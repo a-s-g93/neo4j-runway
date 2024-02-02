@@ -1,1 +1,6 @@
-pandas==2.2.0
+langchain==0.1.5
+langchain-openai==0.0.5
+neo4j==5.8.0
+openai==1.10.0
+pandas==2.0.3
+pydantic==1.10.13
