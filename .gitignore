@@ -1,8 +1,10 @@
+src/main/data/csv/ppp_loan_data.csv
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-data/csv
 
 # C extensions
 *.so
