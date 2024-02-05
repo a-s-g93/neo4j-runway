@@ -1,5 +1,7 @@
-from typing import Dict, List
 import io
+import json
+import regex as re
+from typing import Dict, List, Any
 
 import pandas as pd
 
@@ -12,14 +14,20 @@ class Summarizer:
         self.user_input = user_input
         self.llm = llm
 
-        assert "General Info" in self.user_input.keys(), "user_input must include key:value pair {General Info: ...}"
+        assert "General Description" in self.user_input.keys(), "user_input must include key:value pair {General Description: ...}"
 
-        self.columns_of_interest = list(user_input.keys())[:1]
+        self.columns_of_interest = list(user_input.keys())
+        self.columns_of_interest.remove("General Description")
 
         self.data = data[self.columns_of_interest]
+
+        self._discovery_ran = False
+        self._initial_model_created = False
+        self.model_iterations = 0
+        self.model_history = []
     
 
-    def generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
+    def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
         """
         Generate the data summaries.
         """
@@ -111,6 +119,11 @@ class Summarizer:
                 "To": <the node this relationship ends>,
                 "Reasoning": <reasoning for why this decision was made.>
                 }
+            Format your JSON as:
+            {
+            "Nodes": {nodes},
+            "Relationships"{relationships}
+            }
             """
         return prompt
     
@@ -150,27 +163,66 @@ class Summarizer:
                 "To": <the node this relationship ends>,
                 "Reasoning": <reasoning for why this decision was made.>
                 }
+            Format your JSON as:
+            {
+            "Nodes": {nodes},
+            "Relationships"{relationships}
+            }
             """
     
         return prompt
     
-    def discovery(self) -> str:
+    def run_discovery(self) -> str:
         """
         Run discovery on the data.
         """
 
-        pass
+        self._generate_csv_summary()
+        
+        response = self.llm.get_response(formatted_prompt=self._generate_discovery_prompt())
 
-    def initial_model(self) -> str:
+        self._discovery_ran = True
+
+        return response
+
+    def create_initial_model(self) -> str:
         """
         Create the initial model.
         """
 
-        pass
+        assert self._discovery_ran, "Run discovery before creating the initial model."
+
+        response = self.llm.get_response(formatted_prompt=self._generate_initial_data_model_prompt())
+
+        self.model_history.append(response)
+
+        self._initial_model_created = True
+
+        return response
 
     def iterate_model(self, iterations: int = 1) -> str:
         """
         Iterate on the previous model the number times indicated.
         """
 
-        pass
+        assert self._initial_model_created, "No model present to iterate on."
+
+        def iterate():
+            for i in range(0, iterations):
+                new_model = self.llm.get_response(formatted_prompt=self._generate_data_model_iteration_prompt())
+                self.model_history.append(new_model)
+                self.model_iterations+=1
+                yield new_model
+        
+        for iteration in iterate():
+            return iteration
+
+    def parse_model_from_response(self, response: str) -> Dict[str, Any]:
+        """
+        Get the model from a response. Assumes ```json\n{...} \n``` format
+        """
+
+        try:
+            return json.loads(re.findall(r"(?:```\njson|```)\n(\{[\n\s\w\"\:\[\]\{\\},\'\.\-]*)```", response)[0])
+        except Exception as e:
+            raise ValueError("Unable to parse json from the provided response.")
