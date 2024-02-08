@@ -1,7 +1,7 @@
 import io
 import json
 import regex as re
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Union
 
 import pandas as pd
 
@@ -26,7 +26,16 @@ class Summarizer:
         self.model_iterations = 0
         self.model_history = []
     
+    @property
+    def current_model(self) -> Dict[str, Any]:
+        """
+        The current data model.
+        """
 
+        assert len(self.model_history) > 0, "No models found in history."
+
+        return self.parse_model_from_response(self.model_history[-1])
+    
     def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
         """
         Generate the data summaries.
@@ -180,7 +189,7 @@ class Summarizer:
         self._generate_csv_summary()
         
         response = self.llm.get_response(formatted_prompt=self._generate_discovery_prompt())
-
+        
         self._discovery_ran = True
 
         return response
@@ -193,7 +202,10 @@ class Summarizer:
         assert self._discovery_ran, "Run discovery before creating the initial model."
 
         response = self.llm.get_response(formatted_prompt=self._generate_initial_data_model_prompt())
-
+        validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
+        if not validation['valid']:
+            response = self.retry(retry_message=validation["message"])
+            
         self.model_history.append(response)
 
         self._initial_model_created = True
@@ -226,3 +238,68 @@ class Summarizer:
             return json.loads(re.findall(r"(?:```\njson|```)\n(\{[\n\s\w\"\:\[\]\{\\},\'\.\-]*)```", response)[0])
         except Exception as e:
             raise ValueError("Unable to parse json from the provided response.")
+        
+    def _validate_properties_exist_in_csv(self, data_model: Dict[str, Any]) -> Dict[str, Union[bool, str]]:
+        """
+        Validate that the proposed properties given by the LLM match to the CSV column names.
+        """
+        valid = True
+        message = ""
+        for node in data_model['Nodes']:
+            for prop in node['Properties']:
+                if prop not in self.columns_of_interest:
+                    valid = False
+                    message+="The node {node} was given the property {prop} which is not present in the provided CSV data. "
+        for edge in data_model['Relationships']:
+            for prop in node['Properties']:
+                if prop not in self.columns_of_interest:
+                    valid = False
+                    message+="The relationship {edge} was given the property {prop} which is not present in the provided CSV data. "
+        
+        if message != "":
+            message = """
+                        The following issues are present in the current model: {message} Fix the errors
+                        Return your data model in JSON format.
+                        Format nodes as:
+                        {
+                            "Label": <node label>,
+                            "Properties": <list of node properties>,
+                            "Reasoning": <reasoning for why this decision was made.>
+                        }
+                        Format relationships as:
+                        {
+                            "Label": <relationship label>,
+                            "Properties": <list of relationship properties>,
+                            "From": <the node this relationship begins>,
+                            "To": <the node this relationship ends>,
+                            "Reasoning": <reasoning for why this decision was made.>
+                            }
+                        Format your JSON as:
+                        {
+                        "Nodes": {nodes},
+                        "Relationships"{relationships}
+                        }
+                        """.format(message=message)
+
+        return {"valid": valid, "message": message}
+    
+    def retry(self, retry_message: str, max_retries = 1) -> str:
+        """
+        Receive a new LLM response with fixed errors.
+        """
+        retries = 0
+        valid = False
+        while retries > max_retries and not valid:
+            print("retry: ", retries+1)
+            response = self.llm.get_response(formatted_prompt=retry_message)
+            validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
+            valid = validation["valid"]
+            retry_message = validation["message"]
+            retries+=1
+
+        if retries >= max_retries and not valid:
+            print("Max retries reached to properly format JSON.")
+            return response
+        
+        return response
+        
