@@ -34,7 +34,7 @@ class Summarizer:
 
         assert len(self.model_history) > 0, "No models found in history."
 
-        return self.parse_model_from_response(self.model_history[-1])
+        return self.model_history[-1]
     
     def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
         """
@@ -111,9 +111,11 @@ class Summarizer:
 
             Do not return any code to create the data model. I only want to
             focus on the proposed nodes, relationships, and properties with
-            your explanation for why you suggested each.
+            your explanation for why you suggested each. 
+            Properties should be exact matches to features in the .csv file.
 
-            Return your data model in JSON format. 
+            Return your data model in JSON format. Note the start and end of JSON with ```.
+            Only include the JSON between the ```.
             Format nodes as:
             {
                 "Label": <node label>,
@@ -152,12 +154,13 @@ class Summarizer:
             be converted to separate, additional nodes in the data model?
 
             Please return an updated graph data model with your suggested improvements.
-            Reference only features available in the original .csv file.
+            Properties should be exact matches to features in the .csv file.
 
             Do not return any code to create the data model. I only want to
             focus on the proposed nodes, relationships, and properties.
 
-            Return your data model in JSON format.
+            Return your data model in JSON format. Note the start and end of JSON with ```.
+            Only include the JSON between the ```.
             Format nodes as:
             {
                 "Label": <node label>,
@@ -205,8 +208,8 @@ class Summarizer:
         validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
         if not validation['valid']:
             response = self.retry(retry_message=validation["message"])
-            
-        self.model_history.append(response)
+
+        self.model_history.append(self.parse_model_from_response(response))
 
         self._initial_model_created = True
 
@@ -221,10 +224,13 @@ class Summarizer:
 
         def iterate():
             for i in range(0, iterations):
-                new_model = self.llm.get_response(formatted_prompt=self._generate_data_model_iteration_prompt())
-                self.model_history.append(new_model)
+                response = self.llm.get_response(formatted_prompt=self._generate_data_model_iteration_prompt())
+                validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
+                if not validation['valid']:
+                    response = self.retry(retry_message=validation["message"])
+                self.model_history.append(self.parse_model_from_response(response))
                 self.model_iterations+=1
-                yield new_model
+                yield response
         
         for iteration in iterate():
             return iteration
@@ -235,51 +241,57 @@ class Summarizer:
         """
 
         try:
-            return json.loads(re.findall(r"(?:```\njson|```)\n(\{[\n\s\w\"\:\[\]\{\\},\'\.\-]*)```", response)[0])
+            # return json.loads(re.findall(r"(?:```\njson|```json|```)\n(\{[\n\s\w\"\:\[\]\{\\},\'\.\-]*)```", response)[0])
+            return json.loads(re.findall(r"(\{[\n\s\w\"\:\[\]\{\\},\'\.\-]*)", response)[0])
         except Exception as e:
+            print(response)
             raise ValueError("Unable to parse json from the provided response.")
         
     def _validate_properties_exist_in_csv(self, data_model: Dict[str, Any]) -> Dict[str, Union[bool, str]]:
         """
         Validate that the proposed properties given by the LLM match to the CSV column names.
         """
+        print("Validating response...")
         valid = True
         message = ""
         for node in data_model['Nodes']:
             for prop in node['Properties']:
                 if prop not in self.columns_of_interest:
                     valid = False
-                    message+="The node {node} was given the property {prop} which is not present in the provided CSV data. "
+                    print(prop)
+                    message+=f"The node {node} was given the property {prop} which is not present in the provided CSV data. "
         for edge in data_model['Relationships']:
             for prop in node['Properties']:
                 if prop not in self.columns_of_interest:
                     valid = False
-                    message+="The relationship {edge} was given the property {prop} which is not present in the provided CSV data. "
+                    print(prop)
+                    message+=f"The relationship {edge} was given the property {prop} which is not present in the provided CSV data. "
         
         if message != "":
+            print("pre formatted message: ", message)
             message = """
-                        The following issues are present in the current model: {message} Fix the errors
+                        The following issues are present in the current model: {input} Fix the errors
                         Return your data model in JSON format.
                         Format nodes as:
-                        {
+                        {{
                             "Label": <node label>,
                             "Properties": <list of node properties>,
                             "Reasoning": <reasoning for why this decision was made.>
-                        }
+                        }}
                         Format relationships as:
-                        {
+                        {{
                             "Label": <relationship label>,
                             "Properties": <list of relationship properties>,
                             "From": <the node this relationship begins>,
                             "To": <the node this relationship ends>,
                             "Reasoning": <reasoning for why this decision was made.>
-                            }
+                            }}
                         Format your JSON as:
-                        {
-                        "Nodes": {nodes},
-                        "Relationships"{relationships}
-                        }
-                        """.format(message=message)
+                        {{
+                        "Nodes": {{nodes}},
+                        "Relationships"{{relationships}}
+                        }}
+                        """.format(input=str(message))
 
         return {"valid": valid, "message": message}
     

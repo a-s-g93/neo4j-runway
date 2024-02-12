@@ -23,7 +23,7 @@ class LLM():
                 azure_endpoint = os.environ.get('openai_endpoint'),
                 azure_deployment = os.environ.get('gpt4_8k_name'),
                 model_name = 'gpt-4-8k',
-                temperature=0.7) # default is 0.7
+                temperature=0) # default is 0.7
 
     
         self.memory = ConversationTokenBufferMemory(llm=self.llm_instance, max_token_limit=1000)
