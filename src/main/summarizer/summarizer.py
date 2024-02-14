@@ -266,7 +266,7 @@ class Summarizer:
                 if prop not in self.columns_of_interest:
                     valid = False
                     print(prop)
-                    message+=f"The relationship {edge['Label']} was given the property {prop} which is not present in the provided CSV data. "
+                    message+=f"The relationship {edge['Type']} was given the property {prop} which is not present in the provided CSV data. "
         
         if message != "":
             # print("pre formatted message: ", message)
