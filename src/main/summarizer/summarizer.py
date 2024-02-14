@@ -95,13 +95,9 @@ class Summarizer:
         Generate the initial data model request prompt.
         """
         prompt = """
-            That is a very helpful. Based upon your of the data in my .csv and your
-            knowledge of high-quality Neo4j graph data models, I would like you to return your
+            That is a very helpful. Based upon your knowledge of the data in my .csv and 
+            of high-quality Neo4j graph data models, I would like you to return your
             suggestion for translating the data in my .csv into a Neo4j graph data model.
-
-            Once built, the Neo4j graph will be used to identify
-            potential fraud. We have not identified fraudulent loans yet
-            and so do not have that information in this data.
 
             Please return the following:
             Suggested Nodes and their properties, along with your reasoning for each
@@ -110,7 +106,7 @@ class Summarizer:
             features from my .csv file.
 
             Do not return any code to create the data model. I only want to
-            focus on the proposed nodes, relationships, and properties with
+            focus on the proposed nodes, relationships, properties and constraints with
             your explanation for why you suggested each. 
             Properties should be exact matches to features in the .csv file.
 
@@ -120,12 +116,14 @@ class Summarizer:
             {
                 "Label": <node label>,
                 "Properties": <list of node properties>,
+                "Unique Constraints": <list of properties with uniqueness constraints>,
                 "Reasoning": <reasoning for why this decision was made.>
             }
             Format relationships as:
             {
-                "Label": <relationship label>,
+                "Type": <relationship type>,
                 "Properties": <list of relationship properties>,
+                "Unique Constraints": <list of properties with uniqueness constraints>,
                 "From": <the node this relationship begins>,
                 "To": <the node this relationship ends>,
                 "Reasoning": <reasoning for why this decision was made.>
@@ -138,8 +136,7 @@ class Summarizer:
             """
         return prompt
     
-    @staticmethod
-    def _generate_data_model_iteration_prompt() -> str:
+    def _generate_data_model_iteration_prompt(self) -> str:
         """
         Generate the prompt to iterate on the previous data model.
         """
@@ -148,7 +145,8 @@ class Summarizer:
             That is a good start and very helpful.
 
             Based on your experience building high-quality graph data
-            models, are there any improvements you would suggest?
+            models, are there any improvements you would suggest to this model?
+            {data_model}
 
             For example, are there any node properties that should
             be converted to separate, additional nodes in the data model?
@@ -157,30 +155,33 @@ class Summarizer:
             Properties should be exact matches to features in the .csv file.
 
             Do not return any code to create the data model. I only want to
-            focus on the proposed nodes, relationships, and properties.
+            focus on the proposed nodes, relationships, properties and constraints.
+            Properties should be exact matches to features in the .csv file.
 
             Return your data model in JSON format. Note the start and end of JSON with ```.
             Only include the JSON between the ```.
             Format nodes as:
-            {
+            {{
                 "Label": <node label>,
                 "Properties": <list of node properties>,
+                "Unique Constraints": <list of properties with uniqueness constraints>,
                 "Reasoning": <reasoning for why this decision was made.>
-            }
+            }}
             Format relationships as:
-            {
-                "Label": <relationship label>,
+            {{
+                "Type": <relationship type>,
                 "Properties": <list of relationship properties>,
+                "Unique Constraints": <list of properties with uniqueness constraints>,
                 "From": <the node this relationship begins>,
                 "To": <the node this relationship ends>,
                 "Reasoning": <reasoning for why this decision was made.>
-                }
+                }}
             Format your JSON as:
-            {
-            "Nodes": {nodes},
-            "Relationships"{relationships}
-            }
-            """
+            {{
+            "Nodes": {{nodes}},
+            "Relationships"{{relationships}}
+            }}
+            """.format(data_model=self.current_model)
     
         return prompt
     
@@ -259,29 +260,32 @@ class Summarizer:
                 if prop not in self.columns_of_interest:
                     valid = False
                     print(prop)
-                    message+=f"The node {node} was given the property {prop} which is not present in the provided CSV data. "
+                    message+=f"The node {node['Label']} was given the property {prop} which is not present in the provided CSV data. "
         for edge in data_model['Relationships']:
             for prop in node['Properties']:
                 if prop not in self.columns_of_interest:
                     valid = False
                     print(prop)
-                    message+=f"The relationship {edge} was given the property {prop} which is not present in the provided CSV data. "
+                    message+=f"The relationship {edge['Label']} was given the property {prop} which is not present in the provided CSV data. "
         
         if message != "":
-            print("pre formatted message: ", message)
+            # print("pre formatted message: ", message)
             message = """
-                        The following issues are present in the current model: {input} Fix the errors
-                        Return your data model in JSON format.
+                        The following issues are present in the current model: {input} Fix the errors.
+                        Return your data model in JSON format. Note the start and end of JSON with ```.
+                        Only include the JSON between the ```.
                         Format nodes as:
                         {{
                             "Label": <node label>,
                             "Properties": <list of node properties>,
+                            "Unique Constraints": <list of properties with uniqueness constraints>,
                             "Reasoning": <reasoning for why this decision was made.>
                         }}
                         Format relationships as:
                         {{
-                            "Label": <relationship label>,
+                            "Type": <relationship type>,
                             "Properties": <list of relationship properties>,
+                            "Unique Constraints": <list of properties with uniqueness constraints>,
                             "From": <the node this relationship begins>,
                             "To": <the node this relationship ends>,
                             "Reasoning": <reasoning for why this decision was made.>
