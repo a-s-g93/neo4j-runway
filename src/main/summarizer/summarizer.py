@@ -56,83 +56,80 @@ class Summarizer:
         Generate the initial discovery prompt.
         """
 
-        descriptions = ""
+        self._descriptions = ""
         for col in self.description_numeric.columns:
-            descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_numeric[col]} \n\n"
+            self._descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_numeric[col]} \n\n"
 
         for col in self.description_categorical.columns:
-            descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_categorical[col]} \n\n"
+            self._descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_categorical[col]} \n\n"
 
         prompt = f"""
-                You are a data scientist with experience creating Neo4j
-                graph data models from tabular data. I am a developer who will be
-                creating a Neo4j graph data model from the data in a single .csv file.
-
                 I want you to perform a preliminary analysis on my data to help us understand
                 its characteristics before we brainstorm about the graph data model.
 
                 This is a general description of the data:
                 {self.user_input['General Description']}
 
-                The following is summary of the data features, data types, and missing values:
+                The following is a summary of the data features, data types, and missing values:
                 {self.general_info}
 
                 The following is a description of each feature in the data:
-                {descriptions}
+                {self._descriptions}
 
                 Provide me with your preliminary analysis of this data. What are important
                 overall details about the data? What are the most important features?
-
-                Do not return your suggestion for the Neo4j graph data model
-                yet. We will do that in the next step.
                 """
         
         return prompt
     
-    @staticmethod
-    def _generate_initial_data_model_prompt() -> str:
+    def _generate_initial_data_model_prompt(self) -> str:
         """
         Generate the initial data model request prompt.
         """
-        prompt = """
-            That is a very helpful. Based upon your knowledge of the data in my .csv and 
+        prompt = f"""
+            Here is the csv data:
+            This is a general description of the data:
+            {self.user_input['General Description']}
+
+            The following is a summary of the data features, data types, and missing values:
+            {self.general_info}
+
+            The following is a description of each feature in the data:
+            {self._descriptions}
+
+            Here is the initial discovery findings:
+            {self.discovery}
+
+            Based upon your knowledge of the data in my .csv and 
             of high-quality Neo4j graph data models, I would like you to return your
             suggestion for translating the data in my .csv into a Neo4j graph data model.
 
-            Please return the following:
-            Suggested Nodes and their properties, along with your reasoning for each
-            Relationships and their properties, along with your reasoning for each
-            Include only nodes, relationships, and properties derived from
-            features from my .csv file.
-
-            Do not return any code to create the data model. I only want to
-            focus on the proposed nodes, relationships, properties and constraints with
-            your explanation for why you suggested each. 
+            Please return the following in JSON format:
+            Suggested Nodes and their properties, relationships and their properties, and uniqueness constraints if any.
+            Include only nodes, relationships, and properties derived from features from my .csv file.
+            If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
 
-            Return your data model in JSON format. Note the start and end of JSON with ```.
-            Only include the JSON between the ```.
+            Return your data model in JSON format. 
             Format nodes as:
-            {
-                "Label": <node label>,
-                "Properties": <list of node properties>,
-                "Unique Constraints": <list of properties with uniqueness constraints>,
-                "Reasoning": <reasoning for why this decision was made.>
-            }
+            {{
+                "label": <node label>,
+                "properties": <list of node properties>,
+                "unique_constraints": <list of properties with uniqueness constraints>,
+            }}
             Format relationships as:
-            {
-                "Type": <relationship type>,
-                "Properties": <list of relationship properties>,
-                "Unique Constraints": <list of properties with uniqueness constraints>,
-                "From": <the node this relationship begins>,
-                "To": <the node this relationship ends>,
-                "Reasoning": <reasoning for why this decision was made.>
-                }
+            {{
+                "type": <relationship type>,
+                "properties": <list of relationship properties>,
+                "unique_constraints": <list of properties with uniqueness constraints>,
+                "source": <the node this relationship begins>,
+                "target": <the node this relationship ends>,
+                }}
             Format your JSON as:
-            {
-            "Nodes": {nodes},
-            "Relationships"{relationships}
-            }
+            {{
+            "Nodes": {{nodes}},
+            "Relationships"{{relationships}}
+            }}
             """
         return prompt
     
@@ -142,7 +139,18 @@ class Summarizer:
         """
 
         prompt = """
-            That is a good start and very helpful.
+            Here is the csv data:
+            This is a general description of the data:
+            {self.user_input['General Description']}
+
+            The following is a summary of the data features, data types, and missing values:
+            {self.general_info}
+
+            The following is a description of each feature in the data:
+            {self._descriptions}
+
+            Here is the initial discovery findings:
+            {self.discovery}
 
             Based on your experience building high-quality graph data
             models, are there any improvements you would suggest to this model?
@@ -151,36 +159,9 @@ class Summarizer:
             For example, are there any node properties that should
             be converted to separate, additional nodes in the data model?
 
-            Please return an updated graph data model with your suggested improvements.
+            Please return an updated graph data model with your suggested improvements in JSON format.
+            If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
-
-            Do not return any code to create the data model. I only want to
-            focus on the proposed nodes, relationships, properties and constraints.
-            Properties should be exact matches to features in the .csv file.
-
-            Return your data model in JSON format. Note the start and end of JSON with ```.
-            Only include the JSON between the ```.
-            Format nodes as:
-            {{
-                "Label": <node label>,
-                "Properties": <list of node properties>,
-                "Unique Constraints": <list of properties with uniqueness constraints>,
-                "Reasoning": <reasoning for why this decision was made.>
-            }}
-            Format relationships as:
-            {{
-                "Type": <relationship type>,
-                "Properties": <list of relationship properties>,
-                "Unique Constraints": <list of properties with uniqueness constraints>,
-                "From": <the node this relationship begins>,
-                "To": <the node this relationship ends>,
-                "Reasoning": <reasoning for why this decision was made.>
-                }}
-            Format your JSON as:
-            {{
-            "Nodes": {{nodes}},
-            "Relationships"{{relationships}}
-            }}
             """.format(data_model=self.current_model)
     
         return prompt
@@ -192,9 +173,10 @@ class Summarizer:
 
         self._generate_csv_summary()
         
-        response = self.llm.get_response(formatted_prompt=self._generate_discovery_prompt())
+        response = self.llm.get_response(response_type='discovery', formatted_prompt=self._generate_discovery_prompt())
         
         self._discovery_ran = True
+        self.discovery = response
 
         return response
 
@@ -205,12 +187,13 @@ class Summarizer:
 
         assert self._discovery_ran, "Run discovery before creating the initial model."
 
-        response = self.llm.get_response(formatted_prompt=self._generate_initial_data_model_prompt())
-        validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
-        if not validation['valid']:
-            response = self.retry(retry_message=validation["message"])
+        response = self.llm.get_response(response_type='data_model', formatted_prompt=self._generate_initial_data_model_prompt())
+        # validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
+        # if not validation['valid']:
+        #     response = self.retry(retry_message=validation["message"])
 
-        self.model_history.append(self.parse_model_from_response(response))
+        # self.model_history.append(self.parse_model_from_response(response))
+        self.model_history.append(response)
 
         self._initial_model_created = True
 
@@ -225,7 +208,7 @@ class Summarizer:
 
         def iterate():
             for i in range(0, iterations):
-                response = self.llm.get_response(formatted_prompt=self._generate_data_model_iteration_prompt())
+                response = self.llm.get_response(response_type='data_model', formatted_prompt=self._generate_data_model_iteration_prompt())
                 validation = self._validate_properties_exist_in_csv(data_model=self.parse_model_from_response(response))
                 if not validation['valid']:
                     response = self.retry(retry_message=validation["message"])
@@ -319,3 +302,32 @@ class Summarizer:
         
         return response
         
+
+
+"""
+Return your data model in JSON format. 
+            Format nodes as:
+            {{
+                "label": <node label>,
+                "properties": <list of node properties>,
+                "unique_constraints": <list of properties with uniqueness constraints>,
+            }}
+            Format relationships as:
+            {{
+                "type": <relationship type>,
+                "properties": <list of relationship properties>,
+                "unique_constraints": <list of properties with uniqueness constraints>,
+                "source": <the node this relationship begins>,
+                "target": <the node this relationship ends>,
+                }}
+            Format your JSON as:
+            {{
+            "Nodes": {{nodes}},
+            "Relationships"{{relationships}}
+            }}
+"""
+
+"""
+Do not return any code to create the data model. I only want to
+            focus on the proposed nodes, relationships, properties and constraints.
+"""
