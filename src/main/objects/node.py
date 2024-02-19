@@ -9,28 +9,32 @@ class Node(BaseModel):
     """
 
     label: str
-    properties: List[str]
-    unique_constraints: Union[List[Union[str, None]], None]
+    properties: Union[List[str], None] = []
+    unique_constraints: Union[List[Union[str, None]], None] = []
 
-    # def __init__(self, *a, **kw) -> None:
-    #     super().__init__(*a, **kw)
+    def __init__(self, *a, **kw) -> None:
+        super().__init__(*a, **kw)
 
     @property
     def dict(self) -> Dict[str, Union[List[str], str]]:
         pass
 
-    @classmethod
-    def validate_properties(self, csv_columns: List[str]):
-        for prop in self.properties:
-            if prop not in csv_columns:
-                raise ValueError(
-                    f"node {self.label} property {prop} does not exist in csv columns."
-                )
+    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
+        if self.properties is not None:
+            for prop in self.properties:
+                if prop not in csv_columns:
+                    # raise ValueError(
+                    errors.append(f"node {self.label} property {prop} does not exist in csv columns.")
+                    # )
+        return errors
 
-    @classmethod
-    def validate_unique_constraints(self, csv_columns: List[str]):
-        for prop in self.unique_constraints:
-            if prop not in csv_columns:
-                raise ValueError(
-                    f"node {self.label} unique constraint {prop} does not exist in csv columns."
-                )
+    def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
+        if self.unique_constraints is not None:
+            for prop in self.unique_constraints:
+                if prop not in csv_columns:
+                    # raise ValueError(
+                    errors.append(f"node {self.label} unique constraint {prop} does not exist in csv columns.")
+                    # )
+        return errors

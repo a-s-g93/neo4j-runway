@@ -1,15 +1,11 @@
 import os
 from typing import List, Dict, Tuple, Union
 
-# from langchain.chains import ConversationChain
-# from langchain_openai import AzureChatOpenAI, ChatOpenAI
-# from langchain.memory import ConversationTokenBufferMemory
-# from langchain.schema import HumanMessage
 from openai import OpenAI
-import openai
+# import openai
 import instructor
 
-import pandas as pd
+# import pandas as pd
 from objects.data_model import DataModel
 from resources.prompts.prompts import system_prompts
 
@@ -51,7 +47,7 @@ class LLM():
         )
         return response.choices[0].message.content
         
-    def get_data_model_response(self, formatted_prompt: str) -> str:
+    def get_data_model_response(self, formatted_prompt: str, csv_columns: List[str], max_retries: int = 2) -> str:
         """
         Get a data model response from the LLM.
         """
@@ -63,6 +59,32 @@ class LLM():
             messages=[
                 {"role": "system", "content": system_prompts['data_model']},
                 {"role": "user", "content": formatted_prompt}
-            ]
+            ],
         )
+
+        validation = response.validate_model(csv_columns=csv_columns)
+        if not validation['valid']:
+            response = self.retry(retry_message=validation["message"], max_retries=max_retries)
+
+        return response
+
+    def retry(self, retry_message: str, csv_columns: List[str],  max_retries = 1) -> str:
+        """
+        Receive a new LLM response with fixed errors.
+        """
+
+        retries = 0
+        valid = False
+        while retries > max_retries and not valid:
+            print("retry: ", retries+1)
+            response = self.get_data_model_response(formatted_prompt=retry_message, csv_columns=csv_columns)
+            validation = response.validate_model(csv_columns=csv_columns)
+            valid = validation["valid"]
+            retry_message = validation["message"]
+            retries+=1
+
+        if retries >= max_retries and not valid:
+            print("Max retries reached to properly format JSON.")
+            return response
+        
         return response

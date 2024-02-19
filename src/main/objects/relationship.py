@@ -9,8 +9,8 @@ class Relationship(BaseModel):
     """
 
     type: str
-    properties: List[Union[str, None]]
-    unique_constraints: List[Union[str, None]]
+    properties: Union[List[Union[str, None]], None] = []
+    unique_constraints: Union[List[Union[str, None]], None] = []
     source: str
     target: str
 
@@ -21,14 +21,22 @@ class Relationship(BaseModel):
     def dict(self) -> Dict[str, Union[List[str], str]]:
         pass
 
-    @classmethod
-    def validate_properties(self, csv_columns: List[str]):
-        for prop in self.properties:
-            if prop not in csv_columns:
-                raise ValueError(f"relationship {self.type} property {prop} does not exist in csv columns.")
+    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
+        if self.properties is not None:
+            for prop in self.properties:
+                if prop not in csv_columns:
+                    # raise ValueError(
+                    errors.append(f"relationship {self.type} property {prop} does not exist in csv columns.")
+                        # )
+        return errors
     
-    @classmethod
-    def validate_unique_constraints(self, csv_columns: List[str]):
-        for prop in self.unique_constraints:
-            if prop not in csv_columns:
-                raise ValueError(f"relationship {self.type} unique constraint {prop} does not exist in csv columns.")
+    def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
+        if self.unique_constraints is not None:
+            for prop in self.unique_constraints:
+                if prop not in csv_columns:
+                    # raise ValueError(
+                    errors.append(f"relationship {self.type} unique constraint {prop} does not exist in csv columns.")
+                    # )
+        return errors
