@@ -104,6 +104,7 @@ class Summarizer:
 
             Please return the following in JSON format:
             Suggested Nodes and their properties, relationships and their properties, and uniqueness constraints if any.
+            A uniqueness constraint is what makes the associated node or relationship unique.
             Include only nodes, relationships, and properties derived from features from my .csv file.
             If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
@@ -158,6 +159,7 @@ class Summarizer:
             be converted to separate, additional nodes in the data model?
 
             Please return an updated graph data model with your suggested improvements in JSON format.
+            A uniqueness constraint is what makes the associated node or relationship unique.
             If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
             """

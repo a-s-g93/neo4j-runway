@@ -39,6 +39,12 @@ class TestValidation(unittest.TestCase):
                 properties=None,
                 source="Person",
                 target="Person",
+            ),
+            Relationship(
+                type="BAD",
+                properties=None,
+                source="City",
+                target="Person",
             )
         ]
 
@@ -76,12 +82,16 @@ class TestValidation(unittest.TestCase):
         """
         Test bad input for init.
         """
-        # with self.assertRaises(ValueError) as err:
+
         test_model = DataModel(
                 nodes=self.bad_nodes, relationships=self.bad_relationships
             )
         validation = test_model.validate_model(csv_columns=self.columns)
         self.assertFalse(validation['valid'])
+        self.assertIn("BAD", validation['message'].split())
+        self.assertIn("City", validation['message'].split())
+        self.assertIn("source", validation['message'].split())
+
 
     def test_good_init(self) -> None:
         """
@@ -126,6 +136,8 @@ class TestValidation(unittest.TestCase):
         self.assertEqual(list(test_dict.keys()), ["nodes", "relationships"])
         self.assertEqual(list(test_dict['nodes'][0].keys()), ['label', 'properties', 'unique_constraints'])
         self.assertEqual(list(test_dict['relationships'][0].keys()), ['type', 'properties', 'unique_constraints', 'source', 'target'])
+
+    
 
 
 if __name__ == "__main__":
