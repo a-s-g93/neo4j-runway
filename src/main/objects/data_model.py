@@ -1,5 +1,6 @@
 from typing import List, Dict, Union
 
+from graphviz import Digraph
 from pydantic import BaseModel
 
 from objects.node import Node
@@ -98,3 +99,18 @@ class DataModel(BaseModel):
         """
 
         pass
+
+    def visualize(self) -> Digraph:
+        """
+        Visualize the data model.
+        """
+
+        dot = Digraph(comment="Data Model")
+
+        for node in self.nodes:
+            dot.node(name=node.label, label=node.label)
+        
+        for rel in self.relationships:
+            dot.edge(tail_name=rel.source, head_name=rel.target, label=rel.type)
+        
+        return dot
