@@ -1,6 +1,8 @@
-langchain==0.1.5
-langchain-openai==0.0.5
+# langchain==0.1.5
+# langchain-openai==0.0.5
+graphviz==0.20.1
 neo4j==5.8.0
+# networkx==3.2.1
 openai==1.10.0
 pandas==2.0.3
 pydantic==1.10.13
