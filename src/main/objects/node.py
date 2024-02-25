@@ -25,7 +25,7 @@ class Node(BaseModel):
             for prop in self.properties:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"node {self.label} property {prop} does not exist in csv columns.")
+                    errors.append(f"The node {self.label} has the property {prop} which does not exist in csv columns.")
                     # )
         return errors
 
@@ -35,6 +35,6 @@ class Node(BaseModel):
             for prop in self.unique_constraints:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"node {self.label} unique constraint {prop} does not exist in csv columns.")
+                    errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns.")
                     # )
         return errors

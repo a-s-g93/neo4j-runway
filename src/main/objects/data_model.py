@@ -23,7 +23,6 @@ class DataModel(BaseModel):
     ) -> None:
         super().__init__(nodes=nodes, relationships=relationships)
 
-
     @property
     def dict(self) -> Dict[str, Union[List[str], str]]:
         return {
@@ -65,12 +64,13 @@ class DataModel(BaseModel):
         
         if len(errors) > 0:
             message = f"""
-                    Fix the errors in following data model.
+                    Fix the errors in following data model and return a corrected version. Do not return the same data model.
                     Data Model:
                     {self.dict}
                     Errors:
                     {str(errors)}
                     """
+            print("retry message: \n", message)
             return {
                 "valid": False,
                 "message": message
@@ -88,9 +88,9 @@ class DataModel(BaseModel):
         errors = []
         for rel in self.relationships:
             if rel.source not in self.node_labels:
-                errors.append(f"relationship {rel.type} source {rel.source} does not exist in generated Node labels.")
+                errors.append(f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels.")
             if rel.target not in self.node_labels:
-                errors.append(f"relationship {rel.type} target {rel.target} does not exist in generated Node labels.")
+                errors.append(f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels.")
         return errors
                 
     def map_columns_to_values(self, column_mapping: Dict[str, str]) -> None:
