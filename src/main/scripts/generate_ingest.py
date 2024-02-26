@@ -56,6 +56,8 @@ def create_from_datamodel(args):
         non_uniq_constraints.append(f"n.{property_name} = row.{prop}") 
 
       uniq_constr_str = ", ".join(uniq_constraints)
+      print(f"uniq_constr_str: {uniq_constr_str}")
+
       non_uniq_constr_str = ", ".join(non_uniq_constraints)
       if not non_uniq_constr_str == "":
         non_uniq_constr_str = f"SET {non_uniq_constr_str}"
@@ -63,8 +65,8 @@ def create_from_datamodel(args):
       merge_str = "WITH $dict.rows AS rows\nUNWIND rows AS row\nMERGE (n:" + label + " {" + uniq_constr_str + "})\n" + non_uniq_constr_str 
       load_csv_merge_str = "LOAD CSV WITH HEADERS FROM 'file:///file_name' as row\nCALL {\n\tWITH row\n\tMERGE (n:" + label + " {" + uniq_constr_str + "})\n" + non_uniq_constr_str + "} IN TRANSACTIONS OF 10000 ROWS;\n"
       #print(load_csv_merge_str)
-      nodes_map[lowercase_first_letter(label)] = "MATCH (n:" + label + "{" + f"{property_name}: row.{prop}" + "})"
-      
+      nodes_map[lowercase_first_letter(label)] = "MATCH (n:" + label + "{" + f"{uniq_constr_str}" + "})"
+            
       #add to cypher map
       cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/data/{csv_file}" }
 
