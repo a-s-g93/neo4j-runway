@@ -6,8 +6,9 @@ import streamlit as st
 
 from summarizer.summarizer import Summarizer
 from llm.llm import LLM
+from utils.test_connection import test_database_connection
 
-def column_component(column_name: str):
+def column_component(column_name: str) -> None:
     """
     Input component for a column.
     """
@@ -24,22 +25,50 @@ def column_component(column_name: str):
         if ignore:
             st.session_state["USER_GENERATED_INPUT"].pop(column_name)
 
-        # if not ignore:
-        #     st.session_state["USER_GENERATED_INPUT"][column_name] = description
+def neo4j_credentials_component(show: bool = True) -> None:
+    """
+    Component to handle Neo4j credentials submission.
+    """
 
+    with st.expander("Neo4j Credentials", expanded=show):
+        with st.form("Neo4j-credentials-form", clear_on_submit=True):
+            uri = st.text_input(label="uri")
+            database = st.text_input(label="database")
+            username = st.text_input(label="Username")
+            password = st.text_input(label="Password", type="password")
+
+            submitted = st.form_submit_button("Link Database")
+            if submitted:
+                credentials = {
+                        "uri": uri,
+                        "username": username,
+                        "password": password,
+                        "database": database
+                    }
+                test_response = test_database_connection(credentials=credentials)
+                if test_response["valid"]:
+                    st.session_state["show_credentials"] = False 
+                    st.session_state["NEO4J_CREDENTIALS"] = credentials
+                    st.write(test_response["message"])
+                else:
+                    st.warning(test_response["message"])
 
 # ------------------
 # ------------------
 # ------------------
 
+# init variables
 if "user_input_gathered" not in st.session_state.keys():
     st.session_state["user_input_gathered"] = False
+    st.session_state["show_credentials"] = True
     st.session_state["show_csv_loader"] = True
     st.session_state["show_discovery"] = True
     st.session_state["show_initial_data_model"] = True
+    summarizer = None
 
 st.title("CSV --> Graph")
 
+neo4j_credentials_component(show=st.session_state["show_credentials"])
 with st.expander("CSV Loader", expanded=st.session_state["show_csv_loader"]):
     csv_input = st.file_uploader(label="CSV Loader", accept_multiple_files=False, label_visibility="collapsed")
 
@@ -86,24 +115,24 @@ with st.expander("CSV Loader", expanded=st.session_state["show_csv_loader"]):
                 # st.session_state["show_discovery"] = True
                 # st.session_state["show_initial_data_model"] = True
                 st.write(st.session_state["USER_GENERATED_INPUT"])
-                summarizer = Summarizer(llm=LLM(), 
+                st.session_state["summarizer"] = Summarizer(llm=LLM(), 
                                         user_input=st.session_state["USER_GENERATED_INPUT"], 
                                         data=input_dataframe)
                 # time.sleep(2)
 
-if st.session_state["user_input_gathered"]:   
+if st.session_state["user_input_gathered"] and st.session_state["summarizer"] is not None:   
     with st.status("Discovery", expanded=st.session_state["show_discovery"]):
-        discovery = summarizer.run_discovery()
+        discovery = st.session_state["summarizer"].run_discovery()
         st.write(discovery)
         st.session_state["show_initial_data_model"] = True
 
     with st.status("Data Model - 1"):
         st.write("Creating Initial Data Model")
-        summarizer.create_initial_model()
+        st.session_state["summarizer"].create_initial_model()
         # we iterate once to refine the first displayed model
-        summarizer.iterate_model(iterations=1)
-        st.write(summarizer.current_model)
-        st.write(summarizer.model_history[-1].visualize())
+        st.session_state["summarizer"].iterate_model(iterations=1)
+        st.write(st.session_state["summarizer"].current_model)
+        st.write(st.session_state["summarizer"].model_history[-1].visualize())
     
 
 
