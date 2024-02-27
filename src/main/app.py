@@ -134,6 +134,8 @@ if st.session_state["user_input_gathered"] and st.session_state["summarizer"] is
         st.write(st.session_state["summarizer"].current_model)
         st.write(st.session_state["summarizer"].model_history[-1].visualize())
     
+    
+    
 
 
         
