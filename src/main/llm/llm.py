@@ -56,7 +56,7 @@ class LLM():
 
             validation = response.validate_model(csv_columns=csv_columns)
             if not validation['valid']:
-                print("validation should fail")
+                print("validation failed")
                 formatted_prompt = validation['message']
             elif validation['valid']:
                 print("recieved a valid response")
