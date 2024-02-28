@@ -16,13 +16,13 @@ LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
 CALL {
 	WITH row
 	MERGE (n:Address {name: row.name})
-SET n.street = row.street, n.city = row.city} IN TRANSACTIONS OF 10000 ROWS;
+SET n.city = row.city, n.street = row.street} IN TRANSACTIONS OF 10000 ROWS;
 
 LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
 CALL {
 	WITH row
 	MERGE (n:Pet {name: row.name})
-SET n.kind = row.kind, n.name = row.name} IN TRANSACTIONS OF 10000 ROWS;
+SET n.name = row.name, n.kind = row.kind} IN TRANSACTIONS OF 10000 ROWS;
 
 LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
 CALL {

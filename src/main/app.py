@@ -9,6 +9,11 @@ from llm.llm import LLM
 from ingestion.generate_ingest import IngestionGenerator
 from utils.test_connection import test_database_connection
 
+from st.components.introduction import introduction
+from st.components.iterate_model import iterate_model
+from st.components.iterate_model_input import iterate_model_input
+from st.components.sidebar import sidebar
+
 def column_component(column_name: str) -> None:
     """
     Input component for a column.
@@ -22,7 +27,7 @@ def column_component(column_name: str) -> None:
                                     label_visibility="collapsed",
                                     placeholder="column description...")
     with c3:
-        ignore = st.checkbox("", key=column_name+"-ignore-button")
+        ignore = st.checkbox(label="ignore", key=column_name+"-ignore-button", label_visibility="collapsed")
         if ignore:
             st.session_state["USER_GENERATED_INPUT"].pop(column_name)
 
@@ -60,7 +65,7 @@ def ingestion_generation_component(data_model: Dict[str, Any], show: bool = True
     the user prefers and download options.
     """
 
-    gen = IngestionGenerator(data_model=data_model,
+    st.session_state["ingestion_generator"] = IngestionGenerator(data_model=data_model,
                              username=st.session_state["NEO4J_CREDENTIALS"]["username"],
                              password=st.session_state["NEO4J_CREDENTIALS"]["password"],
                              uri=st.session_state["NEO4J_CREDENTIALS"]["uri"],
@@ -96,13 +101,18 @@ def initial_model_component(show: bool = True) -> None:
     """
     Display the intial data model JSON and visual.
     """
-    with st.status("Data Model - 1"):
+    with st.status("Data Model V1", expanded=show):
         st.write("Creating Initial Data Model")
-        st.session_state["summarizer"].create_initial_model()
-        # we iterate once to refine the first displayed model
-        st.session_state["summarizer"].iterate_model(iterations=1)
-        st.write(st.session_state["summarizer"].current_model)
-        st.write(st.session_state["summarizer"].model_history[-1].visualize())
+
+        # only run the first time!
+        if st.session_state["initial_model_created"] == False:
+            st.session_state["summarizer"].create_initial_model()
+            # we iterate once to refine the first displayed model
+            st.session_state["summarizer"].iterate_model(iterations=1)
+            st.session_state["initial_model_created"] = True
+
+        st.json(st.session_state["summarizer"].current_model, expanded=False)
+        st.graphviz_chart(st.session_state["summarizer"].model_history[-1].visualize(), use_container_width=True)
     
 def csv_loader_component(show: bool = True) -> None:
     """
@@ -165,33 +175,63 @@ def csv_loader_component(show: bool = True) -> None:
 
 # init variables
 if "user_input_gathered" not in st.session_state.keys():
+
+    # USER INPUT FLAG
     st.session_state["user_input_gathered"] = False
+
+    # EXPANDER FLAGS
     st.session_state["show_credentials"] = True
     st.session_state["show_csv_loader"] = True
     st.session_state["show_discovery"] = True
     st.session_state["show_initial_data_model"] = True
+    st.session_state["show_iterate_model"] = False
+    st.session_state["show_iterate_model_input"] = True
     st.session_state["show_ingestion"] = True
+
+    # LLM FLAGS
     st.session_state["discovery_ran"] = False
+    st.session_state["initial_model_created"] = False
+    st.session_state["run_iterate_model"] = False
+
+    # MISC
     st.session_state["NEO4J_CREDENTIALS"] = {
         "username": None,
         "password": None,
         "uri": None,
         "database": None
     }
-    summarizer = None
+    st.session_state["summarizer"] = None
+    st.session_state["ingestion_code_generated"] = False
+    st.session_state["model_iteration"] = 1
 
 st.title("CSV --> Graph")
+
+introduction(content_file_path="st/ui/intro.md")
 
 neo4j_credentials_component(show=st.session_state["show_credentials"])
 
 csv_loader_component(show=st.session_state["show_csv_loader"])
 
 if st.session_state["user_input_gathered"] and st.session_state["summarizer"] is not None:   
+
     discovery_component(show=st.session_state["show_discovery"])
 
     initial_model_component(show=st.session_state["show_initial_data_model"])
     
-    ingestion_generation_component(data_model=st.session_state["summarizer"].model_history[-1].dict, show=st.session_state["show_ingestion"])
+    print("run iterate model before: ", st.session_state["run_iterate_model"])
+    print("iteration: ", st.session_state['model_iteration'])
+    if st.session_state["model_iteration"] > 1:
+        iterate_model(show=st.session_state["show_iterate_model"])
+
+    iterate_model_input(show=st.session_state["show_iterate_model_input"])
+    
+    # after user has confirmed model we show this content
+    # ingestion_generation_component(data_model=st.session_state["summarizer"].model_history[-1].dict, 
+    #                                show=st.session_state["show_ingestion"])
+
+# generate sidebar last
+sidebar(content_file_path="st/ui/sidebar.md")
+
     
     
     
