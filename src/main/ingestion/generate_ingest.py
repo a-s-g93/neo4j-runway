@@ -142,65 +142,83 @@ class IngestionGenerator(BaseModel):
         file_dict["chunk_size"] =  100 
         self.config_files_list.append(file_dict)
 
-  def generate_pyingest_yaml(self, file_name: str = "pyingest_config", write_file: bool = False) -> str:
+  def generate_pyingest_yaml_file(self, file_name: str = "pyingest_config") -> None:
     """
     Generate the PyIngest yaml file.
     """
-    to_return = ""
+
     #create pyingest config.yml
     final_yaml = {}
     final_yaml["files"] = self.config_files_list
     config_dump = yaml.dump(final_yaml)
 
-    if write_file:
-      with open(f"./{file_name}.yml", "w") as config_yaml:
-        config_yaml.write(f"server_uri: {self.uri}\n")
-        config_yaml.write(f"admin_user: {self.username}\n")
-        config_yaml.write(f"admin_pass: {self.password}\n")
-        config_yaml.write("basepath: file:./\n\n")
-        config_yaml.write("pre_ingest:\n")
-        for constraint in self.constraints:
-          config_yaml.write(f"  - {self.constraints[constraint]}")
-        config_yaml.write(config_dump)
-    
+
+    with open(f"./{file_name}.yml", "w") as config_yaml:
+      config_yaml.write(f"server_uri: {self.uri}\n")
+      config_yaml.write(f"admin_user: {self.username}\n")
+      config_yaml.write(f"admin_pass: {self.password}\n")
+      config_yaml.write("basepath: file:./\n\n")
+      config_yaml.write("pre_ingest:\n")
+      for constraint in self.constraints:
+        config_yaml.write(f"  - {self.constraints[constraint]}")
+      config_yaml.write(config_dump)
+
+  def generate_pyingest_yaml_string(self) -> str:
+    """
+    Generate the PyIngest yaml in string format.
+    """
+
+    final_yaml = {}
+    final_yaml["files"] = self.config_files_list
+    config_dump = yaml.dump(final_yaml)
+
     to_return = f"server_uri: {self.uri}\n" + f"admin_user: {self.username}\n" + f"admin_pass: {self.password}\n" + "basepath: file:./\n\n" + "pre_ingest:\n"
     for constraint in self.constraints:
           to_return += f"  - {self.constraints[constraint]}"
     to_return += config_dump
 
     return to_return
+  
+  def generate_constraints_cypher_file(self, file_name: str = "constraints") -> None:
+    """
+    Generate the Constraints cypher file.
+    """
 
- 
-  def generate_constraints_cypher(self, file_name: str = "constraints", write_file: bool = False) -> str:
+    with open(f"./{file_name}.cypher", "w") as constraints_cypher:
+      for constraint in self.constraints:
+        constraints_cypher.write(self.constraints[constraint]) 
+  
+  def generate_constraints_cypher_string(self) -> str:
     """
     Generate the Constraints cypher file.
     """
     to_return = ""
-    #create constraints cypher
-    if write_file:
-      with open(f"./{file_name}.cypher", "w") as constraints_cypher:
-        for constraint in self.constraints:
-          constraints_cypher.write(self.constraints[constraint])
 
     for constraint in self.constraints:
       to_return = to_return + self.constraints[constraint]   
 
     return to_return
 
-  def generate_load_csv(self, file_name: str = "load_csv", write_file: bool = False) -> str:
+
+
+  def generate_load_csv_file(self, file_name: str = "load_csv") -> None:
     """
     Generate the load_csv cypher file.
     """
     load_csv = []
+
+    for item in self.cypher_map:
+      load_csv.append(self.cypher_map[item]["cypher_loadcsv"])
+
+    with open(f"./{file_name}.cypher", "w") as load_csv_file:
+      load_csv_file.writelines([f"{self.constraints[constraint]}\n" for constraint in self.constraints])
+      load_csv_file.writelines([f"{line}\n" for line in load_csv])
+  
+  def generate_load_csv_string(self) -> str:
+    """
+    Generate the load_csv cypher in string format.
+    """
     to_return = ""
-
-    if write_file:
-      for item in self.cypher_map:
-        load_csv.append(self.cypher_map[item]["cypher_loadcsv"])
-
-      with open(f"./{file_name}.cypher", "w") as load_csv_file:
-        load_csv_file.writelines([f"{self.constraints[constraint]}\n" for constraint in self.constraints])
-        load_csv_file.writelines([f"{line}\n" for line in load_csv])
     
     for constraint in self.constraints:
        to_return = to_return + self.constraints[constraint]
