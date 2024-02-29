@@ -108,9 +108,43 @@ class DataModel(BaseModel):
         dot = Digraph(comment="Data Model")
 
         for node in self.nodes:
-            dot.node(name=node.label, label=node.label)
+            dot.node(name=node.label, label=self._generate_node_text(node=node))
         
         for rel in self.relationships:
-            dot.edge(tail_name=rel.source, head_name=rel.target, label=rel.type)
+            dot.edge(tail_name=rel.source, head_name=rel.target, label=self._generate_relationship_text(relationship=rel))
         
         return dot
+    
+    @staticmethod
+    def _generate_node_text(node: Node) -> str:
+        """
+        Generate the label, property and unique constraints displayed on a node.
+        """
+
+        result = node.label
+        # print(result)
+        if len(node.properties) > 1:
+            result+="\n\nproperties:\n"
+            # print(result)
+        for prop in node.properties:
+            result = result + prop + (" *unique*" if prop in node.unique_constraints else "") + "\n"
+            # print(result)
+
+        return result
+    
+    @staticmethod
+    def _generate_relationship_text(relationship: Relationship) -> str:
+        """
+        Generate the label, property and unique constraints displayed on a relationship.
+        """
+
+        result = relationship.type
+        # print(result)
+        if len(relationship.properties) > 0:
+            result+="\n\nproperties:\n"
+            # print(result)
+        for prop in relationship.properties:
+            result = result + prop + (" *unique*" if prop in relationship.unique_constraints else "") + "\n"
+            # print(result)
+
+        return result
