@@ -89,7 +89,7 @@ class IngestionGenerator(BaseModel):
           nodes_map[lowercase_first_letter(label)] = "MATCH (n:" + label + "{" + f"{uniq_constr_str}" + "})"
                 
           #add to cypher map
-          self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/data/{csv_file}" }
+          self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/{csv_file}" }
 
     model_map = {}    
     ## get relationships
@@ -119,7 +119,7 @@ class IngestionGenerator(BaseModel):
                     f"{tab}MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target){newline}}} IN TRANSACTIONS OF 10000 ROWS;{newline}"
 
           #print(load_csv_merge_str)
-          self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/data/{model_map[mapitem]['csv']}" }
+          self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/{model_map[mapitem]['csv']}" }
   
     #print(self.cypher_map)
     self.config_files_list = []
