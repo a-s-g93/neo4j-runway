@@ -1,10 +1,11 @@
-import json
-from typing import Dict, List, Any, Union
-import csv
 import os
-import argparse
+# import json
+from typing import Dict, List, Any, Union
+# import csv
+import os
+# import argparse
 import yaml
-from yaml.representer import SafeRepresenter
+# from yaml.representer import SafeRepresenter
 
 from pydantic import BaseModel
 
@@ -37,7 +38,9 @@ class IngestionGenerator(BaseModel):
   password: Union[str, None] = None
   uri: Union[str, None] = None
   database: Union[str, None] = None
-  csv_file_path: Union[str, None] = None
+  csv_name: str
+  csv_dir: str = ""
+  file_output_dir: str = ""
 
   config_files_list: Union[List[Dict[str, Any]], None] = []
   constraints: Dict[str, str] = {}
@@ -61,7 +64,7 @@ class IngestionGenerator(BaseModel):
             missing_properties_err.append({"label" : label})
           
           props = list(set(props) - set(node["unique_constraints"]))
-          csv_file = self.csv_file_path
+          csv_file = self.csv_name
           uniq_constraints = []
           non_uniq_constraints = []
     
@@ -89,7 +92,7 @@ class IngestionGenerator(BaseModel):
           nodes_map[lowercase_first_letter(label)] = "MATCH (n:" + label + "{" + f"{uniq_constr_str}" + "})"
                 
           #add to cypher map
-          self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/{csv_file}" }
+          self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/{self.csv_dir}{csv_file}" }
 
     model_map = {}    
     ## get relationships
@@ -100,7 +103,7 @@ class IngestionGenerator(BaseModel):
       model_map[f"{lowercase_first_letter(src_node_label)}_{lowercase_first_letter(target_node_label)}"] = { \
         "source": {"node": f"{nodes_map[lowercase_first_letter(src_node_label)]}"},
         "target": {"node": f"{nodes_map[lowercase_first_letter(target_node_label)]}"},
-        "csv": f"{self.csv_file_path}",
+        "csv": f"{self.csv_name}",
         "relationship": {"rel": rel_type}
       }
       model_maps.append(model_map)
@@ -119,7 +122,7 @@ class IngestionGenerator(BaseModel):
                     f"{tab}MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target){newline}}} IN TRANSACTIONS OF 10000 ROWS;{newline}"
 
           #print(load_csv_merge_str)
-          self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/{model_map[mapitem]['csv']}" }
+          self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/{self.csv_dir}{model_map[mapitem]['csv']}" }
   
     #print(self.cypher_map)
     self.config_files_list = []
@@ -152,8 +155,9 @@ class IngestionGenerator(BaseModel):
     final_yaml["files"] = self.config_files_list
     config_dump = yaml.dump(final_yaml)
 
+    os.makedirs(self.file_output_dir, exist_ok=True)
 
-    with open(f"./{file_name}.yml", "w") as config_yaml:
+    with open(f"./{self.file_output_dir}{file_name}.yml", "w") as config_yaml:
       config_yaml.write(f"server_uri: {self.uri}\n")
       config_yaml.write(f"admin_user: {self.username}\n")
       config_yaml.write(f"admin_pass: {self.password}\n")
@@ -184,13 +188,15 @@ class IngestionGenerator(BaseModel):
     Generate the Constraints cypher file.
     """
 
-    with open(f"./{file_name}.cypher", "w") as constraints_cypher:
+    os.makedirs(self.file_output_dir, exist_ok=True)
+
+    with open(f"./{self.file_output_dir}{file_name}.cypher", "w") as constraints_cypher:
       for constraint in self.constraints:
         constraints_cypher.write(self.constraints[constraint]) 
   
   def generate_constraints_cypher_string(self) -> str:
     """
-    Generate the Constraints cypher file.
+    Generate the Constraints cypher file in string format.
     """
     to_return = ""
 
@@ -210,7 +216,9 @@ class IngestionGenerator(BaseModel):
     for item in self.cypher_map:
       load_csv.append(self.cypher_map[item]["cypher_loadcsv"])
 
-    with open(f"./{file_name}.cypher", "w") as load_csv_file:
+    os.makedirs(self.file_output_dir, exist_ok=True)
+
+    with open(f"./{self.file_output_dir}{file_name}.cypher", "w") as load_csv_file:
       load_csv_file.writelines([f"{self.constraints[constraint]}\n" for constraint in self.constraints])
       load_csv_file.writelines([f"{line}\n" for line in load_csv])
   
