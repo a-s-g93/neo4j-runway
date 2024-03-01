@@ -14,9 +14,9 @@ class LLM():
     Interface for interacting with different LLMs.
     """
     
-    def __init__(self) -> None:
+    def __init__(self, open_ai_key: Union[str, None] = None) -> None:
 
-        self.llm_instance = instructor.patch(OpenAI(api_key=os.environ.get("OPENAI_API_KEY")))
+        self.llm_instance = instructor.patch(OpenAI(api_key=open_ai_key if open_ai_key is not None else os.environ.get("OPENAI_API_KEY")))
 
     def get_discovery_response(self, formatted_prompt: str) -> DataModel:
         """
