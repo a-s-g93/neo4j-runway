@@ -123,7 +123,7 @@ class DataModel(BaseModel):
 
         result = node.label
         # print(result)
-        if len(node.properties) > 1:
+        if len(node.properties) > 0:
             result+="\n\nproperties:\n"
             # print(result)
         for prop in node.properties:

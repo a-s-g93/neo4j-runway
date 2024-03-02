@@ -161,6 +161,7 @@ class IngestionGenerator(BaseModel):
       config_yaml.write(f"server_uri: {self.uri}\n")
       config_yaml.write(f"admin_user: {self.username}\n")
       config_yaml.write(f"admin_pass: {self.password}\n")
+      config_yaml.write(f"database: {self.database}\n")
       config_yaml.write("basepath: file:./\n\n")
       config_yaml.write("pre_ingest:\n")
       for constraint in self.constraints:
@@ -176,7 +177,7 @@ class IngestionGenerator(BaseModel):
     final_yaml["files"] = self.config_files_list
     config_dump = yaml.dump(final_yaml)
 
-    to_return = f"server_uri: {self.uri}\n" + f"admin_user: {self.username}\n" + f"admin_pass: {self.password}\n" + "basepath: file:./\n\n" + "pre_ingest:\n"
+    to_return = f"server_uri: {self.uri}\n" + f"admin_user: {self.username}\n" + f"admin_pass: {self.password}\n" + f"database: {self.database}\n" + "basepath: file:./\n\n" + "pre_ingest:\n"
     for constraint in self.constraints:
           to_return += f"  - {self.constraints[constraint]}"
     to_return += config_dump
