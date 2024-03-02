@@ -116,6 +116,7 @@ class Summarizer:
             Suggested Nodes and their properties, relationships and their properties, and uniqueness constraints if any.
             A uniqueness constraint is what makes the associated node or relationship unique.
             Each node will most likely have at least one unique constraint.
+            Each node must have at least one property.
             Include only nodes, relationships, and properties derived from features from my .csv file.
             If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
@@ -149,7 +150,7 @@ class Summarizer:
         """
 
         if user_corrections is not None:
-            user_corrections = "Focus on this feedback when refactoring the model: \n" + user_corrections
+            user_corrections = "Focus on this feedback when refactoring the model: \n" + user_corrections 
         else:
             user_corrections = """For example, are there any node properties that should
             be converted to separate, additional nodes in the data model?"""
@@ -177,8 +178,10 @@ class Summarizer:
             Please return an updated graph data model with your suggested improvements in JSON format.
             A uniqueness constraint is what makes the associated node or relationship unique.
             Each node will most likely have at least one unique constraint.
+            Each node must have at least one property.
             If no properties or unique constraints are suggested return an empty list.
             Properties should be exact matches to features in the .csv file.
+            Do not return the same model!
             """
     
         return prompt
