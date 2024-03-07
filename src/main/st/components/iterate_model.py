@@ -13,7 +13,7 @@ def iterate_model(show: bool = False) -> None:
 
         if st.session_state["run_iterate_model"]:
             print(f"running iterate {iteration}...")
-            st.session_state["summarizer"].iterate_model(iterations=1)
+            st.session_state["summarizer"].iterate_model(iterations=1, user_corrections=st.session_state["user_corrections"])
             st.session_state["run_iterate_model"] = False
 
         st.json(st.session_state["summarizer"].current_model, expanded=False)

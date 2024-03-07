@@ -12,13 +12,13 @@ def ingest(show: bool = True) -> None:
 
     with st.expander("Ingest", expanded=show):
 
-        st.write("Ingest the CSV data into the linked Neo4j database. This will not reset the database before ingestion.")
+        st.write("Ingest the CSV data into the linked Neo4j database.")
 
         with st.form(key="data-model-version-select-pyingest-ingestion"):
             current_model_version = len(st.session_state["summarizer"].model_history)-1
             version = st.number_input(label="Select Data Model Version", min_value=1, max_value=current_model_version, placeholder=current_model_version)
 
-            if st.form_submit_button(label="Ingest"):
+            if st.form_submit_button(label="Ingest", disabled=st.session_state["disable_ingest"], help="Neo4j credentials required."):
 
                 gen_temp = IngestionGenerator(data_model=st.session_state["summarizer"].model_history[version].dict,
                                         username=st.session_state["NEO4J_CREDENTIALS"]["username"],
@@ -37,6 +37,7 @@ def ingest(show: bool = True) -> None:
                 for prog in PyIngestForStreamlit(yaml_string=yaml, dataframe=st.session_state["dataframe"]):
                     prog_bar.progress(value=prog, text="Ingesting...")
                 prog_bar.progress(value=prog, text="Ingestion Complete!")
+                st.session_state["disable_ingest"] = True
 
                 
                 
