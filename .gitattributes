@@ -7,3 +7,4 @@ scripts/
 data/model/
 data/csv_links.json
 tests/
+resources/
