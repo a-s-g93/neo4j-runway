@@ -3,8 +3,8 @@
 ppp_loan_data.ipynb export-ignore
 pydantic_test.ipynb export-ignore
 countries.ipynb export-ignore
-scripts/
-data/model/
-data/csv_links.json
-tests/
-resources/
+scripts/ export-ignore
+data/model/ export-ignore
+data/csv_links.json export-ignore
+tests/ export-ignore
+resources/ export-ignore
