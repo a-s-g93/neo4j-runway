@@ -37,7 +37,7 @@ class Summarizer:
     @property
     def current_model_viz(self) -> Dict[str, Any]:
         """
-        The current data model.
+        The current data model visualized with Graphviz.
         """
 
         assert len(self.model_history) > 0, "No models found in history."

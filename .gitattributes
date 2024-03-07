@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+ppp_loan_data.ipynb export-ignore
+pydantic_test.ipynb export-ignore
+countries.ipynb export-ignore
+scripts/
+data/model/
+data/csv_links.json
+tests/

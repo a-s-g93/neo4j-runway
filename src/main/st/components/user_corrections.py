@@ -2,14 +2,14 @@ import streamlit as st
 
 from summarizer.summarizer import Summarizer
 
-def iterate_model_input(show: bool = True) -> None:
+def user_corrections(show: bool = True) -> None:
     """
     Receives user input to inject into the iterate model prompt.
     """
 
-    with st.status("Iterate Model Input", expanded=show):
+    with st.expander("User Corrections", expanded=show):
 
-        user_input = st.text_input(label="Data Model Corrections", placeholder="Are there any corrections?")
+        st.session_state["user_corrections"] = st.text_input(label="Data Model Corrections", placeholder="Are there any corrections?")
 
         if st.button("Retry"):
             print("retrying model")

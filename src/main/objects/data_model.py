@@ -69,6 +69,8 @@ class DataModel(BaseModel):
                     {self.dict}
                     Errors:
                     {str(errors)}
+                    Column Options:
+                    {csv_columns}
                     """
             print("retry message: \n", message)
             return {
