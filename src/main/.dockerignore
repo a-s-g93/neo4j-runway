@@ -1,0 +1,5 @@
+*.ipynb
+tests/
+data/
+scripts/
+__pycache__
