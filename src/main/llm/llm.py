@@ -61,30 +61,5 @@ class LLM():
             elif validation['valid']:
                 print("recieved a valid response")
                 valid_response = True
-
-            # response = self.retry(retry_message=validation["message"], 
-            #                       csv_columns=csv_columns, 
-            #                       max_retries=max_retries)
             
         return response
-
-    # def retry(self, retry_message: str, csv_columns: List[str],  max_retries = 1) -> str:
-    #     """
-    #     Receive a new LLM response with fixed errors.
-    #     """
-
-    #     retries = 0
-    #     valid = False
-    #     while retries > max_retries and not valid:
-    #         print("retry: ", retries+1)
-    #         response = self.get_data_model_response(formatted_prompt=retry_message, csv_columns=csv_columns)
-    #         validation = response.validate_model(csv_columns=csv_columns)
-    #         valid = validation["valid"]
-    #         retry_message = validation["message"]
-    #         retries+=1
-
-    #     if retries >= max_retries and not valid:
-    #         print("Max retries reached to properly format JSON.")
-    #         return response
-        
-    #     return response

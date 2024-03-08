@@ -2,6 +2,7 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel
 
+from property import Property
 
 class Relationship(BaseModel):
     """
@@ -9,8 +10,8 @@ class Relationship(BaseModel):
     """
 
     type: str
-    properties: Union[List[Union[str, None]], None] = []
-    unique_constraints: Union[List[Union[str, None]], None] = []
+    properties: List[Property] = []
+    # unique_constraints: Union[List[Union[str, None]], None] = []
     source: str
     target: str
 
@@ -31,12 +32,12 @@ class Relationship(BaseModel):
                         # )
         return errors
     
-    def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
-        errors = []
-        if self.unique_constraints is not None:
-            for prop in self.unique_constraints:
-                if prop not in csv_columns:
-                    # raise ValueError(
-                    errors.append(f"The relationship {self.type} has a unique constraint {prop} which does not exist in csv columns.")
-                    # )
-        return errors
+    # def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
+    #     errors = []
+    #     if self.unique_constraints is not None:
+    #         for prop in self.unique_constraints:
+    #             if prop not in csv_columns:
+    #                 # raise ValueError(
+    #                 errors.append(f"The relationship {self.type} has a unique constraint {prop} which does not exist in csv columns.")
+    #                 # )
+    #     return errors

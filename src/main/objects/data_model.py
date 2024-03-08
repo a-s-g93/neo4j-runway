@@ -54,13 +54,14 @@ class DataModel(BaseModel):
         errors = []
         for node in self.nodes:
             errors+=node.validate_properties(csv_columns=csv_columns)
-            errors+=node.validate_unique_constraints(csv_columns=csv_columns)
+            # errors+=node.validate_unique_constraints(csv_columns=csv_columns)
 
         for rel in self.relationships:
             errors+=rel.validate_properties(csv_columns=csv_columns)
-            errors+=rel.validate_unique_constraints(csv_columns=csv_columns)
+            # errors+=rel.validate_unique_constraints(csv_columns=csv_columns)
         
-        errors+=self.validate_relationship_sources_and_targets()
+        errors+=self._validate_relationship_sources_and_targets()
+        errors+=self._validate_csv_features_used_only_once()
         
         if len(errors) > 0:
             message = f"""
@@ -82,7 +83,7 @@ class DataModel(BaseModel):
             "message": ""
         }
     
-    def validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
+    def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
@@ -94,7 +95,30 @@ class DataModel(BaseModel):
             if rel.target not in self.node_labels:
                 errors.append(f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels.")
         return errors
-                
+    
+    def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
+        """
+        Validate that each property is used no more than one time in the data model.
+        """
+
+        used_features = []
+        errors = []
+
+        for node in self.nodes:
+            for prop in node.properties:
+                if prop not in used_features:
+                    used_features.append(prop)
+                else:
+                    errors.append(f"The Node {node.label} has the property {prop} which has already been used in the data model. Select a different feature or remove it from this node.")
+        for rel in self.relationships:
+            for prop in rel.properties:
+                if prop not in used_features:
+                    used_features.append(prop)
+                else:
+                    errors.append(f"The Relationship {rel.type} has the property {prop} which has already been used in the data model. Select a different feature or remove it from this relationship.")
+        return errors
+
+
     def map_columns_to_values(self, column_mapping: Dict[str, str]) -> None:
         """
         Apply a column mapping to the node labels, relationship types and all properties.
