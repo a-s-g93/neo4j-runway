@@ -14,8 +14,14 @@ class Relationship(BaseModel):
     source: str
     target: str
 
-    # def __init__(self, *a, **kw) -> None:
-    #     super().__init__(*a, **kw)
+    def __init__(self, *a, **kw) -> None:
+        super().__init__(*a, **kw)
+
+        if self.properties is None:
+            self.properties = []
+            self.unique_constraints = []
+        if self.unique_constraints is None:
+            self.unique_constraints = []
 
     @property
     def dict(self) -> Dict[str, Union[List[str], str]]:
@@ -27,7 +33,7 @@ class Relationship(BaseModel):
             for prop in self.properties:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The relationship {self.type} has the property {prop} which does not exist in csv columns.")
+                    errors.append(f"The relationship {self.type} has the property {prop} which does not exist in csv columns. {prop} should be removed from relationship {self.type}.")
                         # )
         return errors
     
@@ -37,6 +43,6 @@ class Relationship(BaseModel):
             for prop in self.unique_constraints:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The relationship {self.type} has a unique constraint {prop} which does not exist in csv columns.")
+                    errors.append(f"The relationship {self.type} has a unique constraint {prop} which does not exist in csv columns. {prop} should be removed from relationship {self.type}.")
                     # )
         return errors

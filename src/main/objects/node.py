@@ -9,8 +9,8 @@ class Node(BaseModel):
     """
 
     label: str
-    properties: Union[List[str], None] = []
-    unique_constraints: Union[List[Union[str, None]], None] = []
+    properties: List[str]
+    unique_constraints: List[str]
 
     def __init__(self, *a, **kw) -> None:
         super().__init__(*a, **kw)
@@ -25,7 +25,7 @@ class Node(BaseModel):
             for prop in self.properties:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The node {self.label} has the property {prop} which does not exist in csv columns.")
+                    errors.append(f"The node {self.label} has the property {prop} which does not exist in csv columns. {prop} should be removed from node {self.label}.")
                     # )
         return errors
 
@@ -35,6 +35,6 @@ class Node(BaseModel):
             for prop in self.unique_constraints:
                 if prop not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns.")
+                    errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns. {prop} should be removed from node {self.label}.")
                     # )
         return errors

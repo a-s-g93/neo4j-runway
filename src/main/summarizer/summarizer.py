@@ -5,6 +5,8 @@ import pandas as pd
 
 from llm.llm import LLM
 
+from resources.prompts.prompts import model_generation_rules, model_format
+
 
 class Summarizer:
 
@@ -111,36 +113,11 @@ class Summarizer:
             Based upon your knowledge of the data in my .csv and 
             of high-quality Neo4j graph data models, I would like you to return your
             suggestion for translating the data in my .csv into a Neo4j graph data model.
+            Focus only on the nodes and relationships. Properties will be added in a later step.
 
-            Please return the following in JSON format:
-            Suggested Nodes and their properties, relationships and their properties, and uniqueness constraints if any.
-            A uniqueness constraint is what makes the associated node or relationship unique.
-            Each node will most likely have at least one unique constraint.
-            Each node must have at least one property.
-            Include only nodes, relationships, and properties derived from features from my .csv file.
-            If no properties or unique constraints are suggested return an empty list.
-            Properties should be exact matches to features in the .csv file.
+            {model_generation_rules}
 
-            Return your data model in JSON format. 
-            Format nodes as:
-            {{
-                "label": <node label>,
-                "properties": <list of node properties>,
-                "unique_constraints": <list of properties with uniqueness constraints>,
-            }}
-            Format relationships as:
-            {{
-                "type": <relationship type>,
-                "properties": <list of relationship properties>,
-                "unique_constraints": <list of properties with uniqueness constraints>,
-                "source": <the node this relationship begins>,
-                "target": <the node this relationship ends>,
-                }}
-            Format your JSON as:
-            {{
-            "Nodes": {{nodes}},
-            "Relationships"{{relationships}}
-            }}
+            {model_format}
             """
         return prompt
     
@@ -152,8 +129,11 @@ class Summarizer:
         if user_corrections is not None:
             user_corrections = "Focus on this feedback when refactoring the model: \n" + user_corrections 
         else:
-            user_corrections = """For example, are there any node properties that should
-            be converted to separate, additional nodes in the data model?"""
+            user_corrections =  """
+                                Add features from the csv to each node and relationship as properties. 
+                                Ensure that these properties provide value to their respective node or relationship.
+                                If a property is a unique identifier, then also add it to the unique_constraints list.
+                                """
 
         prompt = f"""
             Here is the csv data:
@@ -175,13 +155,7 @@ class Summarizer:
 
             {user_corrections}
 
-            Please return an updated graph data model with your suggested improvements in JSON format.
-            A uniqueness constraint is what makes the associated node or relationship unique.
-            Each node will most likely have at least one unique constraint.
-            Each node must have at least one property.
-            If no properties or unique constraints are suggested return an empty list.
-            Properties should be exact matches to features in the .csv file.
-            Do not return the same model!
+            {model_generation_rules}
             """
     
         return prompt
