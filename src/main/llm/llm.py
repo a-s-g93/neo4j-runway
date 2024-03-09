@@ -8,6 +8,10 @@ import instructor
 # import pandas as pd
 from objects.data_model import DataModel
 from resources.prompts.prompts import system_prompts
+from resources.prompts.prompts import model_generation_rules
+
+# MODEL = "gpt-3.5-turbo"
+MODEL = "gpt-4"
 
 class LLM():
     """
@@ -24,7 +28,7 @@ class LLM():
         """
 
         response = self.llm_instance.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=MODEL,
             temperature=0,
             messages=[
                 {"role": "system", "content": system_prompts['discovery']},
@@ -33,7 +37,7 @@ class LLM():
         )
         return response.choices[0].message.content
         
-    def get_data_model_response(self, formatted_prompt: str, csv_columns: List[str], max_retries: int = 2) -> DataModel:
+    def get_data_model_response(self, formatted_prompt: str, csv_columns: List[str], max_retries: int = 3) -> DataModel:
         """
         Get a data model response from the LLM.
         """
@@ -45,7 +49,7 @@ class LLM():
             retries+=1 # increment retries each pass
 
             response = self.llm_instance.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=MODEL,
                 temperature=0,
                 response_model=DataModel,
                 messages=[
@@ -57,34 +61,50 @@ class LLM():
             validation = response.validate_model(csv_columns=csv_columns)
             if not validation['valid']:
                 print("validation failed")
-                formatted_prompt = validation['message']
+                cot = self.get_chain_of_thought_response(formatted_prompt=validation['message'])
+                # formatted_prompt = validation['message']
+                formatted_prompt = self._generate_retry_prompt(chain_of_thought_response=cot, 
+                                                               errors_to_fix=validation["errors"],
+                                                               model_to_fix=response)
+                print("retry prompt: ", formatted_prompt)
             elif validation['valid']:
                 print("recieved a valid response")
                 valid_response = True
-
-            # response = self.retry(retry_message=validation["message"], 
-            #                       csv_columns=csv_columns, 
-            #                       max_retries=max_retries)
             
         return response
 
-    # def retry(self, retry_message: str, csv_columns: List[str],  max_retries = 1) -> str:
-    #     """
-    #     Receive a new LLM response with fixed errors.
-    #     """
+    def get_chain_of_thought_response(self, formatted_prompt: str) -> str:
+        """
+        Generate fixes for the previous data model.
+        """
+        print("performing chain of thought process...")
+        response = self.llm_instance.chat.completions.create(
+            model=MODEL,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": system_prompts['retry']},
+                {"role": "user", "content": formatted_prompt}
+            ]
+        )
+        return response.choices[0].message.content
+    
+    def _generate_retry_prompt(self, chain_of_thought_response: str, errors_to_fix: str, model_to_fix: DataModel) -> str:
+        """
+        Generate a prompt to fix the data model using the errors found in previous model
+        and the chain of thought response containing ideas on how to fix the errors.
+        """
 
-    #     retries = 0
-    #     valid = False
-    #     while retries > max_retries and not valid:
-    #         print("retry: ", retries+1)
-    #         response = self.get_data_model_response(formatted_prompt=retry_message, csv_columns=csv_columns)
-    #         validation = response.validate_model(csv_columns=csv_columns)
-    #         valid = validation["valid"]
-    #         retry_message = validation["message"]
-    #         retries+=1
+        return f"""
+                Fix these errors in the data model by following the recommendations below and following the rules.
+                Do not return the same model!
+                {chain_of_thought_response}
 
-    #     if retries >= max_retries and not valid:
-    #         print("Max retries reached to properly format JSON.")
-    #         return response
-        
-    #     return response
+                Errors:
+                {errors_to_fix}
+
+                Data Model:
+                {model_to_fix}
+
+                Rules that must be followed:
+                {model_generation_rules}
+                """
