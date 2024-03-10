@@ -18,14 +18,12 @@ def csv_loader(show: bool = True) -> None:
         csv_input = st.file_uploader(label="CSV Loader", accept_multiple_files=False, label_visibility="collapsed")
 
         if csv_input is not None:
-            print("csv_type: ", type(csv_input))
             input_dataframe = pd.read_csv(csv_input)
             st.session_state["show_csv_loader"] = False
             st.session_state["csv_name"] = csv_input.name
             st.session_state["dataframe"] = input_dataframe
 
 
-            # if "columns_of_interest" not in st.session_state.keys():
             st.session_state["columns_of_interest"] = list(input_dataframe.columns)
 
             with st.form("Columns Form"):
@@ -61,10 +59,9 @@ def csv_loader(show: bool = True) -> None:
                 if submitted and openai_key != "":
                     
                     st.session_state["user_input_gathered"] = True
-                    # st.session_state["show_discovery"] = True
-                    # st.session_state["show_initial_data_model"] = True
                     st.write(st.session_state["USER_GENERATED_INPUT"])
-                    st.session_state["summarizer"] = Summarizer(llm=LLM(open_ai_key=openai_key), 
+                    st.session_state["summarizer"] = Summarizer(llm=LLM(model=st.session_state["model_name"], 
+                                                                        open_ai_key=openai_key), 
                                             user_input=st.session_state["USER_GENERATED_INPUT"], 
                                             data=input_dataframe)
                 elif openai_key == "":
