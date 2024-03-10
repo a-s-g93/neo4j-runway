@@ -1,5 +1,6 @@
 import os
 from typing import List, Dict, Tuple, Union
+from enum import Enum
 
 from openai import OpenAI
 # import openai
@@ -11,16 +12,32 @@ from resources.prompts.prompts import system_prompts
 from resources.prompts.prompts import model_generation_rules
 
 # MODEL = "gpt-3.5-turbo"
-MODEL = "gpt-4"
+# MODEL = "gpt-4"
+
+model_options = [
+    'gpt-4', 
+    'gpt-3.5-turbo',
+    'gpt-4-0125-preview',
+    'gpt-4-turbo-preview',
+    'gpt-4-1106-preview',
+    'gpt-4-0613',
+    'gpt-4-32k',
+    'gpt-4-32k-0613',
+    'gpt-3.5-turbo-1106',
+    'gpt-3.5-turbo-0125'
+    ]
 
 class LLM():
     """
     Interface for interacting with different LLMs.
     """
     
-    def __init__(self, open_ai_key: Union[str, None] = None) -> None:
+    def __init__(self, model: str = "gpt-4", open_ai_key: Union[str, None] = None) -> None:
 
+        if model not in model_options:
+            raise ValueError("model must be one of the following: ", model_options)
         self.llm_instance = instructor.patch(OpenAI(api_key=open_ai_key if open_ai_key is not None else os.environ.get("OPENAI_API_KEY")))
+        self.model = model
 
     def get_discovery_response(self, formatted_prompt: str) -> DataModel:
         """
@@ -28,7 +45,7 @@ class LLM():
         """
 
         response = self.llm_instance.chat.completions.create(
-            model=MODEL,
+            model=self.model,
             temperature=0,
             messages=[
                 {"role": "system", "content": system_prompts['discovery']},
@@ -49,7 +66,7 @@ class LLM():
             retries+=1 # increment retries each pass
 
             response = self.llm_instance.chat.completions.create(
-                model=MODEL,
+                model=self.model,
                 temperature=0,
                 response_model=DataModel,
                 messages=[
@@ -79,7 +96,7 @@ class LLM():
         """
         print("performing chain of thought process...")
         response = self.llm_instance.chat.completions.create(
-            model=MODEL,
+            model=self.model,
             temperature=0,
             messages=[
                 {"role": "system", "content": system_prompts['retry']},

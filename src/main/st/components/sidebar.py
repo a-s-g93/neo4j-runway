@@ -16,6 +16,11 @@ def sidebar(content_file_path: str) -> None:
     with open(content_file_path, "r") as f:
         content = f.read()
 
+    if st.session_state["summarizer"] is None:
+        disable_model_select = False
+    else:
+        disable_model_select = True
+    st.session_state["model_name"] = st.sidebar.radio("Select LLM", ["gpt-4", "gpt-3.5-turbo"], disabled=disable_model_select)
     st.sidebar.markdown(content)
 
     if st.session_state["summarizer"] is not None:
