@@ -2,6 +2,9 @@ src/main/data/csv/ppp_loan_data.csv
 test_downloads/
 test_output/
 resources/presentation_images/
+dockerfile
+private/
+agent-neo-langsmith.ipynb
 # test_downloads/data_model_v1.json
 
 # Byte-compiled / optimized / DLL files

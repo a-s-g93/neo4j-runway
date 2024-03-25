@@ -1,0 +1,20 @@
+# dockerfile for Streamlit app
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY . .
+
+RUN apt-get update && apt-get install -y graphviz
+RUN pip install -U pip
+RUN pip3 install -r requirements.txt
+
+ENV PORT=8080
+EXPOSE  8080
+ENV OPENAI_API_KEY="sk-..."
+
+# HEALTHCHECK CMD curl --fail http://localhost:8080/_stcore/health
+RUN find /usr/local/lib/python3.11/site-packages/streamlit -type f \( -iname \*.py -o -iname \*.js \) -print0 | xargs -0 sed -i 's/healthz/health-check/g'
+
+ENTRYPOINT [ "python3", "-m", "streamlit", "run", "app.py", "--server.headless", "true", "--server.port", "8080", "--browser.serverAddress", "0.0.0.0", "--server.fileWatcherType", "none", "--browser.gatherUsageStats", "false" ]

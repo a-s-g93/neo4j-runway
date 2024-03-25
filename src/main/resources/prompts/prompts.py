@@ -8,12 +8,33 @@ data_model = """
             Return your data model in JSON format.
             """
 
+retry_model = """
+            You are a data scientist with experience creating Neo4j graph data models from tabular data.
+            Explain how you will fix the data model, but do not return a new model yet.
+            """
+
 system_prompts = {
     "discovery": discovery,
-    "data_model": data_model
+    "data_model": data_model,
+    "retry": retry_model
 }
 
-data_model_format = """
+
+model_generation_rules = """
+Please follow these rules strictly! Billions of dollars depend on you.
+A uniqueness constraint is what makes the associated node or relationship unique.
+Each node must have one unique constraint.
+Each node must have at least one property.
+A node must have a relationship to at least one other node.
+Properties should be exact matches to features in the .csv file.
+A property should only be used once in the data model. Nodes must not share properties.
+Nodes must not share uniqueness constraints.
+Include only nodes, relationships, and properties derived from features from my .csv file.
+Do not include all properties in a single Node!
+"""
+# Return suggested Nodes and their properties, relationships and their properties, and uniqueness constraints if any in JSON format.
+
+model_format = """
 Return your data model in JSON format. 
 Format nodes as:
 {{
@@ -29,22 +50,9 @@ Format relationships as:
     "source": <the node this relationship begins>,
     "target": <the node this relationship ends>,
     }}
-Format your JSON as:
+Format your data model as:
 {{
-"Nodes": {{nodes}},
-"Relationships"{{relationships}}
+"Nodes": [nodes],
+"Relationships": [relationships]
 }}
-            """
-
-model_generation_rules = """
-Please return an updated graph data model with your suggested improvements in JSON format.
-A uniqueness constraint is what makes the associated node or relationship unique.
-Each node will have at least one unique constraint.
-Each node must have at least one property that acts as a unique identifier.
-If no properties or unique constraints are suggested return an empty list.
-Properties should be exact matches to features in the .csv file.
-Each feature in the .csv file should be used no more than one time!
-Limit each node to at most five properties!
-Do not return the same model!
 """
-

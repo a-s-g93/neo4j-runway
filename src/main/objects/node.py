@@ -27,16 +27,16 @@ class Node(BaseModel):
             for prop in self.properties:
                 if prop.csv_mapping not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The node {self.label} has the property {prop} which does not exist in csv columns.")
+                    errors.append(f"The node {self.label} has the property {prop} which does not exist in csv columns. {prop} should be removed from node {self.label}.")
                     # )
         return errors
 
-    # def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
-    #     errors = []
-    #     if self.unique_constraints is not None:
-    #         for prop in self.unique_constraints:
-    #             if prop not in csv_columns:
-    #                 # raise ValueError(
-    #                 errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns.")
-    #                 # )
-    #     return errors
+    def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
+        errors = []
+        if self.unique_constraints is not None:
+            for prop in self.unique_constraints:
+                if prop not in csv_columns:
+                    # raise ValueError(
+                    errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns. {prop} should be removed from node {self.label}.")
+                    # )
+        return errors

@@ -107,11 +107,13 @@ class IngestionGenerator(BaseModel):
         "relationship": {"rel": rel_type}
       }
       model_maps.append(model_map)
+      print("model maps: ", model_maps)
       for mapitem in model_map:
         if not model_map[mapitem]["csv"] is None:
+          # replace "(n:"" so we don't catch alias names that end with "n"
           merge_str = f"WITH $dict.rows AS rows\nUNWIND rows as row\n" \
-                    f"{model_map[mapitem]['source']['node'].replace('n:', 'source:')}\n" \
-                    f"{model_map[mapitem]['target']['node'].replace('n:', 'target:')}\n" \
+                    f"{model_map[mapitem]['source']['node'].replace('(n:', '(source:')}\n" \
+                    f"{model_map[mapitem]['target']['node'].replace('(n:', '(target:')}\n" \
                     f"MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target)" 
           newline = "\n"
           tab = "\t"

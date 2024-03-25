@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from objects.node import Node
 from objects.relationship import Relationship
-
+from resources.prompts.prompts import model_generation_rules
 
 class DataModel(BaseModel):
     """
@@ -65,22 +65,31 @@ class DataModel(BaseModel):
         
         if len(errors) > 0:
             message = f"""
-                    Fix the errors in following data model and return a corrected version. Do not return the same data model.
+                    The following data model is invalid and must be fixed.
+                    Properties must be from the provided Column Options. 
                     Data Model:
                     {self.dict}
                     Errors:
                     {str(errors)}
                     Column Options:
                     {csv_columns}
+                    A data model must follow these rules:
+                    {model_generation_rules}
+                    Consider adding Nodes if they don't exist.
+                    Consider moving properties to different nodes.
+                    Is there a column option that is semantically similar to an invalid property?
+                    Return an explanation of how you will fix each error while following the provided rules.
                     """
-            print("retry message: \n", message)
+            print("validation message: \n", message)
             return {
                 "valid": False,
-                "message": message
+                "message": message,
+                "errors": errors
             }
         return {
             "valid": True,
-            "message": ""
+            "message": "",
+            "errors": []
         }
     
     def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
@@ -95,30 +104,35 @@ class DataModel(BaseModel):
             if rel.target not in self.node_labels:
                 errors.append(f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels.")
         return errors
-    
+                
     def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
         """
         Validate that each property is used no more than one time in the data model.
         """
 
-        used_features = []
+        used_features = {}
         errors = []
 
         for node in self.nodes:
             for prop in node.properties:
-                if prop not in used_features:
-                    used_features.append(prop)
+                if prop not in list(used_features.keys()):
+                    used_features[prop] = [node.label]
                 else:
-                    errors.append(f"The Node {node.label} has the property {prop} which has already been used in the data model. Select a different feature or remove it from this node.")
+                    used_features[prop].append(node.label)
+                    # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
         for rel in self.relationships:
             for prop in rel.properties:
                 if prop not in used_features:
-                    used_features.append(prop)
+                    used_features[prop] = [rel.type]
                 else:
-                    errors.append(f"The Relationship {rel.type} has the property {prop} which has already been used in the data model. Select a different feature or remove it from this relationship.")
+                    used_features[prop].append(rel.type)
+                    # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
+        for prop, labels_or_types in used_features.items():
+            if len(labels_or_types) > 1:
+                errors.append(f"The property {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property instead. Find alternative properties from the column options or remove.")
+
         return errors
-
-
+    
     def map_columns_to_values(self, column_mapping: Dict[str, str]) -> None:
         """
         Apply a column mapping to the node labels, relationship types and all properties.

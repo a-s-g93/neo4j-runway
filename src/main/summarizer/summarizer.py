@@ -4,7 +4,9 @@ from typing import Dict, Any, Union
 import pandas as pd
 
 from llm.llm import LLM
-from resources.prompts.prompts import data_model_format, model_generation_rules
+
+from resources.prompts.prompts import model_generation_rules, model_format
+
 
 class Summarizer:
 
@@ -111,10 +113,11 @@ class Summarizer:
             Based upon your knowledge of the data in my .csv and 
             of high-quality Neo4j graph data models, I would like you to return your
             suggestion for translating the data in my .csv into a Neo4j graph data model.
+            Focus only on the nodes and relationships. Properties will be added in a later step.
 
             {model_generation_rules}
 
-            {data_model_format}
+            {model_format}
             """
         return prompt
     
@@ -126,8 +129,11 @@ class Summarizer:
         if user_corrections is not None:
             user_corrections = "Focus on this feedback when refactoring the model: \n" + user_corrections 
         else:
-            user_corrections = """For example, are there any node properties that should
-            be converted to separate, additional nodes in the data model?"""
+            user_corrections =  """
+                                Add features from the csv to each node and relationship as properties. 
+                                Ensure that these properties provide value to their respective node or relationship.
+                                If a property is a unique identifier, then also add it to the unique_constraints list.
+                                """
 
         prompt = f"""
             Here is the csv data:
