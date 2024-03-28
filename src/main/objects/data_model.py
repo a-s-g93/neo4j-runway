@@ -23,12 +23,12 @@ class DataModel(BaseModel):
     ) -> None:
         super().__init__(nodes=nodes, relationships=relationships)
 
-    @property
-    def dict(self) -> Dict[str, Union[List[str], str]]:
-        return {
-            "nodes": [n.__dict__ for n in self.nodes],
-            "relationships": [r.__dict__ for r in self.relationships],
-        }
+    # @property
+    # def dict(self) -> Dict[str, Union[List[str], str]]:
+    #     return {
+    #         "nodes": [n.__dict__ for n in self.nodes],
+    #         "relationships": [r.__dict__ for r in self.relationships],
+    #     }
     
     @property
     def node_labels(self) -> List[str]:
@@ -115,21 +115,21 @@ class DataModel(BaseModel):
 
         for node in self.nodes:
             for prop in node.properties:
-                if prop not in list(used_features.keys()):
-                    used_features[prop] = [node.label]
+                if prop.csv_mapping not in list(used_features.keys()):
+                    used_features[prop.csv_mapping] = [node.label]
                 else:
-                    used_features[prop].append(node.label)
+                    used_features[prop.csv_mapping].append(node.label)
                     # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
         for rel in self.relationships:
             for prop in rel.properties:
-                if prop not in used_features:
-                    used_features[prop] = [rel.type]
+                if prop.csv_mapping not in used_features:
+                    used_features[prop.csv_mapping] = [rel.type]
                 else:
-                    used_features[prop].append(rel.type)
+                    used_features[prop.csv_mapping].append(rel.type)
                     # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
         for prop, labels_or_types in used_features.items():
             if len(labels_or_types) > 1:
-                errors.append(f"The property {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property instead. Find alternative properties from the column options or remove.")
+                errors.append(f"The property csv_mapping {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove.")
 
         return errors
     
@@ -167,7 +167,7 @@ class DataModel(BaseModel):
             result+="\n\nproperties:\n"
             # print(result)
         for prop in node.properties:
-            result = result + prop + (" *unique*" if prop in node.unique_constraints else "") + "\n"
+            result = result + prop.name + f": {prop.csv_mapping}" + (" *unique*" if prop.is_unique else "") + "\n"
             # print(result)
 
         return result
@@ -184,7 +184,7 @@ class DataModel(BaseModel):
             result+="\n\nproperties:\n"
             # print(result)
         for prop in relationship.properties:
-            result = result + prop + (" *unique*" if prop in relationship.unique_constraints else "") + "\n"
+            result = result + prop.name + f": {prop.csv_mapping}" + (" *unique*" if prop.is_unique else "") + "\n"
             # print(result)
 
         return result

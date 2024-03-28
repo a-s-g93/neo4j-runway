@@ -34,7 +34,7 @@ class Summarizer:
 
         assert len(self.model_history) > 0, "No models found in history."
 
-        return self.model_history[-1].dict
+        return self.model_history[-1].model_dump()
 
     @property
     def current_model_viz(self) -> Dict[str, Any]:

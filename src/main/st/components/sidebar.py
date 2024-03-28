@@ -20,7 +20,7 @@ def sidebar(content_file_path: str) -> None:
         disable_model_select = False
     else:
         disable_model_select = True
-    st.session_state["model_name"] = st.sidebar.radio("Select LLM", ["gpt-4", "gpt-3.5-turbo"], disabled=disable_model_select)
+    st.session_state["model_name"] = st.sidebar.radio("Select LLM", ["gpt-4-0125-preview", "gpt-3.5-turbo"], disabled=disable_model_select)
     st.sidebar.markdown(content)
 
     if st.session_state["summarizer"] is not None:
@@ -46,7 +46,7 @@ def sidebar(content_file_path: str) -> None:
         
         st.sidebar.download_button(
                 label=f"Data Model V{str(version)}",
-                data=json.dumps(st.session_state["summarizer"].model_history[version].dict),
+                data=json.dumps(st.session_state["summarizer"].model_history[version].model_dump()),
                 file_name=f'data_model_v{str(version)}.json',
                 mime='application/json',
                 help="The selected data model in JSON format."
@@ -86,7 +86,7 @@ def sidebar(content_file_path: str) -> None:
             st.sidebar.divider()
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "x") as zip:
-                zip.writestr(f'data_model_v{str(version)}.json', json.dumps(st.session_state["summarizer"].model_history[version].dict))
+                zip.writestr(f'data_model_v{str(version)}.json', json.dumps(st.session_state["summarizer"].model_history[version].model_dump()))
                 zip.writestr(f'pyingest_config_data_model_v{str(version)}.yml', pyingest_string)
                 zip.writestr(f'load_csv_cypher_data_model_v{str(version)}.cypher', load_csv_string)
                 zip.writestr(f"constraints_data_model_v{str(version)}.cypher", constraints_string)
@@ -102,7 +102,6 @@ def sidebar(content_file_path: str) -> None:
 
             )
 
-
 @st.cache_data
 def prepare_pyingest():
     return st.session_state["ingestion_generator"].generate_pyingest_yaml_string()
@@ -110,7 +109,6 @@ def prepare_pyingest():
 @st.cache_data
 def prepare_load_csv():
     return st.session_state["ingestion_generator"].generate_load_csv_string()
-
 
 @st.cache_data
 def prepare_constraints():

@@ -9,6 +9,8 @@ import yaml
 
 from pydantic import BaseModel
 
+from objects.data_model import DataModel
+
 cypher_map ={}
 model_maps = []
 nodes_map = {}
@@ -33,7 +35,7 @@ def lowercase_first_letter(str):
 
 class IngestionGenerator(BaseModel):
 
-  data_model: Dict[str, Any]
+  data_model: DataModel
   username: Union[str, None] = None
   password: Union[str, None] = None
   uri: Union[str, None] = None
@@ -52,32 +54,37 @@ class IngestionGenerator(BaseModel):
       self._generate_base_information()
 
   def _generate_base_information(self):
-    for node in self.data_model["nodes"]:
-          label = node["label"]
-          props = node["properties"]
-          uniq_constraints_parts = []
-          if "," in node["unique_constraints"]:
-            uniq_constraints_parts = node["unique_constraints"].split(",")
-          elif len(node["unique_constraints"]) > 0:
-            uniq_constraints_parts = node["unique_constraints"]
-          else:
-            missing_properties_err.append({"label" : label})
+    for node in self.data_model.nodes:
+          label = node.label
+          # props = node["properties"]
+          props = node.property_column_mapping
+          # uniq_constraints_parts = []
+          uniq_constraints_parts = node.unique_constraints_column_mapping
+          # if "," in node["unique_constraints"]:
+          #   uniq_constraints_parts = node["unique_constraints"].split(",")
+          # elif len(node["unique_constraints"]) > 0:
+          #   uniq_constraints_parts = node["unique_constraints"]
+          # else:
+          #   missing_properties_err.append({"label" : label})
           
-          props = list(set(props) - set(node["unique_constraints"]))
+          # props = list(set(props) - set(uniq_constraints_parts))
+          for k in uniq_constraints_parts.keys():
+            del props[k]
           csv_file = self.csv_name
           uniq_constraints = []
           non_uniq_constraints = []
     
           if len(uniq_constraints_parts) > 0:
-            for part in uniq_constraints_parts:
-              constraint_prop_name = part.lower()
-              uniq_constraints.append(f"{constraint_prop_name}: row.{part}")
-              self.constraints[f"{label.lower()}_{constraint_prop_name}"] = f"CREATE CONSTRAINT {label.lower()}_{constraint_prop_name} IF NOT EXISTS FOR (n:{label}) REQUIRE n.{constraint_prop_name} IS UNIQUE;\n"
+            for part, col in uniq_constraints_parts.items():
+              # constraint_prop_name = part.lower()
+              uniq_constraints.append(f"{part}: row.{col}")
+              self.constraints[f"{label.lower()}_{part.lower()}"] = f"CREATE CONSTRAINT {label.lower()}_{part.lower()} IF NOT EXISTS FOR (n:{label}) REQUIRE n.{part} IS UNIQUE;\n"
 
+          print("constraints: ", self.constraints)
           #use first property as unique constraint, at this time
-          for count, prop in enumerate(props):
-            property_name = prop.lower()
-            non_uniq_constraints.append(f"n.{property_name} = row.{prop}") 
+          for prop, col in props.items():
+            # property_name = prop.lower()
+            non_uniq_constraints.append(f"n.{prop} = row.{col}") 
 
           uniq_constr_str = ", ".join(uniq_constraints)
           # print(f"uniq_constr_str: {uniq_constr_str}")
@@ -93,7 +100,7 @@ class IngestionGenerator(BaseModel):
                 
           #add to cypher map
           self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/{self.csv_dir}{csv_file}" }
-
+    print("cypher map: \n", self.cypher_map)
     model_map = {}    
     ## get relationships
     for rel in self.data_model["relationships"]:

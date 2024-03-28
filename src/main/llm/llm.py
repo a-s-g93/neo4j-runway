@@ -32,7 +32,7 @@ class LLM():
     Interface for interacting with different LLMs.
     """
     
-    def __init__(self, model: str = "gpt-4", open_ai_key: Union[str, None] = None) -> None:
+    def __init__(self, model: str = "gpt-4-0125-preview", open_ai_key: Union[str, None] = None) -> None:
 
         if model not in model_options:
             raise ValueError("model must be one of the following: ", model_options)
