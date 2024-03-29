@@ -3,78 +3,82 @@ import unittest
 
 from objects.node import Node
 from objects.relationship import Relationship
+from objects.property import Property
 from objects.data_model import DataModel
 
 
-class TestValidation(unittest.TestCase):
+class TestDataModel(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.columns = ["name", "age", "street", "city"]
+        cls.columns = ["name", "age", "street", "city", "pet_name", "pet", "toy", "toy_type"]
 
-        cls.bad_nodes = [
-            Node(
-                label="Person",
-                properties=["name", "age"],
-                unique_constraints=["lastName"],
-                ),
-            Node(
-                label="Address", 
-                properties=["street", "state"], 
-                unique_constraints=None
-            )
-        ]
-
-        cls.bad_relationships = [
-            Relationship(
-                type="HAS_ADDRESS",
-                properties=["town"],
-                unique_constraints=None,
-                source="Person",
-                target="Address",
-            ),
-            Relationship(
-                type="KNOWS",
-                unique_constraints=["score"],
-                properties=None,
-                source="Person",
-                target="Person",
-            ),
-            Relationship(
-                type="BAD",
-                properties=None,
-                source="City",
-                target="Person",
-            )
-        ]
+        person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
+        person_age = Property(name="age", type="str", csv_mapping="age", is_unique=False)
+        address_street = Property(name="street", type="str", csv_mapping="street", is_unique=False)
+        address_city = Property(name="city", type="str", csv_mapping="city", is_unique=False)
+        pet_name = Property(name="name", type="str", csv_mapping="pet_name", is_unique=False)
+        pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
+        toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
+        toy_kind = Property(name="kind", type="str", csv_mapping="toy_type", is_unique=False)
 
         cls.good_nodes = [
             Node(
                 label="Person",
-                properties=["name", "age"],
-                unique_constraints=["name"],
+                properties=[person_name, person_age],
                 ),
             Node(
                 label="Address", 
-                properties=["street", "city"], 
-                unique_constraints=None
+                properties=[address_street, address_city], 
+            ),
+            Node(
+                label="Pet", 
+                properties=[pet_name, pet_kind], 
+            ),
+            Node(
+                label="Toy", 
+                properties=[toy_name, toy_kind], 
             )
         ]
 
         cls.good_relationships = [
+                    Relationship(
+                        type="HAS_ADDRESS",
+                        properties=[],
+                        source="Person",
+                        target="Address",
+                    ),
+                    Relationship(
+                        type="KNOWS",
+                        properties=[],
+                        source="Person",
+                        target="Person",
+                    ),
+                    Relationship(
+                        type="HAS_PET",
+                        properties=[],
+                        source="Person",
+                        target="Pet",
+                    ),
+                    Relationship(
+                        type="PLAYS_WITH",
+                        properties=[],
+                        source="Pet",
+                        target="Toy",
+                    )
+                ]
+        cls.bad_relationships = cls.good_relationships+[
             Relationship(
-                type="HAS_ADDRESS",
-                properties=[],
-                unique_constraints=None,
-                source="Person",
-                target="Address",
-            ),
-            Relationship(
-                type="KNOWS",
-                unique_constraints=[],
-                properties=None,
-                source="Person",
-                target="Person",
+                        type="BAD",
+                        properties=[],
+                        source="Dog",
+                        target="Toy",
+                    )
+        ]
+        cls.bad_nodes = cls.good_nodes + [
+            Node(
+                label="Toy", 
+                properties=[toy_name, toy_kind], 
             )
         ]
 
@@ -89,7 +93,7 @@ class TestValidation(unittest.TestCase):
         validation = test_model.validate_model(csv_columns=self.columns)
         self.assertFalse(validation['valid'])
         self.assertIn("BAD", validation['message'].split())
-        self.assertIn("City", validation['message'].split())
+        self.assertIn("Dog", validation['message'].split())
         self.assertIn("source", validation['message'].split())
 
 
@@ -98,31 +102,8 @@ class TestValidation(unittest.TestCase):
         This input should pass.
         """
 
-        self.assertEqual(Node(
-                label="Person",
-                properties=["name", "age"],
-                unique_constraints=["name"],
-            ).label,
-            "Person"
-        )
-
-        self.assertEqual(Node(
-                label="Person",
-                properties=None,
-                unique_constraints=None,
-            ).label,
-            "Person"
-        )
-
-        self.assertEqual(Relationship(type="HAS_ADDRESS",
-                                       properties=None,
-                                       unique_constraints=None,
-                                       source="Person",
-                                       target="Address").source,
-                        "Person")
-        
         # valid
-        DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+        self.assertIsInstance(DataModel(nodes=self.good_nodes, relationships=self.good_relationships), DataModel)
     
     def test_to_dict(self) -> None:
         """
@@ -131,14 +112,11 @@ class TestValidation(unittest.TestCase):
 
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
 
-        test_dict = test_model.dict
+        test_dict = test_model.model_dump()
 
         self.assertEqual(list(test_dict.keys()), ["nodes", "relationships"])
-        self.assertEqual(list(test_dict['nodes'][0].keys()), ['label', 'properties', 'unique_constraints'])
-        self.assertEqual(list(test_dict['relationships'][0].keys()), ['type', 'properties', 'unique_constraints', 'source', 'target'])
-
-    
-
+        self.assertEqual(list(test_dict['nodes'][0].keys()), ['label', 'properties'])
+        self.assertEqual(list(test_dict['relationships'][0].keys()), ['type', 'properties', 'source', 'target'])
 
 if __name__ == "__main__":
     unittest.main()
