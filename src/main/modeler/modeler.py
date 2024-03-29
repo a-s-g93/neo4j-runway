@@ -1,16 +1,24 @@
 import io
 from typing import Dict, Any, Union
+import warnings
 
-import pandas as pd
+from graphviz import Digraph
 
 from llm.llm import LLM
-
+from objects.data_model import DataModel
 from resources.prompts.prompts import model_generation_rules, model_format
 
+class GraphDataModeler:
 
-class Summarizer:
-
-    def __init__(self, llm: LLM, user_input: Dict[str, str], data: pd.DataFrame) -> None:
+    def __init__(self, 
+                 llm: LLM, 
+                 user_input: Dict[str, str], 
+                 discovery: str = "",
+                 general_data_description: str = "",
+                 numeric_data_description: str = "",
+                 categorical_data_description: str = "",
+                 feature_descriptions: str = ""
+                 ) -> None:
         self.user_input = user_input
         self.llm = llm
 
@@ -19,78 +27,59 @@ class Summarizer:
         self.columns_of_interest = list(user_input.keys())
         self.columns_of_interest.remove("General Description")
 
-        self.data = data[self.columns_of_interest]
+        self.discovery = discovery
+        self.general_info = general_data_description
+        self.description_numeric = numeric_data_description
+        self.description_categorical = categorical_data_description
+        self.feature_descriptions = feature_descriptions
 
-        self._discovery_ran = False
+        if self.discovery == "":
+            warnings.warn("It is highly recommended to provide discovery generated from the Discovery module.")
+
         self._initial_model_created = False
         self.model_iterations = 0
         self.model_history = []
     
     @property
-    def current_model(self) -> Dict[str, Any]:
+    def current_model(self) -> DataModel:
         """
         The current data model.
         """
 
         assert len(self.model_history) > 0, "No models found in history."
 
-        return self.model_history[-1].model_dump()
+        
+        return self.model_history[-1]
+    
+    def get_model(self, version: int = -1, as_dict: bool = False) -> Union[DataModel, Dict[str, Any]]:
+        """
+        Returns the data model version specified. 
+        By default will return the most recent model.
+        Allows access to the intial model.
+        """
+
+        assert len(self.model_history) > 0, "No models found in history."
+        assert version != 0, "No model version 0."
+        if version < 0:
+            assert version + len(self.model_history) >= 0, "Model version out of range."
+        else:
+            assert len(self.model_history) - version >= 0, "Model version out of range."
+            # adjust for index
+            version-=1
+
+        return self.model_history[version].model_dump() if as_dict else self.model_history[-1]
 
     @property
-    def current_model_viz(self) -> Dict[str, Any]:
+    def current_model_viz(self) -> Digraph:
         """
         The current data model visualized with Graphviz.
         """
 
         assert len(self.model_history) > 0, "No models found in history."
 
-        return self.model_history[-1].visualize()
+        return self.current_model.visualize()
     
-    def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
-        """
-        Generate the data summaries.
-        """
-        buffer = io.StringIO()
-        self.data.info(buf=buffer)
-
-        df_info = buffer.getvalue()
-        desc_numeric = self.data.describe(percentiles=[0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99])
-        desc_categorical = self.data.describe(include='object')
-
-        self.general_info = df_info
-        self.description_numeric = desc_numeric
-        self.description_categorical = desc_categorical
     
-    def _generate_discovery_prompt(self) ->str:
-        """
-        Generate the initial discovery prompt.
-        """
-
-        self._descriptions = ""
-        for col in self.description_numeric.columns:
-            self._descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_numeric[col]} \n\n"
-
-        for col in self.description_categorical.columns:
-            self._descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.description_categorical[col]} \n\n"
-
-        prompt = f"""
-                I want you to perform a preliminary analysis on my data to help us understand
-                its characteristics before we brainstorm about the graph data model.
-
-                This is a general description of the data:
-                {self.user_input['General Description']}
-
-                The following is a summary of the data features, data types, and missing values:
-                {self.general_info}
-
-                The following is a description of each feature in the data:
-                {self._descriptions}
-
-                Provide me with your preliminary analysis of this data. What are important
-                overall details about the data? What are the most important features?
-                """
-        
-        return prompt
     
     def _generate_initial_data_model_prompt(self) -> str:
         """
@@ -105,7 +94,7 @@ class Summarizer:
             {self.general_info}
 
             The following is a description of each feature in the data:
-            {self._descriptions}
+            {self.feature_descriptions}
 
             Here is the initial discovery findings:
             {self.discovery}
@@ -144,7 +133,7 @@ class Summarizer:
             {self.general_info}
 
             The following is a description of each feature in the data:
-            {self._descriptions}
+            {self.feature_descriptions}
 
             Here is the initial discovery findings:
             {self.discovery}
@@ -159,27 +148,13 @@ class Summarizer:
             """
     
         return prompt
-    
-    def run_discovery(self) -> str:
-        """
-        Run discovery on the data.
-        """
-
-        self._generate_csv_summary()
-        
-        response = self.llm.get_discovery_response(formatted_prompt=self._generate_discovery_prompt())
-        
-        self._discovery_ran = True
-        self.discovery = response
-
-        return response
 
     def create_initial_model(self) -> str:
         """
         Create the initial model.
         """
 
-        assert self._discovery_ran, "Run discovery before creating the initial model."
+        # assert self._discovery_ran, "Run discovery before creating the initial model."
 
         response = self.llm.get_data_model_response(formatted_prompt=self._generate_initial_data_model_prompt(), csv_columns=self.columns_of_interest)
 
@@ -191,10 +166,10 @@ class Summarizer:
 
     def iterate_model(self, iterations: int = 1, user_corrections: Union[str, None] = None) -> str:
         """
-        Iterate on the previous model the number times indicated.
+        Iterate on the previous data model the number times indicated.
         """
 
-        assert self._initial_model_created, "No model present to iterate on."
+        assert self._initial_model_created, "No data model present to iterate on."
 
         def iterate():
             for i in range(0, iterations):
