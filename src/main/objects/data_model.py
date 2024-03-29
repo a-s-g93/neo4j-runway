@@ -23,13 +23,6 @@ class DataModel(BaseModel):
     ) -> None:
         super().__init__(nodes=nodes, relationships=relationships)
 
-    # @property
-    # def dict(self) -> Dict[str, Union[List[str], str]]:
-    #     return {
-    #         "nodes": [n.__dict__ for n in self.nodes],
-    #         "relationships": [r.__dict__ for r in self.relationships],
-    #     }
-    
     @property
     def node_labels(self) -> List[str]:
         """
@@ -68,7 +61,7 @@ class DataModel(BaseModel):
                     The following data model is invalid and must be fixed.
                     Properties must be from the provided Column Options. 
                     Data Model:
-                    {self.dict}
+                    {self.model_dump()}
                     Errors:
                     {str(errors)}
                     Column Options:
@@ -132,13 +125,6 @@ class DataModel(BaseModel):
                 errors.append(f"The property csv_mapping {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove.")
 
         return errors
-    
-    def map_columns_to_values(self, column_mapping: Dict[str, str]) -> None:
-        """
-        Apply a column mapping to the node labels, relationship types and all properties.
-        """
-
-        pass
 
     def visualize(self) -> Digraph:
         """

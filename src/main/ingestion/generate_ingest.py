@@ -124,8 +124,8 @@ class IngestionGenerator(BaseModel):
           tab = "\t"
           load_csv_merge_str = f"LOAD CSV WITH HEADERS FROM 'file:///file_name' as row{newline}" \
                     f"CALL {{{newline}{tab}WITH row{newline}" \
-                    f"{tab}{model_map[mapitem]['source']['node'].replace('n:', 'source:')}{newline}" \
-                    f"{tab}{model_map[mapitem]['target']['node'].replace('n:', 'target:')}{newline}" \
+                    f"{tab}{model_map[mapitem]['source']['node'].replace('(n:', '(source:')}{newline}" \
+                    f"{tab}{model_map[mapitem]['target']['node'].replace('(n:', '(target:')}{newline}" \
                     f"{tab}MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target){newline}}} IN TRANSACTIONS OF 10000 ROWS;{newline}"
 
           self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/{self.csv_dir}{model_map[mapitem]['csv']}" }
