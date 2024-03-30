@@ -15,31 +15,31 @@ class TestNode(unittest.TestCase):
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEquals(node.label, "Person")
-        self.assertEquals(len(node.properties), 2)
+        self.assertEqual(node.label, "Person")
+        self.assertEqual(len(node.properties), 2)
 
     def test_properties(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEquals(node.property_names, ["name", "age"])
+        self.assertEqual(node.property_names, ["name", "age"])
 
     def test_unique_constraints(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEquals(node.unique_constraints, ["name"])
+        self.assertEqual(node.unique_constraints, ["name"])
 
     def test_property_column_mapping(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEquals(node.property_column_mapping, {"name": "first_name", "age": "age"})
+        self.assertEqual(node.property_column_mapping, {"name": "first_name", "age": "age"})
 
     def test_unique_constraints_column_mapping(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEquals(node.unique_constraints_column_mapping, {"name": "first_name"})
+        self.assertEqual(node.unique_constraints_column_mapping, {"name": "first_name"})
 
 

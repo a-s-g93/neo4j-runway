@@ -67,7 +67,7 @@ class GraphDataModeler:
             # adjust for index
             version-=1
 
-        return self.model_history[version].model_dump() if as_dict else self.model_history[-1]
+        return self.model_history[version].model_dump() if as_dict else self.model_history[version]
 
     @property
     def current_model_viz(self) -> Digraph:

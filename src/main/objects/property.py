@@ -17,7 +17,7 @@ TYPES_MAP = {
     "bytearray": "ByteArray",
     "date": "date",
     "datetime": "datetime",
-    "object": "MAP"
+    # "object": "MAP"
 }
 
 class Property(BaseModel):
