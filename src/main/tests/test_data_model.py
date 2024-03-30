@@ -118,5 +118,58 @@ class TestDataModel(unittest.TestCase):
         self.assertEqual(list(test_dict['nodes'][0].keys()), ['label', 'properties'])
         self.assertEqual(list(test_dict['relationships'][0].keys()), ['type', 'properties', 'source', 'target'])
 
+    def test_neo4j_naming_conventions(self) -> None:
+        """
+        Test renaming labels, types and properties to Neo4j naming conventions.
+        """
+
+        prop1 = Property(name="Name", type="str", csv_mapping="name", is_unique=True)
+        prop2 = Property(name="person_age", type="int", csv_mapping="age", is_unique=False)
+        prop3 = Property(name="CurrentStreet", type="str", csv_mapping="street", is_unique=True)
+        prop4 = Property(name="favorite_score", type="int", csv_mapping="favorite", is_unique=False)
+
+        name_conv_nodes = [
+            Node(
+                label="person",
+                properties=[prop1, prop2],
+                ),
+            Node(
+                label="current_Address", 
+                properties=[prop3], 
+            ),
+        ]
+
+        name_conv_relationships = [
+                    Relationship(
+                        type="has_address",
+                        properties=[prop4],
+                        source="Person",
+                        target="current_address",
+                    ),
+                    Relationship(
+                        type="HasSecondAddress",
+                        properties=[prop4],
+                        source="person",
+                        target="current_Address",
+                    ),
+                    Relationship(
+                        type="hasAddress_Three",
+                        properties=[prop4],
+                        source="Person",
+                        target="CURRENT_ADDRESS",
+                    )
+                ] 
+        
+        dm = DataModel(nodes=name_conv_nodes, relationships=name_conv_relationships)
+        dm.apply_neo4j_naming_conventions()
+
+        self.assertEqual(set(dm.node_labels), {"Person", "CurrentAddress"})
+        self.assertEqual(set(dm.relationship_types), {"HAS_ADDRESS", "HAS_SECOND_ADDRESS", "HAS_ADDRESS_THREE"})
+        for rel in dm.relationships: 
+            self.assertIn(rel.source, ["Person", "CurrentAddress"])
+            self.assertIn(rel.target, ["Person", "CurrentAddress"])
+
+        
+
 if __name__ == "__main__":
     unittest.main()
