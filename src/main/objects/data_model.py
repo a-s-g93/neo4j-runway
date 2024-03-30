@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from objects.node import Node
 from objects.relationship import Relationship
 from resources.prompts.prompts import model_generation_rules
+from utils.naming_conventions import fix_node_label, fix_property, fix_relationship_type
 
 class DataModel(BaseModel):
     """
@@ -19,9 +20,11 @@ class DataModel(BaseModel):
         self,
         nodes: List[Node],
         relationships: List[Relationship],
-        # csv_columns: List[str],
     ) -> None:
         super().__init__(nodes=nodes, relationships=relationships)
+
+        # default apply Neo4j naming conventions.
+        self.apply_neo4j_naming_conventions()
 
     @property
     def node_labels(self) -> List[str]:
@@ -174,3 +177,26 @@ class DataModel(BaseModel):
             # print(result)
 
         return result
+    
+    def apply_neo4j_naming_conventions(self) -> None:
+        """
+        Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
+        """
+
+        # fix node labels and properties
+        for node in self.nodes:
+            node.label = fix_node_label(node.label)
+            for prop in node.properties:
+                prop.name = fix_property(prop.name)
+
+        # fix relationship types and properties
+        for rel in self.relationships:
+            rel.type = fix_relationship_type(rel.type)
+            rel.source = fix_node_label(rel.source)
+            rel.target = fix_node_label(rel.target)
+            for prop in rel.properties:
+                prop.name = fix_property(prop.name)
+
+
+
+
