@@ -14,7 +14,7 @@ from resources.prompts.prompts import model_generation_rules
 # MODEL = "gpt-3.5-turbo"
 # MODEL = "gpt-4"
 
-model_options = [
+MODEL_OPTIONS = [
     'gpt-4', 
     'gpt-3.5-turbo',
     'gpt-4-0125-preview',
@@ -34,8 +34,8 @@ class LLM():
     
     def __init__(self, model: str = "gpt-4-0125-preview", open_ai_key: Union[str, None] = None) -> None:
 
-        if model not in model_options:
-            raise ValueError("model must be one of the following: ", model_options)
+        if model not in MODEL_OPTIONS:
+            raise ValueError("model must be one of the following: ", MODEL_OPTIONS)
         self.llm_instance = instructor.patch(OpenAI(api_key=open_ai_key if open_ai_key is not None else os.environ.get("OPENAI_API_KEY")))
         self.model = model
 
