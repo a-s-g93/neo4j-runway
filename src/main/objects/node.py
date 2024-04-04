@@ -2,6 +2,7 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel
 
+from objects.arrows import ArrowsNode
 from objects.property import Property
 
 class Node(BaseModel):
@@ -57,12 +58,19 @@ class Node(BaseModel):
                     # )
         return errors
 
-    # def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
-    #     errors = []
-    #     if self.unique_constraints is not None:
-    #         for prop in self.unique_constraints:
-    #             if prop not in csv_columns:
-    #                 # raise ValueError(
-    #                 errors.append(f"The node {self.label} has a unique constraint {prop} which does not exist in csv columns. {prop} should be removed from node {self.label}.")
-    #                 # )
-    #     return errors
+    def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:
+        """
+        Return an arrows.app compatible node.
+        """
+        pos = {"x": x_position, "y": y_position}
+        props = {x.name: x.csv_mapping for x in self.properties}
+        return ArrowsNode(id=self.label, position=pos, labels=[self.label], properties=props)
+    
+    @classmethod
+    def from_arrows(cls, arrows_node: ArrowsNode):
+        """
+        Initialize a Node from an arrows node.
+        """
+
+        props = [Property(name=k, csv_mapping=v, type="unknown", is_unique=False) for k, v in arrows_node.properties.items()]
+        return cls(label=arrows_node.id, properties=props)

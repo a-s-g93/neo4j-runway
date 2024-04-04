@@ -3,6 +3,7 @@ from typing import List, Dict, Union, Any
 from pydantic import BaseModel
 
 from objects.property import Property
+from objects.arrows import ArrowsRelationship
 
 class Relationship(BaseModel):
     """
@@ -63,12 +64,20 @@ class Relationship(BaseModel):
                         # )
         return errors
     
-    # def validate_unique_constraints(self, csv_columns: List[str]) -> List[Union[str, None]]:
-    #     errors = []
-    #     if self.unique_constraints is not None:
-    #         for prop in self.unique_constraints:
-    #             if prop not in csv_columns:
-    #                 # raise ValueError(
-    #                 errors.append(f"The relationship {self.type} has a unique constraint {prop} which does not exist in csv columns. {prop} should be removed from relationship {self.type}.")
-    #                 # )
-    #     return errors
+    def to_arrows(self) -> ArrowsRelationship:
+        """
+        Return an arrows.app compatible relationship.
+        """
+        
+        props = {x.name: x.csv_mapping for x in self.properties}
+        arrows_id = self.type+self.source+self.target
+        return ArrowsRelationship(id=arrows_id, fromId=self.source, toId=self.target, type=self.type, properties=props)
+
+    @classmethod
+    def from_arrows(cls, arrows_relationship: ArrowsRelationship):
+        """
+        Initialize a relationship from an arrows relationship.
+        """
+
+        props = [Property(name=k, csv_mapping=v, type="unknown", is_unique=False) for k, v in arrows_relationship.properties.items()]
+        return cls(type=arrows_relationship.type, source=arrows_relationship.fromId, target=arrows_relationship.toId, properties=props)

@@ -2,6 +2,7 @@ import unittest
 
 from objects.relationship import Relationship
 from objects.property import Property
+from objects.arrows import ArrowsRelationship
 
 class TestRelationship(unittest.TestCase):
 
@@ -42,5 +43,31 @@ class TestRelationship(unittest.TestCase):
         relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
 
         self.assertEqual(relationship.unique_constraints_column_mapping, {"current": "current"})
+
+    def test_from_arrows(self) -> None:
+        """
+        Test init from arrows node.
+        """
+
+        arrows_relationship = ArrowsRelationship(id="HAS_SIMILARNodeANodeB", 
+                                type="HAS_SIMILAR",
+                                fromId="NodeA",
+                                toId="NodeB",
+                                properties={"score": "similarity_score", "current": "current"}
+                                )
+        
+        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+
+        self.assertEqual(relationship.type, "HAS_SIMILAR")
+        self.assertEqual(len(relationship.properties), 2)
+
+        relationship_from_arrows = Relationship.from_arrows(arrows_relationship=arrows_relationship)
+
+        self.assertEqual(relationship_from_arrows.type, arrows_relationship.type)
+        self.assertEqual(len(relationship_from_arrows.properties), 2)
+        self.assertEqual(relationship_from_arrows.source, arrows_relationship.fromId)
+        self.assertEqual(relationship_from_arrows.target, arrows_relationship.toId)
+
+
 
 

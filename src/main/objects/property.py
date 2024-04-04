@@ -4,7 +4,7 @@ from typing import List, Dict, Union, Any
 from pydantic import BaseModel, field_validator
 
 
-PYTHON_TYPES = ["list", "str", "bool", "int", "int64", "float", "float64", "bytearray", "date", "datetime", "object"]
+PYTHON_TYPES = ["list", "str", "bool", "int", "int64", "float", "float64", "bytearray", "date", "datetime", "object", "unknown"]
 
 TYPES_MAP = {
     "list": "LIST",
@@ -17,6 +17,7 @@ TYPES_MAP = {
     "bytearray": "ByteArray",
     "date": "date",
     "datetime": "datetime",
+    "unknown": "unknown"
     # "object": "MAP"
 }
 

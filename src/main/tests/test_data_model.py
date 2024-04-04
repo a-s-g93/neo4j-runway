@@ -160,7 +160,7 @@ class TestDataModel(unittest.TestCase):
                     )
                 ] 
         
-        dm = DataModel(nodes=name_conv_nodes, relationships=name_conv_relationships)
+        dm = DataModel(nodes=name_conv_nodes, relationships=name_conv_relationships, use_neo4j_naming_conventions=False)
         dm.apply_neo4j_naming_conventions()
 
         self.assertEqual(set(dm.node_labels), {"Person", "CurrentAddress"})
@@ -169,7 +169,12 @@ class TestDataModel(unittest.TestCase):
             self.assertIn(rel.source, ["Person", "CurrentAddress"])
             self.assertIn(rel.target, ["Person", "CurrentAddress"])
 
-        
+    def test_from_arrows_init(self) -> None:
+        """
+        Test init from arrows json file.
+        """
+
+        data_model = DataModel.from_arrows(file_path="tests/resources/arrows-data-model.json")
 
 if __name__ == "__main__":
     unittest.main()
