@@ -29,6 +29,8 @@ def fix_relationship_type(type: str) -> str:
     """
 
     if is_mixed_case(type):
+        if "_" not in type:
+            return type.upper()
         parts = re.findall('[A-Z_][^A-Z_]*', type[0].upper()+type[1:])
         return "_".join([x.upper() for x in parts if x != "_"])
 
@@ -43,7 +45,7 @@ def fix_relationship_type(type: str) -> str:
         parts = re.findall('[A-Z][^A-Z]*', type[0].upper()+type[1:])
         return "_".join(x.upper() for x in parts)
     else:
-        return type
+        return type.upper()
 
 def fix_property(property_name: str) -> str:
     """
@@ -76,7 +78,7 @@ def is_camel_case(input: str) -> bool:
     # first letter capital
     if ord(input[0]) >= 65 and ord(input[0]) <= 90:
         return False
-    
+
     return not "_" in input
 
 def is_pascal_case(input: str) -> bool:
@@ -89,7 +91,7 @@ def is_pascal_case(input: str) -> bool:
     # first letter not capital
     if ord(input[0]) < 65 or ord(input[0]) > 90:
         return False
-    
+
     return not "_" in input
 
 def is_snake_case(input: str) -> bool:
@@ -99,7 +101,7 @@ def is_snake_case(input: str) -> bool:
 
     assert len(input) > 0, "No input provided!"
 
-    return "_" in input
+    return "_" in input or input.isupper()
 
 def is_mixed_case(input: str) -> bool:
     """
@@ -112,11 +114,11 @@ def is_mixed_case(input: str) -> bool:
     snake = False
 
     for i in range(len(input)):
-        if input[i].isupper() and i > 0 and input[i-1].islower():
+        if input[i].isupper() and i > 0 and input[i-1].islower() and input[i+1].islower():
             camel_or_pascal = True
             break
     
-    if "_" in input:
+    if "_" in input or input.isupper():
         snake = True
 
     return camel_or_pascal and snake

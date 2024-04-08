@@ -1,8 +1,10 @@
+from ast import literal_eval
 from typing import List, Dict, Union
 
 from graphviz import Digraph
 from pydantic import BaseModel
 
+from objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from objects.node import Node
 from objects.relationship import Relationship
 from resources.prompts.prompts import model_generation_rules
@@ -20,11 +22,13 @@ class DataModel(BaseModel):
         self,
         nodes: List[Node],
         relationships: List[Relationship],
+        use_neo4j_naming_conventions: bool = True
     ) -> None:
-        super().__init__(nodes=nodes, relationships=relationships)
+        super().__init__(nodes=nodes, relationships=relationships, use_neo4j_naming_conventions=True)
 
         # default apply Neo4j naming conventions.
-        self.apply_neo4j_naming_conventions()
+        if use_neo4j_naming_conventions:
+            self.apply_neo4j_naming_conventions() 
 
     @property
     def node_labels(self) -> List[str]:
@@ -197,6 +201,53 @@ class DataModel(BaseModel):
             for prop in rel.properties:
                 prop.name = fix_property(prop.name)
 
+    def to_json(self, file_name: str = "data-model") -> Dict[str, any]:
+        """
+        Output the data model to a JSON file.
+        """
 
+        with open(f"./{file_name}.json", "w") as f:
+            f.write(self.model_dump_json())
+
+    def to_arrows(self, file_name: str = "data-model", write_file: bool = True) -> ArrowsDataModel:
+        """
+        Output the data model to arrows compatible JSON file.
+        """
+
+        NODE_SPACING: int = 200
+        # x_current: int = 0
+        y_current = 0
+        arrows_nodes = []
+        for idx, n in enumerate(self.nodes):
+            if (idx+1) % 5 == 0:
+                y_current-=200
+            arrows_nodes.append(n.to_arrows(x_position=NODE_SPACING*(idx%5), y_position=y_current))
+        
+        arrows_data_model = ArrowsDataModel(nodes=arrows_nodes, relationships=[r.to_arrows() for r in self.relationships])
+        
+        if write_file:
+            with open(f"./{file_name}.json", "w") as f:
+                f.write(arrows_data_model.model_dump_json()) 
+        
+        return arrows_data_model
+    
+    @classmethod
+    def from_arrows(cls, file_path: str) -> None:
+        """
+        Instatiate a DataModel from an arrows data model JSON file.
+        """
+
+        with open(f"{file_path}", "r") as f:
+                content = literal_eval(f.read())
+                return cls(nodes=[Node.from_arrows(ArrowsNode(id=n["id"], position=n["position"], labels=n["labels"], properties=n["properties"], caption=n["caption"], style=n["style"])) for n in content["nodes"]], 
+                           relationships=[Relationship.from_arrows(ArrowsRelationship(id=r["id"], fromId=r["fromId"], toId=r["toId"], properties=r["properties"], type=r["type"], style=r["style"])) for r in content["relationships"]])
+
+
+    def to_solutions_workbench(self, file_name: str = "data-model") -> Dict[str, any]:
+        """
+        Output the data model to Solutions Workbench compatible JSON file.
+        """
+
+        pass
 
 

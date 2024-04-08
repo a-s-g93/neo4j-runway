@@ -14,6 +14,8 @@ class TestNamingConventions(unittest.TestCase):
         """
 
         self.assertEqual(fix_node_label("Test_Label"), "TestLabel")
+        self.assertEqual(fix_node_label("Test"), "Test")
+        self.assertEqual(fix_node_label("test"), "Test")
         self.assertEqual(fix_node_label("test_Label"), "TestLabel")
         self.assertEqual(fix_node_label("test_label"), "TestLabel")
         self.assertEqual(fix_node_label("testLabel"), "TestLabel")
@@ -32,6 +34,8 @@ class TestNamingConventions(unittest.TestCase):
         self.assertEqual(fix_relationship_type("TestLabelPascal_Snake"), "TEST_LABEL_PASCAL_SNAKE")
         self.assertEqual(fix_relationship_type("test_long_title_long"), "TEST_LONG_TITLE_LONG")
         self.assertEqual(fix_relationship_type("hasAddress_Three"), "HAS_ADDRESS_THREE")
+        self.assertEqual(fix_relationship_type("TEST"), "TEST")
+        self.assertEqual(fix_relationship_type("test"), "TEST")
 
     def test_fix_property(self) -> None:
         """
@@ -39,6 +43,8 @@ class TestNamingConventions(unittest.TestCase):
         """
 
         self.assertEqual(fix_property("Test_Label"), "testLabel")
+        self.assertEqual(fix_property("test"), "test")
+        self.assertEqual(fix_property("Test"), "test")
         self.assertEqual(fix_property("test_Label"), "testLabel")
         self.assertEqual(fix_property("test_label"), "testLabel")
         self.assertEqual(fix_property("TestLabel"), "testLabel")
