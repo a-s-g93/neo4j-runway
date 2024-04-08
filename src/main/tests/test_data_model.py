@@ -107,7 +107,7 @@ class TestDataModel(unittest.TestCase):
     
     def test_to_dict(self) -> None:
         """
-        Test dict property.
+        Test model_dump property.
         """
 
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
@@ -175,6 +175,9 @@ class TestDataModel(unittest.TestCase):
         """
 
         data_model = DataModel.from_arrows(file_path="tests/resources/arrows-data-model.json")
+
+        self.assertTrue(data_model.nodes[0].properties[0].is_unique)
+        self.assertEqual(data_model.nodes[0].properties[1].type, "int")
 
 if __name__ == "__main__":
     unittest.main()

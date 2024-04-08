@@ -17,7 +17,7 @@ class TestDataModel(unittest.TestCase):
         cls.columns = ["name", "age", "street", "city", "pet_name", "pet", "toy", "toy_type"]
 
         person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
-        person_age = Property(name="age", type="str", csv_mapping="age", is_unique=False)
+        person_age = Property(name="age", type="int", csv_mapping="age", is_unique=False)
         address_street = Property(name="street", type="str", csv_mapping="street", is_unique=False)
         address_city = Property(name="city", type="str", csv_mapping="city", is_unique=False)
         pet_name = Property(name="name", type="str", csv_mapping="pet_name", is_unique=False)

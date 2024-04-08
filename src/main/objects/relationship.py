@@ -69,7 +69,7 @@ class Relationship(BaseModel):
         Return an arrows.app compatible relationship.
         """
         
-        props = {x.name: x.csv_mapping for x in self.properties}
+        props = {x.name: x.csv_mapping+" | "+x.type for x in self.properties}
         arrows_id = self.type+self.source+self.target
         return ArrowsRelationship(id=arrows_id, fromId=self.source, toId=self.target, type=self.type, properties=props)
 
@@ -79,5 +79,22 @@ class Relationship(BaseModel):
         Initialize a relationship from an arrows relationship.
         """
 
-        props = [Property(name=k, csv_mapping=v, type="unknown", is_unique=False) for k, v in arrows_relationship.properties.items()]
+        props = [cls._parse_arrows_property(arrows_property={k: v}) for k, v in arrows_relationship.properties.items()]
         return cls(type=arrows_relationship.type, source=arrows_relationship.fromId, target=arrows_relationship.toId, properties=props)
+    
+    def _parse_arrows_property(arrows_property: Dict[str, str]) -> Property:
+        """
+        Parse the arrows property representation into a standard Property model.
+        Unique property names are unable to be identified and will default to False.
+        Arrow property values are formatted as <csv_mapping> | <python_type>.
+        """
+
+        if "|" in list(arrows_property.values())[0]:
+            csv_mapping, python_type = [x.strip() for x in list(arrows_property.values())[0].split("|")]
+        else:
+            csv_mapping = list(arrows_property.values())[0]
+            python_type = "unknown"
+
+        is_unique = False
+
+        return Property(name=list(arrows_property.keys())[0], csv_mapping=csv_mapping, type=python_type, is_unique=is_unique)

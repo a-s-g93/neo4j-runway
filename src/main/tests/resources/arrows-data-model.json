@@ -1,155 +1,155 @@
 {
-    "style": {
-      "font-family": "sans-serif",
-      "background-color": "#ffffff",
-      "background-image": "",
-      "background-size": "100%",
-      "node-color": "#ffffff",
-      "border-width": 4,
-      "border-color": "#000000",
-      "radius": 50,
-      "node-padding": 5,
-      "node-margin": 2,
-      "outside-position": "auto",
-      "node-icon-image": "",
-      "node-background-image": "",
-      "icon-position": "inside",
-      "icon-size": 64,
-      "caption-position": "inside",
-      "caption-max-width": 200,
-      "caption-color": "#000000",
-      "caption-font-size": 50,
-      "caption-font-weight": "normal",
-      "label-position": "inside",
-      "label-display": "pill",
-      "label-color": "#000000",
-      "label-background-color": "#ffffff",
-      "label-border-color": "#000000",
-      "label-border-width": 4,
-      "label-font-size": 40,
-      "label-padding": 5,
-      "label-margin": 4,
-      "directionality": "directed",
-      "detail-position": "inline",
-      "detail-orientation": "parallel",
-      "arrow-width": 5,
-      "arrow-color": "#000000",
-      "margin-start": 5,
-      "margin-end": 5,
-      "margin-peer": 20,
-      "attachment-start": "normal",
-      "attachment-end": "normal",
-      "relationship-icon-image": "",
-      "type-color": "#000000",
-      "type-background-color": "#ffffff",
-      "type-border-color": "#000000",
-      "type-border-width": 0,
-      "type-font-size": 16,
-      "type-padding": 5,
-      "property-position": "outside",
-      "property-alignment": "colon",
-      "property-color": "#000000",
-      "property-font-size": 16,
-      "property-font-weight": "normal"
+  "style": {
+    "font-family": "sans-serif",
+    "background-color": "#ffffff",
+    "background-image": "",
+    "background-size": "100%",
+    "node-color": "#ffffff",
+    "border-width": 4,
+    "border-color": "#000000",
+    "radius": 50,
+    "node-padding": 5,
+    "node-margin": 2,
+    "outside-position": "auto",
+    "node-icon-image": "",
+    "node-background-image": "",
+    "icon-position": "inside",
+    "icon-size": 64,
+    "caption-position": "inside",
+    "caption-max-width": 200,
+    "caption-color": "#000000",
+    "caption-font-size": 50,
+    "caption-font-weight": "normal",
+    "label-position": "inside",
+    "label-display": "pill",
+    "label-color": "#000000",
+    "label-background-color": "#ffffff",
+    "label-border-color": "#000000",
+    "label-border-width": 4,
+    "label-font-size": 40,
+    "label-padding": 5,
+    "label-margin": 4,
+    "directionality": "directed",
+    "detail-position": "inline",
+    "detail-orientation": "parallel",
+    "arrow-width": 5,
+    "arrow-color": "#000000",
+    "margin-start": 5,
+    "margin-end": 5,
+    "margin-peer": 20,
+    "attachment-start": "normal",
+    "attachment-end": "normal",
+    "relationship-icon-image": "",
+    "type-color": "#000000",
+    "type-background-color": "#ffffff",
+    "type-border-color": "#000000",
+    "type-border-width": 0,
+    "type-font-size": 16,
+    "type-padding": 5,
+    "property-position": "outside",
+    "property-alignment": "colon",
+    "property-color": "#000000",
+    "property-font-size": 16,
+    "property-font-weight": "normal"
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "position": {
+        "x": 105.3711141386136,
+        "y": -243.80584874322315
+      },
+      "caption": "name",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "name | str",
+        "age": "age | int"
+      },
+      "style": {}
     },
-    "nodes": [
-      {
-        "id": "n0",
-        "position": {
-          "x": 122.11375978036546,
-          "y": -355.5312093310422
-        },
-        "caption": "",
-        "labels": [
-          "Person"
-        ],
-        "properties": {
-          "name": "name",
-          "age": "age"
-        },
-        "style": {}
+    {
+      "id": "n1",
+      "position": {
+        "x": 142.1337531280864,
+        "y": 50
       },
-      {
-        "id": "n1",
-        "position": {
-          "x": 95.07271135554218,
-          "y": -70.57620340713449
-        },
-        "caption": "",
-        "labels": [
-          "Address"
-        ],
-        "properties": {
-          "street": "street",
-          "city": "city"
-        },
-        "style": {}
+      "caption": "",
+      "labels": [
+        "Address"
+      ],
+      "properties": {
+        "street": "street | str",
+        "city": "city | str"
       },
-      {
-        "id": "n2",
-        "position": {
-          "x": 481.0168135010525,
-          "y": -382.5580853314172
-        },
-        "caption": "",
-        "labels": [
-          "Pet"
-        ],
-        "properties": {
-          "name": "pet_name",
-          "kind": "pet"
-        },
-        "style": {}
+      "style": {}
+    },
+    {
+      "id": "n2",
+      "position": {
+        "x": 484.55353547755726,
+        "y": -279.86295267473423
       },
-      {
-        "id": "n3",
-        "position": {
-          "x": 673.5484280860351,
-          "y": -190.02647074643465
-        },
-        "caption": "",
-        "labels": [
-          "Toy"
-        ],
-        "properties": {
-          "name": "toy",
-          "kind": "toy_type"
-        },
-        "style": {}
-      }
-    ],
-    "relationships": [
-      {
-        "id": "n0",
-        "fromId": "n0",
-        "toId": "n1",
-        "type": "HAS_ADDRESS",
-        "properties": {},
-        "style": {}
+      "caption": "",
+      "labels": [
+        "Pet"
+      ],
+      "properties": {
+        "name": "pet_name | str",
+        "kind": "pet | str"
       },
-      {
-        "id": "n1",
-        "fromId": "n0",
-        "toId": "n0",
-        "type": "KNOWS",
-        "properties": {},
-        "style": {}
+      "style": {}
+    },
+    {
+      "id": "n3",
+      "position": {
+        "x": 675,
+        "y": 50
       },
-      {
-        "id": "n2",
-        "fromId": "n0",
-        "toId": "n2",
-        "type": "HAS_PET",
-        "properties": {},
-        "style": {}
+      "caption": "name",
+      "labels": [
+        "Toy"
+      ],
+      "properties": {
+        "name": "toy | str",
+        "kind": "toy_type | str"
       },
-      {
-        "id": "n3",
-        "fromId": "n2",
-        "toId": "n3",
-        "type": "PLAYS_WITH",
-        "properties": {},
-        "style": {}
-      }
-    ]
-  }
+      "style": {}
+    }
+  ],
+  "relationships": [
+    {
+      "id": "n0",
+      "fromId": "n0",
+      "toId": "n1",
+      "type": "HAS_ADDRESS",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n1",
+      "fromId": "n0",
+      "toId": "n0",
+      "type": "KNOWS",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n2",
+      "fromId": "n0",
+      "toId": "n2",
+      "type": "HAS_PET",
+      "properties": {},
+      "style": {}
+    },
+    {
+      "id": "n3",
+      "fromId": "n2",
+      "toId": "n3",
+      "type": "PLAYS_WITH",
+      "properties": {},
+      "style": {}
+    }
+  ]
+}

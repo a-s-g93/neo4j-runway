@@ -63,8 +63,9 @@ class Node(BaseModel):
         Return an arrows.app compatible node.
         """
         pos = {"x": x_position, "y": y_position}
-        props = {x.name: x.csv_mapping for x in self.properties}
-        return ArrowsNode(id=self.label, position=pos, labels=[self.label], properties=props)
+        props = {x.name: x.csv_mapping+" | "+x.type for x in self.properties}
+        caption = ", ".join([x.name for x in self.properties if x.is_unique])
+        return ArrowsNode(id=self.label, caption=caption, position=pos, labels=[self.label], properties=props)
     
     @classmethod
     def from_arrows(cls, arrows_node: ArrowsNode):
@@ -72,5 +73,23 @@ class Node(BaseModel):
         Initialize a Node from an arrows node.
         """
 
-        props = [Property(name=k, csv_mapping=v, type="unknown", is_unique=False) for k, v in arrows_node.properties.items()]
+        props = [cls._parse_arrows_property(arrows_property={k: v}, arrows_node_caption=arrows_node.caption) for k, v in arrows_node.properties.items()]
         return cls(label=arrows_node.id, properties=props)
+    
+    @staticmethod
+    def _parse_arrows_property(arrows_property: Dict[str, str], arrows_node_caption: str) -> Property:
+        """
+        Parse the arrows property representation into a standard Property model.
+        Unique property names are stored in the nodes caption.
+        Arrow property values are formatted as <csv_mapping> | <python_type>.
+        """
+
+        if "|" in list(arrows_property.values())[0]:
+            csv_mapping, python_type = [x.strip() for x in list(arrows_property.values())[0].split("|")]
+        else:
+            csv_mapping = list(arrows_property.values())[0]
+            python_type = "unknown"
+
+        is_unique = list(arrows_property.keys())[0] in [x.strip() for x in arrows_node_caption.split(",")]
+
+        return Property(name=list(arrows_property.keys())[0], csv_mapping=csv_mapping, type=python_type, is_unique=is_unique)
