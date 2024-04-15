@@ -9,9 +9,13 @@ class TestNode(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.person_name = Property(name="name", type="str", csv_mapping="first_name", is_unique=True)
-        cls.person_age = Property(name="age", type="str", csv_mapping="age", is_unique=False)
-    
+        cls.person_name = Property(
+            name="name", type="str", csv_mapping="first_name", is_unique=True
+        )
+        cls.person_age = Property(
+            name="age", type="str", csv_mapping="age", is_unique=False
+        )
+
     def test_init(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
@@ -35,7 +39,9 @@ class TestNode(unittest.TestCase):
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEqual(node.property_column_mapping, {"name": "first_name", "age": "age"})
+        self.assertEqual(
+            node.property_column_mapping, {"name": "first_name", "age": "age"}
+        )
 
     def test_unique_constraints_column_mapping(self) -> None:
 
@@ -48,13 +54,14 @@ class TestNode(unittest.TestCase):
         Test init from arrows node.
         """
 
-        arrows_node = ArrowsNode(id="Person", 
-                                 caption="name",
-                                 position={"x": 0, "y": 0}, 
-                                 labels=["Person"], 
-                                 properties={"name": "first_name | str", "age": "age | int"}
-                                 )
-        
+        arrows_node = ArrowsNode(
+            id="Person",
+            caption="name",
+            position={"x": 0, "y": 0},
+            labels=["Person"],
+            properties={"name": "first_name | str", "age": "age | int"},
+        )
+
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
         self.assertEqual(node.label, "Person")
@@ -68,15 +75,16 @@ class TestNode(unittest.TestCase):
         self.assertEqual(node_from_arrows.properties[0].type, "str")
         self.assertEqual(node_from_arrows.properties[1].type, "int")
 
-
     def test_parse_arrows_property(self) -> None:
         """
         Test the parsing of an arrows property to a standard property model.
         """
 
-        to_parse = {"name": "name_col | str"} # passes
-        to_parse2 = {"notUnique": "nu_col|str"} # passes
-        to_parse3 = {"other": "other_col | STRING"}  # should pass, but replace the STRING type with str
+        to_parse = {"name": "name_col | str"}  # passes
+        to_parse2 = {"notUnique": "nu_col|str"}  # passes
+        to_parse3 = {
+            "other": "other_col | STRING"
+        }  # should pass, but replace the STRING type with str
 
         caption = "name, other, thisOne"
 
@@ -84,25 +92,24 @@ class TestNode(unittest.TestCase):
         parsed_prop2 = Node._parse_arrows_property(to_parse2, caption)
         parsed_prop3 = Node._parse_arrows_property(to_parse3, caption)
 
-        prop1 = Property(name="name", type="str", csv_mapping="name_col", is_unique=True)
-        prop2 = Property(name="notUnique", type="str", csv_mapping="nu_col", is_unique=False)
-        prop3 = Property(name="other", type="str", csv_mapping="other_col", is_unique=True)
+        prop1 = Property(
+            name="name", type="str", csv_mapping="name_col", is_unique=True
+        )
+        prop2 = Property(
+            name="notUnique", type="str", csv_mapping="nu_col", is_unique=False
+        )
+        prop3 = Property(
+            name="other", type="str", csv_mapping="other_col", is_unique=True
+        )
 
         self.assertEqual(parsed_prop1, prop1)
         self.assertEqual(parsed_prop2, prop2)
         self.assertEqual(parsed_prop3, prop3)
 
         to_parse4 = {"name": "name_col"}
-        prop4 = Property(name="name", type="unknown", csv_mapping="name_col", is_unique=False)
+        prop4 = Property(
+            name="name", type="unknown", csv_mapping="name_col", is_unique=False
+        )
 
         self.assertEqual(Node._parse_arrows_property(to_parse4, ""), prop4)
         self.assertEqual(Node._parse_arrows_property(to_parse4, " adfwe"), prop4)
-
-
-
-
-
-
-
-
-

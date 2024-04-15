@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def introduction(content_file_path: str) -> None:
     """
     Display introduction content.

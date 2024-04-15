@@ -4,64 +4,110 @@ from objects.relationship import Relationship
 from objects.property import Property
 from objects.arrows import ArrowsRelationship
 
+
 class TestRelationship(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.prop1 = Property(name="score", type="float", csv_mapping="similarity_score", is_unique=False)
-        cls.prop2 = Property(name="current", type="bool", csv_mapping="current", is_unique=True)
+        cls.prop1 = Property(
+            name="score", type="float", csv_mapping="similarity_score", is_unique=False
+        )
+        cls.prop2 = Property(
+            name="current", type="bool", csv_mapping="current", is_unique=True
+        )
         cls.source = "NodeA"
         cls.target = "NodeB"
-    
+
     def test_init(self) -> None:
 
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
         self.assertEqual(relationship.type, "HAS_SIMILAR")
         self.assertEqual(len(relationship.properties), 2)
 
     def test_properties(self) -> None:
 
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
         self.assertEqual(relationship.property_names, ["score", "current"])
 
     def test_unique_constraints(self) -> None:
 
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
         self.assertEqual(relationship.unique_constraints, ["current"])
 
     def test_property_column_mapping(self) -> None:
 
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
-        self.assertEqual(relationship.property_column_mapping, {"score": "similarity_score", "current": "current"})
+        self.assertEqual(
+            relationship.property_column_mapping,
+            {"score": "similarity_score", "current": "current"},
+        )
 
     def test_unique_constraints_column_mapping(self) -> None:
 
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
-        self.assertEqual(relationship.unique_constraints_column_mapping, {"current": "current"})
+        self.assertEqual(
+            relationship.unique_constraints_column_mapping, {"current": "current"}
+        )
 
     def test_from_arrows(self) -> None:
         """
         Test init from arrows node.
         """
 
-        arrows_relationship = ArrowsRelationship(id="HAS_SIMILARNodeANodeB", 
-                                type="HAS_SIMILAR",
-                                fromId="NodeA",
-                                toId="NodeB",
-                                properties={"score": "similarity_score | float", "current": "current | bool"}
-                                )
-        
-        relationship = Relationship(type="HAS_SIMILAR", properties=[self.prop1, self.prop2], source=self.source, target=self.target)
+        arrows_relationship = ArrowsRelationship(
+            id="HAS_SIMILARNodeANodeB",
+            type="HAS_SIMILAR",
+            fromId="NodeA",
+            toId="NodeB",
+            properties={
+                "score": "similarity_score | float",
+                "current": "current | bool",
+            },
+        )
+
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
 
         self.assertEqual(relationship.type, "HAS_SIMILAR")
         self.assertEqual(len(relationship.properties), 2)
 
-        relationship_from_arrows = Relationship.from_arrows(arrows_relationship=arrows_relationship)
+        relationship_from_arrows = Relationship.from_arrows(
+            arrows_relationship=arrows_relationship
+        )
 
         self.assertEqual(relationship_from_arrows.type, arrows_relationship.type)
         self.assertEqual(len(relationship_from_arrows.properties), 2)
@@ -76,26 +122,34 @@ class TestRelationship(unittest.TestCase):
         Test the parsing of an arrows property to a standard property model.
         """
 
-        to_parse = {"name": "name_col | str"} # passes
-        to_parse2 = {"notUnique": "nu_col|str"} # passes
-        to_parse3 = {"other": "other_col | STRING"}  # should pass, but replace the STRING type with str
+        to_parse = {"name": "name_col | str"}  # passes
+        to_parse2 = {"notUnique": "nu_col|str"}  # passes
+        to_parse3 = {
+            "other": "other_col | STRING"
+        }  # should pass, but replace the STRING type with str
 
         parsed_prop1 = Relationship._parse_arrows_property(to_parse)
         parsed_prop2 = Relationship._parse_arrows_property(to_parse2)
         parsed_prop3 = Relationship._parse_arrows_property(to_parse3)
 
-        prop1 = Property(name="name", type="str", csv_mapping="name_col", is_unique=False)
-        prop2 = Property(name="notUnique", type="str", csv_mapping="nu_col", is_unique=False)
-        prop3 = Property(name="other", type="str", csv_mapping="other_col", is_unique=False)
+        prop1 = Property(
+            name="name", type="str", csv_mapping="name_col", is_unique=False
+        )
+        prop2 = Property(
+            name="notUnique", type="str", csv_mapping="nu_col", is_unique=False
+        )
+        prop3 = Property(
+            name="other", type="str", csv_mapping="other_col", is_unique=False
+        )
 
         self.assertEqual(parsed_prop1, prop1)
         self.assertEqual(parsed_prop2, prop2)
         self.assertEqual(parsed_prop3, prop3)
 
         to_parse4 = {"name": "name_col"}
-        prop4 = Property(name="name", type="unknown", csv_mapping="name_col", is_unique=False)
+        prop4 = Property(
+            name="name", type="unknown", csv_mapping="name_col", is_unique=False
+        )
 
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
-
-

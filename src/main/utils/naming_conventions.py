@@ -7,21 +7,22 @@ def fix_node_label(label: str) -> str:
     """
 
     if is_mixed_case(label):
-        parts = re.findall('[A-Z_][^A-Z_]*', label[0].upper()+label[1:])
+        parts = re.findall("[A-Z_][^A-Z_]*", label[0].upper() + label[1:])
         return "".join([x.capitalize() for x in parts if x != "_"])
 
     elif is_pascal_case(label):
         return label
-    
+
     elif is_camel_case(label):
-        return label[0].upper()+label[1:]
-    
+        return label[0].upper() + label[1:]
+
     elif is_snake_case(label):
         parts = label.split("_")
         return "".join([x.capitalize() for x in parts])
-    
+
     else:
         return label
+
 
 def fix_relationship_type(type: str) -> str:
     """
@@ -31,21 +32,22 @@ def fix_relationship_type(type: str) -> str:
     if is_mixed_case(type):
         if "_" not in type:
             return type.upper()
-        parts = re.findall('[A-Z_][^A-Z_]*', type[0].upper()+type[1:])
+        parts = re.findall("[A-Z_][^A-Z_]*", type[0].upper() + type[1:])
         return "_".join([x.upper() for x in parts if x != "_"])
 
     elif is_snake_case(type):
         return type.upper()
-    
+
     elif is_pascal_case(type):
-        parts = re.findall('[A-Z][^A-Z]*', type)
+        parts = re.findall("[A-Z][^A-Z]*", type)
         return "_".join(x.upper() for x in parts)
-    
+
     elif is_camel_case(type):
-        parts = re.findall('[A-Z][^A-Z]*', type[0].upper()+type[1:])
+        parts = re.findall("[A-Z][^A-Z]*", type[0].upper() + type[1:])
         return "_".join(x.upper() for x in parts)
     else:
         return type.upper()
+
 
 def fix_property(property_name: str) -> str:
     """
@@ -53,20 +55,23 @@ def fix_property(property_name: str) -> str:
     """
 
     if is_mixed_case(property_name):
-        parts = re.findall('[A-Z_][^A-Z_]*', property_name[0].upper()+property_name[1:])
+        parts = re.findall(
+            "[A-Z_][^A-Z_]*", property_name[0].upper() + property_name[1:]
+        )
         pascal = "".join([x.lower().capitalize() for x in parts if x != "_"])
-        return pascal[0].lower()+pascal[1:]
+        return pascal[0].lower() + pascal[1:]
 
     elif is_camel_case(property_name):
         return property_name
-    
+
     elif is_pascal_case(property_name):
-        return property_name[0].lower()+property_name[1:]
-    
+        return property_name[0].lower() + property_name[1:]
+
     elif is_snake_case(property_name):
         parts = property_name.split("_")
         pascal = "".join([x.capitalize() for x in parts])
-        return pascal[0].lower()+pascal[1:]
+        return pascal[0].lower() + pascal[1:]
+
 
 def is_camel_case(input: str) -> bool:
     """
@@ -81,6 +86,7 @@ def is_camel_case(input: str) -> bool:
 
     return not "_" in input
 
+
 def is_pascal_case(input: str) -> bool:
     """
     Determine if input is Pascal case.
@@ -94,6 +100,7 @@ def is_pascal_case(input: str) -> bool:
 
     return not "_" in input
 
+
 def is_snake_case(input: str) -> bool:
     """
     Determine if input is snake case.
@@ -102,6 +109,7 @@ def is_snake_case(input: str) -> bool:
     assert len(input) > 0, "No input provided!"
 
     return "_" in input or input.isupper()
+
 
 def is_mixed_case(input: str) -> bool:
     """
@@ -114,10 +122,15 @@ def is_mixed_case(input: str) -> bool:
     snake = False
 
     for i in range(len(input)):
-        if input[i].isupper() and i > 0 and input[i-1].islower() and input[i+1].islower():
+        if (
+            input[i].isupper()
+            and i > 0
+            and input[i - 1].islower()
+            and input[i + 1].islower()
+        ):
             camel_or_pascal = True
             break
-    
+
     if "_" in input or input.isupper():
         snake = True
 

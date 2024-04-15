@@ -2,6 +2,7 @@ import unittest
 
 from objects.property import Property, TYPES_MAP
 
+
 class TestProperty(unittest.TestCase):
 
     @classmethod
@@ -14,12 +15,18 @@ class TestProperty(unittest.TestCase):
         Test input for init.
         """
 
-        self.assertIsInstance(Property(name="name", type="str", csv_mapping="name", is_unique=True), Property)
-        self.assertIsInstance(Property(name="street", type="str", csv_mapping="street", is_unique=False), Property)
+        self.assertIsInstance(
+            Property(name="name", type="str", csv_mapping="name", is_unique=True),
+            Property,
+        )
+        self.assertIsInstance(
+            Property(name="street", type="str", csv_mapping="street", is_unique=False),
+            Property,
+        )
 
         with self.assertRaises(ValueError):
             Property(name="name", type="string", csv_mapping="name", is_unique=True)
-    
+
         with self.assertRaises(ValueError):
             Property(name="name", type="dictionary", csv_mapping="name", is_unique=True)
 
@@ -31,10 +38,14 @@ class TestProperty(unittest.TestCase):
         Test dict property.
         """
 
-        prop = Property(name="name", type="str", csv_mapping="name", is_unique=True).model_dump()
+        prop = Property(
+            name="name", type="str", csv_mapping="name", is_unique=True
+        ).model_dump()
 
-        self.assertEqual(list(prop.keys()), ["name", "type", "csv_mapping", "is_unique"])
-        self.assertEqual(prop['csv_mapping'], "name")
+        self.assertEqual(
+            list(prop.keys()), ["name", "type", "csv_mapping", "is_unique"]
+        )
+        self.assertEqual(prop["csv_mapping"], "name")
 
     def test_neo4j_properties(self) -> None:
         """
@@ -42,7 +53,12 @@ class TestProperty(unittest.TestCase):
         """
 
         for k, v in TYPES_MAP.items():
-            self.assertEqual(Property(name="city", type=k, csv_mapping="city", is_unique=False).neo4j_type, v)
+            self.assertEqual(
+                Property(
+                    name="city", type=k, csv_mapping="city", is_unique=False
+                ).neo4j_type,
+                v,
+            )
 
 
 if __name__ == "__main__":

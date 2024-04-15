@@ -2,6 +2,7 @@ import unittest
 
 from utils.naming_conventions import *
 
+
 class TestNamingConventions(unittest.TestCase):
 
     @classmethod
@@ -19,7 +20,9 @@ class TestNamingConventions(unittest.TestCase):
         self.assertEqual(fix_node_label("test_Label"), "TestLabel")
         self.assertEqual(fix_node_label("test_label"), "TestLabel")
         self.assertEqual(fix_node_label("testLabel"), "TestLabel")
-        self.assertEqual(fix_node_label("TestLabelPascal_Snake"), "TestLabelPascalSnake")
+        self.assertEqual(
+            fix_node_label("TestLabelPascal_Snake"), "TestLabelPascalSnake"
+        )
         self.assertEqual(fix_node_label("test_long_Title_long"), "TestLongTitleLong")
 
     def test_fix_relationship_type(self) -> None:
@@ -31,8 +34,12 @@ class TestNamingConventions(unittest.TestCase):
         self.assertEqual(fix_relationship_type("test_Label"), "TEST_LABEL")
         self.assertEqual(fix_relationship_type("test_label"), "TEST_LABEL")
         self.assertEqual(fix_relationship_type("testLabel"), "TEST_LABEL")
-        self.assertEqual(fix_relationship_type("TestLabelPascal_Snake"), "TEST_LABEL_PASCAL_SNAKE")
-        self.assertEqual(fix_relationship_type("test_long_title_long"), "TEST_LONG_TITLE_LONG")
+        self.assertEqual(
+            fix_relationship_type("TestLabelPascal_Snake"), "TEST_LABEL_PASCAL_SNAKE"
+        )
+        self.assertEqual(
+            fix_relationship_type("test_long_title_long"), "TEST_LONG_TITLE_LONG"
+        )
         self.assertEqual(fix_relationship_type("hasAddress_Three"), "HAS_ADDRESS_THREE")
         self.assertEqual(fix_relationship_type("TEST"), "TEST")
         self.assertEqual(fix_relationship_type("test"), "TEST")
@@ -85,7 +92,7 @@ class TestNamingConventions(unittest.TestCase):
         self.assertTrue(is_snake_case("SNAKE_CASE"))
         self.assertFalse(is_snake_case("camelCase"))
         self.assertFalse(is_snake_case("PascalCase"))
-    
+
     def test_is_mixed_case(self) -> None:
         """
         Test determining if input is mix of camel, pascal or snake case.
@@ -98,7 +105,6 @@ class TestNamingConventions(unittest.TestCase):
         self.assertFalse(is_mixed_case("snake_Case"))
         self.assertFalse(is_mixed_case("camelCase"))
         self.assertFalse(is_mixed_case("PascalCase"))
-
 
     def test_empty_input_is_case(self) -> None:
         """

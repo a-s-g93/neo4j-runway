@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def initial_model(show: bool = True) -> None:
     """
     Display the intial data model JSON and visual.
@@ -14,4 +15,7 @@ def initial_model(show: bool = True) -> None:
             st.session_state["initial_model_created"] = True
 
         st.json(st.session_state["summarizer"].model_history[1].dict, expanded=False)
-        st.graphviz_chart(st.session_state["summarizer"].model_history[1].visualize(), use_container_width=True)
+        st.graphviz_chart(
+            st.session_state["summarizer"].model_history[1].visualize(),
+            use_container_width=True,
+        )

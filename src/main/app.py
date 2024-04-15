@@ -37,7 +37,7 @@ if "user_input_gathered" not in st.session_state.keys():
         "username": None,
         "password": None,
         "uri": None,
-        "database": None
+        "database": None,
     }
     st.session_state["summarizer"] = None
     st.session_state["ingestion_code_generated"] = False
@@ -52,29 +52,22 @@ neo4j_credentials(show=st.session_state["show_credentials"])
 
 csv_loader(show=st.session_state["show_csv_loader"])
 
-if st.session_state["user_input_gathered"] and st.session_state["summarizer"] is not None:   
+if (
+    st.session_state["user_input_gathered"]
+    and st.session_state["summarizer"] is not None
+):
     print("Using LLM: ", st.session_state["model_name"])
-    
+
     discovery(show=st.session_state["show_discovery"])
 
     initial_model(show=st.session_state["show_initial_data_model"])
-    
+
     if st.session_state["model_iteration"] > 1:
         iterate_model(show=st.session_state["show_iterate_model"])
 
     user_corrections(show=st.session_state["show_iterate_model_input"])
-    
+
     ingest(show=st.session_state["show_ingestion"])
 
 # generate sidebar last
 sidebar(content_file_path="st/ui/sidebar.md")
-
-    
-    
-    
-
-
-        
-
-            
-        
