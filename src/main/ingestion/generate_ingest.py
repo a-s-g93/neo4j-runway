@@ -52,49 +52,133 @@ class IngestionGenerator(BaseModel):
       super().__init__(*a, **kw)
 
       self._generate_base_information()
+  
+  @staticmethod
+  def _generate_constraints_key(node_label: str, unique_property: str) -> str:
+    """
+    Generate the key for a unique constraint.
+    """
 
+    return f"{node_label.lower()}_{unique_property.lower()}"
+  
+  @staticmethod
+  def _generate_constraint(node_label: str, unique_property: str) -> str:
+    """
+    Generate a constrant string.
+    """
+    
+    return f"CREATE CONSTRAINT {node_label.lower()}_{unique_property.lower()} IF NOT EXISTS FOR (n:{node_label}) REQUIRE n.{unique_property} IS UNIQUE;\n"
+  
+  @staticmethod
+  def _generate_match_node_clause(node_label: str, unique_property_match_component: str) -> str:
+    """
+    Generate a MATCH node clause.
+    """
+
+    return "MATCH (n:" + node_label + "{" + f"{unique_property_match_component}" + "})"
+  
+  @staticmethod
+  def _generate_set_property(property_column_mapping: Dict[str, str]) -> str:
+    """
+    Generate a set property string.
+    """
+
+    temp_set_list = []
+
+    for prop, col in property_column_mapping.items():
+      temp_set_list.append(f"n.{prop} = row.{col}") 
+
+    result = ", ".join(temp_set_list)
+
+    if not result == "":
+      result = f"SET {result}"
+    
+    return result
+  
+  @staticmethod
+  def _generate_set_unique_property(unique_properties: List[str]) -> str:
+    """
+    Generate the unique properties to match a node on within a MERGE statement.
+    Returns: unique_property_match_component
+    """
+
+    return ", ".join(unique_properties)
+
+  @staticmethod
+  def _generate_merge_node_clause_standard(node_label: str, unique_properties: str, non_unique_properties: str) -> str:
+    """
+    Generate a MERGE node clause.
+    """
+
+    return "WITH $dict.rows AS rows\nUNWIND rows AS row\nMERGE (n:" + node_label + " {" + unique_properties + "})\n" + non_unique_properties 
+
+  @staticmethod
+  def _generate_merge_node_load_csv_clause(node_label: str, unique_properties: str, non_unique_properties: str, batch_size: int = 10000) -> str:
+    """
+    Generate a MERGE node clause for the LOAD CSV method.
+    """
+
+    return "LOAD CSV WITH HEADERS FROM 'file:///file_name' as row\nCALL {\n\tWITH row\n\tMERGE (n:" + node_label + " {" + unique_properties + "})\n" + non_unique_properties + "} IN TRANSACTIONS OF " + str(batch_size) + " ROWS;\n"
+
+  @staticmethod
+  def _generate_merge_relationship_clause_standard(source_node: str, target_node: str, relationship_type: str, non_unique_properties_clause: str) -> str:
+    """
+    Generate a MERGE relationship clause.
+    """
+    # replace "(n:" so we don't catch alias names that end with "n"
+    return  f"""
+            WITH $dict.rows AS rows\nUNWIND rows as row
+            {source_node.replace('(n:', '(source:')}
+            {target_node.replace('(n:', '(target:')}
+            MERGE (source)-[:{relationship_type}]->(target)
+            {non_unique_properties_clause}
+            """
+  
+  @staticmethod
+  def _generate_merge_relationship_load_csv_clause(source_node: str, target_node: str, relationship_type: str, non_unique_properties_clause: str, batch_size: int = 10000) -> str:
+    """
+    Generate a MERGE relationship clause for the LOAD CSV method.
+    """
+
+    return f"""
+            LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
+            CALL {{
+              WITH row
+              {source_node.replace('(n:', '(source:')}
+              {target_node.replace('(n:', '(target:')}
+              MERGE (source)-[:{relationship_type}]->(target)
+              {non_unique_properties_clause}
+              }} IN TRANSACTIONS OF {batch_size} ROWS;
+              """
+  
   def _generate_base_information(self):
     for node in self.data_model.nodes:
           label = node.label
-          # props = node["properties"]
           props = node.property_column_mapping
-          # uniq_constraints_parts = []
-          uniq_constraints_parts = node.unique_constraints_column_mapping
-          # if "," in node["unique_constraints"]:
-          #   uniq_constraints_parts = node["unique_constraints"].split(",")
-          # elif len(node["unique_constraints"]) > 0:
-          #   uniq_constraints_parts = node["unique_constraints"]
-          # else:
-          #   missing_properties_err.append({"label" : label})
-          
-          # props = list(set(props) - set(uniq_constraints_parts))
-          for k in uniq_constraints_parts.keys():
+          unique_constraints_parts = node.unique_constraints_column_mapping
+          for k in unique_constraints_parts.keys():
             del props[k]
           csv_file = self.csv_name
-          uniq_constraints = []
-          non_uniq_constraints = []
+          unique_constraints = []
     
-          if len(uniq_constraints_parts) > 0:
-            for part, col in uniq_constraints_parts.items():
-              # constraint_prop_name = part.lower()
-              uniq_constraints.append(f"{part}: row.{col}")
-              self.constraints[f"{label.lower()}_{part.lower()}"] = f"CREATE CONSTRAINT {label.lower()}_{part.lower()} IF NOT EXISTS FOR (n:{label}) REQUIRE n.{part} IS UNIQUE;\n"
+          if len(unique_constraints_parts) > 0:
+            for unique_property, unique_property_csv_mapping in unique_constraints_parts.items():
+              unique_constraints.append(f"{unique_property}: row.{unique_property_csv_mapping}")
+              self.constraints[self._generate_constraints_key(node_label=label, unique_property=unique_property)] = self._generate_constraint(node_label=label, unique_property=unique_property)
 
           print("constraints: ", self.constraints)
-          #use first property as unique constraint, at this time
-          for prop, col in props.items():
-            # property_name = prop.lower()
-            non_uniq_constraints.append(f"n.{prop} = row.{col}") 
-
-          uniq_constr_str = ", ".join(uniq_constraints)
-
-          non_uniq_constr_str = ", ".join(non_uniq_constraints)
-          if not non_uniq_constr_str == "":
-            non_uniq_constr_str = f"SET {non_uniq_constr_str}"
-
-          merge_str = "WITH $dict.rows AS rows\nUNWIND rows AS row\nMERGE (n:" + label + " {" + uniq_constr_str + "})\n" + non_uniq_constr_str 
-          load_csv_merge_str = "LOAD CSV WITH HEADERS FROM 'file:///file_name' as row\nCALL {\n\tWITH row\n\tMERGE (n:" + label + " {" + uniq_constr_str + "})\n" + non_uniq_constr_str + "} IN TRANSACTIONS OF 10000 ROWS;\n"
-          nodes_map[lowercase_first_letter(label)] = "MATCH (n:" + label + "{" + f"{uniq_constr_str}" + "})"
+          set_property_string = self._generate_set_property(property_column_mapping=props)
+          
+          unique_property_match_component = self._generate_set_unique_property(unique_properties=unique_constraints)
+          merge_str = self._generate_merge_node_clause_standard(node_label=label, 
+                                                                unique_properties=unique_property_match_component, 
+                                                                non_unique_properties=set_property_string)
+          load_csv_merge_str = self._generate_merge_node_load_csv_clause(node_label=label, 
+                                                                         unique_properties=unique_property_match_component, 
+                                                                         non_unique_properties=set_property_string, 
+                                                                         batch_size=10000)
+          nodes_map[lowercase_first_letter(label)] = self._generate_match_node_clause(node_label=label, 
+                                                                                      unique_property_match_component=unique_property_match_component)
                 
           #add to cypher map
           self.cypher_map[lowercase_first_letter(label)] = {"cypher" : literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str), "csv": f"$BASE/{self.csv_dir}{csv_file}" }
@@ -105,6 +189,23 @@ class IngestionGenerator(BaseModel):
       rel_type = rel.type
       src_node_label = rel.source
       target_node_label = rel.target
+      props = node.property_column_mapping
+      unique_constraints_parts = node.unique_constraints_column_mapping
+
+      for k in unique_constraints_parts.keys():
+        del props[k]
+      csv_file = self.csv_name
+      unique_constraints = []
+
+      if len(unique_constraints_parts) > 0:
+        for unique_property, unique_property_csv_mapping in unique_constraints_parts.items():
+          unique_constraints.append(f"{unique_property}: row.{unique_property_csv_mapping}")
+          self.constraints[self._generate_constraints_key(node_label=label, unique_property=unique_property)] = self._generate_constraint(node_label=label, unique_property=unique_property)
+
+      print("constraints: ", self.constraints)
+      set_property_string = self._generate_set_property(property_column_mapping=props)
+      
+      unique_property_match_component = self._generate_set_unique_property(unique_properties=unique_constraints)
       model_map[f"{lowercase_first_letter(src_node_label)}_{lowercase_first_letter(target_node_label)}"] = { \
         "source": {"node": f"{nodes_map[lowercase_first_letter(src_node_label)]}"},
         "target": {"node": f"{nodes_map[lowercase_first_letter(target_node_label)]}"},
@@ -114,19 +215,15 @@ class IngestionGenerator(BaseModel):
       model_maps.append(model_map)
       print("model maps: ", model_maps)
       for mapitem in model_map:
-        if not model_map[mapitem]["csv"] is None:
-          # replace "(n:"" so we don't catch alias names that end with "n"
-          merge_str = f"WITH $dict.rows AS rows\nUNWIND rows as row\n" \
-                    f"{model_map[mapitem]['source']['node'].replace('(n:', '(source:')}\n" \
-                    f"{model_map[mapitem]['target']['node'].replace('(n:', '(target:')}\n" \
-                    f"MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target)" 
-          newline = "\n"
-          tab = "\t"
-          load_csv_merge_str = f"LOAD CSV WITH HEADERS FROM 'file:///file_name' as row{newline}" \
-                    f"CALL {{{newline}{tab}WITH row{newline}" \
-                    f"{tab}{model_map[mapitem]['source']['node'].replace('(n:', '(source:')}{newline}" \
-                    f"{tab}{model_map[mapitem]['target']['node'].replace('(n:', '(target:')}{newline}" \
-                    f"{tab}MERGE (source)-[:{model_map[mapitem]['relationship']['rel']}]->(target){newline}}} IN TRANSACTIONS OF 10000 ROWS;{newline}"
+        if model_map[mapitem]["csv"] is not None:
+          merge_str = self._generate_merge_relationship_clause_standard(source_node=model_map[mapitem]['source']['node'],
+                                                                        target_node=model_map[mapitem]['target']['node'],
+                                                                        relationship_type=model_map[mapitem]['relationship']['rel'])
+
+          load_csv_merge_str = self._generate_merge_relationship_load_csv_clause(source_node=model_map[mapitem]['source']['node'],
+                                                                                 target_node=model_map[mapitem]['target']['node'],
+                                                                                 relationship_type=model_map[mapitem]['relationship']['rel'],
+                                                                                 batch_size=10000)
 
           self.cypher_map[mapitem] = {"cypher": literal_unicode(merge_str), "cypher_loadcsv": literal_unicode(load_csv_merge_str),  "csv": f"$BASE/{self.csv_dir}{model_map[mapitem]['csv']}" }
   
