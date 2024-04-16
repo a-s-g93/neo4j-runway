@@ -1,10 +1,18 @@
 [tool.poetry]
 name = "neo4j-runway"
 version = "0.1.0"
-description = "A Python library that contains tools for data discovery, datta model generation and ingestion."
-authors = ["alex <a.gilmore1993@gmail.com>"]
+description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
+authors = ["Alex Gilmore <a.gilmore1993@gmail.com>", "Jason Booth", "Dan Bukowski"]
 license = "MIT"
 readme = "README.md"
+
+exclude = [
+    "src/main/data/",
+    "src/main/test_downloads/",
+    "src/main/test_output/",
+    "tests/"
+
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
