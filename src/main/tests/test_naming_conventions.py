@@ -105,6 +105,8 @@ class TestNamingConventions(unittest.TestCase):
         self.assertFalse(is_mixed_case("snake_Case"))
         self.assertFalse(is_mixed_case("camelCase"))
         self.assertFalse(is_mixed_case("PascalCase"))
+        self.assertFalse(is_mixed_case("camel"))
+        self.assertFalse(is_mixed_case("camelA"))
 
     def test_empty_input_is_case(self) -> None:
         """

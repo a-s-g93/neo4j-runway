@@ -37,22 +37,22 @@ files:
     SET n.kind = row.toy_type
   url: $BASE/test
 - chunk_size: 100
-  cql: "\n            WITH $dict.rows AS rows\nUNWIND rows as row\n            MATCH\
-    \ (source:Person{name: row.name})\n            MATCH (target:Address{})\n    \
-    \        MERGE (source)-[:HAS_ADDRESS]->(target)\n            "
+  cql: "WITH $dict.rows AS rows\nUNWIND rows as row\n\tMATCH (source:Person{name:\
+    \ row.name})\n\tMATCH (target:Address{})\n\tMERGE (source)-[n:HAS_ADDRESS]->(target)\n\
+    \tSET n.kind = row.toy_type"
   url: $BASE/test
 - chunk_size: 100
-  cql: "\n            WITH $dict.rows AS rows\nUNWIND rows as row\n            MATCH\
-    \ (source:Person{name: row.name})\n            MATCH (target:Person{name: row.name})\n\
-    \            MERGE (source)-[:KNOWS]->(target)\n            "
+  cql: "WITH $dict.rows AS rows\nUNWIND rows as row\n\tMATCH (source:Person{name:\
+    \ row.name})\n\tMATCH (target:Person{name: row.name})\n\tMERGE (source)-[n:KNOWS]->(target)\n\
+    \tSET n.kind = row.toy_type"
   url: $BASE/test
 - chunk_size: 100
-  cql: "\n            WITH $dict.rows AS rows\nUNWIND rows as row\n            MATCH\
-    \ (source:Person{name: row.name})\n            MATCH (target:Pet{})\n        \
-    \    MERGE (source)-[:HAS_PET]->(target)\n            "
+  cql: "WITH $dict.rows AS rows\nUNWIND rows as row\n\tMATCH (source:Person{name:\
+    \ row.name})\n\tMATCH (target:Pet{})\n\tMERGE (source)-[n:HAS_PET]->(target)\n\
+    \tSET n.kind = row.toy_type"
   url: $BASE/test
 - chunk_size: 100
-  cql: "\n            WITH $dict.rows AS rows\nUNWIND rows as row\n            MATCH\
-    \ (source:Pet{})\n            MATCH (target:Toy{name: row.toy})\n            MERGE\
-    \ (source)-[:PLAYS_WITH]->(target)\n            "
+  cql: "WITH $dict.rows AS rows\nUNWIND rows as row\n\tMATCH (source:Pet{})\n\tMATCH\
+    \ (target:Toy{name: row.toy})\n\tMERGE (source)-[n:PLAYS_WITH]->(target)\n\tSET\
+    \ n.kind = row.toy_type"
   url: $BASE/test

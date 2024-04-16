@@ -126,6 +126,7 @@ def is_mixed_case(input: str) -> bool:
             input[i].isupper()
             and i > 0
             and input[i - 1].islower()
+            and i < len(input) - 1
             and input[i + 1].islower()
         ):
             camel_or_pascal = True
