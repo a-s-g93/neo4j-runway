@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "neo4j-runway"
+version = "0.1.0"
+description = "A Python library that contains tools for data discovery, datta model generation and ingestion."
+authors = ["alex <a.gilmore1993@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+graphviz = "^0.20.1"
+instructor = "^0.5.2"
+neo4j = "^5.19.0"
+openai = "^1.12.0"
+pandas = "^2.0.3"
+pydantic = "^2.6.1"
+pyyaml = "^6.0.1"
+streamlit = "^1.31.1"
+jmespath = "^0.10.0"
+numpy = "^1.26.3"
+python-dateutil = "^2.8.2"
+pytz = "^2023.4"
+smart-open = "^7.0.1"
+urllib3 = "^2.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
