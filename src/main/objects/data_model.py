@@ -10,6 +10,7 @@ from objects.relationship import Relationship
 from resources.prompts.prompts import model_generation_rules
 from utils.naming_conventions import fix_node_label, fix_property, fix_relationship_type
 
+
 class DataModel(BaseModel):
     """
     Graph Data Model representation.
@@ -22,13 +23,15 @@ class DataModel(BaseModel):
         self,
         nodes: List[Node],
         relationships: List[Relationship],
-        use_neo4j_naming_conventions: bool = True
+        use_neo4j_naming_conventions: bool = True,
     ) -> None:
-        super().__init__(nodes=nodes, relationships=relationships, use_neo4j_naming_conventions=True)
+        super().__init__(
+            nodes=nodes, relationships=relationships, use_neo4j_naming_conventions=True
+        )
 
         # default apply Neo4j naming conventions.
         if use_neo4j_naming_conventions:
-            self.apply_neo4j_naming_conventions() 
+            self.apply_neo4j_naming_conventions()
 
     @property
     def node_labels(self) -> List[str]:
@@ -37,7 +40,7 @@ class DataModel(BaseModel):
         """
 
         return [n.label for n in self.nodes]
-    
+
     @property
     def relationship_types(self) -> List[str]:
         """
@@ -53,16 +56,16 @@ class DataModel(BaseModel):
 
         errors = []
         for node in self.nodes:
-            errors+=node.validate_properties(csv_columns=csv_columns)
+            errors += node.validate_properties(csv_columns=csv_columns)
             # errors+=node.validate_unique_constraints(csv_columns=csv_columns)
 
         for rel in self.relationships:
-            errors+=rel.validate_properties(csv_columns=csv_columns)
+            errors += rel.validate_properties(csv_columns=csv_columns)
             # errors+=rel.validate_unique_constraints(csv_columns=csv_columns)
-        
-        errors+=self._validate_relationship_sources_and_targets()
-        errors+=self._validate_csv_features_used_only_once()
-        
+
+        errors += self._validate_relationship_sources_and_targets()
+        errors += self._validate_csv_features_used_only_once()
+
         if len(errors) > 0:
             message = f"""
                     The following data model is invalid and must be fixed.
@@ -81,17 +84,9 @@ class DataModel(BaseModel):
                     Return an explanation of how you will fix each error while following the provided rules.
                     """
             print("validation message: \n", message)
-            return {
-                "valid": False,
-                "message": message,
-                "errors": errors
-            }
-        return {
-            "valid": True,
-            "message": "",
-            "errors": []
-        }
-    
+            return {"valid": False, "message": message, "errors": errors}
+        return {"valid": True, "message": "", "errors": []}
+
     def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
         """
         Validate the source and target of a relationship exist in the model nodes.
@@ -100,11 +95,15 @@ class DataModel(BaseModel):
         errors = []
         for rel in self.relationships:
             if rel.source not in self.node_labels:
-                errors.append(f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels.")
+                errors.append(
+                    f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels."
+                )
             if rel.target not in self.node_labels:
-                errors.append(f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels.")
+                errors.append(
+                    f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels."
+                )
         return errors
-                
+
     def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
         """
         Validate that each property is used no more than one time in the data model.
@@ -129,7 +128,9 @@ class DataModel(BaseModel):
                     # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
         for prop, labels_or_types in used_features.items():
             if len(labels_or_types) > 1:
-                errors.append(f"The property csv_mapping {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove.")
+                errors.append(
+                    f"The property csv_mapping {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove."
+                )
 
         return errors
 
@@ -142,12 +143,16 @@ class DataModel(BaseModel):
 
         for node in self.nodes:
             dot.node(name=node.label, label=self._generate_node_text(node=node))
-        
+
         for rel in self.relationships:
-            dot.edge(tail_name=rel.source, head_name=rel.target, label=self._generate_relationship_text(relationship=rel))
-        
+            dot.edge(
+                tail_name=rel.source,
+                head_name=rel.target,
+                label=self._generate_relationship_text(relationship=rel),
+            )
+
         return dot
-    
+
     @staticmethod
     def _generate_node_text(node: Node) -> str:
         """
@@ -157,14 +162,20 @@ class DataModel(BaseModel):
         result = node.label
         # print(result)
         if len(node.properties) > 0:
-            result+="\n\nproperties:\n"
+            result += "\n\nproperties:\n"
             # print(result)
         for prop in node.properties:
-            result = result + prop.name + f": {prop.csv_mapping}" + (" *unique*" if prop.is_unique else "") + "\n"
+            result = (
+                result
+                + prop.name
+                + f": {prop.csv_mapping}"
+                + (" *unique*" if prop.is_unique else "")
+                + "\n"
+            )
             # print(result)
 
         return result
-    
+
     @staticmethod
     def _generate_relationship_text(relationship: Relationship) -> str:
         """
@@ -174,14 +185,20 @@ class DataModel(BaseModel):
         result = relationship.type
         # print(result)
         if len(relationship.properties) > 0:
-            result+="\n\nproperties:\n"
+            result += "\n\nproperties:\n"
             # print(result)
         for prop in relationship.properties:
-            result = result + prop.name + f": {prop.csv_mapping}" + (" *unique*" if prop.is_unique else "") + "\n"
+            result = (
+                result
+                + prop.name
+                + f": {prop.csv_mapping}"
+                + (" *unique*" if prop.is_unique else "")
+                + "\n"
+            )
             # print(result)
 
         return result
-    
+
     def apply_neo4j_naming_conventions(self) -> None:
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
@@ -209,7 +226,9 @@ class DataModel(BaseModel):
         with open(f"./{file_name}.json", "w") as f:
             f.write(self.model_dump_json())
 
-    def to_arrows(self, file_name: str = "data-model", write_file: bool = True) -> ArrowsDataModel:
+    def to_arrows(
+        self, file_name: str = "data-model", write_file: bool = True
+    ) -> ArrowsDataModel:
         """
         Output the data model to arrows compatible JSON file.
         """
@@ -219,18 +238,23 @@ class DataModel(BaseModel):
         y_current = 0
         arrows_nodes = []
         for idx, n in enumerate(self.nodes):
-            if (idx+1) % 5 == 0:
-                y_current-=200
-            arrows_nodes.append(n.to_arrows(x_position=NODE_SPACING*(idx%5), y_position=y_current))
-        
-        arrows_data_model = ArrowsDataModel(nodes=arrows_nodes, relationships=[r.to_arrows() for r in self.relationships])
-        
+            if (idx + 1) % 5 == 0:
+                y_current -= 200
+            arrows_nodes.append(
+                n.to_arrows(x_position=NODE_SPACING * (idx % 5), y_position=y_current)
+            )
+
+        arrows_data_model = ArrowsDataModel(
+            nodes=arrows_nodes,
+            relationships=[r.to_arrows() for r in self.relationships],
+        )
+
         if write_file:
             with open(f"./{file_name}.json", "w") as f:
-                f.write(arrows_data_model.model_dump_json()) 
-        
+                f.write(arrows_data_model.model_dump_json())
+
         return arrows_data_model
-    
+
     @classmethod
     def from_arrows(cls, file_path: str) -> None:
         """
@@ -238,10 +262,35 @@ class DataModel(BaseModel):
         """
 
         with open(f"{file_path}", "r") as f:
-                content = literal_eval(f.read())
-                return cls(nodes=[Node.from_arrows(ArrowsNode(id=n["id"], position=n["position"], labels=n["labels"], properties=n["properties"], caption=n["caption"], style=n["style"])) for n in content["nodes"]], 
-                           relationships=[Relationship.from_arrows(ArrowsRelationship(id=r["id"], fromId=r["fromId"], toId=r["toId"], properties=r["properties"], type=r["type"], style=r["style"])) for r in content["relationships"]])
-
+            content = literal_eval(f.read())
+            return cls(
+                nodes=[
+                    Node.from_arrows(
+                        ArrowsNode(
+                            id=n["id"],
+                            position=n["position"],
+                            labels=n["labels"],
+                            properties=n["properties"],
+                            caption=n["caption"],
+                            style=n["style"],
+                        )
+                    )
+                    for n in content["nodes"]
+                ],
+                relationships=[
+                    Relationship.from_arrows(
+                        ArrowsRelationship(
+                            id=r["id"],
+                            fromId=r["fromId"],
+                            toId=r["toId"],
+                            properties=r["properties"],
+                            type=r["type"],
+                            style=r["style"],
+                        )
+                    )
+                    for r in content["relationships"]
+                ],
+            )
 
     def to_solutions_workbench(self, file_name: str = "data-model") -> Dict[str, any]:
         """
@@ -249,5 +298,3 @@ class DataModel(BaseModel):
         """
 
         pass
-
-

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from objects.arrows import ArrowsNode
 from objects.property import Property
 
+
 class Node(BaseModel):
     """
     Node representation.
@@ -23,7 +24,7 @@ class Node(BaseModel):
         """
 
         return [prop.name for prop in self.properties]
-    
+
     @property
     def property_column_mapping(self) -> Dict[str, str]:
         """
@@ -39,14 +40,16 @@ class Node(BaseModel):
         """
 
         return [prop.name for prop in self.properties if prop.is_unique]
-    
+
     @property
     def unique_constraints_column_mapping(self) -> Dict[str, str]:
         """
         Map of unique constraints to their respective csv columns.
         """
 
-        return {prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique}
+        return {
+            prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+        }
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
@@ -54,7 +57,9 @@ class Node(BaseModel):
             for prop in self.properties:
                 if prop.csv_mapping not in csv_columns:
                     # raise ValueError(
-                    errors.append(f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}.")
+                    errors.append(
+                        f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
+                    )
                     # )
         return errors
 
@@ -63,21 +68,34 @@ class Node(BaseModel):
         Return an arrows.app compatible node.
         """
         pos = {"x": x_position, "y": y_position}
-        props = {x.name: x.csv_mapping+" | "+x.type for x in self.properties}
+        props = {x.name: x.csv_mapping + " | " + x.type for x in self.properties}
         caption = ", ".join([x.name for x in self.properties if x.is_unique])
-        return ArrowsNode(id=self.label, caption=caption, position=pos, labels=[self.label], properties=props)
-    
+        return ArrowsNode(
+            id=self.label,
+            caption=caption,
+            position=pos,
+            labels=[self.label],
+            properties=props,
+        )
+
     @classmethod
     def from_arrows(cls, arrows_node: ArrowsNode):
         """
         Initialize a Node from an arrows node.
         """
 
-        props = [cls._parse_arrows_property(arrows_property={k: v}, arrows_node_caption=arrows_node.caption) for k, v in arrows_node.properties.items()]
+        props = [
+            cls._parse_arrows_property(
+                arrows_property={k: v}, arrows_node_caption=arrows_node.caption
+            )
+            for k, v in arrows_node.properties.items()
+        ]
         return cls(label=arrows_node.id, properties=props)
-    
+
     @staticmethod
-    def _parse_arrows_property(arrows_property: Dict[str, str], arrows_node_caption: str) -> Property:
+    def _parse_arrows_property(
+        arrows_property: Dict[str, str], arrows_node_caption: str
+    ) -> Property:
         """
         Parse the arrows property representation into a standard Property model.
         Unique property names are stored in the nodes caption.
@@ -85,11 +103,20 @@ class Node(BaseModel):
         """
 
         if "|" in list(arrows_property.values())[0]:
-            csv_mapping, python_type = [x.strip() for x in list(arrows_property.values())[0].split("|")]
+            csv_mapping, python_type = [
+                x.strip() for x in list(arrows_property.values())[0].split("|")
+            ]
         else:
             csv_mapping = list(arrows_property.values())[0]
             python_type = "unknown"
 
-        is_unique = list(arrows_property.keys())[0] in [x.strip() for x in arrows_node_caption.split(",")]
+        is_unique = list(arrows_property.keys())[0] in [
+            x.strip() for x in arrows_node_caption.split(",")
+        ]
 
-        return Property(name=list(arrows_property.keys())[0], csv_mapping=csv_mapping, type=python_type, is_unique=is_unique)
+        return Property(
+            name=list(arrows_property.keys())[0],
+            csv_mapping=csv_mapping,
+            type=python_type,
+            is_unique=is_unique,
+        )

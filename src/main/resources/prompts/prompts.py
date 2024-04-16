@@ -16,7 +16,7 @@ retry_model = """
 system_prompts = {
     "discovery": discovery,
     "data_model": data_model,
-    "retry": retry_model
+    "retry": retry_model,
 }
 
 
