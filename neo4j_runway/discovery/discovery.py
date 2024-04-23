@@ -3,7 +3,7 @@ from typing import Dict
 
 import pandas as pd
 
-from llm.llm import LLM
+from ..llm.llm import LLM
 
 
 class Discovery:

@@ -4,9 +4,9 @@ import warnings
 
 from graphviz import Digraph
 
-from llm.llm import LLM
-from objects.data_model import DataModel
-from resources.prompts.prompts import model_generation_rules, model_format
+from ..llm.llm import LLM
+from ..objects.data_model import DataModel
+from ..resources.prompts.prompts import model_generation_rules, model_format
 
 
 class GraphDataModeler:

@@ -2,8 +2,8 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel
 
-from objects.arrows import ArrowsNode
-from objects.property import Property
+from ..objects.arrows import ArrowsNode
+from ..objects.property import Property
 
 
 class Node(BaseModel):

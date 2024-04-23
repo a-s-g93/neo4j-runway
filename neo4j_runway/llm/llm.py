@@ -8,9 +8,9 @@ from openai import OpenAI
 import instructor
 
 # import pandas as pd
-from objects.data_model import DataModel
-from resources.prompts.prompts import system_prompts
-from resources.prompts.prompts import model_generation_rules
+from ..objects.data_model import DataModel
+from ..resources.prompts.prompts import system_prompts
+from ..resources.prompts.prompts import model_generation_rules
 
 # MODEL = "gpt-3.5-turbo"
 # MODEL = "gpt-4"

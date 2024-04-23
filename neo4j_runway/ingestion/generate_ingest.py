@@ -3,7 +3,7 @@ from typing import Dict, List, Any, Union
 import yaml
 
 from pydantic import BaseModel
-from objects.data_model import DataModel
+from ..objects.data_model import DataModel
 
 model_maps = []
 nodes_map = {}

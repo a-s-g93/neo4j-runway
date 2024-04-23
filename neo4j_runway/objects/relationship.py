@@ -2,8 +2,8 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel
 
-from objects.property import Property
-from objects.arrows import ArrowsRelationship
+from ..objects.property import Property
+from ..objects.arrows import ArrowsRelationship
 
 
 class Relationship(BaseModel):
