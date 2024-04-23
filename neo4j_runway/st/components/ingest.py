@@ -1,7 +1,7 @@
 import streamlit as st
 
 from ingestion.generate_ingest import IngestionGenerator
-from pyingest.pyingest import PyIngestForStreamlit
+from neo4j_runway.main.ingestion.pyingest import PyIngestForStreamlit
 
 
 def ingest(show: bool = True) -> None:

@@ -1,4 +1,4 @@
-# csv-to-graph
+# Neo4j Runway
 This application takes a CSV file and some optional data descriptions as input and produces the following:
 - Discovery on your data
 - Graph data model in json format

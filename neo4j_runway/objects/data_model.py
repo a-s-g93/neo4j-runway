@@ -4,11 +4,15 @@ from typing import List, Dict, Union
 from graphviz import Digraph
 from pydantic import BaseModel
 
-from objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
-from objects.node import Node
-from objects.relationship import Relationship
-from resources.prompts.prompts import model_generation_rules
-from utils.naming_conventions import fix_node_label, fix_property, fix_relationship_type
+from ..objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
+from ..objects.node import Node
+from ..objects.relationship import Relationship
+from ..resources.prompts.prompts import model_generation_rules
+from ..utils.naming_conventions import (
+    fix_node_label,
+    fix_property,
+    fix_relationship_type,
+)
 
 
 class DataModel(BaseModel):
