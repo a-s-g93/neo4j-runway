@@ -7,4 +7,3 @@
 # from .test_node import *
 # from .test_property import *
 # from .test_relationship import *
-from . import test_node, test_relationship

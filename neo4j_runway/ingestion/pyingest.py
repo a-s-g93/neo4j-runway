@@ -40,7 +40,7 @@ class LocalServer(object):
         self._driver.close()
 
     def load_file(
-        self, file, streamlit_input=None, from_streamlit: bool = False
+        self, file, dataframe: pd.DataFrame | None = None
     ) -> None:
         # Set up parameters/defaults
         # Check skip_file first so we can exit early
@@ -49,10 +49,10 @@ class LocalServer(object):
             print("Skipping this file: {}", file["url"])
             return
 
-        print("{} : Reading file", datetime.datetime.utcnow())
+        print("{} : Reading file", datetime.datetime.now())
 
-        if from_streamlit:
-            self.load_dataframe_from_streamlit(file=file, dataframe=streamlit_input)
+        if dataframe is not None:
+            self.load_dataframe(file=file, dataframe=dataframe)
             return None
         # If file type is specified, use that.  Else check the extension.  Else, treat as csv
         type = file.get("type") or "NA"
@@ -105,18 +105,18 @@ class LocalServer(object):
     #                 if rec_num > params['skip_records']:
     #                     rows.append(row)
     #                     if len(rows) == params['chunk_size']:
-    #                         print(file['url'], chunk_num, datetime.datetime.utcnow(), flush=True)
+    #                         print(file['url'], chunk_num, datetime.datetime.now(), flush=True)
     #                         chunk_num = chunk_num + 1
     #                         rows_dict = {'rows': rows}
     #                         session.run(params['cql'], dict=rows_dict).consume()
     #                         rows = []
 
     #         if len(rows) > 0:
-    #             print(file['url'], chunk_num, datetime.datetime.utcnow(), flush=True)
+    #             print(file['url'], chunk_num, datetime.datetime.now(), flush=True)
     #             rows_dict = {'rows': rows}
     #             session.run(params['cql'], dict=rows_dict).consume()
 
-    #     print("{} : Completed file", datetime.datetime.utcnow())
+    #     print("{} : Completed file", datetime.datetime.now())
 
     def get_params(self, file):
         params = dict()
@@ -167,55 +167,29 @@ class LocalServer(object):
             )
 
             for i, rows in enumerate(row_chunks):
-                print(params["url"], i, datetime.datetime.utcnow(), flush=True)
+                print(params["url"], i, datetime.datetime.now(), flush=True)
                 # Chunk up the rows to enable additional fastness :-)
                 rows_dict = {"rows": rows.fillna(value="").to_dict("records")}
                 session.run(params["cql"], dict=rows_dict).consume()
 
-        print("{} : Completed file", datetime.datetime.utcnow())
+        print("{} : Completed file", datetime.datetime.now())
 
-    def load_dataframe_from_streamlit(self, file, dataframe: pd.DataFrame) -> None:
+    def load_dataframe(self, file, dataframe: pd.DataFrame) -> None:
         """
-        Load from the uploaded csv file in streamlit.
+        Load a Pandas DataFrame directly using a PyIngest yaml config file.
         """
         with self._driver.session(**self.db_config) as session:
             params = self.get_params(file)
-            # openfile = file_handle(params['url'], params['compression'])
 
-            # - The file interfaces should be consistent in Python but they aren't
-            # if params['compression'] == 'zip':
-            #     header = openfile.readline().decode('UTF-8')
-            # else:
-            #     header = str(openfile.readline())
-            # header = str(openfile.readline())
+            partition = max(1, int(len(dataframe) / params["chunk_size"]))
 
-            # Grab the header from the file and pass that to pandas.  This allow the header
-            # to be applied even if we are skipping lines of the file
-            # header = header.strip().split(params['field_sep'])
-
-            # Pandas' read_csv method is highly optimized and fast :-)
-            # print("csv file: ", csv_file)
-            # print()
-            # print(csv_file._file_urls)
-            # print()
-            # print(csv_file._file_urls.upload_url)
-            # row_chunks = pd.read_csv(csv_file,
-            #                         #  dtype=str, sep=params['field_sep'],
-            #                            on_bad_lines="skip",
-            #                         #  index_col=False, skiprows=params['skip_records'],
-            #                         #  names=header,
-            #                          low_memory=False, engine='c',
-            #                         #  compression='infer', header=None,
-            #                          chunksize=params['chunk_size'])
-            # row_chunks = pd.read_csv(csv_file._file_urls.upload_url)
-
-            for i, rows in enumerate(np.array_split(dataframe, 10)):
-                print("loading...", i, datetime.datetime.utcnow(), flush=True)
+            for i, rows in enumerate(np.array_split(dataframe, partition)):
+                print("loading...", i, datetime.datetime.now(), flush=True)
                 # Chunk up the rows to enable additional fastness :-)
                 rows_dict = {"rows": rows.fillna(value="").to_dict("records")}
                 session.run(params["cql"], dict=rows_dict).consume()
 
-        print("{} : Completed file", datetime.datetime.utcnow())
+        print("{} : Completed file", datetime.datetime.now())
 
     def pre_ingest(self):
         if "pre_ingest" in config:
@@ -273,31 +247,31 @@ def load_config(configuration):
     config = yaml.safe_load(configuration)
 
 
-def PyIngestForStreamlit(yaml_string: str, dataframe: pd.DataFrame) -> Iterator:
-    """
-    The PyIngest method to be run in the Streamlit application.
-    Yields a progress value to be displayed.
-    """
-    # configuration = sys.argv[1]
-    load_config(yaml_string)
-    server = LocalServer()
-    server.pre_ingest()
-    file_list = config["files"]
-    num_files = float(len(file_list))
-    for idx, file in enumerate(file_list):
-        server.load_file(file=file, streamlit_input=dataframe, from_streamlit=True)
-        yield (idx + 1) / num_files  # progession
-    server.post_ingest()
-    server.close()
+# def PyIngestForStreamlit(yaml_string: str, dataframe: pd.DataFrame) -> Iterator:
+#     """
+#     The PyIngest method to be run in the Streamlit application.
+#     Yields a progress value to be displayed.
+#     """
+#     # configuration = sys.argv[1]
+#     load_config(yaml_string)
+#     server = LocalServer()
+#     server.pre_ingest()
+#     file_list = config["files"]
+#     num_files = float(len(file_list))
+#     for idx, file in enumerate(file_list):
+#         server.load_file(file=file, streamlit_input=dataframe, from_streamlit=True)
+#         yield (idx + 1) / num_files  # progession
+#     server.post_ingest()
+#     server.close()
 
 
-def PyIngest(yaml_string: str) -> None:
+def PyIngest(yaml_string: str, dataframe: pd.DataFrame | None = None) -> None:
     # configuration = sys.argv[1]
     load_config(yaml_string)
     server = LocalServer()
     server.pre_ingest()
     file_list = config["files"]
     for file in file_list:
-        server.load_file(file)
+        server.load_file(file, dataframe=dataframe)
     server.post_ingest()
     server.close()
