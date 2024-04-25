@@ -1,11 +1,11 @@
 import unittest
 
-from objects.node import Node
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.data_model import DataModel
-from ingestion.generate_ingest import *
-from tests.resources.ingestion_generation_answers import *
+from ..objects.node import Node
+from ..objects.relationship import Relationship
+from ..objects.property import Property
+from ..objects.data_model import DataModel
+from ..ingestion.generate_ingest import *
+from ..tests.resources.ingestion_generation_answers import *
 
 
 class TestIngestCodeGneration(unittest.TestCase):
@@ -257,3 +257,6 @@ class TestIngestCodeGneration(unittest.TestCase):
         """
 
         pass
+
+if __name__ == '__main__':
+    unittest.main()

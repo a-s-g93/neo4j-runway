@@ -2,13 +2,8 @@ import unittest
 
 import pandas as pd
 
-from objects.node import Node
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.data_model import DataModel
-from modeler.modeler import GraphDataModeler
-from discovery.discovery import Discovery
-from llm.llm import LLM
+from ..discovery.discovery import Discovery
+from ..llm.llm import LLM
 
 USER_GENERATED_INPUT = {
     "General Description": "This is data on some interesting data.",

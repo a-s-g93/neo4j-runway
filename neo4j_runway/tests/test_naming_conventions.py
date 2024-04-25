@@ -1,6 +1,6 @@
 import unittest
 
-from utils.naming_conventions import *
+from ..utils.naming_conventions import *
 
 
 class TestNamingConventions(unittest.TestCase):
@@ -121,3 +121,6 @@ class TestNamingConventions(unittest.TestCase):
             is_pascal_case("")
         with self.assertRaises(AssertionError):
             is_mixed_case("")
+
+if __name__ == '__main__':
+    unittest.main()

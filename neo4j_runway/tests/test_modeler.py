@@ -2,11 +2,11 @@ import unittest
 
 from graphviz import Digraph
 
-from objects.node import Node
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.data_model import DataModel
-from modeler.modeler import GraphDataModeler
+from ..objects.node import Node
+from ..objects.relationship import Relationship
+from ..objects.property import Property
+from ..objects.data_model import DataModel
+from ..modeler.modeler import GraphDataModeler
 
 USER_GENERATED_INPUT = {
     "General Description": "This is data on some interesting data.",
