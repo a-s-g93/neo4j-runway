@@ -1,8 +1,8 @@
 import unittest
 
-from objects.node import Node
-from objects.property import Property
-from objects.arrows import ArrowsNode
+from ..objects.node import Node
+from ..objects.property import Property
+from ..objects.arrows import ArrowsNode
 
 
 class TestNode(unittest.TestCase):
@@ -113,3 +113,6 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(Node._parse_arrows_property(to_parse4, ""), prop4)
         self.assertEqual(Node._parse_arrows_property(to_parse4, " adfwe"), prop4)
+
+if __name__ == '__main__':
+    unittest.main()

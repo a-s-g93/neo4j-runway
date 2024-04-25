@@ -1,8 +1,8 @@
 import unittest
 
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.arrows import ArrowsRelationship
+from ..objects.relationship import Relationship
+from ..objects.property import Property
+from ..objects.arrows import ArrowsRelationship
 
 
 class TestRelationship(unittest.TestCase):
@@ -153,3 +153,6 @@ class TestRelationship(unittest.TestCase):
 
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
+
+if __name__ == '__main__':
+    unittest.main()
