@@ -27,7 +27,6 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
         # clear database before loading
         with cls.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             session.run("""
-                        // reset database
                         match (n)-[r]-()
                         detach delete n, r
                         ;
