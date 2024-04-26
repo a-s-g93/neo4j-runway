@@ -154,5 +154,6 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

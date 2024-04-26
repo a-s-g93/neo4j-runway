@@ -21,7 +21,7 @@ TYPES_MAP_NEO4J_KEYS = {
     "POINT": "neo4j.spartial.Point",
     "POINT Cartesian": "neo4j.spartial.CartesianPoint",
     "POINT WGS-84": "neo4j.spartial.WGS84Point",
-    "unknown": "unknown"
+    "unknown": "unknown",
 }
 
 TYPES_MAP_PYTHON_KEYS = {v: k for k, v in TYPES_MAP_NEO4J_KEYS.items()}

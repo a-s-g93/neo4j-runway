@@ -53,6 +53,22 @@ class DataModel(BaseModel):
 
         return [r.type for r in self.relationships]
 
+    @property
+    def node_dict(self) -> Dict[str, Node]:
+        """
+        Returns a dictionary of {<node label>: <Node>}
+        """
+
+        return {node.label: node for node in self.nodes}
+
+    @property
+    def relationship_dict(self) -> Dict[str, Node]:
+        """
+        Returns a dictionary of {<relationship type>: <Relationship>}
+        """
+
+        return {r.type: r for r in self.relationships}
+
     def validate_model(self, csv_columns: List[str]) -> None:
         """
         Validate the model.

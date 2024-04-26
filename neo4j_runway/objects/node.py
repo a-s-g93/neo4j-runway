@@ -34,21 +34,41 @@ class Node(BaseModel):
         return {prop.name: prop.csv_mapping for prop in self.properties}
 
     @property
-    def unique_constraints(self) -> List[str]:
+    def unique_properties(self) -> List[str]:
         """
-        The node's unique constraints.
+        The node's unique properties.
         """
 
         return [prop.name for prop in self.properties if prop.is_unique]
 
     @property
-    def unique_constraints_column_mapping(self) -> Dict[str, str]:
+    def unique_properties_column_mapping(self) -> Dict[str, str]:
         """
-        Map of unique constraints to their respective csv columns.
+        Map of unique properties to their respective csv columns.
         """
 
         return {
             prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+        }
+
+    @property
+    def nonunique_properties(self) -> List[str]:
+        """
+        The node's nonunique properties.
+        """
+
+        return [prop.name for prop in self.properties if not prop.is_unique]
+
+    @property
+    def nonunique_properties_column_mapping(self) -> Dict[str, str]:
+        """
+        Map of nonunique properties to their respective csv columns.
+        """
+
+        return {
+            prop.name: prop.csv_mapping
+            for prop in self.properties
+            if not prop.is_unique
         }
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:

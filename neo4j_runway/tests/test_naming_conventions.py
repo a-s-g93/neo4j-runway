@@ -122,5 +122,6 @@ class TestNamingConventions(unittest.TestCase):
         with self.assertRaises(AssertionError):
             is_mixed_case("")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
