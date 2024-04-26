@@ -1,0 +1,79 @@
+server_uri: bolt://localhost:7687
+admin_user: neo4j
+admin_pass: password
+database: peoplepets
+basepath: file:./
+
+pre_ingest:
+  - CREATE CONSTRAINT person_name IF NOT EXISTS FOR (n:Person) REQUIRE n.name IS UNIQUE;
+  - CREATE CONSTRAINT toy_name IF NOT EXISTS FOR (n:Toy) REQUIRE n.name IS UNIQUE;
+files:
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Person {name: row.name})
+    SET n.age = row.age
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Address {})
+    SET n.street = row.street, n.city = row.city
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Pet {})
+    SET n.name = row.pet_name, n.kind = row.pet
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Toy {name: row.toy})
+    SET n.kind = row.toy_type
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Person{name: row.name})
+    MATCH (target:Address{})
+    MERGE (source)-[n:HAS_ADDRESS]->(target)
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Person{name:row.name})
+    MATCH (target:Person{name: row.name})
+    MERGE (source)-[n:KNOWS]->(target)
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Person{name:row.name})
+    MATCH (target:Pet{})
+    MERGE (source)-[n:HAS_PET]->(target)
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Pet{})
+    MATCH (target:Toy{name: row.toy})
+    MERGE (source)-[n:PLAYS_WITH]->(target)
+  url: $BASE/resources/people-pets.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    UNWIND row.knows as knowName
+    MATCH (source:Person{name: row.name})
+    MATCH (target:Person{name: knowName})
+    MERGE (source)-[n:KNOWS]->(target)
+  url: $BASE/resources/people-pets.csv
