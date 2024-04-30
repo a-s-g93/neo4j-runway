@@ -3,11 +3,11 @@ import unittest
 
 from ast import literal_eval
 
-from objects.node import Node
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.data_model import DataModel
-from objects.arrows import ArrowsDataModel
+from ..objects.node import Node
+from ..objects.relationship import Relationship
+from ..objects.property import Property
+from ..objects.data_model import DataModel
+from ..objects.arrows import ArrowsDataModel
 
 
 class TestDataModel(unittest.TestCase):

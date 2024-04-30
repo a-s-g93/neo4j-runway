@@ -1,6 +1,6 @@
 import unittest
 
-from objects.property import Property, TYPES_MAP
+from ..objects.property import Property, TYPES_MAP_PYTHON_KEYS
 
 
 class TestProperty(unittest.TestCase):
@@ -24,15 +24,14 @@ class TestProperty(unittest.TestCase):
             Property,
         )
 
+    def test_bad_type(self) -> None:
         with self.assertRaises(ValueError):
             Property(name="name", type="string", csv_mapping="name", is_unique=True)
 
         with self.assertRaises(ValueError):
             Property(name="name", type="dictionary", csv_mapping="name", is_unique=True)
 
-        with self.assertRaises(ValueError):
-            Property(name="name", type="STRING", csv_mapping="name", is_unique=True)
-
+        
     def test_to_dict(self) -> None:
         """
         Test dict property.
@@ -52,7 +51,7 @@ class TestProperty(unittest.TestCase):
         Test the Neo4j property mapping.
         """
 
-        for k, v in TYPES_MAP.items():
+        for k, v in TYPES_MAP_PYTHON_KEYS.items():
             self.assertEqual(
                 Property(
                     name="city", type=k, csv_mapping="city", is_unique=False

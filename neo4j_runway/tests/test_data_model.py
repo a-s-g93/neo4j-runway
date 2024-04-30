@@ -2,10 +2,10 @@ import unittest
 
 # import os
 
-from objects.node import Node
-from objects.relationship import Relationship
-from objects.property import Property
-from objects.data_model import DataModel
+from ..objects.node import Node
+from ..objects.relationship import Relationship
+from ..objects.property import Property
+from ..objects.data_model import DataModel
 
 
 class TestDataModel(unittest.TestCase):
@@ -217,7 +217,7 @@ class TestDataModel(unittest.TestCase):
         """
 
         data_model = DataModel.from_arrows(
-            file_path="tests/resources/arrows-data-model.json"
+            file_path="neo4j_runway/tests/resources/arrows-data-model.json"
         )
 
         self.assertTrue(data_model.nodes[0].properties[0].is_unique)

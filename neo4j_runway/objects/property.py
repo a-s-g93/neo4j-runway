@@ -4,36 +4,27 @@ from typing import List, Dict, Union, Any
 from pydantic import BaseModel, field_validator
 
 
-PYTHON_TYPES = [
-    "list",
-    "str",
-    "bool",
-    "int",
-    "int64",
-    "float",
-    "float64",
-    "bytearray",
-    "date",
-    "datetime",
-    "object",
-    "unknown",
-]
-
-TYPES_MAP = {
-    "list": "LIST",
-    "str": "STRING",
-    "bool": "BOOLEAN",
-    "int": "INTEGER",
-    "int64": "INTEGER",
-    "float": "FLOAT",
-    "float64": "FLOAT",
-    "bytearray": "ByteArray",
-    "date": "date",
-    "datetime": "datetime",
-    "unknown": "unknown",
-    # "object": "MAP"
+TYPES_MAP_NEO4J_KEYS = {
+    "LIST": "list",
+    "MAP": "dict",
+    "BOOLEAN": "bool",
+    "INTEGER": "int",
+    "FLOAT": "float",
+    "STRING": "str",
+    "ByteArray": "bytearray",
+    "DATE": "neo4j.time.Date",
+    "ZONED TIME": "neo4j.time.Time",
+    "LOCAL TIME": "neo4j.time.Time",
+    "ZONED DATETIME": "neo4j.time.DateTime",
+    "LOCAL DATETIME": "neo4j.time.DateTime",
+    "DURATION": "neo4j.time.Duration",
+    "POINT": "neo4j.spartial.Point",
+    "POINT Cartesian": "neo4j.spartial.CartesianPoint",
+    "POINT WGS-84": "neo4j.spartial.WGS84Point",
+    "unknown": "unknown"
 }
-TYPES_MAP_NEO4J_KEYS = {v: k for k, v in TYPES_MAP.items()}
+
+TYPES_MAP_PYTHON_KEYS = {v: k for k, v in TYPES_MAP_NEO4J_KEYS.items()}
 
 
 class Property(BaseModel):
@@ -53,11 +44,13 @@ class Property(BaseModel):
 
     @field_validator("type")
     def validate_type(cls, v):
-        if v not in PYTHON_TYPES + list(TYPES_MAP.values()):
-            raise ValueError(f"{v} is an invalid type.")
         if v == "object":
             return "str"
-        if v in list(TYPES_MAP.values()):
+        if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) + list(
+            TYPES_MAP_PYTHON_KEYS.values()
+        ):
+            raise ValueError(f"{v} is an invalid type.")
+        if v in list(TYPES_MAP_PYTHON_KEYS.values()):
             return TYPES_MAP_NEO4J_KEYS[v]
         return v
 
@@ -66,4 +59,4 @@ class Property(BaseModel):
         """
         The Neo4j property type.
         """
-        return TYPES_MAP[self.type]
+        return TYPES_MAP_PYTHON_KEYS[self.type]
