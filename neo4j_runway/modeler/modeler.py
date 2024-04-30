@@ -24,13 +24,12 @@ class GraphDataModeler:
         """
         Takes an LLM instance and Discovery information. Either a Discovery object can be provided, or each field can be provided individually.
         """
-        
+
         self.llm = llm
 
         if isinstance(discovery, Discovery):
 
             self.user_input = discovery.user_input
-
 
             assert (
                 "General Description" in self.user_input.keys()
@@ -44,11 +43,10 @@ class GraphDataModeler:
             self.description_numeric = discovery.numeric_data_description
             self.description_categorical = discovery.categorical_data_description
             self.feature_descriptions = discovery.feature_descriptions
-        
+
         else:
 
             self.user_input = user_input
-
 
             assert (
                 "General Description" in self.user_input.keys()

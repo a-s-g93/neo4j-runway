@@ -110,7 +110,7 @@ class Node(BaseModel):
             )
             for k, v in arrows_node.properties.items()
         ]
-        #support only single labels for now, take first label
+        # support only single labels for now, take first label
         return cls(label=arrows_node.labels[0], properties=props)
 
     @staticmethod
@@ -119,7 +119,7 @@ class Node(BaseModel):
     ) -> Property:
         """
         Parse the arrows property representation into a standard Property model.
-        Unique property names are stored in the nodes caption.
+        Unique property names are stored in the nodes caption as a comma-separated list: List<str>.
         Arrow property values are formatted as <csv_mapping> | <python_type>.
         """
 

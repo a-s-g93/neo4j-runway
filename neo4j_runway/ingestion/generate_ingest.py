@@ -38,23 +38,31 @@ def lowercase_first_letter(str):
     return str[0].lower() + str[1:]
 
 
-class IngestionGenerator(BaseModel):
+class IngestionGenerator:
 
-    data_model: DataModel
-    username: Union[str, None] = None
-    password: Union[str, None] = None
-    uri: Union[str, None] = None
-    database: Union[str, None] = None
-    csv_name: str
-    csv_dir: str = ""
-    file_output_dir: str = ""
+    def __init__(
+        self,
+        data_model: DataModel,
+        csv_name: str,
+        username: Union[str, None] = None,
+        password: Union[str, None] = None,
+        uri: Union[str, None] = None,
+        database: Union[str, None] = None,
+        csv_dir: str = "",
+        file_output_dir: str = "",
+    ):
 
-    _config_files_list: Union[List[Dict[str, Any]], None] = []
-    _constraints: Dict[str, str] = {}
-    _cypher_map: Dict[str, Dict[str, Any]] = {}
-
-    def model_post_init(self, ctx) -> None:
-
+        self.data_model: DataModel = data_model
+        self.username: Union[str, None] = username
+        self.password: Union[str, None] = password
+        self.uri: Union[str, None] = uri
+        self.database: Union[str, None] = database
+        self.csv_name: str = csv_name
+        self.csv_dir: str = csv_dir
+        self.file_output_dir: str = file_output_dir
+        self._config_files_list: Union[List[Dict[str, Any]], None] = []
+        self._constraints: Dict[str, str] = {}
+        self._cypher_map: Dict[str, Dict[str, Any]] = {}
         self._generate_base_information()
 
     def _generate_base_information(self):
