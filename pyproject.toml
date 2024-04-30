@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neo4j_runway"
-version = "0.1.7"
+version = "0.2.1"
 description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
 authors = ["Alex Gilmore", "Jason Booth", "Dan Bukowski"]
 license = "MIT"
