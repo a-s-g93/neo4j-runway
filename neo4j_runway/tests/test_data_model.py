@@ -222,6 +222,7 @@ class TestDataModel(unittest.TestCase):
 
         self.assertTrue(data_model.nodes[0].properties[0].is_unique)
         self.assertEqual(data_model.nodes[0].properties[1].type, "int")
+        self.assertEqual(data_model.nodes[0].label, "Person")
 
 
 if __name__ == "__main__":

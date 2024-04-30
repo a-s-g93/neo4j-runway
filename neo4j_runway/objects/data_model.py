@@ -77,11 +77,9 @@ class DataModel(BaseModel):
         errors = []
         for node in self.nodes:
             errors += node.validate_properties(csv_columns=csv_columns)
-            # errors+=node.validate_unique_constraints(csv_columns=csv_columns)
 
         for rel in self.relationships:
             errors += rel.validate_properties(csv_columns=csv_columns)
-            # errors+=rel.validate_unique_constraints(csv_columns=csv_columns)
 
         errors += self._validate_relationship_sources_and_targets()
         errors += self._validate_csv_features_used_only_once()
@@ -203,10 +201,8 @@ class DataModel(BaseModel):
         """
 
         result = relationship.type
-        # print(result)
         if len(relationship.properties) > 0:
             result += "\n\nproperties:\n"
-            # print(result)
         for prop in relationship.properties:
             result = (
                 result
@@ -215,7 +211,6 @@ class DataModel(BaseModel):
                 + (" *unique*" if prop.is_unique else "")
                 + "\n"
             )
-            # print(result)
 
         return result
 
@@ -254,7 +249,6 @@ class DataModel(BaseModel):
         """
 
         NODE_SPACING: int = 200
-        # x_current: int = 0
         y_current = 0
         arrows_nodes = []
         for idx, n in enumerate(self.nodes):

@@ -110,7 +110,8 @@ class Node(BaseModel):
             )
             for k, v in arrows_node.properties.items()
         ]
-        return cls(label=arrows_node.id, properties=props)
+        #support only single labels for now, take first label
+        return cls(label=arrows_node.labels[0], properties=props)
 
     @staticmethod
     def _parse_arrows_property(

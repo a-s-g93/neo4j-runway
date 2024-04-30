@@ -29,11 +29,11 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(node.property_names, ["name", "age"])
 
-    def test_unique_constraints(self) -> None:
+    def test_unique_properties(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEqual(node.unique_constraints, ["name"])
+        self.assertEqual(node.unique_properties, ["name"])
 
     def test_property_column_mapping(self) -> None:
 
@@ -43,11 +43,11 @@ class TestNode(unittest.TestCase):
             node.property_column_mapping, {"name": "first_name", "age": "age"}
         )
 
-    def test_unique_constraints_column_mapping(self) -> None:
+    def test_unique_properties_column_mapping(self) -> None:
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEqual(node.unique_constraints_column_mapping, {"name": "first_name"})
+        self.assertEqual(node.unique_properties_column_mapping, {"name": "first_name"})
 
     def test_from_arrows(self) -> None:
         """
