@@ -31,7 +31,6 @@ class TestProperty(unittest.TestCase):
         with self.assertRaises(ValueError):
             Property(name="name", type="dictionary", csv_mapping="name", is_unique=True)
 
-        
     def test_to_dict(self) -> None:
         """
         Test dict property.

@@ -39,9 +39,7 @@ class LocalServer(object):
     def close(self):
         self._driver.close()
 
-    def load_file(
-        self, file, dataframe: pd.DataFrame | None = None
-    ) -> None:
+    def load_file(self, file, dataframe: pd.DataFrame | None = None) -> None:
         # Set up parameters/defaults
         # Check skip_file first so we can exit early
         skip = file.get("skip_file") or False

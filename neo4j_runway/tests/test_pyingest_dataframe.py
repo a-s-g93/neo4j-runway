@@ -11,36 +11,48 @@ from .resources.people_pets import people_pets_yaml_string
 
 load_dotenv()
 
+
 class TestPyIngestLoadDataFrame(unittest.TestCase):
     """
     Requires .env file in tests/ containing NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, NEO4J_DATABASE.
     Use a unique test database as contents will be deleted each run.
     """
+
     @classmethod
     def setUpClass(cls) -> None:
-        cls.driver = GraphDatabase.driver(uri=os.environ.get("NEO4J_URI"), auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")))
+        cls.driver = GraphDatabase.driver(
+            uri=os.environ.get("NEO4J_URI"),
+            auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")),
+        )
         data = pd.read_csv("neo4j_runway/tests/resources/people-pets.csv")
         # convert to lists
-        data['knows'] = data['knows'].apply(lambda x: x[1:-1].split(", "))
+        data["knows"] = data["knows"].apply(lambda x: x[1:-1].split(", "))
+        # explode lists for data loading
         cls.data = data.explode("knows")
 
         # clear database before loading
         with cls.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
-            session.run("""
+            session.run(
+                """
                         match (n)-[r]-()
                         detach delete n, r
                         ;
-                        """)
-            session.run("""
+                        """
+            )
+            session.run(
+                """
                         match (n)
                         delete n
                         ;
-                        """)
-            session.run("""
+                        """
+            )
+            session.run(
+                """
                         CALL apoc.schema.assert({}, {})
                         ;
-                        """)
-            
+                        """
+            )
+
         PyIngest(yaml_string=people_pets_yaml_string, dataframe=cls.data)
 
     @classmethod
@@ -70,7 +82,7 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
             self.assertEqual(toy, r)
 
     def test_address_node_count(self) -> None:
-        address = len(set(self.data['city']+self.data['street']))
+        address = len(set(self.data["city"] + self.data["street"]))
         address_cypher = "match (p:Address) return count(p)"
         with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(address_cypher).single().value()
@@ -83,18 +95,24 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
         match (:Person {name: name})-[r:KNOWS]->(:Person) return count(r)
         """
         with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
-            r = session.run(cypher, parameters={"names": list(self.data["name"].unique())}).single().value()
+            r = (
+                session.run(
+                    cypher, parameters={"names": list(self.data["name"].unique())}
+                )
+                .single()
+                .value()
+            )
             self.assertEqual(person_to_person, r)
-    
+
     def test_person_to_pet_relationship_counts(self) -> None:
-        person_to_pet = self.data["pet_name"].nunique() # all pets have 1 owner
+        person_to_pet = self.data["pet_name"].nunique()  # all pets have 1 owner
         cypher = "match (:Person)-[r:HAS_PET]-(:Pet) return count(r)"
         with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(person_to_pet, r)
 
     def test_person_to_address_relationship_counts(self) -> None:
-        person_to_address = self.data["name"].nunique() # all people have 1 address
+        person_to_address = self.data["name"].nunique()  # all people have 1 address
         cypher = "match (:Person)-[r:HAS_ADDRESS]-(:Address) return count(r)"
         with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(cypher).single().value()
@@ -113,5 +131,6 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
             r = session.run(cypher).value()
             self.assertEqual(["person_name", "toy_name"], r)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -114,5 +114,6 @@ class TestNode(unittest.TestCase):
         self.assertEqual(Node._parse_arrows_property(to_parse4, ""), prop4)
         self.assertEqual(Node._parse_arrows_property(to_parse4, " adfwe"), prop4)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

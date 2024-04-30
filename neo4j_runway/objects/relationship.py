@@ -13,7 +13,6 @@ class Relationship(BaseModel):
 
     type: str
     properties: List[Property] = []
-    # unique_constraints: Union[List[Union[str, None]], None] = []
     source: str
     target: str
 
@@ -40,21 +39,41 @@ class Relationship(BaseModel):
         return {prop.name: prop.csv_mapping for prop in self.properties}
 
     @property
-    def unique_constraints(self) -> List[str]:
+    def unique_properties(self) -> List[str]:
         """
-        The relationship's unique constraints.
+        The relationship's unique properties.
         """
 
         return [prop.name for prop in self.properties if prop.is_unique]
 
     @property
-    def unique_constraints_column_mapping(self) -> Dict[str, str]:
+    def unique_properties_column_mapping(self) -> Dict[str, str]:
         """
-        Map of unique constraints to their respective csv columns.
+        Map of unique properties to their respective csv columns.
         """
 
         return {
             prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+        }
+
+    @property
+    def nonunique_properties(self) -> List[str]:
+        """
+        The node's nonunique properties.
+        """
+
+        return [prop.name for prop in self.properties if not prop.is_unique]
+
+    @property
+    def nonunique_properties_column_mapping(self) -> Dict[str, str]:
+        """
+        Map of nonunique properties to their respective csv columns.
+        """
+
+        return {
+            prop.name: prop.csv_mapping
+            for prop in self.properties
+            if not prop.is_unique
         }
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:

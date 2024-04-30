@@ -55,7 +55,7 @@ class TestIngestCodeGneration(unittest.TestCase):
             uri="bolt://address:7687",
             database="testdb",
             csv_name="test.csv",
-            csv_dir="test_dir",
+            csv_dir="test_dir/",
             file_output_dir="",
         )
 
@@ -65,43 +65,49 @@ class TestIngestCodeGneration(unittest.TestCase):
         """
 
         label = self.node_a.label
-        unique_props = self.node_a.unique_constraints
+        unique_props = self.node_a.unique_properties
         self.assertEqual(
-            generate_constraints_key(node_label=label, unique_property=unique_props[0]),
+            generate_constraints_key(
+                label_or_type=label, unique_property=unique_props[0]
+            ),
             constraints_key_a_1,
         )
         self.assertEqual(
-            generate_constraints_key(node_label=label, unique_property=unique_props[1]),
+            generate_constraints_key(
+                label_or_type=label, unique_property=unique_props[1]
+            ),
             constraints_key_a_3,
         )
 
         label = self.node_b.label
-        unique_props = self.node_b.unique_constraints
+        unique_props = self.node_b.unique_properties
         self.assertEqual(
-            generate_constraints_key(node_label=label, unique_property=unique_props[0]),
+            generate_constraints_key(
+                label_or_type=label, unique_property=unique_props[0]
+            ),
             constraints_key_b,
         )
 
     def test_generate_constraint(self) -> None:
         """
-        Generate a constrant string.
+        Generate a constraint string.
         """
 
         label = self.node_a.label
-        unique_props = self.node_a.unique_constraints
+        unique_props = self.node_a.unique_properties
         self.assertEqual(
-            generate_constraint(node_label=label, unique_property=unique_props[0]),
+            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
             constraint_a_1,
         )
         self.assertEqual(
-            generate_constraint(node_label=label, unique_property=unique_props[1]),
+            generate_constraint(label_or_type=label, unique_property=unique_props[1]),
             constraint_a_3,
         )
 
         label = self.node_b.label
-        unique_props = self.node_b.unique_constraints
+        unique_props = self.node_b.unique_properties
         self.assertEqual(
-            generate_constraint(node_label=label, unique_property=unique_props[0]),
+            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
             constraint_b,
         )
 
@@ -110,23 +116,13 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a MATCH node clause.
         """
 
-        unique_property_match_component = (
-            "uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_prop_3"
-        )
         self.assertEqual(
-            generate_match_node_clause(
-                node_label=self.node_a.label,
-                unique_property_match_component=unique_property_match_component,
-            ),
+            generate_match_node_clause(node=self.node_a),
             match_node_a,
         )
 
-        unique_property_match_component = "uniqueProp2: row.unique_prop_2"
         self.assertEqual(
-            generate_match_node_clause(
-                node_label=self.node_b.label,
-                unique_property_match_component=unique_property_match_component,
-            ),
+            generate_match_node_clause(node=self.node_b),
             match_node_b,
         )
 
@@ -135,7 +131,7 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a set property string.
         """
 
-        unique_map = self.node_a.unique_constraints_column_mapping
+        unique_map = self.node_a.unique_properties_column_mapping
         prop_map = self.node_a.property_column_mapping
         for k in unique_map.keys():
             del prop_map[k]
@@ -143,7 +139,7 @@ class TestIngestCodeGneration(unittest.TestCase):
             generate_set_property(property_column_mapping=prop_map), set_properties_a
         )
 
-        unique_map = self.node_b.unique_constraints_column_mapping
+        unique_map = self.node_b.unique_properties_column_mapping
         prop_map = self.node_b.property_column_mapping
         for k in unique_map.keys():
             del prop_map[k]
@@ -158,13 +154,13 @@ class TestIngestCodeGneration(unittest.TestCase):
 
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties_column_mapping=self.node_a.unique_constraints_column_mapping
+                unique_properties_column_mapping=self.node_a.unique_properties_column_mapping
             ),
             set_unique_property_a,
         )
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties_column_mapping=self.node_b.unique_constraints_column_mapping
+                unique_properties_column_mapping=self.node_b.unique_properties_column_mapping
             ),
             set_unique_property_b,
         )
@@ -174,15 +170,8 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a MERGE node clause.
         """
 
-        label = self.node_a.label
-        unique_props = "uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_prop_3"
-        props = "SET n.prop1 = row.prop_1"
         self.assertEqual(
-            generate_merge_node_clause_standard(
-                node_label=label,
-                unique_properties=unique_props,
-                non_unique_properties=props,
-            ),
+            generate_merge_node_clause_standard(node=self.node_a),
             merge_node_standard_a,
         )
 
@@ -191,14 +180,9 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a MERGE node clause for the LOAD CSV method.
         """
 
-        label = self.node_b.label
-        unique_props = "uniqueProp2: row.unique_prop_2"
-        props = "SET n.prop2 = row.prop_2, n.prop3 = row.prop_3"
         self.assertEqual(
             generate_merge_node_load_csv_clause(
-                node_label=label,
-                unique_properties=unique_props,
-                non_unique_properties=props,
+                node=self.node_b,
             ),
             merge_node_load_csv_b,
         )
@@ -208,17 +192,11 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a MERGE relationship clause.
         """
 
-        source = f"MATCH (n:{self.rel_1.source})"
-        target = f"MATCH (n:{self.rel_1.target})"
-        relationship_type = self.rel_1.type
-        unique_props = ""
-        props = "SET n.relProp = row.rel_prop"
         self.assertEqual(
             generate_merge_relationship_clause_standard(
-                source_node_match_clause=source,
-                target_node_match_clause=target,
-                relationship_type=relationship_type,
-                non_unique_properties_clause=props,
+                relationship=self.rel_1,
+                source_node=self.node_a,
+                target_node=self.node_b,
             ),
             merge_relationship_standard,
         )
@@ -228,17 +206,11 @@ class TestIngestCodeGneration(unittest.TestCase):
         Generate a MERGE relationship clause for the LOAD CSV method.
         """
 
-        source = f"MATCH (n:{self.rel_1.source})"
-        target = f"MATCH (n:{self.rel_1.target})"
-        relationship_type = self.rel_1.type
-        unique_props = ""
-        props = "SET n.relProp = row.rel_prop"
         self.assertEqual(
             generate_merge_relationship_load_csv_clause(
-                source_node_match_clause=source,
-                target_node_match_clause=target,
-                relationship_type=relationship_type,
-                non_unique_properties_clause=props,
+                relationship=self.rel_1,
+                source_node=self.node_a,
+                target_node=self.node_b,
                 batch_size=50,
             ),
             merge_relationship_load_csv,
@@ -258,5 +230,6 @@ class TestIngestCodeGneration(unittest.TestCase):
 
         pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
