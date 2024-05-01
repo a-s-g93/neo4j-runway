@@ -4,7 +4,7 @@ Neo4j Runway is a Python library that simplifies the process of migrating your r
 ## Key Features
 
 - **Data Discovery**: Harness OpenAI LLMs to provide valuable insights from your data
-- **Graph Data Modeling**: Utilize OpenAI and the Instructor Python library to create valid graph data models
+- **Graph Data Modeling**: Utilize OpenAI and the [Instructor](https://github.com/jxnl/instructor) Python library to create valid graph data models
 - **Code Generation**: Generate ingestion code for your preferred method of loading data
 - **Data Ingestion**: Load your data using Runway's built in implementation of [PyIngest](https://github.com/neo4j-field/pyingest) - Neo4j's popular ingestion tool
 
@@ -69,7 +69,7 @@ If we have graphviz installed, we can take a look at our model.
 ```Python
 gdm.current_model.visualize()
 ```
-![countries-first-model.svg](attachment:countries-first-model.svg)
+![countries-first-model.svg](./images/countries-first-model.svg)
 
 Let's make some corrections to our model and view the results.
 ```Python
@@ -79,6 +79,8 @@ Remove The relationship between Country and Region.
 """)
 gdm.current_model.visualize()
 ```
+![countries-second-model.svg](./images/countries-second-model.svg)
+
 ### Code Generation
 We can now use our data model to generate some ingestion code.
 
@@ -92,7 +94,7 @@ pyingest_yaml = gen.generate_pyingest_yaml_string()
 
 ```
 ### Ingestion
-We will use the generated PyIngest yaml config to ingest our csv into our Neo4j instance. 
+We will use the generated PyIngest yaml config to ingest our CSV into our Neo4j instance. 
 ```Python
 PyIngest(yaml_string=pyingest_yaml, dataframe=data)
 ```
@@ -100,9 +102,12 @@ We can also save this as a .yaml file and use with the original [PyIngest](https
 ```Python
 gen.generate_pyingest_yaml_file(file_name="countries")
 ```
+Here's a snapshot of our new graph!
+
+![countries-graph.png](./images/countries-graph-white-background.png)
 
 ## Limitations
-The current project is in beta and has the following restrictions.
+The current project is in beta and has the following limitations:
 - Single CSV input only
 - Nodes may only have a single label
 - Only uniqueness constraints are supported
