@@ -15,23 +15,25 @@ merge_node_standard_a = f"""WITH $dict.rows AS rows
 UNWIND rows AS row
 MERGE (n:NodeA {{{set_unique_property_a}}})
 {set_properties_a}"""
-merge_node_load_csv_b = f"""LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
+merge_node_load_csv_b = f"""LOAD CSV WITH HEADERS FROM 'file:///test.csv' as row
 CALL {{
     WITH row
     MERGE (n:NodeB {{{set_unique_property_b}}})
     {set_properties_b}
-}} IN TRANSACTIONS OF 10000 ROWS;"""
+}} IN TRANSACTIONS OF 10000 ROWS;
+"""
 merge_relationship_standard = f"""WITH $dict.rows AS rows
 UNWIND rows as row
 MATCH (source:NodeA {{uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_prop_3}})
 MATCH (target:NodeB {{uniqueProp2: row.unique_prop_2}})
 MERGE (source)-[n:HAS_RELATIONSHIP]->(target)
 {set_properties_rel_1}"""
-merge_relationship_load_csv = f"""LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
+merge_relationship_load_csv = f"""LOAD CSV WITH HEADERS FROM 'file:///test.csv' as row
 CALL {{
     WITH row
     MATCH (source:NodeA {{uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_prop_3}})
     MATCH (target:NodeB {{uniqueProp2: row.unique_prop_2}})
     MERGE (source)-[n:HAS_RELATIONSHIP]->(target)
     {set_properties_rel_1}
-}} IN TRANSACTIONS OF 50 ROWS;"""
+}} IN TRANSACTIONS OF 50 ROWS;
+"""

@@ -83,7 +83,7 @@ class IngestionGenerator:
                     generate_merge_node_clause_standard(node=node)
                 ),
                 "cypher_loadcsv": literal_unicode(
-                    generate_merge_node_load_csv_clause(node=node)
+                    generate_merge_node_load_csv_clause(node=node, csv_name=self.csv_name)
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
             }
@@ -110,7 +110,7 @@ class IngestionGenerator:
                 ),
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_relationship_load_csv_clause(
-                        relationship=rel, source_node=source, target_node=target
+                        relationship=rel, source_node=source, target_node=target, csv_name=self.csv_name
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
@@ -285,18 +285,20 @@ MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_col
 
 def generate_merge_node_load_csv_clause(
     node: Node,
+    csv_name: str,
     batch_size: int = 10000,
 ) -> str:
     """
     Generate a MERGE node clause for the LOAD CSV method.
     """
 
-    return f"""LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
+    return f"""LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_column_mapping)}}})
     {generate_set_property(node.nonunique_properties_column_mapping)}
-}} IN TRANSACTIONS OF {str(batch_size)} ROWS;"""
+}} IN TRANSACTIONS OF {str(batch_size)} ROWS;
+"""
 
 
 def generate_merge_relationship_clause_standard(
@@ -318,17 +320,19 @@ def generate_merge_relationship_load_csv_clause(
     relationship: Relationship,
     source_node: Node,
     target_node: Node,
-    batch_size: int = 10000,
+    csv_name: str,
+    batch_size: int = 10000
 ) -> str:
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
     """
 
-    return f"""LOAD CSV WITH HEADERS FROM 'file:///file_name' as row
+    return f"""LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}
     {generate_match_node_clause(target_node).replace('(n:', '(target:')}
     MERGE (source)-[n:{relationship.type}]->(target)
     {generate_set_property(relationship.nonunique_properties_column_mapping)}
-}} IN TRANSACTIONS OF {str(batch_size)} ROWS;"""
+}} IN TRANSACTIONS OF {str(batch_size)} ROWS;
+"""

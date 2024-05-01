@@ -183,6 +183,7 @@ class TestIngestCodeGneration(unittest.TestCase):
         self.assertEqual(
             generate_merge_node_load_csv_clause(
                 node=self.node_b,
+                csv_name="test.csv"
             ),
             merge_node_load_csv_b,
         )
@@ -211,6 +212,7 @@ class TestIngestCodeGneration(unittest.TestCase):
                 relationship=self.rel_1,
                 source_node=self.node_a,
                 target_node=self.node_b,
+                csv_name="test.csv",
                 batch_size=50,
             ),
             merge_relationship_load_csv,
