@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Database ::",
 ]
 exclude = [
-    "neo4j_runway/tests/"
+    "*tests*"
 ]
 
 [tool.poetry.dependencies]
