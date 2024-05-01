@@ -14,27 +14,27 @@ files:
     UNWIND rows AS row
     MERGE (n:Person {name: row.name})
     SET n.age = row.age
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
     UNWIND rows AS row
     MERGE (target:Address{city: row.city, street: row.street})
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
     UNWIND rows AS row
     MERGE (n:Pet {name: row.pet_name})
     SET n.kind = row.pet
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
     UNWIND rows AS row
     MERGE (n:Toy {name: row.toy})
     SET n.kind = row.toy_type
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
@@ -42,7 +42,7 @@ files:
     MATCH (source:Person{name: row.name})
     MATCH (target:Address{city: row.city, street: row.street})
     MERGE (source)-[n:HAS_ADDRESS]->(target)
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
@@ -50,7 +50,7 @@ files:
     MATCH (source:Person{name:row.name})
     MATCH (target:Pet{name: row.pet_name})
     MERGE (source)-[n:HAS_PET]->(target)
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
@@ -58,7 +58,7 @@ files:
     MATCH (source:Pet{name: row.pet_name})
     MATCH (target:Toy{name: row.toy})
     MERGE (source)-[n:PLAYS_WITH]->(target)
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv
 - chunk_size: 100
   cql: |-
     WITH $dict.rows AS rows
@@ -66,4 +66,4 @@ files:
     MATCH (source:Person {name: row.name})
     MATCH (target:Person {name: row.knows})
     MERGE (source)-[n:KNOWS]->(target)
-  url: $BASE/resources/people-pets.csv
+  url: $BASE/tests/resources/people-pets.csv

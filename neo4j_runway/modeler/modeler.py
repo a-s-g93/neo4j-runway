@@ -1,11 +1,11 @@
-import io
 from typing import Dict, Any, Union
 import warnings
 
 from graphviz import Digraph
 
-from ..llm.llm import LLM
-from ..objects.data_model import DataModel
+from ..discovery import Discovery
+from ..llm import LLM
+from ..objects import DataModel
 from ..resources.prompts.prompts import model_generation_rules, model_format
 
 
@@ -14,28 +14,52 @@ class GraphDataModeler:
     def __init__(
         self,
         llm: LLM,
-        user_input: Dict[str, str],
-        discovery: str = "",
+        discovery: Union[str, Discovery] = "",
+        user_input: Union[Dict[str, str], None] = None,
         general_data_description: str = "",
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
     ) -> None:
-        self.user_input = user_input
+        """
+        Takes an LLM instance and Discovery information. Either a Discovery object can be provided, or each field can be provided individually.
+        """
+
         self.llm = llm
 
-        assert (
-            "General Description" in self.user_input.keys()
-        ), "user_input must include key:value pair {General Description: ...}"
+        if isinstance(discovery, Discovery):
 
-        self.columns_of_interest = list(user_input.keys())
-        self.columns_of_interest.remove("General Description")
+            self.user_input = discovery.user_input
 
-        self.discovery = discovery
-        self.general_info = general_data_description
-        self.description_numeric = numeric_data_description
-        self.description_categorical = categorical_data_description
-        self.feature_descriptions = feature_descriptions
+            assert (
+                "General Description" in self.user_input.keys()
+            ), "user_input must include key:value pair {General Description: ...}"
+
+            self.columns_of_interest = list(user_input.keys())
+            self.columns_of_interest.remove("General Description")
+
+            self.discovery = discovery.discovery
+            self.general_info = discovery.general_description
+            self.description_numeric = discovery.numeric_data_description
+            self.description_categorical = discovery.categorical_data_description
+            self.feature_descriptions = discovery.feature_descriptions
+
+        else:
+
+            self.user_input = user_input
+
+            assert (
+                "General Description" in self.user_input.keys()
+            ), "user_input must include key:value pair {General Description: ...}"
+
+            self.columns_of_interest = list(user_input.keys())
+            self.columns_of_interest.remove("General Description")
+
+            self.discovery = discovery
+            self.general_info = general_data_description
+            self.description_numeric = numeric_data_description
+            self.description_categorical = categorical_data_description
+            self.feature_descriptions = feature_descriptions
 
         if self.discovery == "":
             warnings.warn(

@@ -53,6 +53,22 @@ class DataModel(BaseModel):
 
         return [r.type for r in self.relationships]
 
+    @property
+    def node_dict(self) -> Dict[str, Node]:
+        """
+        Returns a dictionary of {<node label>: <Node>}
+        """
+
+        return {node.label: node for node in self.nodes}
+
+    @property
+    def relationship_dict(self) -> Dict[str, Node]:
+        """
+        Returns a dictionary of {<relationship type>: <Relationship>}
+        """
+
+        return {r.type: r for r in self.relationships}
+
     def validate_model(self, csv_columns: List[str]) -> None:
         """
         Validate the model.
@@ -61,11 +77,9 @@ class DataModel(BaseModel):
         errors = []
         for node in self.nodes:
             errors += node.validate_properties(csv_columns=csv_columns)
-            # errors+=node.validate_unique_constraints(csv_columns=csv_columns)
 
         for rel in self.relationships:
             errors += rel.validate_properties(csv_columns=csv_columns)
-            # errors+=rel.validate_unique_constraints(csv_columns=csv_columns)
 
         errors += self._validate_relationship_sources_and_targets()
         errors += self._validate_csv_features_used_only_once()
@@ -187,10 +201,8 @@ class DataModel(BaseModel):
         """
 
         result = relationship.type
-        # print(result)
         if len(relationship.properties) > 0:
             result += "\n\nproperties:\n"
-            # print(result)
         for prop in relationship.properties:
             result = (
                 result
@@ -199,7 +211,6 @@ class DataModel(BaseModel):
                 + (" *unique*" if prop.is_unique else "")
                 + "\n"
             )
-            # print(result)
 
         return result
 
@@ -230,6 +241,8 @@ class DataModel(BaseModel):
         with open(f"./{file_name}.json", "w") as f:
             f.write(self.model_dump_json())
 
+        return self.model_dump_json()
+
     def to_arrows(
         self, file_name: str = "data-model", write_file: bool = True
     ) -> ArrowsDataModel:
@@ -238,7 +251,6 @@ class DataModel(BaseModel):
         """
 
         NODE_SPACING: int = 200
-        # x_current: int = 0
         y_current = 0
         arrows_nodes = []
         for idx, n in enumerate(self.nodes):

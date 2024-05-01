@@ -41,7 +41,7 @@ class TestRelationship(unittest.TestCase):
 
         self.assertEqual(relationship.property_names, ["score", "current"])
 
-    def test_unique_constraints(self) -> None:
+    def test_unique_properties(self) -> None:
 
         relationship = Relationship(
             type="HAS_SIMILAR",
@@ -50,7 +50,7 @@ class TestRelationship(unittest.TestCase):
             target=self.target,
         )
 
-        self.assertEqual(relationship.unique_constraints, ["current"])
+        self.assertEqual(relationship.unique_properties, ["current"])
 
     def test_property_column_mapping(self) -> None:
 
@@ -66,7 +66,7 @@ class TestRelationship(unittest.TestCase):
             {"score": "similarity_score", "current": "current"},
         )
 
-    def test_unique_constraints_column_mapping(self) -> None:
+    def test_unique_properties_column_mapping(self) -> None:
 
         relationship = Relationship(
             type="HAS_SIMILAR",
@@ -76,7 +76,7 @@ class TestRelationship(unittest.TestCase):
         )
 
         self.assertEqual(
-            relationship.unique_constraints_column_mapping, {"current": "current"}
+            relationship.unique_properties_column_mapping, {"current": "current"}
         )
 
     def test_from_arrows(self) -> None:
@@ -154,5 +154,6 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
         self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
