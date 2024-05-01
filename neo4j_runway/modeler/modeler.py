@@ -15,7 +15,7 @@ class GraphDataModeler:
         self,
         llm: LLM,
         discovery: Union[str, Discovery] = "",
-        user_input: Union[Dict[str, str], None] = None,
+        user_input: Dict[str, str] = {},
         general_data_description: str = "",
         numeric_data_description: str = "",
         categorical_data_description: str = "",
