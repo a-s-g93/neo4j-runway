@@ -101,7 +101,14 @@ We can also save this as a .yaml file and use with the original [PyIngest](https
 gen.generate_pyingest_yaml_file(file_name="countries")
 ```
 
-
-
+## Limitations
+The current project is in beta and has the following restrictions.
+- Single CSV input only
+- Nodes may only have a single label
+- Only uniqueness constraints are supported
+- Relationships may not have uniqueness constraints
+- CSV columns that refer to the same node property are not supported
+- Only OpenAI models may be used at this time
+- The modified PyIngest function included with Runway only supports loading a local Pandas DataFrame
 
 
