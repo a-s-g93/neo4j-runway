@@ -69,7 +69,7 @@ If we have graphviz installed, we can take a look at our model.
 ```Python
 gdm.current_model.visualize()
 ```
-COUNTRIES INITIAL DATA MODEL IMAGE
+![countries-first-model.svg](attachment:countries-first-model.svg)
 
 Let's make some corrections to our model and view the results.
 ```Python
