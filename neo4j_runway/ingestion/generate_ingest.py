@@ -1,8 +1,8 @@
 import os
 from typing import Dict, List, Any, Union
+
 import yaml
 
-from pydantic import BaseModel
 from ..objects.data_model import DataModel
 from ..objects import Node
 from ..objects import Relationship
