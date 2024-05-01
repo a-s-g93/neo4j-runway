@@ -66,7 +66,7 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(node.label, "Person")
         self.assertEqual(len(node.properties), 2)
-
+        print(arrows_node)
         node_from_arrows = Node.from_arrows(arrows_node=arrows_node)
 
         self.assertEqual(node_from_arrows.label, "Person")

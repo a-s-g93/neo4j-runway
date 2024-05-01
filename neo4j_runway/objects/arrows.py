@@ -1,4 +1,5 @@
 from typing import Dict, List, Any
+import warnings
 
 from pydantic import BaseModel, field_validator
 
@@ -71,8 +72,14 @@ class ArrowsNode(BaseModel):
 
     @field_validator("position")
     def validate_position(cls, v):
-        if list(v.keys()) != ["x", "y"]:
+        if set(v.keys()) != {"x", "y"}:
             raise ValueError("position must have format: {'x': <float>, 'y': <float>}")
+        return v
+    
+    @field_validator("labels")
+    def validate_position(cls, v):
+        if len(v) > 1:
+            warnings.warn(f"Multiple labels detected in Arrows model, but Runway only currently supports single node labels. Input: {v}, Runway model will use {v[0]}.")
         return v
 
 
@@ -97,6 +104,10 @@ class ArrowsDataModel(BaseModel):
     nodes: List[ArrowsNode]
     relationships: List[ArrowsRelationship]
     style: Dict[str, Any] = DEFAULT_STYLE
+
+    @property
+    def node_id_to_node_label_mapping(self) -> Dict[str, str]:
+        return {node.id: node.labels[0] for node in self.nodes}
 
 
 ARROWS_FORMAT = {

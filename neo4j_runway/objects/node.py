@@ -76,11 +76,9 @@ class Node(BaseModel):
         if self.properties is not None:
             for prop in self.properties:
                 if prop.csv_mapping not in csv_columns:
-                    # raise ValueError(
                     errors.append(
                         f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
                     )
-                    # )
         return errors
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:
