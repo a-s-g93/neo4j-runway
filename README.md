@@ -25,9 +25,8 @@ Here we import the modules we'll be using.
 ```Python
 import pandas as pd
 
-from neo4j_runway.modeler import GraphDataModeler
-from neo4j_runway.discovery import Discovery
-from neo4j_runway.llm import LLM
+from neo4j_runway import Discovery, GraphDataModeler, IngestionGenerator, LLM, PyIngest
+
 ```
 ### Discovery
 Now we define a General Description of our data, provide brief descriptions of the columns of interest and load the data with Pandas.
@@ -74,7 +73,10 @@ COUNTRIES INITIAL DATA MODEL IMAGE
 
 Let's make some corrections to our model and view the results.
 ```Python
-gdm.iterate_model(user_corrections="Make Region node have a HAS_SUBREGION relationship with Subregion node. Remove The relationship between Country and Region.")
+gdm.iterate_model(user_corrections="""
+Make Region node have a HAS_SUBREGION relationship with Subregion node. 
+Remove The relationship between Country and Region.
+""")
 gdm.current_model.visualize()
 ```
 ### Code Generation
