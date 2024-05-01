@@ -59,7 +59,7 @@ disc = Discovery(llm=llm, user_input=USER_GENERATED_INPUT, data=data)
 discovery = disc.run()
 ```
 
-### Data Model
+### Data Modeling
 We can now pass our Discovery object to a GraphDataModeler to generate our initial data model. A Discovery object isn't required here, but it provides rich context to the LLM to achieve the best results.
 ```Python
 gdm = GraphDataModeler(llm=llm, discovery=disc)
