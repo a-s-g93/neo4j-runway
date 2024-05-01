@@ -1,7 +1,6 @@
 from typing import Dict, Union
 
 from neo4j import GraphDatabase
-from neo4j.exceptions import DriverError, AuthError
 
 
 def test_database_connection(
@@ -9,6 +8,9 @@ def test_database_connection(
 ) -> Dict[str, Union[str, bool]]:
     """
     Verify accurate credentials upon user submission.
+    credentials: {"username": "neo4j",
+                "password": "password",
+                "uri": "bolt://localhost:7687"}
     """
 
     valid = True
@@ -23,7 +25,7 @@ def test_database_connection(
         return {
             "valid": valid,
             "message": f"""
-                        Are your credentials correct?\n
+                        Are your credentials correct?
                         Connection Error: {e}
                         """,
         }

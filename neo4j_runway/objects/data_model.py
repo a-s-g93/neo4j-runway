@@ -241,6 +241,8 @@ class DataModel(BaseModel):
         with open(f"./{file_name}.json", "w") as f:
             f.write(self.model_dump_json())
 
+        return self.model_dump_json()
+
     def to_arrows(
         self, file_name: str = "data-model", write_file: bool = True
     ) -> ArrowsDataModel:
