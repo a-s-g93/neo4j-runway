@@ -77,7 +77,7 @@ class ArrowsNode(BaseModel):
         return v
     
     @field_validator("labels")
-    def validate_position(cls, v):
+    def validate_labels(cls, v):
         if len(v) > 1:
             warnings.warn(f"Multiple labels detected in Arrows model, but Runway only currently supports single node labels. Input: {v}, Runway model will use {v[0]}.")
         return v
