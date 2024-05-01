@@ -274,11 +274,12 @@ class DataModel(BaseModel):
     @classmethod
     def from_arrows(cls, file_path: str) -> None:
         """
-        Instatiate a DataModel from an arrows data model JSON file.
+        Construct a DataModel from an arrows data model JSON file.
         """
 
         with open(f"{file_path}", "r") as f:
             content = literal_eval(f.read())
+            node_id_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
             return cls(
                 nodes=[
                     Node.from_arrows(
@@ -302,7 +303,8 @@ class DataModel(BaseModel):
                             properties=r["properties"],
                             type=r["type"],
                             style=r["style"],
-                        )
+                        ),
+                        node_id_label_map=node_id_label_map
                     )
                     for r in content["relationships"]
                 ],
