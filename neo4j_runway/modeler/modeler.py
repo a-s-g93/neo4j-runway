@@ -32,11 +32,11 @@ class GraphDataModeler:
             self.user_input = discovery.user_input
 
             assert (
-                "General Description" in self.user_input.keys()
-            ), "user_input must include key:value pair {General Description: ...}"
+                "general_description" in self.user_input.keys()
+            ), "user_input must include key:value pair {general_description: ...}"
 
             self.columns_of_interest = list(user_input.keys())
-            self.columns_of_interest.remove("General Description")
+            self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery.discovery
             self.general_info = discovery.general_description
@@ -49,11 +49,11 @@ class GraphDataModeler:
             self.user_input = user_input
 
             assert (
-                "General Description" in self.user_input.keys()
-            ), "user_input must include key:value pair {General Description: ...}"
+                "general_description" in self.user_input.keys()
+            ), "user_input must include key:value pair {general_description: ...}"
 
             self.columns_of_interest = list(user_input.keys())
-            self.columns_of_interest.remove("General Description")
+            self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery
             self.general_info = general_data_description
@@ -121,7 +121,7 @@ class GraphDataModeler:
         prompt = f"""
             Here is the csv data:
             This is a general description of the data:
-            {self.user_input['General Description']}
+            {self.user_input['general_description']}
 
             The following is a summary of the data features, data types, and missing values:
             {self.general_info}
@@ -165,7 +165,7 @@ class GraphDataModeler:
         prompt = f"""
             Here is the csv data:
             This is a general description of the data:
-            {self.user_input['General Description']}
+            {self.user_input['general_description']}
 
             The following is a summary of the data features, data types, and missing values:
             {self.general_info}
