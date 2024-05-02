@@ -27,14 +27,18 @@ class TestUserInput(unittest.TestCase):
 
     def test_no_general_description(self) -> None:
         UserInput(column_descriptions={"feature_1": "f1", "feature_2": "f2"})
-    
+
     def test_bad_col_description(self) -> None:
         with self.assertRaises(ValueError):
-            UserInput(general_description="gen", column_descriptions={"feature_1": 1, "feature_2": "f2"})
-    
+            UserInput(
+                general_description="gen",
+                column_descriptions={"feature_1": 1, "feature_2": "f2"},
+            )
+
     def test_empty_col_description(self) -> None:
-            with self.assertRaises(ValueError):
-                UserInput(general_description="gen", column_descriptions={})
+        with self.assertRaises(ValueError):
+            UserInput(general_description="gen", column_descriptions={})
+
 
 if __name__ == "__main__":
     unittest.main()

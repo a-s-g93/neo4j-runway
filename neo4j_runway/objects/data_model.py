@@ -304,7 +304,7 @@ class DataModel(BaseModel):
                             type=r["type"],
                             style=r["style"],
                         ),
-                        node_id_label_map=node_id_label_map
+                        node_id_label_map=node_id_label_map,
                     )
                     for r in content["relationships"]
                 ],

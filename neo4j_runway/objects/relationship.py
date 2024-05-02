@@ -104,7 +104,9 @@ class Relationship(BaseModel):
         )
 
     @classmethod
-    def from_arrows(cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]):
+    def from_arrows(
+        cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]
+    ):
         """
         Initialize a relationship from an arrows relationship.
         """

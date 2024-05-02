@@ -106,8 +106,7 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(len(relationship.properties), 2)
 
         relationship_from_arrows = Relationship.from_arrows(
-            arrows_relationship=arrows_relationship,
-            node_id_label_map=node_id_label_map
+            arrows_relationship=arrows_relationship, node_id_label_map=node_id_label_map
         )
 
         self.assertEqual(relationship_from_arrows.type, arrows_relationship.type)

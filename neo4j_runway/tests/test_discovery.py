@@ -41,15 +41,21 @@ class TestDiscovery(unittest.TestCase):
         self.assertEqual(set(self.disc.data.columns), {"id", "feature_1", "feature_2"})
 
     def test_init_with_UserInput(self) -> None:
-        user_input = UserInput(general_description="This is a general description.", column_descriptions={"feature_1": "column one", "feature_2": " column two"})
+        user_input = UserInput(
+            general_description="This is a general description.",
+            column_descriptions={"feature_1": "column one", "feature_2": " column two"},
+        )
 
-        self.test_disc = Discovery(llm=LLM(), user_input=user_input, data=pd.DataFrame(data))
+        self.test_disc = Discovery(
+            llm=LLM(), user_input=user_input, data=pd.DataFrame(data)
+        )
 
         self.assertEqual(self.test_disc.discovery, "")
         self.assertEqual(
             set(self.test_disc.columns_of_interest), {"feature_1", "feature_2"}
         )
         self.assertEqual(set(self.test_disc.data.columns), {"feature_1", "feature_2"})
+
 
 if __name__ == "__main__":
     unittest.main()

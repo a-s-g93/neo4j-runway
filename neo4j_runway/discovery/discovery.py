@@ -6,6 +6,7 @@ import pandas as pd
 from ..llm.llm import LLM
 from ..objects.user_input import UserInput
 
+
 class Discovery:
 
     def __init__(
