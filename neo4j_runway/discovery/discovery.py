@@ -16,12 +16,11 @@ class Discovery:
             self.user_input = user_input.formatted_dict
         else:
             self.user_input = user_input
-            assert (
-            "general_description" in self.user_input.keys()
-        ), "user_input must include key:value pair {general_description: ...}"
+            assert "general_description" in self.user_input.keys(), (
+                "user_input must include key:value pair {general_description: ...}. "
+                + f"Found keys {self.user_input.keys()}"
+            )
         self.llm = llm
-
-
 
         self.columns_of_interest = list(self.user_input.keys())
         self.columns_of_interest.remove("general_description")

@@ -39,14 +39,15 @@ class Property(BaseModel):
     # is_indexed: bool
     # must_exist: bool
 
-    def __init__(self, *a, **kw) -> None:
-        super().__init__(*a, **kw)
-
     @field_validator("type")
     def validate_type(cls, v):
-        if v == "object":
+        if v.lower() == "object" or v.lower() == "string":
             return "str"
-        if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) + list(
+        elif v.lower() == "float64":
+            return "float"
+        elif v.lower() == "int64":
+            return "int"
+        if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) and v not in list(
             TYPES_MAP_PYTHON_KEYS.values()
         ):
             raise ValueError(f"{v} is an invalid type.")

@@ -28,29 +28,30 @@ class GraphDataModeler:
         self.llm = llm
 
         if isinstance(discovery, Discovery):
-
+            # print("discovery instance")
             self.user_input = discovery.user_input
 
-            assert (
-                "general_description" in self.user_input.keys()
-            ), "user_input must include key:value pair {general_description: ...}"
+            assert "general_description" in self.user_input.keys(), (
+                "user_input must include key:value pair {general_description: ...}. "
+                + f"Found keys {self.user_input.keys()}"
+            )
 
-            self.columns_of_interest = list(user_input.keys())
-            self.columns_of_interest.remove("general_description")
+            self.columns_of_interest = discovery.columns_of_interest
 
             self.discovery = discovery.discovery
-            self.general_info = discovery.general_description
+            self.general_info = discovery.df_info
             self.description_numeric = discovery.numeric_data_description
             self.description_categorical = discovery.categorical_data_description
             self.feature_descriptions = discovery.feature_descriptions
 
         else:
-
+            # print("no discovery instance")
             self.user_input = user_input
 
-            assert (
-                "general_description" in self.user_input.keys()
-            ), "user_input must include key:value pair {general_description: ...}"
+            assert "general_description" in self.user_input.keys(), (
+                "user_input must include key:value pair {general_description: ...}. "
+                + f"Found keys {self.user_input.keys()}"
+            )
 
             self.columns_of_interest = list(user_input.keys())
             self.columns_of_interest.remove("general_description")

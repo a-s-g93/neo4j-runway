@@ -9,14 +9,14 @@ from ..objects.data_model import DataModel
 from ..modeler.modeler import GraphDataModeler
 
 USER_GENERATED_INPUT = {
-    "General Description": "This is data on some interesting data.",
+    "general_description": "This is data on some interesting data.",
     "id": "unique id for a node.",
     "feature_1": "this is a feature",
     "feature_2": "this is also a feature",
 }
 
 USER_GENERATED_INPUT_BAD = {
-    # 'General Description': 'This is data on some interesting data.',
+    # 'general_description': 'This is data on some interesting data.',
     "id": "unique id for a node.",
     "feature_1": "this is a feature",
     "feature_2": "this is also a feature",

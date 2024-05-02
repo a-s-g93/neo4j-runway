@@ -24,9 +24,22 @@ class TestProperty(unittest.TestCase):
             Property,
         )
 
+    def test_init_with_neo4j_type(self) -> None:
+
+        p = Property(
+            name="street", type="STRING", csv_mapping="street", is_unique=False
+        )
+        self.assertEqual(p.type, "str")
+
+    def test_float64_type(self) -> None:
+        p = Property(
+            name="street", type="float64", csv_mapping="street", is_unique=False
+        )
+        self.assertEqual(p.type, "float")
+
     def test_bad_type(self) -> None:
         with self.assertRaises(ValueError):
-            Property(name="name", type="string", csv_mapping="name", is_unique=True)
+            Property(name="name", type="hashmap", csv_mapping="name", is_unique=True)
 
         with self.assertRaises(ValueError):
             Property(name="name", type="dictionary", csv_mapping="name", is_unique=True)
