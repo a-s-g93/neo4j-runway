@@ -1,7 +1,5 @@
 import unittest
 
-import pandas as pd
-
 from ..objects import UserInput
 
 USER_GENERATED_INPUT = {
