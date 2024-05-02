@@ -1,25 +1,29 @@
 import io
-from typing import Dict
+from typing import Dict, Union
 
 import pandas as pd
 
 from ..llm.llm import LLM
+from ..objects.user_input import UserInput
 
 
 class Discovery:
 
     def __init__(
-        self, llm: LLM, user_input: Dict[str, str], data: pd.DataFrame
+        self, llm: LLM, user_input: Union[Dict[str, str], UserInput], data: pd.DataFrame
     ) -> None:
-        self.user_input = user_input
+        if isinstance(user_input, UserInput):
+            self.user_input = user_input.formatted_dict
+        else:
+            self.user_input = user_input
         self.llm = llm
 
         assert (
-            "General Description" in self.user_input.keys()
-        ), "user_input must include key:value pair {General Description: ...}"
+            "general_description" in self.user_input.keys()
+        ), "user_input must include key:value pair {general_description: ...}"
 
-        self.columns_of_interest = list(user_input.keys())
-        self.columns_of_interest.remove("General Description")
+        self.columns_of_interest = list(self.user_input.keys())
+        self.columns_of_interest.remove("general_description")
 
         self.data = data[self.columns_of_interest]
 
@@ -39,7 +43,7 @@ class Discovery:
         )
         desc_categorical = self.data.describe(include="object")
 
-        self.general_description = df_info
+        self.df_info = df_info
         self.numeric_data_description = desc_numeric
         self.categorical_data_description = desc_categorical
 
@@ -60,10 +64,10 @@ class Discovery:
                 its characteristics before we brainstorm about the graph data model.
 
                 This is a general description of the data:
-                {self.user_input['General Description']}
+                {self.user_input['general_description']}
 
                 The following is a summary of the data features, data types, and missing values:
-                {self.general_description}
+                {self.df_info}
 
                 The following is a description of each feature in the data:
                 {self.feature_descriptions}

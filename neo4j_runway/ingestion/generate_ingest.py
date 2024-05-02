@@ -83,7 +83,9 @@ class IngestionGenerator:
                     generate_merge_node_clause_standard(node=node)
                 ),
                 "cypher_loadcsv": literal_unicode(
-                    generate_merge_node_load_csv_clause(node=node, csv_name=self.csv_name)
+                    generate_merge_node_load_csv_clause(
+                        node=node, csv_name=self.csv_name
+                    )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
             }
@@ -110,7 +112,10 @@ class IngestionGenerator:
                 ),
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_relationship_load_csv_clause(
-                        relationship=rel, source_node=source, target_node=target, csv_name=self.csv_name
+                        relationship=rel,
+                        source_node=source,
+                        target_node=target,
+                        csv_name=self.csv_name,
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
@@ -321,7 +326,7 @@ def generate_merge_relationship_load_csv_clause(
     source_node: Node,
     target_node: Node,
     csv_name: str,
-    batch_size: int = 10000
+    batch_size: int = 10000,
 ) -> str:
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
