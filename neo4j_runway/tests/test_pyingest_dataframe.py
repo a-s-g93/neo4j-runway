@@ -128,8 +128,8 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
     def test_constraints_present(self) -> None:
         cypher = "show constraints yield name return name"
         with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
-            r = session.run(cypher).value()
-            self.assertEqual(["person_name", "toy_name"], r)
+            r = set(session.run(cypher).value())
+            self.assertEqual({"person_name", "toy_name"}, r)
 
 
 if __name__ == "__main__":

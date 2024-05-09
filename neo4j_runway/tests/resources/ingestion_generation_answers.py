@@ -28,7 +28,7 @@ MATCH (source:NodeA {{uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_pr
 MATCH (target:NodeB {{uniqueProp2: row.unique_prop_2}})
 MERGE (source)-[n:HAS_RELATIONSHIP]->(target)
 {set_properties_rel_1}"""
-merge_relationship_load_csv = f"""LOAD CSV WITH HEADERS FROM 'file:///test.csv' as row
+merge_relationship_load_csv = f""":auto LOAD CSV WITH HEADERS FROM 'file:///test.csv' as row
 CALL {{
     WITH row
     MATCH (source:NodeA {{uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique_prop_3}})
