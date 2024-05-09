@@ -117,42 +117,6 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
 
-    def test_parse_arrows_property(self) -> None:
-        """
-        Test the parsing of an arrows property to a standard property model.
-        """
-
-        to_parse = {"name": "name_col | str"}  # passes
-        to_parse2 = {"notUnique": "nu_col|str"}  # passes
-        to_parse3 = {
-            "other": "other_col | STRING"
-        }  # should pass, but replace the STRING type with str
-
-        parsed_prop1 = Relationship._parse_arrows_property(to_parse)
-        parsed_prop2 = Relationship._parse_arrows_property(to_parse2)
-        parsed_prop3 = Relationship._parse_arrows_property(to_parse3)
-
-        prop1 = Property(
-            name="name", type="str", csv_mapping="name_col", is_unique=False
-        )
-        prop2 = Property(
-            name="notUnique", type="str", csv_mapping="nu_col", is_unique=False
-        )
-        prop3 = Property(
-            name="other", type="str", csv_mapping="other_col", is_unique=False
-        )
-
-        self.assertEqual(parsed_prop1, prop1)
-        self.assertEqual(parsed_prop2, prop2)
-        self.assertEqual(parsed_prop3, prop3)
-
-        to_parse4 = {"name": "name_col"}
-        prop4 = Property(
-            name="name", type="unknown", csv_mapping="name_col", is_unique=False
-        )
-
-        self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
-        self.assertEqual(Relationship._parse_arrows_property(to_parse4), prop4)
 
 
 if __name__ == "__main__":

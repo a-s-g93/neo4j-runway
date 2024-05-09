@@ -63,9 +63,8 @@ class IngestionGenerator:
         self._config_files_list: Union[List[Dict[str, Any]], None] = []
         self._constraints: Dict[str, str] = {}
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
-        self._generate_base_information()
 
-    def _generate_base_information(self):
+    def _generate_base_information(self, method: str = "api", batch_size: int = 100):
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
                 for unique_property in node.unique_properties:
@@ -84,7 +83,10 @@ class IngestionGenerator:
                 ),
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_node_load_csv_clause(
-                        node=node, csv_name=self.csv_name
+                        node=node,
+                        csv_name=self.csv_name,
+                        method=method,
+                        batch_size=batch_size,
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
@@ -116,6 +118,8 @@ class IngestionGenerator:
                         source_node=source,
                         target_node=target,
                         csv_name=self.csv_name,
+                        method=method,
+                        batch_size=batch_size,
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
@@ -127,10 +131,12 @@ class IngestionGenerator:
             if self._cypher_map[item]["csv"]:
                 file_dict["url"] = self._cypher_map[item]["csv"]
                 file_dict["cql"] = self._cypher_map[item]["cypher"]
-                file_dict["chunk_size"] = 100
+                file_dict["chunk_size"] = batch_size
                 self._config_files_list.append(file_dict)
 
-    def generate_pyingest_yaml_file(self, file_name: str = "pyingest_config") -> None:
+    def generate_pyingest_yaml_file(
+        self, file_name: str = "pyingest_config", batch_size: int = 100
+    ) -> None:
         """
         Generate the PyIngest yaml file.
         """
@@ -139,12 +145,14 @@ class IngestionGenerator:
             os.makedirs(self.file_output_dir, exist_ok=True)
 
         with open(f"./{self.file_output_dir}{file_name}.yml", "w") as config_yaml:
-            config_yaml.write(self.generate_pyingest_yaml_string())
+            config_yaml.write(self.generate_pyingest_yaml_string(batch_size=batch_size))
 
-    def generate_pyingest_yaml_string(self) -> str:
+    def generate_pyingest_yaml_string(self, batch_size: int = 100) -> str:
         """
         Generate the PyIngest yaml in string format.
         """
+
+        self._generate_base_information(batch_size=batch_size)
 
         final_yaml = {}
         final_yaml["files"] = self._config_files_list
@@ -181,6 +189,10 @@ class IngestionGenerator:
         """
         Generate the Constraints cypher file in string format.
         """
+
+        if not self._constraints:
+            self._generate_base_information()
+
         to_return = ""
 
         for constraint in self._constraints:
@@ -188,7 +200,9 @@ class IngestionGenerator:
 
         return to_return
 
-    def generate_load_csv_file(self, file_name: str = "load_csv") -> None:
+    def generate_load_csv_file(
+        self, file_name: str = "load_csv", batch_size: int = 100, method: str = "api"
+    ) -> None:
         """
         Generate the load_csv cypher file.
         """
@@ -197,12 +211,19 @@ class IngestionGenerator:
             os.makedirs(self.file_output_dir, exist_ok=True)
 
         with open(f"./{self.file_output_dir}{file_name}.cypher", "w") as load_csv_file:
-            load_csv_file.write(self.generate_load_csv_string())
+            load_csv_file.write(
+                self.generate_load_csv_string(batch_size=batch_size, method=method)
+            )
 
-    def generate_load_csv_string(self) -> str:
+    def generate_load_csv_string(
+        self, batch_size: int = 100, method: str = "api"
+    ) -> str:
         """
         Generate the load_csv cypher in string format.
         """
+
+        self._generate_base_information(batch_size=batch_size, method=method)
+
         to_return = ""
 
         for constraint in self._constraints:
@@ -291,13 +312,15 @@ MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_col
 def generate_merge_node_load_csv_clause(
     node: Node,
     csv_name: str,
+    method: str = "api",
     batch_size: int = 10000,
 ) -> str:
     """
     Generate a MERGE node clause for the LOAD CSV method.
     """
 
-    return f"""LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    command = ":auto " if method == "browser" else ""
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_column_mapping)}}})
@@ -326,13 +349,15 @@ def generate_merge_relationship_load_csv_clause(
     source_node: Node,
     target_node: Node,
     csv_name: str,
+    method: str = "api",
     batch_size: int = 10000,
 ) -> str:
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
     """
 
-    return f"""LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    command = ":auto " if method == "browser" else ""
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}
