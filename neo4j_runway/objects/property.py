@@ -61,3 +61,35 @@ class Property(BaseModel):
         The Neo4j property type.
         """
         return TYPES_MAP_PYTHON_KEYS[self.type]
+
+    @classmethod
+    def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> None:
+        """
+        Parse the arrows property representation into a standard Property model.
+        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique>.
+        """
+
+        if "|" in list(arrows_property.values())[0]:
+            prop_props = [
+                x.strip() for x in list(arrows_property.values())[0].split("|")
+            ]
+            csv_mapping = prop_props[0]
+            python_type = prop_props[1]
+            is_unique = "unique" in prop_props
+        else:
+            csv_mapping = list(arrows_property.values())[0]
+            python_type = "unknown"
+            is_unique = False
+
+        # support identifying uniqueness in caption for now, this will be depreciated.
+        if caption:
+            is_unique = list(arrows_property.keys())[0] in [
+                x.strip() for x in caption.split(",")
+            ]
+
+        return cls(
+            name=list(arrows_property.keys())[0],
+            csv_mapping=csv_mapping,
+            type=python_type,
+            is_unique=is_unique,
+        )

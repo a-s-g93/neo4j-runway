@@ -59,12 +59,12 @@
         "x": 209.43364843656647,
         "y": -279.86295267473423
       },
-      "caption": "name",
+      "caption": "",
       "labels": [
         "Person"
       ],
       "properties": {
-        "name": "name | str",
+        "name": "name | str | unique",
         "age": "age | int"
       },
       "style": {
@@ -78,12 +78,12 @@
         "x": 572.2331024161601,
         "y": -180.66469660748788
       },
-      "caption": "address",
+      "caption": "",
       "labels": [
         "Address"
       ],
       "properties": {
-        "address": "address | str"
+        "address": "address | str | unique"
       },
       "style": {
         "node-color": "#fda1ff",
@@ -96,12 +96,12 @@
         "x": 572.2331024161601,
         "y": -379.06120874198064
       },
-      "caption": "name",
+      "caption": "",
       "labels": [
         "Pet"
       ],
       "properties": {
-        "name": "pet_name | str",
+        "name": "pet_name | str | unique",
         "kind": "pet | str"
       },
       "style": {
@@ -114,12 +114,12 @@
         "x": 900.26386884154,
         "y": -279.86295267473423
       },
-      "caption": "name",
+      "caption": "",
       "labels": [
         "Toy"
       ],
       "properties": {
-        "name": "toy | str",
+        "name": "toy | str | unique",
         "kind": "toy_type | str"
       },
       "style": {

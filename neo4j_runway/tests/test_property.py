@@ -71,6 +71,44 @@ class TestProperty(unittest.TestCase):
                 v,
             )
 
+    def test_parse_arrows_property(self) -> None:
+        """
+        Test the parsing of an arrows property to a standard property model.
+        """
+
+        to_parse = {"name": "name_col | str | unique"}  # passes
+        to_parse2 = {"notUnique": "nu_col|str"}  # passes
+        to_parse3 = {
+            "other": "other_col | STRING | unique"
+        }  # should pass, but replace the STRING type with str
+
+        caption = "name, other, thisOne"
+
+        parsed_prop1 = Property.from_arrows(to_parse, caption)
+        parsed_prop2 = Property.from_arrows(to_parse2, caption)
+        parsed_prop3 = Property.from_arrows(to_parse3)
+
+        prop1 = Property(
+            name="name", type="str", csv_mapping="name_col", is_unique=True
+        )
+        prop2 = Property(
+            name="notUnique", type="str", csv_mapping="nu_col", is_unique=False
+        )
+        prop3 = Property(
+            name="other", type="str", csv_mapping="other_col", is_unique=True
+        )
+
+        self.assertEqual(parsed_prop1, prop1)
+        self.assertEqual(parsed_prop2, prop2)
+        self.assertEqual(parsed_prop3, prop3)
+
+        to_parse4 = {"name": "name_col"}
+        prop4 = Property(
+            name="name", type="unknown", csv_mapping="name_col", is_unique=False
+        )
+
+        self.assertEqual(Property.from_arrows(to_parse4, ""), prop4)
+        self.assertEqual(Property.from_arrows(to_parse4, " adfwe"), prop4)
 
 if __name__ == "__main__":
     unittest.main()
