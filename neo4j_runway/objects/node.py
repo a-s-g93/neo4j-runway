@@ -103,39 +103,8 @@ class Node(BaseModel):
         """
 
         props = [
-            cls._parse_arrows_property(
-                arrows_property={k: v}, arrows_node_caption=arrows_node.caption
-            )
+            Property.from_arrows(arrows_property={k: v}, caption=arrows_node.caption)
             for k, v in arrows_node.properties.items()
         ]
         # support only single labels for now, take first label
         return cls(label=arrows_node.labels[0], properties=props)
-
-    @staticmethod
-    def _parse_arrows_property(
-        arrows_property: Dict[str, str], arrows_node_caption: str
-    ) -> Property:
-        """
-        Parse the arrows property representation into a standard Property model.
-        Unique property names are stored in the nodes caption as a comma-separated list: List<str>.
-        Arrow property values are formatted as <csv_mapping> | <python_type>.
-        """
-
-        if "|" in list(arrows_property.values())[0]:
-            csv_mapping, python_type = [
-                x.strip() for x in list(arrows_property.values())[0].split("|")
-            ]
-        else:
-            csv_mapping = list(arrows_property.values())[0]
-            python_type = "unknown"
-
-        is_unique = list(arrows_property.keys())[0] in [
-            x.strip() for x in arrows_node_caption.split(",")
-        ]
-
-        return Property(
-            name=list(arrows_property.keys())[0],
-            csv_mapping=csv_mapping,
-            type=python_type,
-            is_unique=is_unique,
-        )

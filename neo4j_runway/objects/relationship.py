@@ -112,7 +112,9 @@ class Relationship(BaseModel):
         """
 
         props = [
-            cls._parse_arrows_property(arrows_property={k: v})
+            Property.from_arrows(
+                arrows_property={k: v}
+            )
             for k, v in arrows_relationship.properties.items()
         ]
         return cls(
@@ -120,28 +122,4 @@ class Relationship(BaseModel):
             source=node_id_label_map[arrows_relationship.fromId],
             target=node_id_label_map[arrows_relationship.toId],
             properties=props,
-        )
-
-    def _parse_arrows_property(arrows_property: Dict[str, str]) -> Property:
-        """
-        Parse the arrows property representation into a standard Property model.
-        Unique property names are unable to be identified and will default to False.
-        Arrow property values are formatted as <csv_mapping> | <python_type>.
-        """
-
-        if "|" in list(arrows_property.values())[0]:
-            csv_mapping, python_type = [
-                x.strip() for x in list(arrows_property.values())[0].split("|")
-            ]
-        else:
-            csv_mapping = list(arrows_property.values())[0]
-            python_type = "unknown"
-
-        is_unique = False
-
-        return Property(
-            name=list(arrows_property.keys())[0],
-            csv_mapping=csv_mapping,
-            type=python_type,
-            is_unique=is_unique,
         )
