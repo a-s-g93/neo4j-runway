@@ -43,7 +43,7 @@ class IngestionGenerator:
     def __init__(
         self,
         data_model: DataModel,
-        csv_name: str,
+        csv_name: str = "",
         username: Union[str, None] = None,
         password: Union[str, None] = None,
         uri: Union[str, None] = None,
@@ -84,12 +84,14 @@ class IngestionGenerator:
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_node_load_csv_clause(
                         node=node,
-                        csv_name=self.csv_name,
+                        csv_name=(
+                            node.csv_name if self.csv_name == '' else self.csv_name
+                        ),
                         method=method,
                         batch_size=batch_size,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
+                "csv": f"$BASE/{self.csv_dir}{node.csv_name if self.csv_name == '' else self.csv_name}",
             }
 
         ## get relationships
@@ -117,12 +119,12 @@ class IngestionGenerator:
                         relationship=rel,
                         source_node=source,
                         target_node=target,
-                        csv_name=self.csv_name,
+                        csv_name=rel.csv_name if self.csv_name == '' else self.csv_name,
                         method=method,
                         batch_size=batch_size,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
+                "csv": f"$BASE/{self.csv_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",
             }
 
         self._config_files_list = []

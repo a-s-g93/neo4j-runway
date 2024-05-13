@@ -1,6 +1,6 @@
 from typing import List, Dict, Union, Any, Self
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from ..objects.node import Node
 from ..objects.property import Property
@@ -36,6 +36,19 @@ class Relationship(BaseModel):
 
         if self.properties is None:
             self.properties = []
+
+    @field_validator("csv_name")
+    def validate_csv_name(cls, v: str) -> str:
+        """
+        Validate the CSV name provided.
+        """
+
+        if v == "":
+            return v
+        else:
+            if not v.endswith(".csv"):
+                return v + ".csv"
+        return v
 
     @property
     def property_names(self) -> List[str]:
@@ -110,7 +123,7 @@ class Relationship(BaseModel):
 
         props = {
             x.name: x.csv_mapping + " | " + x.type + " | unique" if x.is_unique else ""
-            for x in self.properties
+            for x in self.properties if x != "csv"
         }
         arrows_id = self.type + self.source + self.target
         return ArrowsRelationship(
@@ -131,7 +144,8 @@ class Relationship(BaseModel):
 
         props = [
             Property.from_arrows(arrows_property={k: v})
-            for k, v in arrows_relationship.properties.items() if k != "csv"
+            for k, v in arrows_relationship.properties.items()
+            if k != "csv"
         ]
 
         csv_name = arrows_relationship.properties["csv"]

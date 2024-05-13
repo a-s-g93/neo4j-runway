@@ -8,7 +8,7 @@ from ..ingestion.generate_ingest import *
 from ..tests.resources.ingestion_generation_answers import *
 
 
-class TestIngestCodeGneration(unittest.TestCase):
+class TestIngestCodeGeneration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -227,7 +227,7 @@ class TestIngestCodeGneration(unittest.TestCase):
 
     def test_generate_load_csv_string(self) -> None:
         """
-        Test LOAD_CSV string generation.
+        Test LOAD CSV string generation.
         """
 
         pass
