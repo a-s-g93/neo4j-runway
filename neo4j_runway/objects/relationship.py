@@ -2,6 +2,7 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel
 
+from ..objects.node import Node
 from ..objects.property import Property
 from ..objects.arrows import ArrowsRelationship
 
@@ -15,9 +16,23 @@ class Relationship(BaseModel):
     properties: List[Property] = []
     source: str
     target: str
+    csv_name: str = ""
 
-    def __init__(self, *a, **kw) -> None:
-        super().__init__(*a, **kw)
+    def __init__(
+        self,
+        type: str,
+        source: str,
+        target: str,
+        properties: List[Property] = [],
+        csv_name: str = "",
+    ) -> None:
+        super().__init__(
+            type=type,
+            source=source,
+            target=target,
+            properties=properties,
+            csv_name=csv_name,
+        )
 
         if self.properties is None:
             self.properties = []
@@ -93,7 +108,10 @@ class Relationship(BaseModel):
         Return an arrows.app compatible relationship.
         """
 
-        props = {x.name: x.csv_mapping + " | " + x.type for x in self.properties}
+        props = {
+            x.name: x.csv_mapping + " | " + x.type + " | unique" if x.is_unique else ""
+            for x in self.properties
+        }
         arrows_id = self.type + self.source + self.target
         return ArrowsRelationship(
             id=arrows_id,
@@ -115,9 +133,35 @@ class Relationship(BaseModel):
             Property.from_arrows(arrows_property={k: v})
             for k, v in arrows_relationship.properties.items()
         ]
+
+        csv_name = _get_relationship_csv_name(
+            source=node_id_label_map[arrows_relationship.fromId],
+            target=node_id_label_map[arrows_relationship.toId],
+            nodes_dict=node_id_label_map,
+        )
         return cls(
             type=arrows_relationship.type,
             source=node_id_label_map[arrows_relationship.fromId],
             target=node_id_label_map[arrows_relationship.toId],
             properties=props,
+            csv_name=csv_name,
         )
+
+
+def _get_relationship_csv_name(
+    source: str, target: str, nodes_dict: Dict[str, Node]
+) -> str:
+    """
+    Find the csv name for a Relationship according to the source and target csv names.
+    """
+
+    source_csv = ""
+    target_csv = ""
+
+    for label, node in nodes_dict.items():
+        if label == source:
+            source_csv = node.csv_name
+        if label == target:
+            target_csv = node.csv_name
+
+    return source_csv if source_csv == target_csv else ""

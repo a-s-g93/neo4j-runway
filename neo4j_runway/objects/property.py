@@ -82,10 +82,10 @@ class Property(BaseModel):
             is_unique = False
 
         # support identifying uniqueness in caption for now, this will be depreciated.
-        if caption:
-            is_unique = list(arrows_property.keys())[0] in [
-                x.strip() for x in caption.split(",")
-            ]
+        # if caption:
+        #     is_unique = list(arrows_property.keys())[0] in [
+        #         x.strip() for x in caption.split(",")
+        #     ]
 
         return cls(
             name=list(arrows_property.keys())[0],

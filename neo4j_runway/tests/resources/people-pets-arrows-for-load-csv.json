@@ -59,7 +59,7 @@
         "x": 209.43364843656647,
         "y": -279.86295267473423
       },
-      "caption": "",
+      "caption": "pets-arrows.csv",
       "labels": [
         "Person"
       ],
@@ -78,7 +78,7 @@
         "x": 572.2331024161601,
         "y": -180.66469660748788
       },
-      "caption": "",
+      "caption": "pets-arrows.csv",
       "labels": [
         "Address"
       ],
@@ -96,7 +96,7 @@
         "x": 572.2331024161601,
         "y": -379.06120874198064
       },
-      "caption": "",
+      "caption": "pets-arrows.csv",
       "labels": [
         "Pet"
       ],
@@ -114,7 +114,7 @@
         "x": 900.26386884154,
         "y": -279.86295267473423
       },
-      "caption": "",
+      "caption": "pets-arrows.csv",
       "labels": [
         "Toy"
       ],

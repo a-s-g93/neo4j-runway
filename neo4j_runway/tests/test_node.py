@@ -56,10 +56,10 @@ class TestNode(unittest.TestCase):
 
         arrows_node = ArrowsNode(
             id="Person",
-            caption="name",
+            caption="",
             position={"x": 0, "y": 0},
             labels=["Person"],
-            properties={"name": "first_name | str", "age": "age | int"},
+            properties={"name": "first_name | str | unique", "age": "age | int"},
         )
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])

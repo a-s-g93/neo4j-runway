@@ -65,7 +65,8 @@ data_model_dict = {
 }
 
 data_model_yaml = """nodes:
-- label: NodeA
+- csv_name: ''
+  label: NodeA
   properties:
   - csv_mapping: prop_1
     is_unique: true
@@ -79,7 +80,8 @@ data_model_yaml = """nodes:
     is_unique: false
     name: prop3
     type: float
-- label: NodeB
+- csv_name: ''
+  label: NodeB
   properties:
   - csv_mapping: prop_4
     is_unique: true
@@ -94,7 +96,8 @@ data_model_yaml = """nodes:
     name: prop6
     type: float
 relationships:
-- properties:
+- csv_name: ''
+  properties:
   - csv_mapping: prop_7
     is_unique: false
     name: prop7

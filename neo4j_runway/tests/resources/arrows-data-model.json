@@ -59,12 +59,12 @@
         "x": 105.3711141386136,
         "y": -243.80584874322315
       },
-      "caption": "name",
+      "caption": "",
       "labels": [
         "Person"
       ],
       "properties": {
-        "name": "name | str",
+        "name": "name | str | unique",
         "age": "age | int"
       },
       "style": {}
@@ -107,12 +107,12 @@
         "x": 675,
         "y": 50
       },
-      "caption": "name",
+      "caption": "",
       "labels": [
         "Toy"
       ],
       "properties": {
-        "name": "toy | str",
+        "name": "toy | str | unique",
         "kind": "toy_type | str"
       },
       "style": {}

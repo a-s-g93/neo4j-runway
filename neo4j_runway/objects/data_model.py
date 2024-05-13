@@ -260,8 +260,9 @@ class DataModel(BaseModel):
 
         yaml_string = yaml.dump(self.model_dump())
 
-        with open(f"./{file_name}.yaml", "w") as f:
-            f.write(yaml_string)
+        if write_file:
+            with open(f"./{file_name}.yaml", "w") as f:
+                f.write(yaml_string)
 
         return yaml_string
 

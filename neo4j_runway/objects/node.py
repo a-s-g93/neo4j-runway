@@ -13,9 +13,12 @@ class Node(BaseModel):
 
     label: str
     properties: List[Property] = []
+    csv_name: str = ""
 
-    def __init__(self, label: str, properties: List[Property] = []) -> None:
-        super().__init__(label=label, properties=properties)
+    def __init__(
+        self, label: str, properties: List[Property] = [], csv_name: str = ""
+    ) -> None:
+        super().__init__(label=label, properties=properties, csv_name=csv_name)
 
     @property
     def property_names(self) -> List[str]:
@@ -86,8 +89,11 @@ class Node(BaseModel):
         Return an arrows.app compatible node.
         """
         pos = {"x": x_position, "y": y_position}
-        props = {x.name: x.csv_mapping + " | " + x.type for x in self.properties}
-        caption = ", ".join([x.name for x in self.properties if x.is_unique])
+        props = {
+            x.name: x.csv_mapping + " | " + x.type + " | unique" if x.is_unique else ""
+            for x in self.properties
+        }
+        caption = self.csv_name
         return ArrowsNode(
             id=self.label,
             caption=caption,
