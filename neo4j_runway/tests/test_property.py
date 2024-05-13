@@ -110,5 +110,6 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(Property.from_arrows(to_parse4, ""), prop4)
         self.assertEqual(Property.from_arrows(to_parse4, " adfwe"), prop4)
 
+
 if __name__ == "__main__":
     unittest.main()

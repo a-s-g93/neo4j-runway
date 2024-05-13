@@ -7,6 +7,8 @@ from ..objects.relationship import Relationship
 from ..objects.property import Property
 from ..objects.data_model import DataModel
 
+from .resources.data_model_yaml import data_model_dict, data_model_yaml
+
 
 class TestDataModel(unittest.TestCase):
 
@@ -223,6 +225,18 @@ class TestDataModel(unittest.TestCase):
         self.assertTrue(data_model.nodes[0].properties[0].is_unique)
         self.assertEqual(data_model.nodes[0].properties[1].type, "int")
         self.assertEqual(data_model.nodes[0].label, "Person")
+
+    def test_to_yaml_string(self) -> None:
+        """
+        Test data model output to yaml format string.
+        """
+
+        data_model = DataModel(
+            nodes=data_model_dict["nodes"],
+            relationships=data_model_dict["relationships"],
+        )
+        self.maxDiff = None
+        self.assertEqual(data_model.to_yaml(write_file=False), data_model_yaml)
 
 
 if __name__ == "__main__":

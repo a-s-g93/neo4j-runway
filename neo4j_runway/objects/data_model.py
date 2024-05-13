@@ -3,6 +3,7 @@ from typing import List, Dict, Union
 
 from graphviz import Digraph
 from pydantic import BaseModel
+import yaml
 
 from ..objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from ..objects.node import Node
@@ -18,6 +19,15 @@ from ..utils.naming_conventions import (
 class DataModel(BaseModel):
     """
     Graph Data Model representation.
+
+    Attributes
+    ----------
+    nodes : List<Node>
+        A list of the nodes in the data model.
+    relationships : List<Relationship>
+        A list of the relationships in the data model.
+    use_neo4j_naming_conventions : bool
+        Whether to convert labels, relationships and properties to Neo4j naming conventions.
     """
 
     nodes: List[Node]
@@ -242,6 +252,18 @@ class DataModel(BaseModel):
             f.write(self.model_dump_json())
 
         return self.model_dump_json()
+
+    def to_yaml(self, file_name: str = "data-model", write_file: bool = True) -> str:
+        """
+        Output the data model to a yaml file and / or yaml string.
+        """
+
+        yaml_string = yaml.dump(self.model_dump())
+
+        with open(f"./{file_name}.yaml", "w") as f:
+            f.write(yaml_string)
+
+        return yaml_string
 
     def to_arrows(
         self, file_name: str = "data-model", write_file: bool = True
