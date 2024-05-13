@@ -118,6 +118,5 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
 
 
-
 if __name__ == "__main__":
     unittest.main()

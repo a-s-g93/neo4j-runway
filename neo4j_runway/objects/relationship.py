@@ -112,9 +112,7 @@ class Relationship(BaseModel):
         """
 
         props = [
-            Property.from_arrows(
-                arrows_property={k: v}
-            )
+            Property.from_arrows(arrows_property={k: v})
             for k, v in arrows_relationship.properties.items()
         ]
         return cls(

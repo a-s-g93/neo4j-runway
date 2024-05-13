@@ -5,24 +5,45 @@ from graphviz import Digraph
 
 from ..discovery import Discovery
 from ..llm import LLM
-from ..objects import DataModel
+from ..objects import DataModel, UserInput
 from ..resources.prompts.prompts import model_generation_rules, model_format
 
 
 class GraphDataModeler:
+    """
+    Attributes
+    ----------
+    llm : LLM
+        The LLM used to generate data models.
+    discovery : Union[str, Discovery] = ""
+        Either a string containing the LLM generated discovery or a Discovery object that has been ran.
+        If a Discovery object is provided then the remaining discovery attributes don't need to be provided.
+    user_input : Dict[str, UserInput] = {}
+        Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
+        Not required.
+    general_data_description : str = ""
+        A general data description provided by Discovery. Not required.
+    numeric_data_description : str = ""
+        A numeric data description provided by Discovery. Not required.
+    categorical_data_description : str = ""
+        A categorical data description provided by Discovery. Not required.
+    feature_descriptions : str = ""
+        Feature descriptions provided by Discovery. Not required.
+    """
 
     def __init__(
         self,
         llm: LLM,
         discovery: Union[str, Discovery] = "",
-        user_input: Dict[str, str] = {},
+        user_input: Union[Dict[str, str], UserInput] = {},
         general_data_description: str = "",
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
     ) -> None:
         """
-        Takes an LLM instance and Discovery information. Either a Discovery object can be provided, or each field can be provided individually.
+        Takes an LLM instance and Discovery information.
+        Either a Discovery object can be provided, or each field can be provided individually.
         """
 
         self.llm = llm
@@ -46,14 +67,25 @@ class GraphDataModeler:
 
         else:
             # print("no discovery instance")
-            self.user_input = user_input
 
-            assert "general_description" in self.user_input.keys(), (
-                "user_input must include key:value pair {general_description: ...}. "
-                + f"Found keys {self.user_input.keys()}"
-            )
+            if isinstance(user_input, UserInput):
+                self.user_input = user_input.formatted_dict
+            else:
+                self.user_input = user_input
+                assert "general_description" in self.user_input.keys(), (
+                    "user_input must include key:value pair {general_description: ...}. "
+                    + f"Found keys {self.user_input.keys()}"
+                )
 
-            self.columns_of_interest = list(user_input.keys())
+
+            # self.user_input = user_input
+
+            # assert "general_description" in self.user_input.keys(), (
+            #     "user_input must include key:value pair {general_description: ...}. "
+            #     + f"Found keys {self.user_input.keys()}"
+            # )
+
+            self.columns_of_interest = list(self.user_input.keys())
             self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery
@@ -80,6 +112,18 @@ class GraphDataModeler:
         assert len(self.model_history) > 0, "No models found in history."
 
         return self.model_history[-1]
+    
+    def load_model(self, data_model: DataModel) -> None:
+        """
+        Append a new data model to the end of the model_history.
+        This will become the new current_model.
+        """
+
+        if not isinstance(data_model, DataModel):
+            raise ValueError("Provided data model is not of type <DataModel>!")
+        
+        self.model_history.append(data_model)
+        self._initial_model_created = True
 
     def get_model(
         self, version: int = -1, as_dict: bool = False
@@ -145,7 +189,9 @@ class GraphDataModeler:
         return prompt
 
     def _generate_data_model_iteration_prompt(
-        self, user_corrections: Union[str, None] = None
+        self,
+        user_corrections: Union[str, None] = None,
+        use_yaml_data_model: bool = False,
     ) -> str:
         """
         Generate the prompt to iterate on the previous data model.
@@ -179,13 +225,13 @@ class GraphDataModeler:
 
             Based on your experience building high-quality graph data
             models, are there any improvements you would suggest to this model?
-            {self.current_model}
+            {self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
 
             {user_corrections}
 
             {model_generation_rules}
             """
-
+        print(prompt)
         return prompt
 
     def create_initial_model(self) -> str:
@@ -207,7 +253,10 @@ class GraphDataModeler:
         return response
 
     def iterate_model(
-        self, iterations: int = 1, user_corrections: Union[str, None] = None
+        self,
+        iterations: int = 1,
+        user_corrections: Union[str, None] = None,
+        use_yaml_data_model: bool = False,
     ) -> str:
         """
         Iterate on the previous data model the number times indicated.
@@ -219,9 +268,11 @@ class GraphDataModeler:
             for i in range(0, iterations):
                 response = self.llm.get_data_model_response(
                     formatted_prompt=self._generate_data_model_iteration_prompt(
-                        user_corrections=user_corrections
+                        user_corrections=user_corrections,
+                        use_yaml_data_model=use_yaml_data_model,
                     ),
                     csv_columns=self.columns_of_interest,
+                    use_yaml_data_model=use_yaml_data_model,
                 )
 
                 self.model_history.append(response)
