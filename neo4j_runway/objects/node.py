@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union, Any, Self
 
 from pydantic import BaseModel
 
@@ -103,7 +103,7 @@ class Node(BaseModel):
         )
 
     @classmethod
-    def from_arrows(cls, arrows_node: ArrowsNode):
+    def from_arrows(cls, arrows_node: ArrowsNode) -> Self:
         """
         Initialize a Node from an arrows node.
         """
@@ -113,4 +113,4 @@ class Node(BaseModel):
             for k, v in arrows_node.properties.items()
         ]
         # support only single labels for now, take first label
-        return cls(label=arrows_node.labels[0], properties=props)
+        return cls(label=arrows_node.labels[0], properties=props, csv_name=arrows_node.caption)

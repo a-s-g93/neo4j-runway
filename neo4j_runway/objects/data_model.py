@@ -1,5 +1,5 @@
 from ast import literal_eval
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Self
 
 from graphviz import Digraph
 from pydantic import BaseModel
@@ -295,7 +295,7 @@ class DataModel(BaseModel):
         return arrows_data_model
 
     @classmethod
-    def from_arrows(cls, file_path: str) -> None:
+    def from_arrows(cls, file_path: str) -> Self:
         """
         Construct a DataModel from an arrows data model JSON file.
         """

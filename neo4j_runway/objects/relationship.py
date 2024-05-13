@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union, Any, Self
 
 from pydantic import BaseModel
 
@@ -124,21 +124,22 @@ class Relationship(BaseModel):
     @classmethod
     def from_arrows(
         cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]
-    ):
+    ) -> Self:
         """
         Initialize a relationship from an arrows relationship.
         """
 
         props = [
             Property.from_arrows(arrows_property={k: v})
-            for k, v in arrows_relationship.properties.items()
+            for k, v in arrows_relationship.properties.items() if k != "csv"
         ]
 
-        csv_name = _get_relationship_csv_name(
-            source=node_id_label_map[arrows_relationship.fromId],
-            target=node_id_label_map[arrows_relationship.toId],
-            nodes_dict=node_id_label_map,
-        )
+        csv_name = arrows_relationship.properties["csv"]
+        # csv_name = _get_relationship_csv_name(
+        #     source=node_id_label_map[arrows_relationship.fromId],
+        #     target=node_id_label_map[arrows_relationship.toId],
+        #     nodes_dict=node_id_label_map,
+        # )
         return cls(
             type=arrows_relationship.type,
             source=node_id_label_map[arrows_relationship.fromId],
