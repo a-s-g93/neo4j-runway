@@ -1,12 +1,12 @@
-# tests/runner.py
 import os
 import unittest
-import sys
 
 # import your test modules
 from . import *
 
 mods = [x[:-3] for x in os.listdir("neo4j_runway/tests/") if x.startswith("test_")]
+# only run the tests that don't charge money $$$
+mods.remove("test_data_modeler_with_yaml")
 # initialize the test suite
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()

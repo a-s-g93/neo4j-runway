@@ -75,8 +75,6 @@ class TestNode(unittest.TestCase):
         self.assertEqual(node_from_arrows.properties[0].type, "str")
         self.assertEqual(node_from_arrows.properties[1].type, "int")
 
-   
-
 
 if __name__ == "__main__":
     unittest.main()
