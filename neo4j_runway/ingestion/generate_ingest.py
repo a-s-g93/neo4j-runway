@@ -85,7 +85,7 @@ class IngestionGenerator:
                     generate_merge_node_load_csv_clause(
                         node=node,
                         csv_name=(
-                            node.csv_name if self.csv_name == '' else self.csv_name
+                            node.csv_name if self.csv_name == "" else self.csv_name
                         ),
                         method=method,
                         batch_size=batch_size,
@@ -119,7 +119,7 @@ class IngestionGenerator:
                         relationship=rel,
                         source_node=source,
                         target_node=target,
-                        csv_name=rel.csv_name if self.csv_name == '' else self.csv_name,
+                        csv_name=rel.csv_name if self.csv_name == "" else self.csv_name,
                         method=method,
                         batch_size=batch_size,
                     )
@@ -267,6 +267,26 @@ def generate_match_node_clause(node: Node) -> str:
     )
 
 
+def generate_match_same_node_labels_clause(node: Node) -> str:
+    """
+    Generate the two match statements for node with two unique csv mappings.
+    This is used when a relationship connects two nodes with the same label.
+    An example: (:Person{name: row.person_name})-[:KNOWS]->(:Person{name:row.knows_person})
+    """
+
+    from_unique, to_unique = [
+        (
+            "{" + f"{prop}: row.{csv_mapping[0]}" + "}",
+            "{" + f"{prop}: row.{csv_mapping[1]}" + "}",
+        )
+        for prop, csv_mapping in node.unique_properties_column_mapping.items()
+        if isinstance(csv_mapping, list)
+    ][0]
+
+    return f"""MATCH (source:{node.label} {from_unique}
+MATCH (target:{node.label} {to_unique})"""
+
+
 def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
     """
     Generate a set property string.
@@ -286,7 +306,7 @@ def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
 
 
 def generate_set_unique_property(
-    unique_properties_column_mapping: Dict[str, str]
+    unique_properties_column_mapping: Dict[str, Union[str, List[str]]]
 ) -> str:
     """
     Generate the unique properties to match a node on within a MERGE statement.
@@ -294,7 +314,11 @@ def generate_set_unique_property(
     """
 
     res = [
-        f"{prop}: row.{csv_mapping}"
+        (
+            f"{prop}: row.{csv_mapping[0]}"
+            if isinstance(csv_mapping, list)
+            else f"{prop}: row.{csv_mapping}"
+        )
         for prop, csv_mapping in unique_properties_column_mapping.items()
     ]
     return ", ".join(res)
@@ -337,8 +361,15 @@ def generate_merge_relationship_clause_standard(
     """
     Generate a MERGE relationship clause.
     """
-
-    return f"""WITH $dict.rows AS rows
+    if source_node.label == target_node.label:
+        return f"""WITH $dict.rows AS rows
+UNWIND rows as row
+{generate_match_node_clause(source_node).replace('(n:', '(source:')}
+{generate_match_node_clause(target_node).replace('(n:', '(target:')}
+MERGE (source)-[n:{relationship.type}]->(target)
+{generate_set_property(relationship.nonunique_properties_column_mapping)}"""
+    else:
+        return f"""WITH $dict.rows AS rows
 UNWIND rows as row
 {generate_match_node_clause(source_node).replace('(n:', '(source:')}
 {generate_match_node_clause(target_node).replace('(n:', '(target:')}
@@ -359,7 +390,10 @@ def generate_merge_relationship_load_csv_clause(
     """
 
     command = ":auto " if method == "browser" else ""
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    if source_node.label == target_node.label:
+        pass
+    else:
+        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}

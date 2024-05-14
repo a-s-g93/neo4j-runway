@@ -103,7 +103,10 @@ class Node(BaseModel):
         """
         pos = {"x": x_position, "y": y_position}
         props = {
-            x.name: x.csv_mapping + " | " + x.type + (" | unique" if x.is_unique else "")
+            x.name: x.csv_mapping
+            + " | "
+            + x.type
+            + (" | unique" if x.is_unique else "")
             for x in self.properties
         }
 
@@ -123,12 +126,15 @@ class Node(BaseModel):
 
         props = [
             Property.from_arrows(arrows_property={k: v})
-            for k, v in arrows_node.properties.items() if k != "csv"
+            for k, v in arrows_node.properties.items()
+            if k != "csv"
         ]
-        
-        csv_name = arrows_node.properties["csv"] if "csv" in arrows_node.properties.keys() else arrows_node.caption
+
+        csv_name = (
+            arrows_node.properties["csv"]
+            if "csv" in arrows_node.properties.keys()
+            else arrows_node.caption
+        )
 
         # support only single labels for now, take first label
-        return cls(
-            label=arrows_node.labels[0], properties=props, csv_name=csv_name
-        )
+        return cls(label=arrows_node.labels[0], properties=props, csv_name=csv_name)

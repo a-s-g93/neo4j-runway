@@ -218,6 +218,11 @@ class TestIngestCodeGeneration(unittest.TestCase):
             merge_relationship_load_csv,
         )
 
+    def test_generate_match_same_labels_different_csv_mapping(self) -> None:
+
+        node = Node(label="Person", properties=[Property(name="name", type="str", csv_mapping=["name", "knows_person"], is_unique=True)])
+        self.assertEqual(generate_match_same_node_labels_clause(node=node), match_same_labels)
+        
     def test_generate_pyingest_string(self) -> None:
         """
         Test PyIngest string generation.

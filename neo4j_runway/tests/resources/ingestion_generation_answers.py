@@ -37,3 +37,5 @@ CALL {{
     {set_properties_rel_1}
 }} IN TRANSACTIONS OF 50 ROWS;
 """
+match_same_labels = """MATCH (source:Person {name: row.name}
+MATCH (target:Person {name: row.knows_person})"""

@@ -123,7 +123,8 @@ class Relationship(BaseModel):
 
         props = {
             x.name: x.csv_mapping + " | " + x.type + " | unique" if x.is_unique else ""
-            for x in self.properties if x != "csv"
+            for x in self.properties
+            if x != "csv"
         }
         arrows_id = self.type + self.source + self.target
         return ArrowsRelationship(
@@ -148,12 +149,12 @@ class Relationship(BaseModel):
             if k != "csv"
         ]
 
-        csv_name = arrows_relationship.properties["csv"]
-        # csv_name = _get_relationship_csv_name(
-        #     source=node_id_label_map[arrows_relationship.fromId],
-        #     target=node_id_label_map[arrows_relationship.toId],
-        #     nodes_dict=node_id_label_map,
-        # )
+        csv_name = (
+            arrows_relationship.properties["csv"]
+            if "csv" in arrows_relationship.properties.keys()
+            else ""
+        )
+
         return cls(
             type=arrows_relationship.type,
             source=node_id_label_map[arrows_relationship.fromId],
@@ -161,22 +162,3 @@ class Relationship(BaseModel):
             properties=props,
             csv_name=csv_name,
         )
-
-
-def _get_relationship_csv_name(
-    source: str, target: str, nodes_dict: Dict[str, Node]
-) -> str:
-    """
-    Find the csv name for a Relationship according to the source and target csv names.
-    """
-
-    source_csv = ""
-    target_csv = ""
-
-    for label, node in nodes_dict.items():
-        if label == source:
-            source_csv = node.csv_name
-        if label == target:
-            target_csv = node.csv_name
-
-    return source_csv if source_csv == target_csv else ""

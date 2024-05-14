@@ -153,7 +153,14 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
         with self.driver.session(database=database) as session:
             r = set(session.run(cypher).value())
             self.assertEqual(
-                {"person_name", "toy_name", "address_address", "pet_name", "shelter_name"}, r
+                {
+                    "person_name",
+                    "toy_name",
+                    "address_address",
+                    "pet_name",
+                    "shelter_name",
+                },
+                r,
             )
 
 

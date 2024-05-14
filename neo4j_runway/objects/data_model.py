@@ -137,23 +137,28 @@ class DataModel(BaseModel):
         Validate that each property is used no more than one time in the data model.
         """
 
-        used_features = {}
-        errors = []
+        used_features: Dict[str, List[str]] = {}
+        errors: List[str] = []
 
         for node in self.nodes:
             for prop in node.properties:
-                if prop.csv_mapping not in list(used_features.keys()):
-                    used_features[prop.csv_mapping] = [node.label]
+                if isinstance(prop.csv_mapping, list):
+                    for csv_map in prop.csv_mapping:
+                        if csv_map not in list(used_features.keys()):
+                            used_features[csv_map] = [node.label]
+                        else:
+                            used_features[csv_map].append(node.label)
                 else:
-                    used_features[prop.csv_mapping].append(node.label)
-                    # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
+                    if prop.csv_mapping not in list(used_features.keys()):
+                        used_features[prop.csv_mapping] = [node.label]
+                    else:
+                        used_features[prop.csv_mapping].append(node.label)
         for rel in self.relationships:
             for prop in rel.properties:
                 if prop.csv_mapping not in used_features:
                     used_features[prop.csv_mapping] = [rel.type]
                 else:
                     used_features[prop.csv_mapping].append(rel.type)
-                    # errors.append(f"The property {prop} is used for {used_features[prop]} in the data model. Each node or relationship must use a different csv column as a property instead.")
         for prop, labels_or_types in used_features.items():
             if len(labels_or_types) > 1:
                 errors.append(
@@ -188,10 +193,8 @@ class DataModel(BaseModel):
         """
 
         result = node.label
-        # print(result)
         if len(node.properties) > 0:
             result += "\n\nproperties:\n"
-            # print(result)
         for prop in node.properties:
             result = (
                 result
@@ -200,7 +203,6 @@ class DataModel(BaseModel):
                 + (" *unique*" if prop.is_unique else "")
                 + "\n"
             )
-            # print(result)
 
         return result
 

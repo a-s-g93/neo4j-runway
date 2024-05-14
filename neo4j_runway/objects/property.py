@@ -34,7 +34,7 @@ class Property(BaseModel):
 
     name: str
     type: str
-    csv_mapping: str
+    csv_mapping: Union[str, List[str]]
     is_unique: bool = False
     # is_indexed: bool
     # must_exist: bool
@@ -73,19 +73,16 @@ class Property(BaseModel):
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
             ]
-            csv_mapping = prop_props[0]
+            if "," in prop_props[0]:
+                csv_mapping: List[str] = [x.strip() for x in prop_props[0].split()]
+            else:
+                csv_mapping: str = prop_props[0]
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
         else:
-            csv_mapping = list(arrows_property.values())[0]
+            csv_mapping: str = list(arrows_property.values())[0]
             python_type = "unknown"
             is_unique = False
-
-        # support identifying uniqueness in caption for now, this will be depreciated.
-        # if caption:
-        #     is_unique = list(arrows_property.keys())[0] in [
-        #         x.strip() for x in caption.split(",")
-        #     ]
 
         return cls(
             name=list(arrows_property.keys())[0],
