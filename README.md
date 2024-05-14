@@ -56,7 +56,7 @@ llm = LLM()
 And we run discovery on our data.
 ```Python
 disc = Discovery(llm=llm, user_input=USER_GENERATED_INPUT, data=data)
-discovery = disc.run()
+disc.run()
 ```
 
 ### Data Modeling
