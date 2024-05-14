@@ -68,6 +68,8 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
                         """
             )
 
+        # contains node csv in caption or property
+        # contains rel csv in property
         data_model = DataModel.from_arrows(
             "neo4j_runway/tests/resources/people-pets-arrows-multi-csv.json"
         )
@@ -80,9 +82,8 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
             database=database,
             csv_name="",
         )
-        print("CSV Name: ", gen.csv_name)
+
         load_csv_cypher = gen.generate_load_csv_string(method="api")
-        print("\n", load_csv_cypher, "\n")
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:

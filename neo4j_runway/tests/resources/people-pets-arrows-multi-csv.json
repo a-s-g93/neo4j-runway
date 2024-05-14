@@ -59,13 +59,14 @@
         "x": 209.43364843656647,
         "y": -279.86295267473423
       },
-      "caption": "pets-arrows.csv",
+      "caption": "",
       "labels": [
         "Person"
       ],
       "properties": {
         "name": "name | str | unique",
-        "age": "age | int"
+        "age": "age | int",
+        "csv": "pets-arrows.csv"
       },
       "style": {
         "outside-position": "top",

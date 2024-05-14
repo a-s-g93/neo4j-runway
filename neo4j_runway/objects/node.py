@@ -123,10 +123,12 @@ class Node(BaseModel):
 
         props = [
             Property.from_arrows(arrows_property={k: v})
-            for k, v in arrows_node.properties.items()
+            for k, v in arrows_node.properties.items() if k != "csv"
         ]
+        
+        csv_name = arrows_node.properties["csv"] if "csv" in arrows_node.properties.keys() else arrows_node.caption
+
         # support only single labels for now, take first label
-        print(arrows_node.caption)
         return cls(
-            label=arrows_node.labels[0], properties=props, csv_name=arrows_node.caption
+            label=arrows_node.labels[0], properties=props, csv_name=csv_name
         )
