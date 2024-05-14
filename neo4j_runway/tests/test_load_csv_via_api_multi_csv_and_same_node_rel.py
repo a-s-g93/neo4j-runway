@@ -18,7 +18,7 @@ uri = os.environ.get("NEO4J_URI")
 database = os.environ.get("NEO4J_DATABASE")
 
 
-class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
+class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
     """
     Steps:
         1. Ensure local instance of Neo4j is available.
@@ -71,7 +71,7 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
         # contains node csv in caption or property
         # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv.json"
+            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv-and-same-node-rel.json"
         )
 
         gen = IngestionGenerator(
@@ -147,6 +147,12 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
         with self.driver.session(database=database) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
+    
+    def test_person_to_person_relationship_counts(self) -> None:
+        cypher = "match (:Person)-[r:KNOWS]->(:Person) return count(r)"
+        with self.driver.session(database=database) as session:
+            r = session.run(cypher).single().value()
+            self.assertEqual(9, r)
 
     def test_constraints_present(self) -> None:
         cypher = "show constraints yield name return name"

@@ -37,5 +37,11 @@ CALL {{
     {set_properties_rel_1}
 }} IN TRANSACTIONS OF 50 ROWS;
 """
-match_same_labels = """MATCH (source:Person {name: row.name}
+match_same_labels = """MATCH (source:Person {name: row.name})
 MATCH (target:Person {name: row.knows_person})"""
+merge_relationship_standard_same_node = """WITH $dict.rows AS rows
+UNWIND rows as row
+MATCH (source:Person {name: row.name})
+MATCH (target:Person {name: row.knows_person})
+MERGE (source)-[n:KNOWS]->(target)
+"""

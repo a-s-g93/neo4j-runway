@@ -1,0 +1,231 @@
+{
+  "style": {
+    "font-family": "sans-serif",
+    "background-color": "#ffffff",
+    "background-image": "",
+    "background-size": "100%",
+    "node-color": "#ffffff",
+    "border-width": 4,
+    "border-color": "#000000",
+    "radius": 50,
+    "node-padding": 5,
+    "node-margin": 2,
+    "outside-position": "auto",
+    "node-icon-image": "",
+    "node-background-image": "",
+    "icon-position": "inside",
+    "icon-size": 64,
+    "caption-position": "inside",
+    "caption-max-width": 200,
+    "caption-color": "#000000",
+    "caption-font-size": 50,
+    "caption-font-weight": "normal",
+    "label-position": "inside",
+    "label-display": "pill",
+    "label-color": "#000000",
+    "label-background-color": "#ffffff",
+    "label-border-color": "#000000",
+    "label-border-width": 4,
+    "label-font-size": 40,
+    "label-padding": 5,
+    "label-margin": 4,
+    "directionality": "directed",
+    "detail-position": "inline",
+    "detail-orientation": "parallel",
+    "arrow-width": 5,
+    "arrow-color": "#000000",
+    "margin-start": 5,
+    "margin-end": 5,
+    "margin-peer": 20,
+    "attachment-start": "normal",
+    "attachment-end": "normal",
+    "relationship-icon-image": "",
+    "type-color": "#000000",
+    "type-background-color": "#ffffff",
+    "type-border-color": "#000000",
+    "type-border-width": 0,
+    "type-font-size": 16,
+    "type-padding": 5,
+    "property-position": "outside",
+    "property-alignment": "colon",
+    "property-color": "#000000",
+    "property-font-size": 16,
+    "property-font-weight": "normal"
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "position": {
+        "x": 209.43364843656647,
+        "y": -279.86295267473423
+      },
+      "caption": "",
+      "labels": [
+        "Person"
+      ],
+      "properties": {
+        "name": "name, knows | str | unique",
+        "age": "age | int",
+        "csv": "pets-arrows-2.csv"
+      },
+      "style": {
+        "outside-position": "top",
+        "node-color": "#68bc00"
+      }
+    },
+    {
+      "id": "n1",
+      "position": {
+        "x": 572.2331024161601,
+        "y": -180.66469660748788
+      },
+      "caption": "pets-arrows-2.csv",
+      "labels": [
+        "Address"
+      ],
+      "properties": {
+        "address": "address | str | unique"
+      },
+      "style": {
+        "node-color": "#fda1ff",
+        "outside-position": "bottom"
+      }
+    },
+    {
+      "id": "n2",
+      "position": {
+        "x": 572.2331024161601,
+        "y": -379.06120874198064
+      },
+      "caption": "pets-arrows-2.csv",
+      "labels": [
+        "Pet"
+      ],
+      "properties": {
+        "name": "pet_name | str | unique",
+        "kind": "pet | str"
+      },
+      "style": {
+        "node-color": "#68ccca",
+        "outside-position": "top-left"
+      }
+    },
+    {
+      "id": "n3",
+      "position": {
+        "x": 935.0325563957538,
+        "y": -478.259464809227
+      },
+      "caption": "pets-arrows-2.csv",
+      "labels": [
+        "Toy"
+      ],
+      "properties": {
+        "name": "toy | str | unique",
+        "kind": "toy_type | str"
+      },
+      "style": {
+        "node-color": "#aea1ff",
+        "outside-position": "bottom"
+      }
+    },
+    {
+      "id": "n4",
+      "position": {
+        "x": 935.0325563957538,
+        "y": -279.86295267473423
+      },
+      "caption": "shelters.csv",
+      "style": {
+        "node-color": "#fcc400",
+        "outside-position": "bottom-right"
+      },
+      "labels": [
+        "Shelter"
+      ],
+      "properties": {
+        "name": "shelter_name | str | unique"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "n0",
+      "fromId": "n0",
+      "toId": "n1",
+      "type": "HAS_ADDRESS",
+      "properties": {
+        "csv": "pets-arrows-2.csv"
+      },
+      "style": {
+        "detail-orientation": "horizontal",
+        "detail-position": "inline"
+      }
+    },
+    {
+      "id": "n2",
+      "fromId": "n0",
+      "toId": "n2",
+      "type": "HAS_PET",
+      "properties": {
+        "csv": "pets-arrows-2.csv"
+      },
+      "style": {
+        "detail-orientation": "horizontal",
+        "detail-position": "inline"
+      }
+    },
+    {
+      "id": "n3",
+      "fromId": "n2",
+      "toId": "n3",
+      "type": "PLAYS_WITH",
+      "properties": {
+        "csv": "pets-arrows-2.csv"
+      },
+      "style": {
+        "detail-orientation": "horizontal",
+        "detail-position": "inline"
+      }
+    },
+    {
+      "id": "n4",
+      "type": "FROM_SHELTER",
+      "style": {
+        "detail-position": "inline",
+        "detail-orientation": "horizontal"
+      },
+      "properties": {
+        "csv": "shelters.csv"
+      },
+      "fromId": "n2",
+      "toId": "n4"
+    },
+    {
+      "id": "n5",
+      "type": "HAS_ADDRESS",
+      "style": {
+        "detail-orientation": "horizontal"
+      },
+      "properties": {
+        "csv": "shelters.csv"
+      },
+      "fromId": "n4",
+      "toId": "n1"
+    },
+    {
+      "id": "n6",
+      "type": "KNOWS",
+      "style": {
+        "attachment-start": "bottom",
+        "attachment-end": "left",
+        "detail-orientation": "horizontal"
+      },
+      "properties": {
+        "csv": "pets-arrows-2.csv"
+      },
+      "fromId": "n0",
+      "toId": "n0"
+    }
+  ]
+}

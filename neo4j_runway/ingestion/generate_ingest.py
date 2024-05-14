@@ -283,7 +283,7 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
         if isinstance(csv_mapping, list)
     ][0]
 
-    return f"""MATCH (source:{node.label} {from_unique}
+    return f"""MATCH (source:{node.label} {from_unique})
 MATCH (target:{node.label} {to_unique})"""
 
 
@@ -364,8 +364,7 @@ def generate_merge_relationship_clause_standard(
     if source_node.label == target_node.label:
         return f"""WITH $dict.rows AS rows
 UNWIND rows as row
-{generate_match_node_clause(source_node).replace('(n:', '(source:')}
-{generate_match_node_clause(target_node).replace('(n:', '(target:')}
+{generate_match_same_node_labels_clause(node=source_node)}
 MERGE (source)-[n:{relationship.type}]->(target)
 {generate_set_property(relationship.nonunique_properties_column_mapping)}"""
     else:
@@ -391,7 +390,14 @@ def generate_merge_relationship_load_csv_clause(
 
     command = ":auto " if method == "browser" else ""
     if source_node.label == target_node.label:
-        pass
+        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+CALL {{
+    WITH row
+    {generate_match_same_node_labels_clause(node=source_node)}
+    MERGE (source)-[n:{relationship.type}]->(target)
+    {generate_set_property(relationship.nonunique_properties_column_mapping)}
+}} IN TRANSACTIONS OF {str(batch_size)} ROWS;
+"""
     else:
         return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
