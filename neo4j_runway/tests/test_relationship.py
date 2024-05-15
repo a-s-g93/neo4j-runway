@@ -92,6 +92,7 @@ class TestRelationship(unittest.TestCase):
             properties={
                 "score": "similarity_score | float",
                 "current": "current | bool",
+                "csv": "test.csv",
             },
         )
 

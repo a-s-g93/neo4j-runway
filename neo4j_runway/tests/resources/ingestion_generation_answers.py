@@ -37,3 +37,18 @@ CALL {{
     {set_properties_rel_1}
 }} IN TRANSACTIONS OF 50 ROWS;
 """
+match_same_labels = """MATCH (source:Person {name: row.name})
+MATCH (target:Person {name: row.knows_person})"""
+merge_relationship_standard_same_node = """WITH $dict.rows AS rows
+UNWIND rows as row
+MATCH (source:Person {name: row.name})
+MATCH (target:Person {name: row.knows_person})
+MERGE (source)-[n:KNOWS]->(target)
+"""
+node_key_constraint_answer = """CREATE CONSTRAINT nodea_nk1_nk2
+FOR (n:NodeA) REQUIRE (n.nk1, n.nk2) IS NODE KEY;
+"""
+
+relationship_key_constraint_answer = """CREATE CONSTRAINT has_relationship_nk1_nk2
+FOR ()-[r:HAS_RELATIONSHIP]-() REQUIRE (r.nk1, r.nk2) IS RELATIONSHIP KEY;
+"""

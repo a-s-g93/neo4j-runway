@@ -65,39 +65,49 @@ data_model_dict = {
 }
 
 data_model_yaml = """nodes:
-- label: NodeA
+- csv_name: ''
+  label: NodeA
   properties:
   - csv_mapping: prop_1
     is_unique: true
     name: prop1
+    part_of_key: false
     type: str
   - csv_mapping: prop_2
     is_unique: false
     name: prop2
+    part_of_key: false
     type: int
   - csv_mapping: prop_3
     is_unique: false
     name: prop3
+    part_of_key: false
     type: float
-- label: NodeB
+- csv_name: ''
+  label: NodeB
   properties:
   - csv_mapping: prop_4
     is_unique: true
     name: prop4
+    part_of_key: false
     type: str
   - csv_mapping: prop_5
     is_unique: false
     name: prop5
+    part_of_key: false
     type: int
   - csv_mapping: prop_6
     is_unique: false
     name: prop6
+    part_of_key: false
     type: float
 relationships:
-- properties:
+- csv_name: ''
+  properties:
   - csv_mapping: prop_7
     is_unique: false
     name: prop7
+    part_of_key: false
     type: float
   source: NodeA
   target: NodeB

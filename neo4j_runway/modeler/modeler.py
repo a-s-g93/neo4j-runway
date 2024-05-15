@@ -77,7 +77,6 @@ class GraphDataModeler:
                     + f"Found keys {self.user_input.keys()}"
                 )
 
-
             # self.user_input = user_input
 
             # assert "general_description" in self.user_input.keys(), (
@@ -112,7 +111,7 @@ class GraphDataModeler:
         assert len(self.model_history) > 0, "No models found in history."
 
         return self.model_history[-1]
-    
+
     def load_model(self, data_model: DataModel) -> None:
         """
         Append a new data model to the end of the model_history.
@@ -121,7 +120,7 @@ class GraphDataModeler:
 
         if not isinstance(data_model, DataModel):
             raise ValueError("Provided data model is not of type <DataModel>!")
-        
+
         self.model_history.append(data_model)
         self._initial_model_created = True
 
