@@ -104,16 +104,44 @@ class Relationship(BaseModel):
             if not prop.is_unique
         }
 
+    @property
+    def relationship_keys(self) -> List[str]:
+        """
+        The relationship's keys.
+        """
+
+        return [prop.name for prop in self.properties if prop.part_of_key]
+
+    @property
+    def relationship_key_mapping(self) -> Dict[str, str]:
+        """
+        Map of relationship keys to their respective csv columns.
+        """
+
+        return {
+            prop.name: prop.csv_mapping for prop in self.properties if prop.part_of_key
+        }
+
+    @property
+    def nonunique_properties_mapping_for_set_clause(self) -> Dict[str, str]:
+        """
+        Map of nonunique properties to their respective csv columns if a property is not unique or a node key.
+        """
+
+        return {
+            prop.name: prop.csv_mapping
+            for prop in self.properties
+            if not prop.is_unique and not prop.part_of_key
+        }
+    
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
         if self.properties is not None:
             for prop in self.properties:
                 if prop.csv_mapping not in csv_columns:
-                    # raise ValueError(
                     errors.append(
                         f"The relationship {self.type} the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from relationship {self.type}."
                     )
-                    # )
         return errors
 
     def to_arrows(self) -> ArrowsRelationship:
@@ -122,7 +150,11 @@ class Relationship(BaseModel):
         """
 
         props = {
-            x.name: x.csv_mapping + " | " + x.type + " | unique" if x.is_unique else ""
+            x.name: (
+                x.csv_mapping + " | " + x.type + " | unique"
+                if x.is_unique
+                else "" + " | nodekey" if x.is_unique else ""
+            )
             for x in self.properties
             if x != "csv"
         }

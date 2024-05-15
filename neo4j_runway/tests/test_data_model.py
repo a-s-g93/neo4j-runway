@@ -156,7 +156,12 @@ class TestDataModel(unittest.TestCase):
         Test renaming labels, types and properties to Neo4j naming conventions.
         """
 
-        prop1 = Property(name="Name", type="str", csv_mapping=["name", "knows_person"], is_unique=True)
+        prop1 = Property(
+            name="Name",
+            type="str",
+            csv_mapping=["name", "knows_person"],
+            is_unique=True,
+        )
         prop2 = Property(
             name="person_age", type="int", csv_mapping="age", is_unique=False
         )

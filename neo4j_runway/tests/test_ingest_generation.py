@@ -220,12 +220,36 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
     def test_generate_match_same_labels_different_csv_mapping(self) -> None:
 
-        node = Node(label="Person", properties=[Property(name="name", type="str", csv_mapping=["name", "knows_person"], is_unique=True)])
-        self.assertEqual(generate_match_same_node_labels_clause(node=node), match_same_labels)
-        
+        node = Node(
+            label="Person",
+            properties=[
+                Property(
+                    name="name",
+                    type="str",
+                    csv_mapping=["name", "knows_person"],
+                    is_unique=True,
+                )
+            ],
+        )
+        self.assertEqual(
+            generate_match_same_node_labels_clause(node=node), match_same_labels
+        )
+
     def test_generate_merge_relationship_clause_standard_with_same_node(self) -> None:
-        node = Node(label="Person", properties=[Property(name="name", type="str", csv_mapping=["name", "knows_person"], is_unique=True)])
-        rel = Relationship(type="KNOWS", source="Person", target="Person", properties=[])
+        node = Node(
+            label="Person",
+            properties=[
+                Property(
+                    name="name",
+                    type="str",
+                    csv_mapping=["name", "knows_person"],
+                    is_unique=True,
+                )
+            ],
+        )
+        rel = Relationship(
+            type="KNOWS", source="Person", target="Person", properties=[]
+        )
 
         self.assertEqual(
             generate_merge_relationship_clause_standard(
@@ -235,6 +259,12 @@ class TestIngestCodeGeneration(unittest.TestCase):
             ),
             merge_relationship_standard_same_node,
         )
+    
+    def test_generate_node_key_constraint(self) -> None:
+        self.assertEqual(generate_node_key_constraint(label="NodeA", unique_property=["nk1", "nk2"]), node_key_constraint_answer)
+
+    def test_generate_relationship_key_constraint(self) -> None:
+        self.assertEqual(generate_relationship_key_constraint(type="HAS_RELATIONSHIP", unique_property=["nk1", "nk2"]), relationship_key_constraint_answer)
 
     def test_generate_pyingest_string(self) -> None:
         """

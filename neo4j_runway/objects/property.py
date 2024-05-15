@@ -36,6 +36,7 @@ class Property(BaseModel):
     type: str
     csv_mapping: Union[str, List[str]]
     is_unique: bool = False
+    part_of_key: bool = False
     # is_indexed: bool
     # must_exist: bool
 
@@ -79,14 +80,17 @@ class Property(BaseModel):
                 csv_mapping: str = prop_props[0]
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
+            node_key = "nodekey" in prop_props
         else:
             csv_mapping: str = list(arrows_property.values())[0]
             python_type = "unknown"
             is_unique = False
+            node_key = False
 
         return cls(
             name=list(arrows_property.keys())[0],
             csv_mapping=csv_mapping,
             type=python_type,
             is_unique=is_unique,
+            part_of_key=node_key,
         )

@@ -87,6 +87,36 @@ class Node(BaseModel):
             if not prop.is_unique
         }
 
+    @property
+    def node_keys(self) -> List[str]:
+        """
+        The node's keys.
+        """
+
+        return [prop.name for prop in self.properties if prop.part_of_key]
+
+    @property
+    def node_key_mapping(self) -> Dict[str, str]:
+        """
+        Map of node keys to their respective csv columns.
+        """
+
+        return {
+            prop.name: prop.csv_mapping for prop in self.properties if prop.part_of_key
+        }
+
+    @property
+    def nonunique_properties_mapping_for_set_clause(self) -> Dict[str, str]:
+        """
+        Map of nonunique properties to their respective csv columns if a property is not unique or a node key.
+        """
+
+        return {
+            prop.name: prop.csv_mapping
+            for prop in self.properties
+            if not prop.is_unique and not prop.part_of_key
+        }
+
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
         if self.properties is not None:
@@ -107,6 +137,7 @@ class Node(BaseModel):
             + " | "
             + x.type
             + (" | unique" if x.is_unique else "")
+            + (" | nodekey" if x.part_of_key else "")
             for x in self.properties
         }
 
