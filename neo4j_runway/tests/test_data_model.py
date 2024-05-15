@@ -143,10 +143,12 @@ class TestDataModel(unittest.TestCase):
         test_dict = test_model.model_dump()
 
         self.assertEqual(list(test_dict.keys()), ["nodes", "relationships"])
-        self.assertEqual(list(test_dict["nodes"][0].keys()), ["label", "properties"])
+        self.assertEqual(
+            list(test_dict["nodes"][0].keys()), ["label", "properties", "csv_name"]
+        )
         self.assertEqual(
             list(test_dict["relationships"][0].keys()),
-            ["type", "properties", "source", "target"],
+            ["type", "properties", "source", "target", "csv_name"],
         )
 
     def test_neo4j_naming_conventions(self) -> None:
@@ -154,7 +156,12 @@ class TestDataModel(unittest.TestCase):
         Test renaming labels, types and properties to Neo4j naming conventions.
         """
 
-        prop1 = Property(name="Name", type="str", csv_mapping="name", is_unique=True)
+        prop1 = Property(
+            name="Name",
+            type="str",
+            csv_mapping=["name", "knows_person"],
+            is_unique=True,
+        )
         prop2 = Property(
             name="person_age", type="int", csv_mapping="age", is_unique=False
         )
