@@ -11,6 +11,8 @@ from ..resources.prompts.prompts import system_prompts
 from ..resources.prompts.prompts import model_generation_rules
 
 MODEL_OPTIONS = [
+    "gpt-4o",
+    "gpt-4o-2024-05-13",
     "gpt-4",
     "gpt-3.5-turbo",
     "gpt-4-0125-preview",
@@ -36,7 +38,7 @@ class LLM:
     """
 
     def __init__(
-        self, model: str = "gpt-4-0125-preview", open_ai_key: Union[str, None] = None
+        self, model: str = "gpt-4o-2024-05-13", open_ai_key: Union[str, None] = None
     ) -> None:
 
         if model not in MODEL_OPTIONS:
