@@ -4,6 +4,8 @@ dockerfile
 private/
 images/*.svg
 runway-mode-generation-flow-V2.png
+test.ipynb
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
