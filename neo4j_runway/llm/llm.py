@@ -54,7 +54,7 @@ class LLM:
         )
         self.model = model
 
-    def get_discovery_response(self, formatted_prompt: str) -> DataModel:
+    def get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
