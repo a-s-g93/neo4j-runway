@@ -54,7 +54,8 @@ class TestProperty(unittest.TestCase):
         ).model_dump()
 
         self.assertEqual(
-            list(prop.keys()), ["name", "type", "csv_mapping", "is_unique"]
+            list(prop.keys()),
+            ["name", "type", "csv_mapping", "is_unique", "part_of_key"],
         )
         self.assertEqual(prop["csv_mapping"], "name")
 
@@ -109,6 +110,7 @@ class TestProperty(unittest.TestCase):
 
         self.assertEqual(Property.from_arrows(to_parse4, ""), prop4)
         self.assertEqual(Property.from_arrows(to_parse4, " adfwe"), prop4)
+
 
 if __name__ == "__main__":
     unittest.main()

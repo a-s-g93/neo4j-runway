@@ -1,11 +1,11 @@
-ppp_loan_data.csv
 test_downloads/
 test_output/
-resources/presentation_images/
 dockerfile
 private/
-agent-neo-langsmith.ipynb
-# test_downloads/data_model_v1.json
+images/*.svg
+runway-mode-generation-flow-V2.png
+test.ipynb
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -159,3 +159,4 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+images/runway-model-generation-flow-V2.png

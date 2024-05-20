@@ -11,6 +11,8 @@ from ..resources.prompts.prompts import system_prompts
 from ..resources.prompts.prompts import model_generation_rules
 
 MODEL_OPTIONS = [
+    "gpt-4o",
+    "gpt-4o-2024-05-13",
     "gpt-4",
     "gpt-3.5-turbo",
     "gpt-4-0125-preview",
@@ -27,10 +29,16 @@ MODEL_OPTIONS = [
 class LLM:
     """
     Interface for interacting with different LLMs.
+    Attributes
+    ----------
+    model: str
+        The OpenAI LLM to use.
+    open_ai_key: Union[str, None] = None
+        Your OpenAI API key if it is not declared in an environment variable.
     """
 
     def __init__(
-        self, model: str = "gpt-4-0125-preview", open_ai_key: Union[str, None] = None
+        self, model: str = "gpt-4o-2024-05-13", open_ai_key: Union[str, None] = None
     ) -> None:
 
         if model not in MODEL_OPTIONS:
@@ -46,7 +54,7 @@ class LLM:
         )
         self.model = model
 
-    def get_discovery_response(self, formatted_prompt: str) -> DataModel:
+    def get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
@@ -62,7 +70,11 @@ class LLM:
         return response.choices[0].message.content
 
     def get_data_model_response(
-        self, formatted_prompt: str, csv_columns: List[str], max_retries: int = 3
+        self,
+        formatted_prompt: str,
+        csv_columns: List[str],
+        max_retries: int = 3,
+        use_yaml_data_model: bool = False,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
@@ -74,7 +86,7 @@ class LLM:
 
             retries += 1  # increment retries each pass
 
-            response = self.llm_instance.chat.completions.create(
+            response: DataModel = self.llm_instance.chat.completions.create(
                 model=self.model,
                 temperature=0,
                 response_model=DataModel,
@@ -94,9 +106,12 @@ class LLM:
                 formatted_prompt = self._generate_retry_prompt(
                     chain_of_thought_response=cot,
                     errors_to_fix=validation["errors"],
-                    model_to_fix=response,
+                    model_to_fix=(
+                        response.to_yaml(write_file=False)
+                        if use_yaml_data_model
+                        else response
+                    ),
                 )
-                print("retry prompt: ", formatted_prompt)
             elif validation["valid"]:
                 print("recieved a valid response")
                 valid_response = True
@@ -122,7 +137,7 @@ class LLM:
         self,
         chain_of_thought_response: str,
         errors_to_fix: str,
-        model_to_fix: DataModel,
+        model_to_fix: Union[DataModel, str],
     ) -> str:
         """
         Generate a prompt to fix the data model using the errors found in previous model

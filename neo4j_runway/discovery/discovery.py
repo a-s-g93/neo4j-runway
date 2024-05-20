@@ -1,4 +1,5 @@
 import io
+import os
 from typing import Dict, Union
 
 import pandas as pd
@@ -93,3 +94,54 @@ class Discovery:
         self.discovery = response
 
         return response
+
+    def to_txt(self, file_dir: str = "./", file_name: str = "discovery") -> None:
+        """
+        Save the generated discovery to a .txt file.
+        """
+
+        if file_dir != "./":
+            os.makedirs(file_dir, exist_ok=True)
+
+        with open(f"./{file_dir}{file_name}.txt", "w") as f:
+
+            f.write(
+                f"""
+Data General Info
+{self.df_info}
+
+Numeric Data Descriptions
+{self.numeric_data_description}
+
+Categorical Data Descriptions
+{self.categorical_data_description}
+
+LLM Generated Discovery
+{self.discovery}
+            """
+            )
+
+    def to_markdown(self, file_dir: str = "./", file_name: str = "discovery") -> None:
+        """
+        Save the generated discovery to a .md file.
+        """
+
+        if file_dir != "./":
+            os.makedirs(file_dir, exist_ok=True)
+
+        with open(f"./{file_dir}{file_name}.md", "w") as f:
+            f.write(
+                f"""
+Data General Info
+{self.df_info}
+
+Numeric Data Descriptions
+{self.numeric_data_description}
+
+Categorical Data Descriptions
+{self.categorical_data_description}
+
+LLM Generated Discovery
+{self.discovery}
+            """
+            )

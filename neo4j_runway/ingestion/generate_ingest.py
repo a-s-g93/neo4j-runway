@@ -43,7 +43,7 @@ class IngestionGenerator:
     def __init__(
         self,
         data_model: DataModel,
-        csv_name: str,
+        csv_name: str = "",
         username: Union[str, None] = None,
         password: Union[str, None] = None,
         uri: Union[str, None] = None,
@@ -67,6 +67,7 @@ class IngestionGenerator:
     def _generate_base_information(self, method: str = "api", batch_size: int = 100):
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
+                # unique constraints
                 for unique_property in node.unique_properties:
                     self._constraints[
                         generate_constraints_key(
@@ -75,6 +76,15 @@ class IngestionGenerator:
                     ] = generate_constraint(
                         label_or_type=node.label, unique_property=unique_property
                     )
+            # node keys
+            if node.node_keys:
+                self._constraints[
+                    generate_constraints_key(
+                        label_or_type=node.label, unique_property=node.node_keys
+                    )
+                ] = generate_node_key_constraint(
+                    label=node.label, unique_property=node.node_keys
+                )
 
             # add to cypher map
             self._cypher_map[lowercase_first_letter(node.label)] = {
@@ -84,17 +94,20 @@ class IngestionGenerator:
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_node_load_csv_clause(
                         node=node,
-                        csv_name=self.csv_name,
+                        csv_name=(
+                            node.csv_name if self.csv_name == "" else self.csv_name
+                        ),
                         method=method,
                         batch_size=batch_size,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
+                "csv": f"$BASE/{self.csv_dir}{node.csv_name if self.csv_name == '' else self.csv_name}",
             }
 
         ## get relationships
         for rel in self.data_model.relationships:
             if len(rel.unique_properties_column_mapping) > 0:
+                # unique constraints
                 for unique_property in rel.unique_properties:
                     self._constraints[
                         generate_constraints_key(
@@ -103,6 +116,16 @@ class IngestionGenerator:
                     ] = generate_constraint(
                         label_or_type=rel.type, unique_property=unique_property
                     )
+
+            # relationship keys
+            if rel.relationship_keys:
+                self._constraints[
+                    generate_constraints_key(
+                        label_or_type=node.label, unique_property=node.node_keys
+                    )
+                ] = generate_relationship_key_constraint(
+                    type=rel.type, unique_property=rel.relationship_keys
+                )
 
             source = self.data_model.node_dict[rel.source]
             target = self.data_model.node_dict[rel.target]
@@ -117,12 +140,12 @@ class IngestionGenerator:
                         relationship=rel,
                         source_node=source,
                         target_node=target,
-                        csv_name=self.csv_name,
+                        csv_name=rel.csv_name if self.csv_name == "" else self.csv_name,
                         method=method,
                         batch_size=batch_size,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{self.csv_name}",
+                "csv": f"$BASE/{self.csv_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",
             }
 
         self._config_files_list = []
@@ -163,7 +186,7 @@ class IngestionGenerator:
             + f"admin_user: {self.username}\n"
             + f"admin_pass: {self.password}\n"
             + f"database: {self.database}\n"
-            + "basepath: file:./\n\n"
+            + "basepath: ./\n\n"
             + "pre_ingest:\n"
         )
         for constraint in self._constraints:
@@ -235,12 +258,18 @@ class IngestionGenerator:
         return to_return
 
 
-def generate_constraints_key(label_or_type: str, unique_property: str) -> str:
+def generate_constraints_key(
+    label_or_type: str, unique_property: Union[str, List[str]]
+) -> str:
     """
-    Generate the key for a unique constraint.
+    Generate the key for a unique or node key constraint.
     """
-
-    return f"{label_or_type.lower()}_{unique_property.lower()}"
+    if isinstance(unique_property, str):
+        return f"{label_or_type.lower()}_{unique_property.lower()}"
+    else:
+        return (
+            f"{label_or_type.lower()}_{'_'.join([x.lower() for x in unique_property])}"
+        )
 
 
 def generate_constraint(label_or_type: str, unique_property: str) -> str:
@@ -260,9 +289,29 @@ def generate_match_node_clause(node: Node) -> str:
         "MATCH (n:"
         + node.label
         + " {"
-        + f"{generate_set_unique_property(node.unique_properties_column_mapping)}"
+        + f"{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}"
         + "})"
     )
+
+
+def generate_match_same_node_labels_clause(node: Node) -> str:
+    """
+    Generate the two match statements for node with two unique csv mappings.
+    This is used when a relationship connects two nodes with the same label.
+    An example: (:Person{name: row.person_name})-[:KNOWS]->(:Person{name:row.knows_person})
+    """
+
+    from_unique, to_unique = [
+        (
+            "{" + f"{prop}: row.{csv_mapping[0]}" + "}",
+            "{" + f"{prop}: row.{csv_mapping[1]}" + "}",
+        )
+        for prop, csv_mapping in node.unique_properties_column_mapping.items()
+        if isinstance(csv_mapping, list)
+    ][0]
+
+    return f"""MATCH (source:{node.label} {from_unique})
+MATCH (target:{node.label} {to_unique})"""
 
 
 def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
@@ -284,7 +333,7 @@ def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
 
 
 def generate_set_unique_property(
-    unique_properties_column_mapping: Dict[str, str]
+    unique_properties_column_mapping: Dict[str, Union[str, List[str]]]
 ) -> str:
     """
     Generate the unique properties to match a node on within a MERGE statement.
@@ -292,7 +341,11 @@ def generate_set_unique_property(
     """
 
     res = [
-        f"{prop}: row.{csv_mapping}"
+        (
+            f"{prop}: row.{csv_mapping[0]}"
+            if isinstance(csv_mapping, list)
+            else f"{prop}: row.{csv_mapping}"
+        )
         for prop, csv_mapping in unique_properties_column_mapping.items()
     ]
     return ", ".join(res)
@@ -305,8 +358,8 @@ def generate_merge_node_clause_standard(node: Node) -> str:
 
     return f"""WITH $dict.rows AS rows
 UNWIND rows AS row
-MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_column_mapping)}}})
-{generate_set_property(node.nonunique_properties_column_mapping)}"""
+MERGE (n:{node.label} {{{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}}})
+{generate_set_property(node.nonunique_properties_mapping_for_set_clause)}"""
 
 
 def generate_merge_node_load_csv_clause(
@@ -323,8 +376,8 @@ def generate_merge_node_load_csv_clause(
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    MERGE (n:{node.label} {{{generate_set_unique_property(node.unique_properties_column_mapping)}}})
-    {generate_set_property(node.nonunique_properties_column_mapping)}
+    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}}})
+    {generate_set_property(node.nonunique_properties_mapping_for_set_clause)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -335,13 +388,19 @@ def generate_merge_relationship_clause_standard(
     """
     Generate a MERGE relationship clause.
     """
-
-    return f"""WITH $dict.rows AS rows
+    if source_node.label == target_node.label:
+        return f"""WITH $dict.rows AS rows
+UNWIND rows as row
+{generate_match_same_node_labels_clause(node=source_node)}
+MERGE (source)-[n:{relationship.type}]->(target)
+{generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}"""
+    else:
+        return f"""WITH $dict.rows AS rows
 UNWIND rows as row
 {generate_match_node_clause(source_node).replace('(n:', '(source:')}
 {generate_match_node_clause(target_node).replace('(n:', '(target:')}
 MERGE (source)-[n:{relationship.type}]->(target)
-{generate_set_property(relationship.nonunique_properties_column_mapping)}"""
+{generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}"""
 
 
 def generate_merge_relationship_load_csv_clause(
@@ -357,12 +416,42 @@ def generate_merge_relationship_load_csv_clause(
     """
 
     command = ":auto " if method == "browser" else ""
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    if source_node.label == target_node.label:
+        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+CALL {{
+    WITH row
+    {generate_match_same_node_labels_clause(node=source_node)}
+    MERGE (source)-[n:{relationship.type}]->(target)
+    {generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}
+}} IN TRANSACTIONS OF {str(batch_size)} ROWS;
+"""
+    else:
+        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}
     {generate_match_node_clause(target_node).replace('(n:', '(target:')}
     MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonunique_properties_column_mapping)}
+    {generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
+
+
+def generate_node_key_constraint(
+    label: str, unique_property: Union[str, List[str]]
+) -> str:
+    """
+    Generate a node key constraint.
+    """
+    props = "(" + ", ".join([f"n.{x}" for x in unique_property]) + ")"
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_property)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
+
+
+def generate_relationship_key_constraint(
+    type: str, unique_property: Union[str, List[str]]
+) -> str:
+    """
+    Generate a relationship key constraint.
+    """
+    props = "(" + ", ".join([f"r.{x}" for x in unique_property]) + ")"
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_property)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""

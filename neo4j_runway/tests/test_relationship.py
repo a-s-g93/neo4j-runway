@@ -92,6 +92,7 @@ class TestRelationship(unittest.TestCase):
             properties={
                 "score": "similarity_score | float",
                 "current": "current | bool",
+                "csv": "test.csv",
             },
         )
 
@@ -116,7 +117,6 @@ class TestRelationship(unittest.TestCase):
         self.assertFalse(relationship_from_arrows.properties[0].is_unique)
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
-
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union, Any, Self
 
 from pydantic import BaseModel, field_validator
 
@@ -34,8 +34,9 @@ class Property(BaseModel):
 
     name: str
     type: str
-    csv_mapping: str
+    csv_mapping: Union[str, List[str]]
     is_unique: bool = False
+    part_of_key: bool = False
     # is_indexed: bool
     # must_exist: bool
 
@@ -63,7 +64,7 @@ class Property(BaseModel):
         return TYPES_MAP_PYTHON_KEYS[self.type]
 
     @classmethod
-    def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> None:
+    def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> Self:
         """
         Parse the arrows property representation into a standard Property model.
         Arrow property values are formatted as <csv_mapping> | <python_type> | <unique>.
@@ -73,23 +74,23 @@ class Property(BaseModel):
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
             ]
-            csv_mapping = prop_props[0]
+            if "," in prop_props[0]:
+                csv_mapping: List[str] = [x.strip() for x in prop_props[0].split(",")]
+            else:
+                csv_mapping: str = prop_props[0]
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
+            node_key = "nodekey" in prop_props
         else:
-            csv_mapping = list(arrows_property.values())[0]
+            csv_mapping: str = list(arrows_property.values())[0]
             python_type = "unknown"
             is_unique = False
-
-        # support identifying uniqueness in caption for now, this will be depreciated.
-        if caption:
-            is_unique = list(arrows_property.keys())[0] in [
-                x.strip() for x in caption.split(",")
-            ]
+            node_key = False
 
         return cls(
             name=list(arrows_property.keys())[0],
             csv_mapping=csv_mapping,
             type=python_type,
             is_unique=is_unique,
+            part_of_key=node_key,
         )
