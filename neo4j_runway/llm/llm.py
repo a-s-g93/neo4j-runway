@@ -112,7 +112,6 @@ class LLM:
                         else response
                     ),
                 )
-                print("retry prompt: ", formatted_prompt)
             elif validation["valid"]:
                 print("recieved a valid response")
                 valid_response = True

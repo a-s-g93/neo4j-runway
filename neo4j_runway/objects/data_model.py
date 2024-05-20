@@ -201,6 +201,7 @@ class DataModel(BaseModel):
                 + prop.name
                 + f": {prop.csv_mapping}"
                 + (" *unique*" if prop.is_unique else "")
+                + (" *key*" if prop.part_of_key else "")
                 + "\n"
             )
 
@@ -221,6 +222,7 @@ class DataModel(BaseModel):
                 + prop.name
                 + f": {prop.csv_mapping}"
                 + (" *unique*" if prop.is_unique else "")
+                + (" *key*" if prop.part_of_key else "")
                 + "\n"
             )
 

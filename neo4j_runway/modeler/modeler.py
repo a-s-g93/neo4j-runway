@@ -228,7 +228,7 @@ class GraphDataModeler:
 
             {model_generation_rules}
             """
-        print(prompt)
+
         return prompt
 
     def create_initial_model(self) -> str:
