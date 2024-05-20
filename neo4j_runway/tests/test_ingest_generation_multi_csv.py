@@ -59,7 +59,7 @@ ans = """server_uri: None
 admin_user: None
 admin_pass: None
 database: None
-basepath: file:./
+basepath: ./
 
 pre_ingest:
   - CREATE CONSTRAINT nodea_alpha IF NOT EXISTS FOR (n:NodeA) REQUIRE n.alpha IS UNIQUE;
