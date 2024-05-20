@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, List
 import warnings
 
 from graphviz import Digraph
@@ -49,7 +49,6 @@ class GraphDataModeler:
         self.llm = llm
 
         if isinstance(discovery, Discovery):
-            # print("discovery instance")
             self.user_input = discovery.user_input
 
             assert "general_description" in self.user_input.keys(), (
@@ -66,7 +65,6 @@ class GraphDataModeler:
             self.feature_descriptions = discovery.feature_descriptions
 
         else:
-            # print("no discovery instance")
 
             if isinstance(user_input, UserInput):
                 self.user_input = user_input.formatted_dict
@@ -98,9 +96,9 @@ class GraphDataModeler:
                 "It is highly recommended to provide discovery generated from the Discovery module."
             )
 
-        self._initial_model_created = False
-        self.model_iterations = 0
-        self.model_history = []
+        self._initial_model_created: bool = False
+        self.model_iterations: int = 0
+        self.model_history: List[DataModel] = []
 
     @property
     def current_model(self) -> DataModel:
@@ -128,7 +126,7 @@ class GraphDataModeler:
         self, version: int = -1, as_dict: bool = False
     ) -> Union[DataModel, Dict[str, Any]]:
         """
-        Returns the data model version specified.
+        Returns the data model version specified. Example: Version 1 will return model_history index 0.
         By default will return the most recent model.
         Allows access to the intial model.
         """
@@ -238,8 +236,6 @@ class GraphDataModeler:
         Create the initial model.
         """
 
-        # assert self._discovery_ran, "Run discovery before creating the initial model."
-
         response = self.llm.get_data_model_response(
             formatted_prompt=self._generate_initial_data_model_prompt(),
             csv_columns=self.columns_of_interest,
@@ -263,7 +259,7 @@ class GraphDataModeler:
 
         assert self._initial_model_created, "No data model present to iterate on."
 
-        def iterate():
+        def iterate() -> DataModel:
             for i in range(0, iterations):
                 response = self.llm.get_data_model_response(
                     formatted_prompt=self._generate_data_model_iteration_prompt(
@@ -276,7 +272,9 @@ class GraphDataModeler:
 
                 self.model_history.append(response)
                 self.model_iterations += 1
-                yield response
 
-        for iteration in iterate():
-            return iteration
+            return response
+        
+        current_model = iterate()
+        
+        return current_model
