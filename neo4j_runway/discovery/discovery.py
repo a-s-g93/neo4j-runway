@@ -94,7 +94,7 @@ class Discovery:
         self.discovery = response
 
         return response
-    
+
     def to_txt(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
         Save the generated discovery to a .txt file.
@@ -102,12 +102,11 @@ class Discovery:
 
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
-        
+
         with open(f"./{file_dir}{file_name}.txt", "w") as f:
-            
-        
-        
-            f.write(f"""
+
+            f.write(
+                f"""
 Data General Info
 {self.df_info}
 
@@ -119,7 +118,8 @@ Categorical Data Descriptions
 
 LLM Generated Discovery
 {self.discovery}
-            """)
+            """
+            )
 
     def to_markdown(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
@@ -128,9 +128,10 @@ LLM Generated Discovery
 
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
-        
+
         with open(f"./{file_dir}{file_name}.md", "w") as f:
-            f.write(f"""
+            f.write(
+                f"""
 Data General Info
 {self.df_info}
 
@@ -142,4 +143,5 @@ Categorical Data Descriptions
 
 LLM Generated Discovery
 {self.discovery}
-            """)
+            """
+            )

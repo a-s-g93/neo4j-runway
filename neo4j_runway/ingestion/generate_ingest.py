@@ -1,5 +1,4 @@
 import os
-from functools import reduce
 from typing import Dict, List, Any, Union
 
 import yaml
@@ -79,7 +78,13 @@ class IngestionGenerator:
                     )
             # node keys
             if node.node_keys:
-                self._constraints[generate_constraints_key(label_or_type=node.label, unique_property=node.node_keys)] = generate_node_key_constraint(label=node.label, unique_property=node.node_keys)
+                self._constraints[
+                    generate_constraints_key(
+                        label_or_type=node.label, unique_property=node.node_keys
+                    )
+                ] = generate_node_key_constraint(
+                    label=node.label, unique_property=node.node_keys
+                )
 
             # add to cypher map
             self._cypher_map[lowercase_first_letter(node.label)] = {
@@ -111,10 +116,16 @@ class IngestionGenerator:
                     ] = generate_constraint(
                         label_or_type=rel.type, unique_property=unique_property
                     )
-                
+
             # relationship keys
             if rel.relationship_keys:
-                self._constraints[generate_constraints_key(label_or_type=node.label, unique_property=node.node_keys)] = generate_relationship_key_constraint(type=rel.type, unique_property=rel.relationship_keys)
+                self._constraints[
+                    generate_constraints_key(
+                        label_or_type=node.label, unique_property=node.node_keys
+                    )
+                ] = generate_relationship_key_constraint(
+                    type=rel.type, unique_property=rel.relationship_keys
+                )
 
             source = self.data_model.node_dict[rel.source]
             target = self.data_model.node_dict[rel.target]
@@ -175,7 +186,7 @@ class IngestionGenerator:
             + f"admin_user: {self.username}\n"
             + f"admin_pass: {self.password}\n"
             + f"database: {self.database}\n"
-            + "basepath: file:./\n\n"
+            + "basepath: ./\n\n"
             + "pre_ingest:\n"
         )
         for constraint in self._constraints:
@@ -247,14 +258,18 @@ class IngestionGenerator:
         return to_return
 
 
-def generate_constraints_key(label_or_type: str, unique_property: Union[str, List[str]]) -> str:
+def generate_constraints_key(
+    label_or_type: str, unique_property: Union[str, List[str]]
+) -> str:
     """
     Generate the key for a unique or node key constraint.
     """
     if isinstance(unique_property, str):
         return f"{label_or_type.lower()}_{unique_property.lower()}"
     else:
-        return f"{label_or_type.lower()}_{'_'.join([x.lower() for x in unique_property])}"
+        return (
+            f"{label_or_type.lower()}_{'_'.join([x.lower() for x in unique_property])}"
+        )
 
 
 def generate_constraint(label_or_type: str, unique_property: str) -> str:
@@ -421,18 +436,22 @@ CALL {{
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
-def generate_node_key_constraint(label: str, unique_property: Union[str, List[str]]) -> str:
+
+def generate_node_key_constraint(
+    label: str, unique_property: Union[str, List[str]]
+) -> str:
     """
     Generate a node key constraint.
     """
     props = "(" + ", ".join([f"n.{x}" for x in unique_property]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_property)}
-FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_property)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
 
-def generate_relationship_key_constraint(type: str, unique_property: Union[str, List[str]]) -> str:
+
+def generate_relationship_key_constraint(
+    type: str, unique_property: Union[str, List[str]]
+) -> str:
     """
     Generate a relationship key constraint.
     """
     props = "(" + ", ".join([f"r.{x}" for x in unique_property]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_property)}
-FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_property)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""

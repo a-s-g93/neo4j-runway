@@ -133,7 +133,7 @@ class Relationship(BaseModel):
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
-    
+
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
         if self.properties is not None:
