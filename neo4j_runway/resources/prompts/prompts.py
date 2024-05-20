@@ -23,7 +23,8 @@ system_prompts = {
 model_generation_rules = """
 Please follow these rules strictly! Billions of dollars depend on you.
 A uniqueness constraint is what makes the associated node or relationship unique.
-Each node must have one property with a unique constraint.
+A node key is a unique combination of two properties that distinguishes a node.
+Each node must have one property with a unique constraint or two properties that make a node key.
 Each node must have at least one property.
 A node must have a relationship to at least one other node.
 Property csv_mappings should be exact matches to features in the .csv file.
@@ -41,7 +42,8 @@ Format properties as:
     "name": <property name>,
     "type": <Python type>,
     "csv_mapping": <csv column that maps to property>,
-    "is_unique": <property has a unique constraint>
+    "is_unique": <property has a unique constraint>,
+    "part_of_key": <property is part of a node or relationship key>
 }
 Format nodes as:
 {
