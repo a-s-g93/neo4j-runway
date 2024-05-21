@@ -32,7 +32,7 @@ from neo4j_runway import Discovery, GraphDataModeler, IngestionGenerator, LLM, P
 Now we define a General Description of our data, provide brief descriptions of the columns of interest and load the data with Pandas.
 ```Python
 USER_GENERATED_INPUT = {
-    'General Description': 'This is data on different countries.',
+    'general_description': 'This is data on different countries.',
     'id': 'unique id for a country.',
     'name': 'the country name.',
     'phone_code': 'country area code.',
@@ -48,7 +48,7 @@ USER_GENERATED_INPUT = {
 data = pd.read_csv("data/csv/countries.csv")
 ```
 
-We then initialize our llm. By default we use GPT-4 and define our OpenAI API key in an environment variable.
+We then initialize our llm. By default we use GPT-4o and define our OpenAI API key in an environment variable.
 ```Python
 llm = LLM()
 ```
@@ -63,7 +63,7 @@ disc.run()
 We can now pass our Discovery object to a GraphDataModeler to generate our initial data model. A Discovery object isn't required here, but it provides rich context to the LLM to achieve the best results.
 ```Python
 gdm = GraphDataModeler(llm=llm, discovery=disc)
-initial_model = gdm.create_initial_model()
+gdm.create_initial_model()
 ```
 If we have graphviz installed, we can take a look at our model.
 ```Python
@@ -108,12 +108,12 @@ Here's a snapshot of our new graph!
 
 ## Limitations
 The current project is in beta and has the following limitations:
-- Single CSV input only
+- Single CSV input only for data model generation
 - Nodes may only have a single label
-- Only uniqueness constraints are supported
+- Only uniqueness and node / relationship key constraints are supported
 - Relationships may not have uniqueness constraints
-- CSV columns that refer to the same node property are not supported
+- CSV columns that refer to the same node property are not supported in model generation
 - Only OpenAI models may be used at this time
-- The modified PyIngest function included with Runway only supports loading a local Pandas DataFrame
+- The modified PyIngest function included with Runway only supports loading a local Pandas DataFrame or CSVs
 
 
