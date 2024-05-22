@@ -15,6 +15,8 @@ class TestNamingConventions(unittest.TestCase):
         """
 
         self.assertEqual(fix_node_label("Test_Label"), "TestLabel")
+        self.assertEqual(fix_node_label("Test Label"), "TestLabel")
+        self.assertEqual(fix_node_label("Test label"), "TestLabel")
         self.assertEqual(fix_node_label("Test"), "Test")
         self.assertEqual(fix_node_label("test"), "Test")
         self.assertEqual(fix_node_label("test_Label"), "TestLabel")
@@ -31,6 +33,8 @@ class TestNamingConventions(unittest.TestCase):
         """
 
         self.assertEqual(fix_relationship_type("Test_Label"), "TEST_LABEL")
+        self.assertEqual(fix_relationship_type("Test Label"), "TEST_LABEL")
+        self.assertEqual(fix_relationship_type("Test label"), "TEST_LABEL")
         self.assertEqual(fix_relationship_type("test_Label"), "TEST_LABEL")
         self.assertEqual(fix_relationship_type("test_label"), "TEST_LABEL")
         self.assertEqual(fix_relationship_type("testLabel"), "TEST_LABEL")
@@ -50,6 +54,8 @@ class TestNamingConventions(unittest.TestCase):
         """
 
         self.assertEqual(fix_property("Test_Label"), "testLabel")
+        self.assertEqual(fix_property("Test Label"), "testLabel")
+        self.assertEqual(fix_property("Test label"), "testLabel")
         self.assertEqual(fix_property("test"), "test")
         self.assertEqual(fix_property("Test"), "test")
         self.assertEqual(fix_property("test_Label"), "testLabel")
