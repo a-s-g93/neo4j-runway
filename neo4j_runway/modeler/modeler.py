@@ -274,7 +274,7 @@ class GraphDataModeler:
                 self.model_iterations += 1
 
             return response
-        
+
         current_model = iterate()
-        
+
         return current_model

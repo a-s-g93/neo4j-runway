@@ -6,7 +6,6 @@ def fix_node_label(label: str) -> str:
     Apply Neo4j naming convention PascalCase to a node label.
     """
 
-
     if is_mixed_case(label):
         parts = re.findall("[A-Z_ ][^A-Z_ ]*", label[0].upper() + label[1:])
         return "".join([x.capitalize().strip() for x in parts if x != "_"])
@@ -139,7 +138,8 @@ def is_mixed_case(input: str) -> bool:
     if "_" in input or input.isupper():
         snake = True
 
-    return (camel_or_pascal and snake)
+    return camel_or_pascal and snake
+
 
 def remove_spaces(text: str) -> str:
     """

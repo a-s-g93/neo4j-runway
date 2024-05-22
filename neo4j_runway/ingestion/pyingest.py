@@ -68,7 +68,7 @@ class LocalServer(object):
             with open(params["url"]) as openfile:
                 # Grab the header from the file and pass that to pandas.  This allow the header
                 # to be applied even if we are skipping lines of the file
-                header = str(openfile.readline()).strip().split(params['field_sep'])
+                header = str(openfile.readline()).strip().split(params["field_sep"])
 
                 # Pandas' read_csv method is highly optimized and fast :-)
                 row_chunks = pd.read_csv(
