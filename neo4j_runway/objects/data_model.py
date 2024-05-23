@@ -2,7 +2,6 @@
 This file contains the DataModel class which is the standard representation of a graph data model in Neo4j Runway.
 """
 
-
 from ast import literal_eval
 from typing import List, Dict, Union, Self
 

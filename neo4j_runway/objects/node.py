@@ -31,7 +31,7 @@ class Node(BaseModel):
         csv_name : str, optional
             The name of the CSV containing the node's information, by default = ""
         """
-        
+
     @field_validator("csv_name")
     def validate_csv_name(cls, v: str) -> str:
         """

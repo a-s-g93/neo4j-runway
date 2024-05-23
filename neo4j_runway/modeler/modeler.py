@@ -11,7 +11,7 @@ from ..resources.prompts.prompts import model_generation_rules, model_format
 
 class GraphDataModeler:
     """
-    This class is responsible for generating a graph data model via communication with an LLM. 
+    This class is responsible for generating a graph data model via communication with an LLM.
     It handles prompt generation, model generation history as well as access to the generated data models.
     """
 

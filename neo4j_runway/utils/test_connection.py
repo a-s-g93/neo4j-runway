@@ -7,12 +7,12 @@ def test_database_connection(
     credentials: Dict[str, str]
 ) -> Dict[str, Union[str, bool]]:
     """
-    Verify accurate credentials upon user submission.    
+    Verify accurate credentials upon user submission.
 
     Parameters
     ----------
     credentials : Dict[str, str]
-        The Neo4j credentials. Must be the following format: 
+        The Neo4j credentials. Must be the following format:
             {"username": "neo4j",
             "password": "password",
             "uri": "bolt://localhost:7687"}
