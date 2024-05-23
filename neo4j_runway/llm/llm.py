@@ -1,3 +1,7 @@
+"""
+This file contains the LLM module that interfaces with an OpenAI LLM via the Instructor library.
+"""
+
 import os
 from typing import List, Union
 
@@ -29,6 +33,7 @@ MODEL_OPTIONS = [
 class LLM:
     """
     Interface for interacting with different LLMs.
+
     Attributes
     ----------
     model: str

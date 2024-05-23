@@ -3,6 +3,19 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class UserInput(BaseModel):
+    """
+    A container for user provided information about the data.
+
+    Attributes
+    ----------
+
+    general_description : str, optional
+        A general description of the CSV data, by default = ""
+    column_descriptions : Dict[str, str]
+        A mapping of the desired CSV columns to their descriptions. 
+        The keys of this argument will determine which CSV columns are 
+        evaluated in discovery and used to generate a data model.
+    """
 
     general_description: str = Field(
         default="", description="A general description of the CSV data."

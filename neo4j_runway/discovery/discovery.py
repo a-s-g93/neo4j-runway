@@ -1,3 +1,7 @@
+"""
+The Discovery module that handles summarization and discovery generation via an LLM.
+"""
+
 import io
 import os
 from typing import Dict, Union
@@ -9,10 +13,26 @@ from ..objects.user_input import UserInput
 
 
 class Discovery:
+    """
+    The Discovery module that handles summarization and discovery generation via an LLM.
+    """
 
     def __init__(
         self, llm: LLM, user_input: Union[Dict[str, str], UserInput], data: pd.DataFrame
     ) -> None:
+        """
+        The Discovery module that handles summarization and discovery generation via an LLM.
+
+        Parameters
+        ----------
+        llm : LLM
+            The LLM instance used to generate data discovery.
+        user_input : Union[Dict[str, str], UserInput]
+            User provided descriptions of the data.
+            If a dictionary, then should contain the keys "general_description" and all desired columns.
+        data : pd.DataFrame
+            The data in Pandas DataFrame format.
+        """
         if isinstance(user_input, UserInput):
             self.user_input = user_input.formatted_dict
         else:
