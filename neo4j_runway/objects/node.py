@@ -8,7 +8,7 @@ from ..objects.property import Property
 
 class Node(BaseModel):
     """
-    Node representation.
+    Standard Node representation.
     """
 
     label: str
@@ -19,6 +19,18 @@ class Node(BaseModel):
         self, label: str, properties: List[Property] = [], csv_name: str = ""
     ) -> None:
         super().__init__(label=label, properties=properties, csv_name=csv_name)
+        """
+        Standard Node representation.
+
+        Attributes
+        -------
+        label : str
+            The node label.
+        properties : List[Property], optional
+            A list of the properties within the node, by default = []
+        csv_name : str, optional
+            The name of the CSV containing the node's information, by default = ""
+        """
 
     @field_validator("csv_name")
     def validate_csv_name(cls, v: str) -> str:
@@ -36,15 +48,25 @@ class Node(BaseModel):
     @property
     def property_names(self) -> List[str]:
         """
-        The node's property names.
+        The node property names.
+
+        Returns
+        -------
+        List[str]
+            A list of the property names in the node.
         """
 
         return [prop.name for prop in self.properties]
 
     @property
-    def property_column_mapping(self) -> Dict[str, str]:
+    def property_column_mapping(self) -> Dict[str, Union[str, List[str]]]:
         """
-        Map of properties to their respective csv columns.
+        A map of property names to their respective CSV columns.
+
+        Returns
+        -------
+        Dict[str, str | List[str]]
+            A dictionary with property name keys and CSV column values.
         """
 
         return {prop.name: prop.csv_mapping for prop in self.properties}
@@ -53,14 +75,24 @@ class Node(BaseModel):
     def unique_properties(self) -> List[str]:
         """
         The node's unique properties.
+
+        Returns
+        -------
+        List[str]
+            A list of unique properties.
         """
 
         return [prop.name for prop in self.properties if prop.is_unique]
 
     @property
-    def unique_properties_column_mapping(self) -> Dict[str, str]:
+    def unique_properties_column_mapping(self) -> Dict[str, Union[str, List[str]]]:
         """
-        Map of unique properties to their respective csv columns.
+        Map of unique properties to their respective CSV columns.
+
+        Returns
+        -------
+        Dict[str, str | List[str]]
+            A dictionary with unique property name keys and CSV column values.
         """
 
         return {
@@ -71,6 +103,11 @@ class Node(BaseModel):
     def nonunique_properties(self) -> List[str]:
         """
         The node's nonunique properties.
+
+        Returns
+        -------
+        List[str]
+            A list of nonunique properties.
         """
 
         return [prop.name for prop in self.properties if not prop.is_unique]
@@ -78,7 +115,12 @@ class Node(BaseModel):
     @property
     def nonunique_properties_column_mapping(self) -> Dict[str, str]:
         """
-        Map of nonunique properties to their respective csv columns.
+        Map of nonunique properties to their respective CSV columns.
+
+        Returns
+        -------
+        Dict[str, str | List[str]]
+            A dictionary with nonunique property name keys and CSV column values.
         """
 
         return {
@@ -91,6 +133,11 @@ class Node(BaseModel):
     def node_keys(self) -> List[str]:
         """
         The node's keys.
+
+        Returns
+        -------
+        List[str]
+            A list of the properties that make up a node key, if any.
         """
 
         return [prop.name for prop in self.properties if prop.part_of_key]
@@ -99,6 +146,11 @@ class Node(BaseModel):
     def node_key_mapping(self) -> Dict[str, str]:
         """
         Map of node keys to their respective csv columns.
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary with node key property keys and CSV column values.
         """
 
         return {
@@ -109,6 +161,11 @@ class Node(BaseModel):
     def nonunique_properties_mapping_for_set_clause(self) -> Dict[str, str]:
         """
         Map of nonunique properties to their respective csv columns if a property is not unique or a node key.
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary with unique or node key property keys and CSV column values.
         """
 
         return {

@@ -1,3 +1,7 @@
+"""
+This file contains the code to generate ingestion code.
+"""
+
 import os
 from typing import Dict, List, Any, Union
 
@@ -39,6 +43,9 @@ def lowercase_first_letter(str):
 
 
 class IngestionGenerator:
+    """
+    Class responsible for generating the ingestion code.
+    """
 
     def __init__(
         self,
@@ -51,6 +58,29 @@ class IngestionGenerator:
         csv_dir: str = "",
         file_output_dir: str = "",
     ):
+        """
+        Class responsible for generating the ingestion code.
+
+        Parameters
+        ----------
+        data_model : DataModel
+            The data model to base ingestion code on.
+        csv_name : str, optional
+            The CSV containing the data. If data is contained in multiple CSVs,
+            then this should be "" and CSVs noted in the data model, by default ""
+        username : Union[str, None], optional
+            The username used to connect to Neo4j, by default None
+        password : Union[str, None], optional
+            The password used to connect to Neo4j, by default None
+        uri : Union[str, None], optional
+            The uri of the Neo4j instance, by default None
+        database : Union[str, None], optional
+            The database within the Neo4j instance to load the data, by default None
+        csv_dir : str, optional
+            The location of the CSV file(s), by default ""
+        file_output_dir : str, optional
+            The location that generated files should be saved to, by default ""
+        """
 
         self.data_model: DataModel = data_model
         self.username: Union[str, None] = username
@@ -161,7 +191,14 @@ class IngestionGenerator:
         self, file_name: str = "pyingest_config", batch_size: int = 100
     ) -> None:
         """
-        Generate the PyIngest yaml file.
+        Generate the PyIngest YAML config file.
+
+        Parameters
+        ----------
+        file_name : str, optional
+            Name of the file, by default "pyingest_config"
+        batch_size : int, optional
+            The desired batch size, by default 100
         """
 
         if self.file_output_dir != "":
@@ -173,6 +210,11 @@ class IngestionGenerator:
     def generate_pyingest_yaml_string(self, batch_size: int = 100) -> str:
         """
         Generate the PyIngest yaml in string format.
+
+        Parameters
+        ----------
+        batch_size : int, optional
+            The desired batch size, by default 100
         """
 
         self._generate_base_information(batch_size=batch_size)
@@ -198,6 +240,11 @@ class IngestionGenerator:
     def generate_constraints_cypher_file(self, file_name: str = "constraints") -> None:
         """
         Generate the Constraints cypher file.
+
+        Parameters
+        ----------
+        file_name : str, optional
+            Name of the file, by default "constraints"
         """
 
         if self.file_output_dir != "":
@@ -228,6 +275,15 @@ class IngestionGenerator:
     ) -> None:
         """
         Generate the load_csv cypher file.
+
+        Parameters
+        ----------
+        file_name : str, optional
+            Name of the file, by default "load_csv"
+        batch_size : int, optional
+            The desired batch size, by default 100
+        method : str, optional
+            The method that LOAD CSV will be run. Must be either "api" or "browser".
         """
 
         if self.file_output_dir != "":
@@ -243,6 +299,13 @@ class IngestionGenerator:
     ) -> str:
         """
         Generate the load_csv cypher in string format.
+
+        Parameters
+        ----------
+        batch_size : int, optional
+            The desired batch size, by default 100
+        method : str, optional
+            The method that LOAD CSV will be run. Must be either "api" or "browser".
         """
 
         self._generate_base_information(batch_size=batch_size, method=method)
