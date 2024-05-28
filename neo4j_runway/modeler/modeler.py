@@ -24,6 +24,7 @@ class GraphDataModeler:
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
+        allowed_columns: List[str] = []
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
@@ -46,17 +47,15 @@ class GraphDataModeler:
             A categorical data description provided by Discovery, by default ""
         feature_descriptions : str, optional
             Feature descriptions provided by Discovery, by default ""
+        allowed_columns : List[str], optional
+            The columns that may be used in the data model. The argument should only be used in no columns are specified in
+            the discovery or user_input arguments., by default []
         """
 
         self.llm = llm
 
         if isinstance(discovery, Discovery):
             self.user_input = discovery.user_input
-
-            assert "general_description" in self.user_input.keys(), (
-                "user_input must include key:value pair {general_description: ...}. "
-                + f"Found keys {self.user_input.keys()}"
-            )
 
             self.columns_of_interest = discovery.columns_of_interest
 
@@ -70,15 +69,18 @@ class GraphDataModeler:
 
             if isinstance(user_input, UserInput):
                 self.user_input = user_input.formatted_dict
+                
             else:
                 self.user_input = user_input
-                assert "general_description" in self.user_input.keys(), (
-                    "user_input must include key:value pair {general_description: ...}. "
-                    + f"Found keys {self.user_input.keys()}"
-                )
 
-            self.columns_of_interest = list(self.user_input.keys())
-            self.columns_of_interest.remove("general_description")
+            if "general_description" not in self.user_input.keys():
+                warnings.warn(
+                "user_input should include key:value pair {general_description: ...} for best results. "
+                + f"Found keys {self.user_input.keys()}"
+            )
+
+            self.columns_of_interest = allowed_columns or list(self.user_input.keys())
+            if "general_description" in self.columns_of_interest: self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery
             self.general_info = general_data_description

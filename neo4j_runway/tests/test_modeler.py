@@ -154,7 +154,7 @@ class TestGraphDataModler(unittest.TestCase):
         Test error if no general description of data is present in user info.
         """
 
-        with self.assertRaises(AssertionError):
+        with self.assertWarns(Warning):
             gdm = GraphDataModeler(
                 llm="llm",
                 user_input=USER_GENERATED_INPUT_BAD,
@@ -164,6 +164,20 @@ class TestGraphDataModler(unittest.TestCase):
                 numeric_data_description="desc",
                 feature_descriptions="desc",
             )
+    
+    def test_no_discovery_no_user_input_with_allowed_columns(self) -> None:
+
+        gdm = GraphDataModeler(
+                llm="llm",
+                discovery="discovery",
+                general_data_description="desc",
+                categorical_data_description="desc",
+                numeric_data_description="desc",
+                feature_descriptions="desc",
+                allowed_columns=["feature_1", "feature_2", "id"]
+            )
+        
+        self.assertEqual(["feature_1", "feature_2", "id"], gdm.columns_of_interest)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ The Discovery module that handles summarization and discovery generation via an 
 import io
 import os
 from typing import Dict, Union
+import warnings
 
 import pandas as pd
 
@@ -18,36 +19,45 @@ class Discovery:
     """
 
     def __init__(
-        self, llm: LLM, user_input: Union[Dict[str, str], UserInput], data: pd.DataFrame
+        self, data: pd.DataFrame, user_input: Union[Dict[str, str], UserInput] = {}, llm: LLM = None, pandas_only: bool = False
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via an LLM.
 
         Parameters
         ----------
-        llm : LLM
-            The LLM instance used to generate data discovery.
+        llm : LLM, optional
+            The LLM instance used to generate data discovery. Only required if pandas_only = False.
         user_input : Union[Dict[str, str], UserInput]
             User provided descriptions of the data.
-            If a dictionary, then should contain the keys "general_description" and all desired columns.
+            If a dictionary, then should contain the keys "general_description" and all desired columns., by default = {}
         data : pd.DataFrame
             The data in Pandas DataFrame format.
+        pandas_only : bool
+            Whether to only generate discovery using Pandas. Will not call the LLM service.
         """
         if isinstance(user_input, UserInput):
             self.user_input = user_input.formatted_dict
         else:
             self.user_input = user_input
-            assert "general_description" in self.user_input.keys(), (
-                "user_input must include key:value pair {general_description: ...}. "
+            if "general_description" not in self.user_input.keys():
+                warnings.warn(
+                "user_input should include key:value pair {general_description: ...} for best results. "
                 + f"Found keys {self.user_input.keys()}"
             )
         self.llm = llm
 
         self.columns_of_interest = list(self.user_input.keys())
-        self.columns_of_interest.remove("general_description")
+        if "general_description" in self.columns_of_interest: self.columns_of_interest.remove("general_description")
 
-        self.data = data[self.columns_of_interest]
+        if self.columns_of_interest:
+            self.data = data[self.columns_of_interest]  
+        else: 
+            warnings.warn("No columns detected in user input. Defaulting to all columns.")
+            self.columns_of_interest = data.columns
+            self.data = data
 
+        self.pandas_only = not self.llm or pandas_only
         self._discovery_ran = False
         self.discovery = ""
 
@@ -106,9 +116,12 @@ class Discovery:
 
         self._generate_csv_summary()
 
-        response = self.llm.get_discovery_response(
-            formatted_prompt=self._generate_discovery_prompt()
-        )
+        if not self.pandas_only:
+            response = self.llm.get_discovery_response(
+                formatted_prompt=self._generate_discovery_prompt()
+            )
+        else:
+            response = ""
 
         self._discovery_ran = True
         self.discovery = response

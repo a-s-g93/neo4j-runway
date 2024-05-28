@@ -1,4 +1,5 @@
 from typing import Dict
+import warnings
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -27,7 +28,7 @@ class UserInput(BaseModel):
     @field_validator("column_descriptions")
     def validate_column_description(cls, v) -> Dict[str, str]:
         if v == {}:
-            raise ValueError("Empty column_descriptions dictionary not allowed.")
+            warnings.warn("Empty column_descriptions dictionary is not recommended.")
         return v
 
     @property
