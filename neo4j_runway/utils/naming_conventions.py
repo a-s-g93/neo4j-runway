@@ -7,21 +7,21 @@ def fix_node_label(label: str) -> str:
     """
 
     if is_mixed_case(label):
-        parts = re.findall("[A-Z_][^A-Z_]*", label[0].upper() + label[1:])
-        return "".join([x.capitalize() for x in parts if x != "_"])
+        parts = re.findall("[A-Z_ ][^A-Z_ ]*", label[0].upper() + label[1:])
+        return "".join([x.capitalize().strip() for x in parts if x != "_"])
 
     elif is_pascal_case(label):
-        return label
+        return remove_spaces(label)
 
     elif is_camel_case(label):
-        return label[0].upper() + label[1:]
+        return label[0].upper() + remove_spaces(label[1:])
 
     elif is_snake_case(label):
-        parts = label.split("_")
+        parts = remove_spaces(label).split("_")
         return "".join([x.capitalize() for x in parts])
 
     else:
-        return label
+        return "".join([x.capitalize().strip() for x in label.split(" ")])
 
 
 def fix_relationship_type(type: str) -> str:
@@ -46,14 +46,15 @@ def fix_relationship_type(type: str) -> str:
         parts = re.findall("[A-Z][^A-Z]*", type[0].upper() + type[1:])
         return "_".join(x.upper() for x in parts)
     else:
-        return type.upper()
+        return type.upper().replace(" ", "_")
 
 
 def fix_property(property_name: str) -> str:
     """
     Apply Neo4j naming convention camelCase to a property name.
     """
-
+    # treat property with spaces as snakecase property
+    property_name = property_name.replace(" ", "_")
     if is_mixed_case(property_name):
         parts = re.findall(
             "[A-Z_][^A-Z_]*", property_name[0].upper() + property_name[1:]
@@ -71,6 +72,8 @@ def fix_property(property_name: str) -> str:
         parts = property_name.split("_")
         pascal = "".join([x.capitalize() for x in parts])
         return pascal[0].lower() + pascal[1:]
+    else:
+        return property_name
 
 
 def is_camel_case(input: str) -> bool:
@@ -84,7 +87,7 @@ def is_camel_case(input: str) -> bool:
     if ord(input[0]) >= 65 and ord(input[0]) <= 90:
         return False
 
-    return not "_" in input
+    return not "_" in input and not " " in input
 
 
 def is_pascal_case(input: str) -> bool:
@@ -98,7 +101,7 @@ def is_pascal_case(input: str) -> bool:
     if ord(input[0]) < 65 or ord(input[0]) > 90:
         return False
 
-    return not "_" in input
+    return not "_" in input and not " " in input
 
 
 def is_snake_case(input: str) -> bool:
@@ -108,7 +111,7 @@ def is_snake_case(input: str) -> bool:
 
     assert len(input) > 0, "No input provided!"
 
-    return "_" in input or input.isupper()
+    return ("_" in input or input.isupper()) and not " " in input
 
 
 def is_mixed_case(input: str) -> bool:
@@ -136,3 +139,10 @@ def is_mixed_case(input: str) -> bool:
         snake = True
 
     return camel_or_pascal and snake
+
+
+def remove_spaces(text: str) -> str:
+    """
+    Remove the spaces from a text string.
+    """
+    return text.replace(" ", "")

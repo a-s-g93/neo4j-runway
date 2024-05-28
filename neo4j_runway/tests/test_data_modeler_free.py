@@ -12,7 +12,8 @@ class LLMMock:
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
         )
-    
+
+
 class TestGraphDataModelerFree(unittest.TestCase):
 
     @classmethod

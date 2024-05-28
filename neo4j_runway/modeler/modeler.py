@@ -11,24 +11,8 @@ from ..resources.prompts.prompts import model_generation_rules, model_format
 
 class GraphDataModeler:
     """
-    Attributes
-    ----------
-    llm : LLM
-        The LLM used to generate data models.
-    discovery : Union[str, Discovery] = ""
-        Either a string containing the LLM generated discovery or a Discovery object that has been ran.
-        If a Discovery object is provided then the remaining discovery attributes don't need to be provided.
-    user_input : Dict[str, UserInput] = {}
-        Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
-        Not required.
-    general_data_description : str = ""
-        A general data description provided by Discovery. Not required.
-    numeric_data_description : str = ""
-        A numeric data description provided by Discovery. Not required.
-    categorical_data_description : str = ""
-        A categorical data description provided by Discovery. Not required.
-    feature_descriptions : str = ""
-        Feature descriptions provided by Discovery. Not required.
+    This class is responsible for generating a graph data model via communication with an LLM.
+    It handles prompt generation, model generation history as well as access to the generated data models.
     """
 
     def __init__(
@@ -40,21 +24,38 @@ class GraphDataModeler:
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
+        allowed_columns: List[str] = [],
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
         Either a Discovery object can be provided, or each field can be provided individually.
+
+        Parameters
+        ----------
+        llm : LLM
+            The LLM used to generate data models.
+        discovery : Union[str, Discovery], optional
+            Either a string containing the LLM generated discovery or a Discovery object that has been ran.
+            If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
+        user_input : Dict[str, UserInput], optional
+            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
+        general_data_description : str, optional
+            A general data description provided by Discovery, by default ""
+        numeric_data_description : str, optional
+            A numeric data description provided by Discovery, by default ""
+        categorical_data_description : str, optional
+            A categorical data description provided by Discovery, by default ""
+        feature_descriptions : str, optional
+            Feature descriptions provided by Discovery, by default ""
+        allowed_columns : List[str], optional
+            The columns that may be used in the data model. The argument should only be used in no columns are specified in
+            the discovery or user_input arguments., by default []
         """
 
         self.llm = llm
 
         if isinstance(discovery, Discovery):
             self.user_input = discovery.user_input
-
-            assert "general_description" in self.user_input.keys(), (
-                "user_input must include key:value pair {general_description: ...}. "
-                + f"Found keys {self.user_input.keys()}"
-            )
 
             self.columns_of_interest = discovery.columns_of_interest
 
@@ -68,22 +69,19 @@ class GraphDataModeler:
 
             if isinstance(user_input, UserInput):
                 self.user_input = user_input.formatted_dict
+
             else:
                 self.user_input = user_input
-                assert "general_description" in self.user_input.keys(), (
-                    "user_input must include key:value pair {general_description: ...}. "
+
+            if "general_description" not in self.user_input.keys():
+                warnings.warn(
+                    "user_input should include key:value pair {general_description: ...} for best results. "
                     + f"Found keys {self.user_input.keys()}"
                 )
 
-            # self.user_input = user_input
-
-            # assert "general_description" in self.user_input.keys(), (
-            #     "user_input must include key:value pair {general_description: ...}. "
-            #     + f"Found keys {self.user_input.keys()}"
-            # )
-
-            self.columns_of_interest = list(self.user_input.keys())
-            self.columns_of_interest.remove("general_description")
+            self.columns_of_interest = allowed_columns or list(self.user_input.keys())
+            if "general_description" in self.columns_of_interest:
+                self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery
             self.general_info = general_data_description
@@ -260,7 +258,7 @@ class GraphDataModeler:
         assert self._initial_model_created, "No data model present to iterate on."
 
         def iterate() -> DataModel:
-            for i in range(0, iterations):
+            for _ in range(0, iterations):
                 response = self.llm.get_data_model_response(
                     formatted_prompt=self._generate_data_model_iteration_prompt(
                         user_corrections=user_corrections,
@@ -274,7 +272,7 @@ class GraphDataModeler:
                 self.model_iterations += 1
 
             return response
-        
+
         current_model = iterate()
-        
+
         return current_model

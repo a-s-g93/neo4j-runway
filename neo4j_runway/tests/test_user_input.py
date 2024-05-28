@@ -34,7 +34,7 @@ class TestUserInput(unittest.TestCase):
             )
 
     def test_empty_col_description(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertWarns(Warning):
             UserInput(general_description="gen", column_descriptions={})
 
 
