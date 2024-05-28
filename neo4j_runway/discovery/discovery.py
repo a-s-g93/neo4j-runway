@@ -19,7 +19,11 @@ class Discovery:
     """
 
     def __init__(
-        self, data: pd.DataFrame, user_input: Union[Dict[str, str], UserInput] = {}, llm: LLM = None, pandas_only: bool = False
+        self,
+        data: pd.DataFrame,
+        user_input: Union[Dict[str, str], UserInput] = {},
+        llm: LLM = None,
+        pandas_only: bool = False,
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via an LLM.
@@ -42,18 +46,21 @@ class Discovery:
             self.user_input = user_input
             if "general_description" not in self.user_input.keys():
                 warnings.warn(
-                "user_input should include key:value pair {general_description: ...} for best results. "
-                + f"Found keys {self.user_input.keys()}"
-            )
+                    "user_input should include key:value pair {general_description: ...} for best results. "
+                    + f"Found keys {self.user_input.keys()}"
+                )
         self.llm = llm
 
         self.columns_of_interest = list(self.user_input.keys())
-        if "general_description" in self.columns_of_interest: self.columns_of_interest.remove("general_description")
+        if "general_description" in self.columns_of_interest:
+            self.columns_of_interest.remove("general_description")
 
         if self.columns_of_interest:
-            self.data = data[self.columns_of_interest]  
-        else: 
-            warnings.warn("No columns detected in user input. Defaulting to all columns.")
+            self.data = data[self.columns_of_interest]
+        else:
+            warnings.warn(
+                "No columns detected in user input. Defaulting to all columns."
+            )
             self.columns_of_interest = data.columns
             self.data = data
 

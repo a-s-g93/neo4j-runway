@@ -59,11 +59,13 @@ class TestDiscovery(unittest.TestCase):
     def test_init_with_no_desired_columns(self) -> None:
         d = Discovery(llm=LLM(), data=pd.DataFrame(data))
 
-        self.assertEqual({"id", "feature_1", "feature_2", "bad_feature"}, set(d.columns_of_interest))
+        self.assertEqual(
+            {"id", "feature_1", "feature_2", "bad_feature"}, set(d.columns_of_interest)
+        )
 
         with self.assertWarns(Warning):
             Discovery(llm=LLM(), data=pd.DataFrame(data))
-    
+
     def test_pandas_only(self) -> None:
         d = Discovery(data=pd.DataFrame(data))
         d.run()
@@ -72,6 +74,7 @@ class TestDiscovery(unittest.TestCase):
         self.assertIsNotNone(d.df_info)
         self.assertIsNotNone(d.numeric_data_description)
         self.assertIsNotNone(d.categorical_data_description)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -24,7 +24,7 @@ class GraphDataModeler:
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
-        allowed_columns: List[str] = []
+        allowed_columns: List[str] = [],
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
@@ -69,18 +69,19 @@ class GraphDataModeler:
 
             if isinstance(user_input, UserInput):
                 self.user_input = user_input.formatted_dict
-                
+
             else:
                 self.user_input = user_input
 
             if "general_description" not in self.user_input.keys():
                 warnings.warn(
-                "user_input should include key:value pair {general_description: ...} for best results. "
-                + f"Found keys {self.user_input.keys()}"
-            )
+                    "user_input should include key:value pair {general_description: ...} for best results. "
+                    + f"Found keys {self.user_input.keys()}"
+                )
 
             self.columns_of_interest = allowed_columns or list(self.user_input.keys())
-            if "general_description" in self.columns_of_interest: self.columns_of_interest.remove("general_description")
+            if "general_description" in self.columns_of_interest:
+                self.columns_of_interest.remove("general_description")
 
             self.discovery = discovery
             self.general_info = general_data_description
