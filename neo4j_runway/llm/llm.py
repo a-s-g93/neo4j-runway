@@ -36,10 +36,10 @@ class LLM:
 
     Attributes
     ----------
-    model: str
-        The OpenAI LLM to use.
-    open_ai_key: Union[str, None] = None
-        Your OpenAI API key if it is not declared in an environment variable.
+    model: str, optional
+        The OpenAI LLM to use., by default gpt-4o-2024-05-13
+    open_ai_key: Union[str, None], optional
+        Your OpenAI API key if it is not declared in an environment variable., by default None
     """
 
     def __init__(
@@ -107,7 +107,7 @@ class LLM:
                 cot = self.get_chain_of_thought_response(
                     formatted_prompt=validation["message"]
                 )
-                # formatted_prompt = validation['message']
+
                 formatted_prompt = self._generate_retry_prompt(
                     chain_of_thought_response=cot,
                     errors_to_fix=validation["errors"],
