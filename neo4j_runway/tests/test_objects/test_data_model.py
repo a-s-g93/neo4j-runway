@@ -1,9 +1,6 @@
 import unittest
 
-from ...objects.node import Node
-from ...objects.relationship import Relationship
-from ...objects.property import Property
-from ...objects.data_model import DataModel
+from ...objects import Node, Relationship, Property, DataModel
 
 from ..resources.data_model_yaml import data_model_dict, data_model_yaml
 

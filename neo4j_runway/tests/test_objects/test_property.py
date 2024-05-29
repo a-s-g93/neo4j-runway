@@ -1,6 +1,6 @@
 import unittest
 
-from ..objects.property import Property, TYPES_MAP_PYTHON_KEYS
+from ...objects.property import Property, TYPES_MAP_PYTHON_KEYS
 
 
 class TestProperty(unittest.TestCase):

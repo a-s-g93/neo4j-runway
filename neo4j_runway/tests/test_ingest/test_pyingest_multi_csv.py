@@ -4,8 +4,8 @@ import unittest
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-from ..ingestion.pyingest import PyIngest
-from .resources.people_pets import people_pets_multi_csv_yaml_string
+from ...ingestion.pyingest import PyIngest
+from ..resources.people_pets import people_pets_multi_csv_yaml_string
 
 load_dotenv()
 

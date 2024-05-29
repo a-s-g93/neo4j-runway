@@ -1,8 +1,6 @@
 import unittest
 
-from ..objects.node import Node
-from ..objects.property import Property
-from ..objects.arrows import ArrowsNode
+from ...objects import Node, Property, ArrowsNode
 
 
 class TestNode(unittest.TestCase):
