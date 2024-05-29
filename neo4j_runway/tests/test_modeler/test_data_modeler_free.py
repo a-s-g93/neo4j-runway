@@ -5,12 +5,14 @@ from ...modeler import GraphDataModeler
 from ..resources.data_model_yaml import data_model_dict
 from graphviz import Digraph
 
+
 class LLMMock:
     def get_data_model_response(*args, **kargs) -> DataModel:
         return DataModel(
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
         )
+
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -25,6 +27,7 @@ USER_GENERATED_INPUT_BAD = {
     "feature_1": "this is a feature",
     "feature_2": "this is also a feature",
 }
+
 
 class TestGraphDataModelerFree(unittest.TestCase):
 
@@ -126,6 +129,7 @@ class TestGraphDataModelerFree(unittest.TestCase):
         )
 
         self.assertEqual(["feature_1", "feature_2", "id"], gdm.columns_of_interest)
+
 
 if __name__ == "__main__":
     unittest.main()
