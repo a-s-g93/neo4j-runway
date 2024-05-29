@@ -1,13 +1,12 @@
 import os
 import unittest
 
-from ast import literal_eval
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 import pandas as pd
 
-from ..ingestion.pyingest import PyIngest
-from .resources.people_pets import people_pets_yaml_string
+from ...ingestion.pyingest import PyIngest
+from ..resources.people_pets import people_pets_yaml_string
 
 load_dotenv()
 

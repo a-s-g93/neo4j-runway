@@ -1,6 +1,6 @@
 import unittest
 
-from ..utils.naming_conventions import *
+from ...utils.naming_conventions import *
 
 
 class TestNamingConventions(unittest.TestCase):

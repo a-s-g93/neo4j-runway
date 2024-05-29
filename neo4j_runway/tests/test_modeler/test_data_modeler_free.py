@@ -1,12 +1,16 @@
 import unittest
 
+from ...objects import UserInput, DataModel
+from ...modeler import GraphDataModeler
+from ..resources.data_model_yaml import data_model_dict
 from graphviz import Digraph
 
-from ..objects.node import Node
-from ..objects.relationship import Relationship
-from ..objects.property import Property
-from ..objects.data_model import DataModel
-from ..modeler.modeler import GraphDataModeler
+class LLMMock:
+    def get_data_model_response(*args, **kargs) -> DataModel:
+        return DataModel(
+            nodes=data_model_dict["nodes"],
+            relationships=data_model_dict["relationships"],
+        )
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -22,100 +26,44 @@ USER_GENERATED_INPUT_BAD = {
     "feature_2": "this is also a feature",
 }
 
-person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
-person_age = Property(name="age", type="str", csv_mapping="age", is_unique=False)
-address_street = Property(
-    name="street", type="str", csv_mapping="street", is_unique=False
-)
-address_city = Property(name="city", type="str", csv_mapping="city", is_unique=False)
-pet_name = Property(name="name", type="str", csv_mapping="pet_name", is_unique=False)
-pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
-toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
-toy_kind = Property(name="kind", type="str", csv_mapping="toy_type", is_unique=False)
-
-nodes = [
-    Node(
-        label="Person",
-        properties=[person_name, person_age],
-    ),
-    Node(
-        label="Address",
-        properties=[address_street, address_city],
-    ),
-    Node(
-        label="Pet",
-        properties=[pet_name, pet_kind],
-    ),
-    Node(
-        label="Toy",
-        properties=[toy_name, toy_kind],
-    ),
-]
-
-relationships = [
-    Relationship(
-        type="HAS_ADDRESS",
-        properties=[],
-        source="Person",
-        target="Address",
-    ),
-    Relationship(
-        type="KNOWS",
-        properties=[],
-        source="Person",
-        target="Person",
-    ),
-    Relationship(
-        type="HAS_PET",
-        properties=[],
-        source="Person",
-        target="Pet",
-    ),
-    Relationship(
-        type="PLAYS_WITH",
-        properties=[],
-        source="Pet",
-        target="Toy",
-    ),
-]
-
-nodes2 = nodes + [
-    Node(
-        label="Test",
-        properties=[
-            Property(name="name", type="str", csv_mapping="test", is_unique=True)
-        ],
-    )
-]
-data_model = DataModel(nodes=nodes, relationships=relationships)
-data_model2 = DataModel(nodes=nodes2, relationships=relationships)
-
-
-class TestGraphDataModler(unittest.TestCase):
+class TestGraphDataModelerFree(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.gdm = GraphDataModeler(
-            llm="llm",
-            user_input=USER_GENERATED_INPUT,
-            discovery="discovery",
-            general_data_description="desc",
-            categorical_data_description="desc",
-            numeric_data_description="desc",
-            feature_descriptions="desc",
+
+        cls.data_model = DataModel(
+            nodes=data_model_dict["nodes"],
+            relationships=data_model_dict["relationships"],
         )
-        cls.gdm.model_history = [data_model, data_model2, data_model]
+
+        user_input = UserInput(
+            general_description="this is dummy data.",
+            column_descriptions={"prop_" + str(i): "" for i in range(1, 8)},
+        )
+        cls.gdm = GraphDataModeler(llm=LLMMock(), user_input=user_input)
+
+    def test_load_model(self) -> None:
+
+        self.gdm.load_model(data_model=self.data_model)
+        self.assertEqual(self.gdm.current_model, self.data_model)
+
+    def test_iterate_model(self) -> None:
+        self.gdm.model_history = []
+        self.gdm.create_initial_model()
+        self.gdm.iterate_model(2)
+
+        self.assertEqual(len(self.gdm.model_history), 3)
 
     def test_get_model(self) -> None:
         """
         Test get model logic.
         """
-
-        self.assertEqual(self.gdm.get_model(version=2, as_dict=False), data_model2)
+        self.gdm.model_history = [self.data_model, "data model", self.data_model]
+        self.assertEqual(self.gdm.get_model(version=2, as_dict=False), "data model")
         self.assertEqual(
-            self.gdm.get_model(version=1, as_dict=True), data_model.model_dump()
+            self.gdm.get_model(version=1, as_dict=True), self.data_model.model_dump()
         )
-        self.assertEqual(self.gdm.get_model(version=-3, as_dict=False), data_model)
+        self.assertEqual(self.gdm.get_model(version=-3, as_dict=False), self.data_model)
 
         with self.assertRaises(AssertionError):
             self.gdm.get_model(version=4, as_dict=False)
@@ -130,7 +78,7 @@ class TestGraphDataModler(unittest.TestCase):
         """
         Test viz returns Digraph.
         """
-
+        self.gdm.model_history = [self.data_model]
         self.assertIsInstance(self.gdm.current_model_viz, Digraph)
 
     def test_discovery_warning(self) -> None:
@@ -178,7 +126,6 @@ class TestGraphDataModler(unittest.TestCase):
         )
 
         self.assertEqual(["feature_1", "feature_2", "id"], gdm.columns_of_interest)
-
 
 if __name__ == "__main__":
     unittest.main()

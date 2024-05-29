@@ -1,13 +1,11 @@
 import unittest
 
-# import os
+from ...objects.node import Node
+from ...objects.relationship import Relationship
+from ...objects.property import Property
+from ...objects.data_model import DataModel
 
-from ..objects.node import Node
-from ..objects.relationship import Relationship
-from ..objects.property import Property
-from ..objects.data_model import DataModel
-
-from .resources.data_model_yaml import data_model_dict, data_model_yaml
+from ..resources.data_model_yaml import data_model_dict, data_model_yaml
 
 
 class TestDataModel(unittest.TestCase):
@@ -246,5 +244,17 @@ class TestDataModel(unittest.TestCase):
         self.assertEqual(data_model.to_yaml(write_file=False), data_model_yaml)
 
 
+    def test_data_model_with_multi_csv_from_arrows(self) -> None:
+        data_model = DataModel.from_arrows(
+            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv.json"
+        )
+
+        self.assertEqual(data_model.relationships[-1].csv_name, "shelters.csv")
+        self.assertEqual(data_model.relationships[0].csv_name, "pets-arrows.csv")
+        self.assertEqual(data_model.nodes[0].csv_name, "pets-arrows.csv")
+
+    def test_data_model_with_multi_csv_from_solutions_workbench(self) -> None:
+        pass
+    
 if __name__ == "__main__":
     unittest.main()

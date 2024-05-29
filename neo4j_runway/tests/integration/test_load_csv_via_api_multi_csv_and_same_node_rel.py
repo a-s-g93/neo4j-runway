@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j.exceptions import AuthError
 
-from ..utils import test_database_connection
-from ..ingestion import IngestionGenerator
-from ..objects import DataModel
+from ...utils import test_database_connection
+from ...ingestion import IngestionGenerator
+from ...objects import DataModel
 
 load_dotenv()
 
@@ -18,7 +18,7 @@ uri = os.environ.get("NEO4J_URI")
 database = os.environ.get("NEO4J_DATABASE")
 
 
-class TestLoadCSVViaAPI(unittest.TestCase):
+class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
     """
     Steps:
         1. Ensure local instance of Neo4j is available.
@@ -68,8 +68,10 @@ class TestLoadCSVViaAPI(unittest.TestCase):
                         """
             )
 
+        # contains node csv in caption or property
+        # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "neo4j_runway/tests/resources/people-pets-arrows-for-load-csv.json"
+            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv-and-same-node-rel.json"
         )
 
         gen = IngestionGenerator(
@@ -78,7 +80,7 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             password=password,
             uri=uri,
             database=database,
-            csv_name="pets-arrows.csv",
+            csv_name="",
         )
 
         load_csv_cypher = gen.generate_load_csv_string(method="api")
@@ -116,6 +118,12 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             r = session.run(address_cypher).single().value()
             self.assertEqual(3, r)
 
+    def test_shelter_node_count(self) -> None:
+        address_cypher = "match (p:Shelter) return count(p)"
+        with self.driver.session(database=database) as session:
+            r = session.run(address_cypher).single().value()
+            self.assertEqual(2, r)
+
     def test_person_to_pet_relationship_counts(self) -> None:
         cypher = "match (:Person)-[r:HAS_PET]-(:Pet) return count(r)"
         with self.driver.session(database=database) as session:
@@ -134,12 +142,31 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
 
+    def test_pet_to_shelter_relationship_counts(self) -> None:
+        cypher = "match (:Pet)-[r:FROM_SHELTER]-(:Shelter) return count(r)"
+        with self.driver.session(database=database) as session:
+            r = session.run(cypher).single().value()
+            self.assertEqual(5, r)
+
+    def test_person_to_person_relationship_counts(self) -> None:
+        cypher = "match (:Person)-[r:KNOWS]->(:Person) return count(r)"
+        with self.driver.session(database=database) as session:
+            r = session.run(cypher).single().value()
+            self.assertEqual(9, r)
+
     def test_constraints_present(self) -> None:
         cypher = "show constraints yield name return name"
         with self.driver.session(database=database) as session:
             r = set(session.run(cypher).value())
             self.assertEqual(
-                {"person_name", "toy_name", "address_address", "pet_name"}, r
+                {
+                    "person_name",
+                    "toy_name",
+                    "address_address",
+                    "pet_name",
+                    "shelter_name",
+                },
+                r,
             )
 
 

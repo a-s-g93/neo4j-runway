@@ -1,6 +1,6 @@
 import unittest
 
-from ..objects import UserInput
+from ...objects import UserInput
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
