@@ -310,7 +310,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
     def test_space_in_column_name(self) -> None:
         prop1 = Property(name="p1", type="str", csv_mapping="p 1")
-    
+
         self.assertEqual(cast_value(prop1), "row.`p 1`")
 
     def test_odd_characters_in_column_name(self) -> None:
