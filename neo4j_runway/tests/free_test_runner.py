@@ -4,9 +4,26 @@ import unittest
 # import your test modules
 from . import *
 
-mods = [x[:-3] for x in os.listdir("neo4j_runway/tests/") if x.startswith("test_")]
-# only run the tests that don't charge money $$$
-mods.remove("test_data_modeler_with_yaml")
+dirs = [
+    "test_code_generator/",
+    "test_discovery/",
+    "test_ingest/",
+    "test_integration/",
+    "test_modeler/",
+    "test_objects/",
+    "test_utils/",
+]
+
+mods = []
+for dir in dirs:
+    # DONT include $$$ modules!
+    mods += [
+        f"{dir[:-1]}." + x[:-3]
+        for x in os.listdir(f"neo4j_runway/tests/{dir}")
+        if x.startswith("test_") and not "paid" in x
+    ]
+
+
 # initialize the test suite
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()

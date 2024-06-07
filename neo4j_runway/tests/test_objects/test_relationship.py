@@ -1,8 +1,6 @@
 import unittest
 
-from ..objects.relationship import Relationship
-from ..objects.property import Property
-from ..objects.arrows import ArrowsRelationship
+from ...objects import Relationship, Property, ArrowsRelationship
 
 
 class TestRelationship(unittest.TestCase):
@@ -50,7 +48,7 @@ class TestRelationship(unittest.TestCase):
             target=self.target,
         )
 
-        self.assertEqual(relationship.unique_properties, ["current"])
+        self.assertEqual(relationship.unique_properties, [self.prop2])
 
     def test_property_column_mapping(self) -> None:
 

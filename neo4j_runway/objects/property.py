@@ -18,9 +18,9 @@ TYPES_MAP_NEO4J_KEYS = {
     "ZONED DATETIME": "neo4j.time.DateTime",
     "LOCAL DATETIME": "neo4j.time.DateTime",
     "DURATION": "neo4j.time.Duration",
-    "POINT": "neo4j.spartial.Point",
-    "POINT Cartesian": "neo4j.spartial.CartesianPoint",
-    "POINT WGS-84": "neo4j.spartial.WGS84Point",
+    "POINT": "neo4j.spatial.Point",
+    "POINT Cartesian": "neo4j.spatial.CartesianPoint",
+    "POINT WGS-84": "neo4j.spatial.WGS84Point",
     "unknown": "unknown",
 }
 

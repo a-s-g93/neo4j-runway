@@ -1,11 +1,8 @@
 import unittest
 
-from ..objects.node import Node
-from ..objects.relationship import Relationship
-from ..objects.property import Property
-from ..objects.data_model import DataModel
-from ..ingestion.generate_ingest import *
-from ..tests.resources.ingestion_generation_answers import *
+from ...objects import Node, Relationship, Property, DataModel
+from ...ingestion.generate_ingest import *
+from ...tests.resources.ingestion_generation_answers import *
 
 
 class TestIngestCodeGeneration(unittest.TestCase):
@@ -66,6 +63,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
         label = self.node_a.label
         unique_props = self.node_a.unique_properties
+        print(unique_props[0].name)
         self.assertEqual(
             generate_constraints_key(
                 label_or_type=label, unique_property=unique_props[0]
@@ -136,7 +134,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
         for k in unique_map.keys():
             del prop_map[k]
         self.assertEqual(
-            generate_set_property(property_column_mapping=prop_map), set_properties_a
+            generate_set_property(properties=self.node_a.nonunique_properties),
+            set_properties_a,
         )
 
         unique_map = self.node_b.unique_properties_column_mapping
@@ -144,7 +143,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
         for k in unique_map.keys():
             del prop_map[k]
         self.assertEqual(
-            generate_set_property(property_column_mapping=prop_map), set_properties_b
+            generate_set_property(properties=self.node_b.nonunique_properties),
+            set_properties_b,
         )
 
     def test_generate_set_unique_property(self) -> None:
@@ -154,13 +154,13 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties_column_mapping=self.node_a.unique_properties_column_mapping
+                unique_properties=self.node_a.unique_properties
             ),
             set_unique_property_a,
         )
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties_column_mapping=self.node_b.unique_properties_column_mapping
+                unique_properties=self.node_b.unique_properties
             ),
             set_unique_property_b,
         )
@@ -261,18 +261,64 @@ class TestIngestCodeGeneration(unittest.TestCase):
         )
 
     def test_generate_node_key_constraint(self) -> None:
+        nk1 = Property(name="nk1", type="str", csv_mapping="nk1", part_of_key=True)
+        nk2 = Property(name="nk2", type="str", csv_mapping="nk2", part_of_key=True)
+
         self.assertEqual(
-            generate_node_key_constraint(label="NodeA", unique_property=["nk1", "nk2"]),
+            generate_node_key_constraint(label="NodeA", unique_properties=[nk1, nk2]),
             node_key_constraint_answer,
         )
 
     def test_generate_relationship_key_constraint(self) -> None:
+        nk1 = Property(name="nk1", type="str", csv_mapping="nk1", part_of_key=True)
+        nk2 = Property(name="nk2", type="str", csv_mapping="nk2", part_of_key=True)
+
         self.assertEqual(
             generate_relationship_key_constraint(
-                type="HAS_RELATIONSHIP", unique_property=["nk1", "nk2"]
+                type="HAS_RELATIONSHIP", unique_properties=[nk1, nk2]
             ),
             relationship_key_constraint_answer,
         )
+
+    def test_cast_value(self) -> None:
+        prop_str = Property(name="p1", type="str", csv_mapping="p1")
+        prop_int = Property(name="p2", type="int", csv_mapping="p2")
+        prop_date = Property(name="p3", type="neo4j.time.Date", csv_mapping="p3")
+        prop_time = Property(name="p4", type="neo4j.time.Time", csv_mapping="p4")
+        prop_datetime = Property(
+            name="p5", type="neo4j.time.DateTime", csv_mapping="p5"
+        )
+        prop_point = Property(
+            name="p6", type="neo4j.spatial.CartesianPoint", csv_mapping="p6"
+        )
+
+        self.assertEqual(cast_value(prop_str), "row.p1")
+        self.assertEqual(cast_value(prop_int), "row.p2")
+        self.assertEqual(cast_value(prop_date), "date(row.p3)")
+        self.assertEqual(cast_value(prop_time), "time(row.p4)")
+        self.assertEqual(cast_value(prop_datetime), "datetime(row.p5)")
+        self.assertEqual(cast_value(prop_point), "point(row.p6)")
+
+    def test_cast_value_multi_column_mapping(self) -> None:
+        prop_str = Property(name="p1", type="str", csv_mapping=["p1", "p1b"])
+        prop_point = Property(
+            name="p1", type="neo4j.spatial.WGS84Point", csv_mapping=["p1", "p1b"]
+        )
+
+        self.assertEqual(cast_value(prop_str), "row.p1")
+        self.assertEqual(cast_value(prop_point), "point(row.p1)")
+
+    def test_space_in_column_name(self) -> None:
+        prop1 = Property(name="p1", type="str", csv_mapping="p 1")
+
+        self.assertEqual(cast_value(prop1), "row.`p 1`")
+
+    def test_odd_characters_in_column_name(self) -> None:
+        prop1 = Property(name="p#", type="str", csv_mapping="#p")
+        prop2 = Property(name="g", type="str", csv_mapping="$g")
+
+        self.assertEqual(cast_value(prop1), "row.`#p`")
+        self.assertEqual(cast_value(prop2), "row.`$g`")
 
     def test_generate_pyingest_string(self) -> None:
         """

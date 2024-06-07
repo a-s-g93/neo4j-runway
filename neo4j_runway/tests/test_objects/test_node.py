@@ -1,8 +1,6 @@
 import unittest
 
-from ..objects.node import Node
-from ..objects.property import Property
-from ..objects.arrows import ArrowsNode
+from ...objects import Node, Property, ArrowsNode
 
 
 class TestNode(unittest.TestCase):
@@ -33,7 +31,7 @@ class TestNode(unittest.TestCase):
 
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
-        self.assertEqual(node.unique_properties, ["name"])
+        self.assertEqual(node.unique_properties, [self.person_name])
 
     def test_property_column_mapping(self) -> None:
 

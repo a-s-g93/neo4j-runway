@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j.exceptions import AuthError
 
-from ..utils import test_database_connection
-from ..ingestion import IngestionGenerator
-from ..objects import DataModel
+from ...utils import test_database_connection
+from ...ingestion import IngestionGenerator
+from ...objects import DataModel
 
 load_dotenv()
 
@@ -18,7 +18,7 @@ uri = os.environ.get("NEO4J_URI")
 database = os.environ.get("NEO4J_DATABASE")
 
 
-class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
+class TestLoadCSVViaAPIWithNodeKeys(unittest.TestCase):
     """
     Steps:
         1. Ensure local instance of Neo4j is available.
@@ -71,7 +71,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         # contains node csv in caption or property
         # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv-and-same-node-rel.json"
+            "neo4j_runway/tests/resources/people-pets-arrows-node-keys.json"
         )
 
         gen = IngestionGenerator(
@@ -84,7 +84,6 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         )
 
         load_csv_cypher = gen.generate_load_csv_string(method="api")
-
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
             with cls.driver.session(database=database) as session:
@@ -116,7 +115,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         address_cypher = "match (p:Address) return count(p)"
         with self.driver.session(database=database) as session:
             r = session.run(address_cypher).single().value()
-            self.assertEqual(3, r)
+            self.assertEqual(4, r)
 
     def test_shelter_node_count(self) -> None:
         address_cypher = "match (p:Shelter) return count(p)"
@@ -162,7 +161,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
                 {
                     "person_name",
                     "toy_name",
-                    "address_address",
+                    "address_city_street",
                     "pet_name",
                     "shelter_name",
                 },

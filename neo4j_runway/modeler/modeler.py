@@ -175,7 +175,6 @@ class GraphDataModeler:
             Based upon your knowledge of the data in my .csv and 
             of high-quality Neo4j graph data models, I would like you to return your
             suggestion for translating the data in my .csv into a Neo4j graph data model.
-            Focus only on the nodes and relationships. Properties will be added in a later step.
 
             {model_generation_rules}
 
@@ -201,7 +200,6 @@ class GraphDataModeler:
             user_corrections = """
                                 Add features from the csv to each node and relationship as properties. 
                                 Ensure that these properties provide value to their respective node or relationship.
-                                If a property is a unique identifier, then also add it to the unique_constraints list.
                                 """
 
         prompt = f"""

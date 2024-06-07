@@ -72,7 +72,7 @@ class Relationship(BaseModel):
         The relationship's unique properties.
         """
 
-        return [prop.name for prop in self.properties if prop.is_unique]
+        return [prop for prop in self.properties if prop.is_unique]
 
     @property
     def unique_properties_column_mapping(self) -> Dict[str, str]:
@@ -90,7 +90,7 @@ class Relationship(BaseModel):
         The node's nonunique properties.
         """
 
-        return [prop.name for prop in self.properties if not prop.is_unique]
+        return [prop for prop in self.properties if not prop.is_unique]
 
     @property
     def nonunique_properties_column_mapping(self) -> Dict[str, str]:
@@ -133,6 +133,23 @@ class Relationship(BaseModel):
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
+
+    @property
+    def nonidentifying_properties(self) -> List[Property]:
+        """
+        List of nonidentifying properties.
+
+        Returns
+        -------
+        List[Property]
+            A list with unique or relationship key property keys and CSV column values.
+        """
+
+        return [
+            prop
+            for prop in self.properties
+            if not prop.is_unique and not prop.part_of_key
+        ]
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
