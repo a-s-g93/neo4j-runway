@@ -48,7 +48,7 @@ class TestRelationship(unittest.TestCase):
             target=self.target,
         )
 
-        self.assertEqual(relationship.unique_properties, ["current"])
+        self.assertEqual(relationship.unique_properties, [self.prop2])
 
     def test_property_column_mapping(self) -> None:
 

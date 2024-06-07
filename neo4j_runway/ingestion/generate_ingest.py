@@ -7,9 +7,7 @@ from typing import Dict, List, Any, Union
 
 import yaml
 
-from ..objects.data_model import DataModel
-from ..objects import Node
-from ..objects import Relationship
+from ..objects import DataModel, Node, Relationship, Property
 
 model_maps = []
 nodes_map = {}
@@ -38,8 +36,8 @@ yaml.add_representer(folded_unicode, folded_unicode_representer)
 yaml.add_representer(literal_unicode, literal_unicode_representer)
 
 
-def lowercase_first_letter(str):
-    return str[0].lower() + str[1:]
+def lowercase_first_letter(s: str):
+    return s[0].lower() + s[1:]
 
 
 class IngestionGenerator:
@@ -113,7 +111,7 @@ class IngestionGenerator:
                         label_or_type=node.label, unique_property=node.node_keys
                     )
                 ] = generate_node_key_constraint(
-                    label=node.label, unique_property=node.node_keys
+                    label=node.label, unique_properties=node.node_keys
                 )
 
             # add to cypher map
@@ -154,7 +152,7 @@ class IngestionGenerator:
                         label_or_type=node.label, unique_property=node.node_keys
                     )
                 ] = generate_relationship_key_constraint(
-                    type=rel.type, unique_property=rel.relationship_keys
+                    type=rel.type, unique_properties=rel.relationship_keys
                 )
 
             source = self.data_model.node_dict[rel.source]
@@ -322,25 +320,25 @@ class IngestionGenerator:
 
 
 def generate_constraints_key(
-    label_or_type: str, unique_property: Union[str, List[str]]
+    label_or_type: str, unique_property: Union[Property, List[Property]]
 ) -> str:
     """
     Generate the key for a unique or node key constraint.
     """
-    if isinstance(unique_property, str):
-        return f"{label_or_type.lower()}_{unique_property.lower()}"
+    if isinstance(unique_property, Property):
+        return f"{label_or_type.lower()}_{unique_property.name.lower()}"
     else:
         return (
-            f"{label_or_type.lower()}_{'_'.join([x.lower() for x in unique_property])}"
+            f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
         )
 
 
-def generate_constraint(label_or_type: str, unique_property: str) -> str:
+def generate_constraint(label_or_type: str, unique_property: Property) -> str:
     """
     Generate a constrant string.
     """
 
-    return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property} IS UNIQUE;\n"
+    return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.name.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property.name} IS UNIQUE;\n"
 
 
 def generate_match_node_clause(node: Node) -> str:
@@ -352,7 +350,7 @@ def generate_match_node_clause(node: Node) -> str:
         "MATCH (n:"
         + node.label
         + " {"
-        + f"{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}"
+        + f"{generate_set_unique_property(node.node_keys or node.unique_properties)}"
         + "})"
     )
 
@@ -377,15 +375,15 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
 MATCH (target:{node.label} {to_unique})"""
 
 
-def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
+def generate_set_property(properties: List[Property]) -> str:
     """
     Generate a set property string.
     """
 
     temp_set_list = []
 
-    for prop, col in property_column_mapping.items():
-        temp_set_list.append(f"n.{prop} = row.{col}")
+    for prop in properties:
+        temp_set_list.append(f"n.{prop.name} = {cast_value(prop)}")
 
     result = ", ".join(temp_set_list)
 
@@ -396,21 +394,14 @@ def generate_set_property(property_column_mapping: Dict[str, str]) -> str:
 
 
 def generate_set_unique_property(
-    unique_properties_column_mapping: Dict[str, Union[str, List[str]]]
+    unique_properties: List[Property]
 ) -> str:
     """
     Generate the unique properties to match a node on within a MERGE statement.
     Returns: unique_property_match_component
     """
 
-    res = [
-        (
-            f"{prop}: row.{csv_mapping[0]}"
-            if isinstance(csv_mapping, list)
-            else f"{prop}: row.{csv_mapping}"
-        )
-        for prop, csv_mapping in unique_properties_column_mapping.items()
-    ]
+    res = [f"{prop.name}: {cast_value(prop)}" for prop in unique_properties]
     return ", ".join(res)
 
 
@@ -421,8 +412,8 @@ def generate_merge_node_clause_standard(node: Node) -> str:
 
     return f"""WITH $dict.rows AS rows
 UNWIND rows AS row
-MERGE (n:{node.label} {{{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}}})
-{generate_set_property(node.nonunique_properties_mapping_for_set_clause)}"""
+MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties)}}})
+{generate_set_property(node.nonidentifying_properties)}"""
 
 
 def generate_merge_node_load_csv_clause(
@@ -439,8 +430,8 @@ def generate_merge_node_load_csv_clause(
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_key_mapping or node.unique_properties_column_mapping)}}})
-    {generate_set_property(node.nonunique_properties_mapping_for_set_clause)}
+    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties)}}})
+    {generate_set_property(node.nonidentifying_properties)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -456,14 +447,14 @@ def generate_merge_relationship_clause_standard(
 UNWIND rows as row
 {generate_match_same_node_labels_clause(node=source_node)}
 MERGE (source)-[n:{relationship.type}]->(target)
-{generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}"""
+{generate_set_property(relationship.nonidentifying_properties)}"""
     else:
         return f"""WITH $dict.rows AS rows
 UNWIND rows as row
 {generate_match_node_clause(source_node).replace('(n:', '(source:')}
 {generate_match_node_clause(target_node).replace('(n:', '(target:')}
 MERGE (source)-[n:{relationship.type}]->(target)
-{generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}"""
+{generate_set_property(relationship.nonidentifying_properties)}"""
 
 
 def generate_merge_relationship_load_csv_clause(
@@ -485,7 +476,7 @@ CALL {{
     WITH row
     {generate_match_same_node_labels_clause(node=source_node)}
     MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}
+    {generate_set_property(relationship.nonidentifying_properties)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
     else:
@@ -495,26 +486,45 @@ CALL {{
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}
     {generate_match_node_clause(target_node).replace('(n:', '(target:')}
     MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonunique_properties_mapping_for_set_clause)}
+    {generate_set_property(relationship.nonidentifying_properties)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
 
 def generate_node_key_constraint(
-    label: str, unique_property: Union[str, List[str]]
+    label: str, unique_properties: List[Property]
 ) -> str:
     """
     Generate a node key constraint.
     """
-    props = "(" + ", ".join([f"n.{x}" for x in unique_property]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_property)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
+    props = "(" + ", ".join([f"n.{x.name}" for x in unique_properties]) + ")"
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_properties)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
 
 
 def generate_relationship_key_constraint(
-    type: str, unique_property: Union[str, List[str]]
+    type: str, unique_properties: List[Property]
 ) -> str:
     """
     Generate a relationship key constraint.
     """
-    props = "(" + ", ".join([f"r.{x}" for x in unique_property]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_property)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
+    props = "(" + ", ".join([f"r.{x.name}" for x in unique_properties]) + ")"
+    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_properties)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
+
+def cast_value(prop: Property) -> str:
+    """
+    format property to be cast to correct type during ingestion.
+    """
+
+    # take the first val as this is the identifying column
+    base = f"row.{prop.csv_mapping[0]}" if isinstance(prop.csv_mapping, list) else f"row.{prop.csv_mapping}"
+
+    if prop.type.lower().endswith("date"):
+        return f"date({base})"
+    elif prop.type.lower().endswith("datetime"):
+        return f"datetime({base})"
+    elif prop.type.lower().endswith("time"):
+        return f"time({base})"
+    elif prop.type.lower().endswith("point"):
+        return f"point({base})"
+    else:
+        return base
