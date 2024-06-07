@@ -511,11 +511,18 @@ def cast_value(prop: Property) -> str:
     """
 
     # take the first val as this is the identifying column
-    base = (
-        f"row.{prop.csv_mapping[0]}"
-        if isinstance(prop.csv_mapping, list)
-        else f"row.{prop.csv_mapping}"
+    csv_mapping = (
+        prop.csv_mapping[0] if isinstance(prop.csv_mapping, list) else prop.csv_mapping
     )
+
+    # escape bad chars
+    csv_mapping = (
+        f"`{csv_mapping}`"
+        if not csv_mapping[0].isalnum() or " " in csv_mapping
+        else csv_mapping
+    )
+
+    base = f"row.{csv_mapping}"
 
     if prop.type.lower().endswith("date"):
         return f"date({base})"
