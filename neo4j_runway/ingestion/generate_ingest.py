@@ -328,9 +328,7 @@ def generate_constraints_key(
     if isinstance(unique_property, Property):
         return f"{label_or_type.lower()}_{unique_property.name.lower()}"
     else:
-        return (
-            f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
-        )
+        return f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
 
 
 def generate_constraint(label_or_type: str, unique_property: Property) -> str:
@@ -393,9 +391,7 @@ def generate_set_property(properties: List[Property]) -> str:
     return result
 
 
-def generate_set_unique_property(
-    unique_properties: List[Property]
-) -> str:
+def generate_set_unique_property(unique_properties: List[Property]) -> str:
     """
     Generate the unique properties to match a node on within a MERGE statement.
     Returns: unique_property_match_component
@@ -491,9 +487,7 @@ CALL {{
 """
 
 
-def generate_node_key_constraint(
-    label: str, unique_properties: List[Property]
-) -> str:
+def generate_node_key_constraint(label: str, unique_properties: List[Property]) -> str:
     """
     Generate a node key constraint.
     """
@@ -510,13 +504,18 @@ def generate_relationship_key_constraint(
     props = "(" + ", ".join([f"r.{x.name}" for x in unique_properties]) + ")"
     return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_properties)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
 
+
 def cast_value(prop: Property) -> str:
     """
     format property to be cast to correct type during ingestion.
     """
 
     # take the first val as this is the identifying column
-    base = f"row.{prop.csv_mapping[0]}" if isinstance(prop.csv_mapping, list) else f"row.{prop.csv_mapping}"
+    base = (
+        f"row.{prop.csv_mapping[0]}"
+        if isinstance(prop.csv_mapping, list)
+        else f"row.{prop.csv_mapping}"
+    )
 
     if prop.type.lower().endswith("date"):
         return f"date({base})"
