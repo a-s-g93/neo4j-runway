@@ -308,6 +308,18 @@ class TestIngestCodeGeneration(unittest.TestCase):
         self.assertEqual(cast_value(prop_str), "row.p1")
         self.assertEqual(cast_value(prop_point), "point(row.p1)")
 
+    def test_space_in_column_name(self) -> None:
+        prop1 = Property(name="p1", type="str", csv_mapping="p 1")
+    
+        self.assertEqual(cast_value(prop1), "row.`p 1`")
+
+    def test_odd_characters_in_column_name(self) -> None:
+        prop1 = Property(name="p#", type="str", csv_mapping="#p")
+        prop2 = Property(name="g", type="str", csv_mapping="$g")
+
+        self.assertEqual(cast_value(prop1), "row.`#p`")
+        self.assertEqual(cast_value(prop2), "row.`$g`")
+
     def test_generate_pyingest_string(self) -> None:
         """
         Test PyIngest string generation.
