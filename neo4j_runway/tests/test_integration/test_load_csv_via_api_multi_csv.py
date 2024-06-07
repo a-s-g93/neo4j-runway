@@ -3,22 +3,28 @@ import unittest
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from neo4j.exceptions import AuthError
 
-from ..ingestion.pyingest import PyIngest
-from .resources.people_pets import people_pets_multi_csv_yaml_string
+from ...utils import test_database_connection
+from ...ingestion import IngestionGenerator
+from ...objects import DataModel
 
 load_dotenv()
 
+# These credentials are for the dummy data testing only. Do NOT use the same credentials here for production graphs.
 username = os.environ.get("NEO4J_USERNAME")
 password = os.environ.get("NEO4J_PASSWORD")
 uri = os.environ.get("NEO4J_URI")
 database = os.environ.get("NEO4J_DATABASE")
 
 
-class TestPyIngestLoadMultiCSV(unittest.TestCase):
+class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
     """
-    Requires .env file in tests/ containing NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, NEO4J_DATABASE.
-    Use a unique test database as contents will be deleted each run.
+    Steps:
+        1. Ensure local instance of Neo4j is available.
+        2. Generate the LOAD CSV code with an imported data model from arrows.app.
+        3. Load the data into a local instance of Neo4j. The csv is located at imports/ of the local instance.
+        4. query local graph to ensure data loaded properly.
     """
 
     @classmethod
@@ -28,7 +34,18 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
             auth=(username, password),
         )
 
-        # clear database before loading
+        connection_info = test_database_connection(
+            credentials={
+                "uri": uri,
+                "username": username,
+                "password": password,
+            }
+        )
+
+        if not connection_info["valid"]:
+            raise AuthError(connection_info["message"])
+
+        # clear all data in the database
         with cls.driver.session(database=database) as session:
             session.run(
                 """
@@ -51,11 +68,30 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
                         """
             )
 
-        PyIngest(yaml_string=people_pets_multi_csv_yaml_string)
+        # contains node csv in caption or property
+        # contains rel csv in property
+        data_model = DataModel.from_arrows(
+            "neo4j_runway/tests/resources/people-pets-arrows-multi-csv.json"
+        )
+
+        gen = IngestionGenerator(
+            data_model=data_model,
+            username=username,
+            password=password,
+            uri=uri,
+            database=database,
+            csv_name="",
+        )
+
+        load_csv_cypher = gen.generate_load_csv_string(method="api")
+
+        # skip last "query" since it is an empty string
+        for query in load_csv_cypher.split(";")[:-1]:
+            with cls.driver.session(database=database) as session:
+                session.run(query=query)
 
     @classmethod
     def tearDownClass(cls) -> None:
-
         cls.driver.close()
 
     def test_person_node_count(self) -> None:
@@ -80,7 +116,7 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
         address_cypher = "match (p:Address) return count(p)"
         with self.driver.session(database=database) as session:
             r = session.run(address_cypher).single().value()
-            self.assertEqual(4, r)
+            self.assertEqual(3, r)
 
     def test_shelter_node_count(self) -> None:
         address_cypher = "match (p:Shelter) return count(p)"
@@ -112,12 +148,6 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
 
-    def test_person_to_person_relationship_counts(self) -> None:
-        cypher = "match (:Person)-[r:KNOWS]->(:Person) return count(r)"
-        with self.driver.session(database=database) as session:
-            r = session.run(cypher).single().value()
-            self.assertEqual(9, r)
-
     def test_constraints_present(self) -> None:
         cypher = "show constraints yield name return name"
         with self.driver.session(database=database) as session:
@@ -126,7 +156,7 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
                 {
                     "person_name",
                     "toy_name",
-                    "address_city_street",
+                    "address_address",
                     "pet_name",
                     "shelter_name",
                 },

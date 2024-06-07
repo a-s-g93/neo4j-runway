@@ -72,7 +72,7 @@ class Node(BaseModel):
         return {prop.name: prop.csv_mapping for prop in self.properties}
 
     @property
-    def unique_properties(self) -> List[str]:
+    def unique_properties(self) -> List[Property]:
         """
         The node's unique properties.
 
@@ -82,7 +82,7 @@ class Node(BaseModel):
             A list of unique properties.
         """
 
-        return [prop.name for prop in self.properties if prop.is_unique]
+        return [prop for prop in self.properties if prop.is_unique]
 
     @property
     def unique_properties_column_mapping(self) -> Dict[str, Union[str, List[str]]]:
@@ -100,7 +100,7 @@ class Node(BaseModel):
         }
 
     @property
-    def nonunique_properties(self) -> List[str]:
+    def nonunique_properties(self) -> List[Property]:
         """
         The node's nonunique properties.
 
@@ -110,7 +110,7 @@ class Node(BaseModel):
             A list of nonunique properties.
         """
 
-        return [prop.name for prop in self.properties if not prop.is_unique]
+        return [prop for prop in self.properties if not prop.is_unique]
 
     @property
     def nonunique_properties_column_mapping(self) -> Dict[str, str]:
@@ -130,7 +130,7 @@ class Node(BaseModel):
         }
 
     @property
-    def node_keys(self) -> List[str]:
+    def node_keys(self) -> List[Property]:
         """
         The node's keys.
 
@@ -140,7 +140,7 @@ class Node(BaseModel):
             A list of the properties that make up a node key, if any.
         """
 
-        return [prop.name for prop in self.properties if prop.part_of_key]
+        return [prop for prop in self.properties if prop.part_of_key]
 
     @property
     def node_key_mapping(self) -> Dict[str, str]:
@@ -165,7 +165,7 @@ class Node(BaseModel):
         Returns
         -------
         Dict[str, str]
-            A dictionary with unique or node key property keys and CSV column values.
+            A dictionary of nonunique or non node key property keys and CSV column values.
         """
 
         return {
@@ -173,6 +173,23 @@ class Node(BaseModel):
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
+
+    @property
+    def nonidentifying_properties(self) -> List[Property]:
+        """
+        List of nonidentifying properties.
+
+        Returns
+        -------
+        List[Property]
+            A list with unique or node key property keys and CSV column values.
+        """
+
+        return [
+            prop
+            for prop in self.properties
+            if not prop.is_unique and not prop.part_of_key
+        ]
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []

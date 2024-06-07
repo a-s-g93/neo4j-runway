@@ -1,9 +1,9 @@
 import unittest
 
-from ..objects import UserInput, DataModel
-from ..modeler import GraphDataModeler
-from ..llm import LLM
-from .resources.data_model_yaml import data_model_dict
+from ...objects import UserInput, DataModel
+from ...modeler import GraphDataModeler
+from ...llm import LLM
+from ..resources.data_model_yaml import data_model_dict
 
 
 class TestGraphDataModelerWithYaml(unittest.TestCase):

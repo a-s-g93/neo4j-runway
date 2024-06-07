@@ -2,9 +2,9 @@ import unittest
 
 import pandas as pd
 
-from ..discovery.discovery import Discovery
-from ..llm.llm import LLM
-from ..objects import UserInput
+from ...discovery.discovery import Discovery
+from ...llm.llm import LLM
+from ...objects import UserInput
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",

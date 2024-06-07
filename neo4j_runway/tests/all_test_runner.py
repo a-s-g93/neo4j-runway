@@ -4,7 +4,23 @@ import unittest
 # import your test modules
 from . import *
 
-mods = [x[:-3] for x in os.listdir("neo4j_runway/tests/") if x.startswith("test_")]
+dirs = [
+    "test_code_generator/",
+    "test_discovery/",
+    "test_ingest/",
+    "test_integration/",
+    "test_modeler/",
+    "test_objects/",
+    "test_utils/",
+]
+
+mods = []
+for dir in dirs:
+    mods += [
+        f"{dir[:-1]}." + x[:-3]
+        for x in os.listdir(f"neo4j_runway/tests/{dir}")
+        if x.startswith("test_")
+    ]
 
 # initialize the test suite
 loader = unittest.TestLoader()
