@@ -2,7 +2,8 @@ import unittest
 
 from ...objects import Node, Relationship, Property, DataModel
 from ...ingestion.generate_ingest import *
-from ...tests.resources.ingestion_generation_answers import *
+
+# from ...tests.resources.ingestion_generation_answers import *
 
 
 nodes = [
@@ -36,7 +37,7 @@ rel = Relationship(
 data_model = DataModel(nodes=nodes, relationships=[rel])
 
 
-class TestIngestCodeGenerationMultiCSV(unittest.TestCase):
+class TestIngestCodeGenerationPyIngestConfigInput(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -46,9 +47,14 @@ class TestIngestCodeGenerationMultiCSV(unittest.TestCase):
         """
         Test the code generation for a data model with data from multiple CSVs.
         """
-
+        pyingest_config = {
+            "CSV_A": {"field_separator": "|", "skip_file": False, "skip_records": 5},
+            "CSV_B": {"skip_file": True, "batch_size": 1234},
+        }
         self.maxDiff = None
-        res = self.gen.generate_pyingest_yaml_string()
+        res = self.gen.generate_pyingest_yaml_string(
+            pyingest_file_config=pyingest_config
+        )
         self.assertEqual(res, ans)
 
 
@@ -68,12 +74,16 @@ files:
     WITH $dict.rows AS rows
     UNWIND rows AS row
     MERGE (n:NodeA {alpha: row.au})
+  field_separator: '|'
+  skip_file: false
+  skip_records: 5
   url: $BASE/./CSV_A.csv
-- chunk_size: 100
+- chunk_size: 1234
   cql: |
     WITH $dict.rows AS rows
     UNWIND rows AS row
     MERGE (n:NodeB {beta: row.bu})
+  skip_file: true
   url: $BASE/./CSV_B.csv
 - chunk_size: 100
   cql: |-
@@ -81,6 +91,9 @@ files:
     UNWIND rows AS row
     MERGE (n:NodeC {gamma: row.cu})
     SET n.decorator = row.dec
+  field_separator: '|'
+  skip_file: false
+  skip_records: 5
   url: $BASE/./CSV_A.csv
 - chunk_size: 100
   cql: |
@@ -89,6 +102,9 @@ files:
     MATCH (source:NodeA {alpha: row.au})
     MATCH (target:NodeC {gamma: row.cu})
     MERGE (source)-[n:REL_AC]->(target)
+  field_separator: '|'
+  skip_file: false
+  skip_records: 5
   url: $BASE/./CSV_A.csv
 """
 
