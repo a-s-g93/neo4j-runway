@@ -68,6 +68,11 @@ class LocalServer(object):
         with self._driver.session(**self.db_config) as session:
             params = self.get_params(file)
 
+            # check if we load this file...
+            skip = params["skip_file"] if "skip_file" in params else False
+            if skip:
+                return
+
             with open(params["url"]) as openfile:
                 # Grab the header from the file and pass that to pandas.  This allow the header
                 # to be applied even if we are skipping lines of the file

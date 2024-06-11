@@ -55,6 +55,7 @@ class IngestionGenerator:
         database: Union[str, None] = None,
         csv_dir: str = "",
         file_output_dir: str = "",
+        pyingest_config: Union[Dict[str, Any], None] = None,
     ):
         """
         Class responsible for generating the ingestion code.
@@ -92,7 +93,13 @@ class IngestionGenerator:
         self._constraints: Dict[str, str] = {}
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
 
-    def _generate_base_information(self, method: str = "api", batch_size: int = 100):
+    def _generate_base_information(
+        self,
+        method: str = "api",
+        batch_size: int = 100,
+        field_separator: str = None,
+        pyingest_file_config: Dict[str, Any] = {},
+    ):
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
                 # unique constraints
@@ -182,11 +189,61 @@ class IngestionGenerator:
             if self._cypher_map[item]["csv"]:
                 file_dict["url"] = self._cypher_map[item]["csv"]
                 file_dict["cql"] = self._cypher_map[item]["cypher"]
+
+                # set globals
                 file_dict["chunk_size"] = batch_size
+                if field_separator:
+                    file_dict["field_separator"] = field_separator
+
+                # set distict file params
+                if self._cypher_map[item]["csv"] in pyingest_file_config:
+                    if (
+                        "batch_size"
+                        in pyingest_file_config[self._cypher_map[item]["csv"]]
+                    ):
+                        file_dict["chunk_size"] = pyingest_file_config[
+                            self._cypher_map[item]["csv"]
+                        ]["batch_size"]
+                    if (
+                        "field_separator"
+                        in pyingest_file_config[self._cypher_map[item]["csv"]]
+                    ):
+                        file_dict["field_separator"] = pyingest_file_config[
+                            self._cypher_map[item]["csv"]
+                        ]["field_separator"]
+                    if (
+                        "skip_records"
+                        in pyingest_file_config[self._cypher_map[item]["csv"]]
+                    ):
+                        file_dict["skip_records"] = pyingest_file_config[
+                            self._cypher_map[item]["csv"]
+                        ]["skip_records"]
+                    if (
+                        "skip_file"
+                        in pyingest_file_config[self._cypher_map[item]["csv"]]
+                    ):
+                        file_dict["skip_file"] = pyingest_file_config[
+                            self._cypher_map[item]["csv"]
+                        ]["skip_file"]
+
                 self._config_files_list.append(file_dict)
 
+    def _format_pyingest_file_config_key(self, config_key: str) -> str:
+        """
+        Format the key to match with cypher_map keys.
+        """
+
+        if f"$BASE/{self.csv_dir}" not in config_key: config_key = f"$BASE/{self.csv_dir}{config_key}"
+        if not config_key.endswith(".csv"): config_key = config_key+".csv"
+
+        return config_key
+    
     def generate_pyingest_yaml_file(
-        self, file_name: str = "pyingest_config", batch_size: int = 100
+        self,
+        file_name: str = "pyingest_config",
+        global_batch_size: int = 100,
+        global_field_separator: str = None,
+        pyingest_file_config: Dict[str, Any] = {},
     ) -> None:
         """
         Generate the PyIngest YAML config file.
@@ -195,27 +252,56 @@ class IngestionGenerator:
         ----------
         file_name : str, optional
             Name of the file, by default "pyingest_config"
-        batch_size : int, optional
-            The desired batch size, by default 100
+        global_batch_size : int, optional
+            The desired batch size for all files, by default 100
+        global_field_separator: str, optional
+            The separator used for all CSV files, by default ","
+        pyingest_file_config: Dict[str, Any], optional
+            A dictionary containing individual file parameters.
+            Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
         """
 
         if self.file_output_dir != "":
             os.makedirs(self.file_output_dir, exist_ok=True)
 
         with open(f"./{self.file_output_dir}{file_name}.yml", "w") as config_yaml:
-            config_yaml.write(self.generate_pyingest_yaml_string(batch_size=batch_size))
+            config_yaml.write(
+                self.generate_pyingest_yaml_string(
+                    global_batch_size=global_batch_size,
+                    global_field_separator=global_field_separator,
+                    pyingest_file_config=pyingest_file_config,
+                )
+            )
 
-    def generate_pyingest_yaml_string(self, batch_size: int = 100) -> str:
+    def generate_pyingest_yaml_string(
+        self,
+        global_batch_size: int = 100,
+        global_field_separator: str = None,
+        pyingest_file_config: Dict[str, Any] = {},
+    ) -> str:
         """
         Generate the PyIngest yaml in string format.
 
         Parameters
         ----------
-        batch_size : int, optional
-            The desired batch size, by default 100
+        global_batch_size : int, optional
+            The desired batch size for all files, by default 100
+        global_field_separator: str, optional
+            The separator used for all CSV files, by default ","
+        pyingest_file_config: Dict[str, Any], optional
+            A dictionary containing individual file parameters.
+            Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
         """
 
-        self._generate_base_information(batch_size=batch_size)
+        # reformat the keys if necessary
+        if pyingest_file_config:
+            pyingest_file_config = {self._format_pyingest_file_config_key(k): v for k, v in pyingest_file_config.items()}
+
+        self._generate_base_information(
+            batch_size=global_batch_size,
+            field_separator=global_field_separator,
+            pyingest_file_config=pyingest_file_config,
+        )
 
         final_yaml = {}
         final_yaml["files"] = self._config_files_list
