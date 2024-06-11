@@ -233,11 +233,13 @@ class IngestionGenerator:
         Format the key to match with cypher_map keys.
         """
 
-        if f"$BASE/{self.csv_dir}" not in config_key: config_key = f"$BASE/{self.csv_dir}{config_key}"
-        if not config_key.endswith(".csv"): config_key = config_key+".csv"
+        if f"$BASE/{self.csv_dir}" not in config_key:
+            config_key = f"$BASE/{self.csv_dir}{config_key}"
+        if not config_key.endswith(".csv"):
+            config_key = config_key + ".csv"
 
         return config_key
-    
+
     def generate_pyingest_yaml_file(
         self,
         file_name: str = "pyingest_config",
@@ -295,7 +297,10 @@ class IngestionGenerator:
 
         # reformat the keys if necessary
         if pyingest_file_config:
-            pyingest_file_config = {self._format_pyingest_file_config_key(k): v for k, v in pyingest_file_config.items()}
+            pyingest_file_config = {
+                self._format_pyingest_file_config_key(k): v
+                for k, v in pyingest_file_config.items()
+            }
 
         self._generate_base_information(
             batch_size=global_batch_size,

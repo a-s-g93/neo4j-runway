@@ -2,6 +2,7 @@ import unittest
 
 from ...objects import Node, Relationship, Property, DataModel
 from ...ingestion.generate_ingest import *
+
 # from ...tests.resources.ingestion_generation_answers import *
 
 
@@ -47,18 +48,13 @@ class TestIngestCodeGenerationPyIngestConfigInput(unittest.TestCase):
         Test the code generation for a data model with data from multiple CSVs.
         """
         pyingest_config = {
-            "CSV_A": {
-                "field_separator": "|",
-                "skip_file": False,
-                "skip_records": 5
-            },
-            "CSV_B": {
-                "skip_file": True,
-                "batch_size": 1234
-            }
+            "CSV_A": {"field_separator": "|", "skip_file": False, "skip_records": 5},
+            "CSV_B": {"skip_file": True, "batch_size": 1234},
         }
         self.maxDiff = None
-        res = self.gen.generate_pyingest_yaml_string(pyingest_file_config=pyingest_config)
+        res = self.gen.generate_pyingest_yaml_string(
+            pyingest_file_config=pyingest_config
+        )
         self.assertEqual(res, ans)
 
 
