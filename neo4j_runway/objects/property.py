@@ -76,7 +76,9 @@ class Property(BaseModel):
                 x.strip() for x in list(arrows_property.values())[0].split("|")
             ]
             if "," in prop_props[0]:
-                csv_mapping, csv_mapping_other = [x.strip() for x in prop_props[0].split(",")]
+                csv_mapping, csv_mapping_other = [
+                    x.strip() for x in prop_props[0].split(",")
+                ]
             else:
                 csv_mapping: str = prop_props[0]
                 csv_mapping_other = None

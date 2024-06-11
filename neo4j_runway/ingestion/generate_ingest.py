@@ -451,7 +451,12 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
     An example: (:Person{name: row.person_name})-[:KNOWS]->(:Person{name:row.knows_person})
     """
     from_unique, to_unique = [
-        ["{" + f"{prop.name}: row.{prop.csv_mapping}" + "}", "{" + f"{prop.name}: row.{prop.csv_mapping_other}" + "}"] for prop in node.unique_properties if prop.csv_mapping_other is not None
+        [
+            "{" + f"{prop.name}: row.{prop.csv_mapping}" + "}",
+            "{" + f"{prop.name}: row.{prop.csv_mapping_other}" + "}",
+        ]
+        for prop in node.unique_properties
+        if prop.csv_mapping_other is not None
     ][0]
 
     return f"""MATCH (source:{node.label} {from_unique})

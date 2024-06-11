@@ -226,7 +226,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name", 
+                    csv_mapping="name",
                     csv_mapping_other="knows_person",
                     is_unique=True,
                 )
@@ -243,7 +243,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name", 
+                    csv_mapping="name",
                     csv_mapping_other="knows_person",
                     is_unique=True,
                 )
@@ -302,9 +302,14 @@ class TestIngestCodeGeneration(unittest.TestCase):
         self.assertEqual(cast_value(prop_point), "point(row.p6)")
 
     def test_cast_value_multi_column_mapping(self) -> None:
-        prop_str = Property(name="p1", type="str", csv_mapping="p1", csv_mapping_other="p1b")
+        prop_str = Property(
+            name="p1", type="str", csv_mapping="p1", csv_mapping_other="p1b"
+        )
         prop_point = Property(
-            name="p1", type="neo4j.spatial.WGS84Point", csv_mapping="p1", csv_mapping_other="p1b"
+            name="p1",
+            type="neo4j.spatial.WGS84Point",
+            csv_mapping="p1",
+            csv_mapping_other="p1b",
         )
 
         self.assertEqual(cast_value(prop_str), "row.p1")
