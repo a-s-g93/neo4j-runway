@@ -154,7 +154,8 @@ class TestDataModel(unittest.TestCase):
         prop1 = Property(
             name="Name",
             type="str",
-            csv_mapping=["name", "knows_person"],
+            csv_mapping="name",
+            csv_mapping_other="knows_person",
             is_unique=True,
         )
         prop2 = Property(

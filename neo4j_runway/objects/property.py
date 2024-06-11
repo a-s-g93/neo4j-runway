@@ -34,7 +34,8 @@ class Property(BaseModel):
 
     name: str
     type: str
-    csv_mapping: Union[str, List[str]]
+    csv_mapping: str
+    csv_mapping_other: Union[str, None] = None
     is_unique: bool = False
     part_of_key: bool = False
     # is_indexed: bool
@@ -75,21 +76,27 @@ class Property(BaseModel):
                 x.strip() for x in list(arrows_property.values())[0].split("|")
             ]
             if "," in prop_props[0]:
-                csv_mapping: List[str] = [x.strip() for x in prop_props[0].split(",")]
+                csv_mapping, csv_mapping_other = [
+                    x.strip() for x in prop_props[0].split(",")
+                ]
             else:
                 csv_mapping: str = prop_props[0]
+                csv_mapping_other = None
+
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
             node_key = "nodekey" in prop_props
         else:
             csv_mapping: str = list(arrows_property.values())[0]
             python_type = "unknown"
+            csv_mapping_other = None
             is_unique = False
             node_key = False
 
         return cls(
             name=list(arrows_property.keys())[0],
             csv_mapping=csv_mapping,
+            csv_mapping_other=csv_mapping_other,
             type=python_type,
             is_unique=is_unique,
             part_of_key=node_key,

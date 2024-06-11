@@ -69,16 +69,19 @@ data_model_yaml = """nodes:
   label: NodeA
   properties:
   - csv_mapping: prop_1
+    csv_mapping_other: null
     is_unique: true
     name: prop1
     part_of_key: false
     type: str
   - csv_mapping: prop_2
+    csv_mapping_other: null
     is_unique: false
     name: prop2
     part_of_key: false
     type: int
   - csv_mapping: prop_3
+    csv_mapping_other: null
     is_unique: false
     name: prop3
     part_of_key: false
@@ -87,16 +90,19 @@ data_model_yaml = """nodes:
   label: NodeB
   properties:
   - csv_mapping: prop_4
+    csv_mapping_other: null
     is_unique: true
     name: prop4
     part_of_key: false
     type: str
   - csv_mapping: prop_5
+    csv_mapping_other: null
     is_unique: false
     name: prop5
     part_of_key: false
     type: int
   - csv_mapping: prop_6
+    csv_mapping_other: null
     is_unique: false
     name: prop6
     part_of_key: false
@@ -105,6 +111,7 @@ relationships:
 - csv_name: ''
   properties:
   - csv_mapping: prop_7
+    csv_mapping_other: null
     is_unique: false
     name: prop7
     part_of_key: false

@@ -55,7 +55,14 @@ class TestProperty(unittest.TestCase):
 
         self.assertEqual(
             list(prop.keys()),
-            ["name", "type", "csv_mapping", "is_unique", "part_of_key"],
+            [
+                "name",
+                "type",
+                "csv_mapping",
+                "csv_mapping_other",
+                "is_unique",
+                "part_of_key",
+            ],
         )
         self.assertEqual(prop["csv_mapping"], "name")
 
