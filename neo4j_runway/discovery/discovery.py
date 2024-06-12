@@ -7,6 +7,7 @@ import os
 from typing import Dict, Union
 import warnings
 
+from IPython.display import display, Markdown
 import pandas as pd
 
 from ..llm.llm import LLM
@@ -92,33 +93,49 @@ class Discovery:
 
         self.feature_descriptions = ""
         for col in self.numeric_data_description.columns:
-            self.feature_descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.numeric_data_description[col]} \n\n"
+            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.numeric_data_description[col]} \n\n"""
 
         for col in self.categorical_data_description.columns:
-            self.feature_descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.categorical_data_description[col]} \n\n"
+            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.categorical_data_description[col]} \n\n"""
+
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
 
         prompt = f"""
-                I want you to perform a preliminary analysis on my data to help us understand
-                its characteristics before we brainstorm about the graph data model.
+I want you to perform a preliminary analysis on my data to help us understand
+its characteristics before we brainstorm about the graph data model.
 
-                This is a general description of the data:
-                {self.user_input['general_description']}
+{gen_description_clause}
 
-                The following is a summary of the data features, data types, and missing values:
-                {self.df_info}
+The following is a summary of the data features, data types, and missing values:
+{self.df_info}
 
-                The following is a description of each feature in the data:
-                {self.feature_descriptions}
+The following is a description of each feature in the data:
+{self.feature_descriptions}
 
-                Provide me with your preliminary analysis of this data. What are important
-                overall details about the data? What are the most important features?
-                """
+Provide me with your preliminary analysis of this data. What are important
+overall details about the data? What are the most important features?
+"""
 
         return prompt
 
-    def run(self) -> str:
+    def run(self, show_result: bool = True, notebook: bool = True) -> None:
         """
-        Run discovery on the data.
+        Run the discovery process on the provided DataFrame.
+        Access generated discovery with the .view_discovery() method of the Discovery class.
+
+        Returns
+        -------
+        show_result: bool
+            Whether to print the generated discovery upon retrieval.
+        notebook: bool
+            Whether code is executed in a notebook. Affects the result print formatting.
         """
 
         self._generate_csv_summary()
@@ -133,7 +150,20 @@ class Discovery:
         self._discovery_ran = True
         self.discovery = response
 
-        return response
+        if show_result:
+            self.view_discovery(notebook=notebook)
+
+    def view_discovery(self, notebook: bool = True) -> None:
+        """
+        Print the discovery information.
+
+        Parameters
+        ----------
+        notebook : bool, optional
+            Whether executing in a notebook, by default True
+        """
+
+        print(self.discovery) if not notebook else display(Markdown(self.discovery))
 
     def to_txt(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
