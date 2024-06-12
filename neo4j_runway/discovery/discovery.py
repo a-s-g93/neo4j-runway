@@ -93,27 +93,35 @@ class Discovery:
 
         self.feature_descriptions = ""
         for col in self.numeric_data_description.columns:
-            self.feature_descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.numeric_data_description[col]} \n\n"
+            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.numeric_data_description[col]} \n\n"""
 
         for col in self.categorical_data_description.columns:
-            self.feature_descriptions += f"{col}: {self.user_input[col]} \n It has the following distribution: {self.categorical_data_description[col]} \n\n"
+            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.categorical_data_description[col]} \n\n"""
+
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
 
         prompt = f"""
-                I want you to perform a preliminary analysis on my data to help us understand
-                its characteristics before we brainstorm about the graph data model.
+I want you to perform a preliminary analysis on my data to help us understand
+its characteristics before we brainstorm about the graph data model.
 
-                This is a general description of the data:
-                {self.user_input['general_description']}
+{gen_description_clause}
 
-                The following is a summary of the data features, data types, and missing values:
-                {self.df_info}
+The following is a summary of the data features, data types, and missing values:
+{self.df_info}
 
-                The following is a description of each feature in the data:
-                {self.feature_descriptions}
+The following is a description of each feature in the data:
+{self.feature_descriptions}
 
-                Provide me with your preliminary analysis of this data. What are important
-                overall details about the data? What are the most important features?
-                """
+Provide me with your preliminary analysis of this data. What are important
+overall details about the data? What are the most important features?
+"""
 
         return prompt
 
