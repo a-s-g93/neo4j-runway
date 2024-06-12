@@ -7,6 +7,7 @@ import os
 from typing import Dict, Union
 import warnings
 
+from IPython.display import display, Markdown
 import pandas as pd
 
 from ..llm.llm import LLM
@@ -116,9 +117,17 @@ class Discovery:
 
         return prompt
 
-    def run(self) -> str:
+    def run(self, show_result: bool = True, notebook: bool = True) -> None:
         """
-        Run discovery on the data.
+        Run the discovery process on the provided DataFrame.
+        Access generated discovery with the .view_discovery() method of the Discovery class.
+
+        Returns
+        -------
+        show_result: bool
+            Whether to print the generated discovery upon retrieval.
+        notebook: bool
+            Whether code is executed in a notebook. Affects the result print formatting.
         """
 
         self._generate_csv_summary()
@@ -133,7 +142,20 @@ class Discovery:
         self._discovery_ran = True
         self.discovery = response
 
-        return response
+        if show_result:
+            self.view_discovery(notebook=notebook)
+
+    def view_discovery(self, notebook: bool = True) -> None:
+        """
+        Print the discovery information.
+
+        Parameters
+        ----------
+        notebook : bool, optional
+            Whether executing in a notebook, by default True
+        """
+
+        print(self.discovery) if not notebook else display(Markdown(self.discovery))
 
     def to_txt(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
