@@ -1,5 +1,8 @@
+from io import StringIO
 import unittest
+import sys
 
+from IPython.display import display, Markdown
 import pandas as pd
 
 from ...discovery.discovery import Discovery
@@ -74,6 +77,30 @@ class TestDiscovery(unittest.TestCase):
         self.assertIsNotNone(d.df_info)
         self.assertIsNotNone(d.numeric_data_description)
         self.assertIsNotNone(d.categorical_data_description)
+
+    def test_view_discovery_no_notebook(self) -> None:
+        d = Discovery(data=pd.DataFrame(data))
+        test_disc = "TEST\ntest"
+        d.discovery = test_disc
+
+        capturedOutput = StringIO()
+        sys.stdout = capturedOutput
+        d.view_discovery(notebook=False)
+        sys.stdout = sys.__stdout__
+        self.assertEqual(capturedOutput.getvalue(), test_disc + "\n")
+
+    def test_view_discovery_with_notebook(self) -> None:
+        d = Discovery(data=pd.DataFrame(data))
+        test_disc = "TEST\ntest"
+        d.discovery = test_disc
+
+        capturedOutput = StringIO()
+        sys.stdout = capturedOutput
+        d.view_discovery(notebook=True)
+        sys.stdout = sys.__stdout__
+        self.assertEqual(
+            capturedOutput.getvalue().strip(), "<IPython.core.display.Markdown object>"
+        )
 
 
 if __name__ == "__main__":
