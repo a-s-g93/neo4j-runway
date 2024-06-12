@@ -158,27 +158,36 @@ class GraphDataModeler:
         """
         Generate the initial data model request prompt.
         """
+
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
+
         prompt = f"""
-            Here is the csv data:
-            This is a general description of the data:
-            {self.user_input['general_description']}
+Here is the csv data information:
+{gen_description_clause}
 
-            The following is a summary of the data features, data types, and missing values:
-            {self.general_info}
+The following is a summary of the data features, data types, and missing values:
+{self.general_info}
 
-            The following is a description of each feature in the data:
-            {self.feature_descriptions}
+The following is a description of each feature in the data:
+{self.feature_descriptions}
 
-            Here is the initial discovery findings:
-            {self.discovery}
+Here is the initial discovery findings:
+{self.discovery}
 
-            Based upon your knowledge of the data in my .csv and 
-            of high-quality Neo4j graph data models, I would like you to return your
-            suggestion for translating the data in my .csv into a Neo4j graph data model.
+Based upon your knowledge of the data in my .csv and 
+of high-quality Neo4j graph data models, I would like you to return your
+suggestion for translating the data in my .csv into a Neo4j graph data model.
 
-            {model_generation_rules}
+{model_generation_rules}
 
-            {model_format}
+{model_format}
             """
         return prompt
 
@@ -202,28 +211,36 @@ class GraphDataModeler:
                                 Ensure that these properties provide value to their respective node or relationship.
                                 """
 
+        gen_description_clause = (
+            f"""
+This is a general description of the data:
+{self.user_input['general_description']}
+"""
+            if "general_description" in self.user_input
+            else ""
+        )
+
         prompt = f"""
-            Here is the csv data:
-            This is a general description of the data:
-            {self.user_input['general_description']}
+Here is the csv data information:
+{gen_description_clause}
 
-            The following is a summary of the data features, data types, and missing values:
-            {self.general_info}
+The following is a summary of the data features, data types, and missing values:
+{self.general_info}
 
-            The following is a description of each feature in the data:
-            {self.feature_descriptions}
+The following is a description of each feature in the data:
+{self.feature_descriptions}
 
-            Here is the initial discovery findings:
-            {self.discovery}
+Here is the initial discovery findings:
+{self.discovery}
 
-            Based on your experience building high-quality graph data
-            models, are there any improvements you would suggest to this model?
-            {self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
+Based on your experience building high-quality graph data
+models, are there any improvements you would suggest to this model?
+{self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
 
-            {user_corrections}
+{user_corrections}
 
-            {model_generation_rules}
-            """
+{model_generation_rules}
+"""
 
         return prompt
 
