@@ -8,7 +8,7 @@ set_unique_property_a = "uniqueProp1: row.unique_prop_1, uniqueProp3: row.unique
 set_unique_property_b = "uniqueProp2: row.unique_prop_2"
 set_properties_a = "SET n.prop1 = row.prop_1"
 set_properties_b = "SET n.prop2 = row.prop_2, n.prop3 = row.prop_3"
-set_properties_rel_1 = "SET n.relProp = row.rel_prop"
+set_properties_rel_1 = "SET n.relProp = toIntegerOrNull(row.rel_prop)"
 match_node_a = "MATCH (n:NodeA" + " {" + f"{set_unique_property_a}" + "})"
 match_node_b = "MATCH (n:NodeB" + " {" + f"{set_unique_property_b}" + "})"
 merge_node_standard_a = f"""WITH $dict.rows AS rows

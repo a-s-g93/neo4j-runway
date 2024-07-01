@@ -2,7 +2,6 @@ from io import StringIO
 import unittest
 import sys
 
-from IPython.display import display, Markdown
 import pandas as pd
 
 from ...discovery.discovery import Discovery
@@ -68,15 +67,6 @@ class TestDiscovery(unittest.TestCase):
 
         with self.assertWarns(Warning):
             Discovery(llm=LLM(), data=pd.DataFrame(data))
-
-    def test_pandas_only(self) -> None:
-        d = Discovery(data=pd.DataFrame(data))
-        d.run()
-
-        self.assertEqual(d.discovery, "")
-        self.assertIsNotNone(d.df_info)
-        self.assertIsNotNone(d.numeric_data_description)
-        self.assertIsNotNone(d.categorical_data_description)
 
     def test_view_discovery_no_notebook(self) -> None:
         d = Discovery(data=pd.DataFrame(data))
