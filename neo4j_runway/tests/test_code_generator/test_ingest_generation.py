@@ -285,7 +285,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
     def test_cast_no_type(self) -> None:
         prop_str = Property(name="p1", type="str", csv_mapping="p1")
         self.assertEqual(cast_value(prop_str), "row.p1")
-        
+
     def test_cast_date(self) -> None:
         prop_date = Property(name="p3", type="neo4j.time.Date", csv_mapping="p3")
         self.assertEqual(cast_value(prop_date), "date(row.p3)")
