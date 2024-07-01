@@ -10,8 +10,6 @@ mods = [
     if x.startswith("test_")
 ]
 
-# only run the tests that don't charge money $$$
-mods.remove("test_discovery_paid")
 # initialize the test suite
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()

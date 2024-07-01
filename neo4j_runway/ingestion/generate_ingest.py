@@ -622,5 +622,11 @@ def cast_value(prop: Property) -> str:
         return f"time({base})"
     elif prop.type.lower().endswith("point"):
         return f"point({base})"
+    elif prop.type.lower().endswith("int"):
+        return f"toIntegerOrNull({base})"
+    elif prop.type.lower().endswith("float"):
+        return f"toFloatOrNull({base})"
+    elif prop.type.lower().endswith("bool"):
+        return f"toBooleanOrNull({base})"
     else:
         return base

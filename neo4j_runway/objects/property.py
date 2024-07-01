@@ -42,13 +42,16 @@ class Property(BaseModel):
     # must_exist: bool
 
     @field_validator("type")
-    def validate_type(cls, v):
+    def validate_type(cls, v: str):
         if v.lower() == "object" or v.lower() == "string":
             return "str"
-        elif v.lower() == "float64":
+        elif "float" in v.lower():
             return "float"
-        elif v.lower() == "int64":
+        elif "int" in v.lower():
             return "int"
+        elif "bool" in v.lower():
+            return "bool"
+
         if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) and v not in list(
             TYPES_MAP_PYTHON_KEYS.values()
         ):
