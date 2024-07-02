@@ -55,7 +55,6 @@ class IngestionGenerator:
         database: Union[str, None] = None,
         csv_dir: str = "",
         file_output_dir: str = "",
-        pyingest_config: Union[Dict[str, Any], None] = None,
     ):
         """
         Class responsible for generating the ingestion code.
@@ -99,6 +98,7 @@ class IngestionGenerator:
         batch_size: int = 100,
         field_separator: str = None,
         pyingest_file_config: Dict[str, Any] = {},
+        strict_typing: bool = True,
     ):
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
@@ -124,7 +124,9 @@ class IngestionGenerator:
             # add to cypher map
             self._cypher_map[lowercase_first_letter(node.label)] = {
                 "cypher": literal_unicode(
-                    generate_merge_node_clause_standard(node=node)
+                    generate_merge_node_clause_standard(
+                        node=node, strict_typing=strict_typing
+                    )
                 ),
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_node_load_csv_clause(
@@ -134,6 +136,7 @@ class IngestionGenerator:
                         ),
                         method=method,
                         batch_size=batch_size,
+                        strict_typing=strict_typing,
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{node.csv_name if self.csv_name == '' else self.csv_name}",
@@ -167,7 +170,10 @@ class IngestionGenerator:
             self._cypher_map[f"{rel.source}_{rel.target}"] = {
                 "cypher": literal_unicode(
                     generate_merge_relationship_clause_standard(
-                        relationship=rel, source_node=source, target_node=target
+                        relationship=rel,
+                        source_node=source,
+                        target_node=target,
+                        strict_typing=strict_typing,
                     )
                 ),
                 "cypher_loadcsv": literal_unicode(
@@ -178,6 +184,7 @@ class IngestionGenerator:
                         csv_name=rel.csv_name if self.csv_name == "" else self.csv_name,
                         method=method,
                         batch_size=batch_size,
+                        strict_typing=strict_typing,
                     )
                 ),
                 "csv": f"$BASE/{self.csv_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",
@@ -246,6 +253,8 @@ class IngestionGenerator:
         global_batch_size: int = 100,
         global_field_separator: str = None,
         pyingest_file_config: Dict[str, Any] = {},
+        post_ingest_code: Union[str, List[str], None] = None,
+        strict_typing: bool = True,
     ) -> None:
         """
         Generate the PyIngest YAML config file.
@@ -261,6 +270,12 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
+        post_ingest_code: Union[str, List[str], None], optional
+            Code to be run after all data is ingested.
+            Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
+            Individual Cypher queries should be separated by a ';'.
+        strict_typing: bool, optional
+            Whether to use the types declared in the data model (True), or infer types during ingestion (False). By default True
         """
 
         if self.file_output_dir != "":
@@ -272,6 +287,8 @@ class IngestionGenerator:
                     global_batch_size=global_batch_size,
                     global_field_separator=global_field_separator,
                     pyingest_file_config=pyingest_file_config,
+                    post_ingest_code=post_ingest_code,
+                    strict_typing=strict_typing,
                 )
             )
 
@@ -280,6 +297,8 @@ class IngestionGenerator:
         global_batch_size: int = 100,
         global_field_separator: str = None,
         pyingest_file_config: Dict[str, Any] = {},
+        post_ingest_code: Union[str, List[str], None] = None,
+        strict_typing: bool = True,
     ) -> str:
         """
         Generate the PyIngest yaml in string format.
@@ -293,6 +312,12 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
+        post_ingest_code: Union[str, List[str], None], optional
+            Code to be run after all data is ingested.
+            Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
+            Individual Cypher queries should be separated by a ';'.
+        strict_typing: bool, optional
+            Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
         """
 
         # reformat the keys if necessary
@@ -306,6 +331,7 @@ class IngestionGenerator:
             batch_size=global_batch_size,
             field_separator=global_field_separator,
             pyingest_file_config=pyingest_file_config,
+            strict_typing=strict_typing,
         )
 
         final_yaml = {}
@@ -323,6 +349,12 @@ class IngestionGenerator:
         for constraint in self._constraints:
             to_return += f"  - {self._constraints[constraint]}"
         to_return += config_dump
+
+        if post_ingest_code:
+            post_ingest_code_string = format_pyingest_post_ingest_code(
+                data=post_ingest_code
+            )
+            to_return += "\npost_ingest:\n" + post_ingest_code_string
 
         return to_return
 
@@ -360,7 +392,11 @@ class IngestionGenerator:
         return to_return
 
     def generate_load_csv_file(
-        self, file_name: str = "load_csv", batch_size: int = 100, method: str = "api"
+        self,
+        file_name: str = "load_csv",
+        batch_size: int = 100,
+        method: str = "api",
+        strict_typing: bool = True,
     ) -> None:
         """
         Generate the load_csv cypher file.
@@ -372,7 +408,9 @@ class IngestionGenerator:
         batch_size : int, optional
             The desired batch size, by default 100
         method : str, optional
-            The method that LOAD CSV will be run. Must be either "api" or "browser".
+            The method that LOAD CSV will be run. Must be either "api" or "browser". By default "api"
+        strict_typing: bool, optional
+            Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
         """
 
         if self.file_output_dir != "":
@@ -380,11 +418,13 @@ class IngestionGenerator:
 
         with open(f"./{self.file_output_dir}{file_name}.cypher", "w") as load_csv_file:
             load_csv_file.write(
-                self.generate_load_csv_string(batch_size=batch_size, method=method)
+                self.generate_load_csv_string(
+                    batch_size=batch_size, method=method, strict_typing=strict_typing
+                )
             )
 
     def generate_load_csv_string(
-        self, batch_size: int = 100, method: str = "api"
+        self, batch_size: int = 100, method: str = "api", strict_typing: bool = True
     ) -> str:
         """
         Generate the load_csv cypher in string format.
@@ -394,10 +434,14 @@ class IngestionGenerator:
         batch_size : int, optional
             The desired batch size, by default 100
         method : str, optional
-            The method that LOAD CSV will be run. Must be either "api" or "browser".
+            The method that LOAD CSV will be run. Must be either "api" or "browser". By default "api"
+        strict_typing: bool, optional
+            Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
         """
 
-        self._generate_base_information(batch_size=batch_size, method=method)
+        self._generate_base_information(
+            batch_size=batch_size, method=method, strict_typing=strict_typing
+        )
 
         to_return = ""
 
@@ -463,7 +507,9 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
 MATCH (target:{node.label} {to_unique})"""
 
 
-def generate_set_property(properties: List[Property]) -> str:
+def generate_set_property(
+    properties: List[Property], strict_typing: bool = True
+) -> str:
     """
     Generate a set property string.
     """
@@ -471,7 +517,7 @@ def generate_set_property(properties: List[Property]) -> str:
     temp_set_list = []
 
     for prop in properties:
-        temp_set_list.append(f"n.{prop.name} = {cast_value(prop)}")
+        temp_set_list.append(f"n.{prop.name} = {cast_value(prop, strict_typing)}")
 
     result = ", ".join(temp_set_list)
 
@@ -481,25 +527,29 @@ def generate_set_property(properties: List[Property]) -> str:
     return result
 
 
-def generate_set_unique_property(unique_properties: List[Property]) -> str:
+def generate_set_unique_property(
+    unique_properties: List[Property], strict_typing: bool = True
+) -> str:
     """
     Generate the unique properties to match a node on within a MERGE statement.
     Returns: unique_property_match_component
     """
 
-    res = [f"{prop.name}: {cast_value(prop)}" for prop in unique_properties]
+    res = [
+        f"{prop.name}: {cast_value(prop, strict_typing)}" for prop in unique_properties
+    ]
     return ", ".join(res)
 
 
-def generate_merge_node_clause_standard(node: Node) -> str:
+def generate_merge_node_clause_standard(node: Node, strict_typing: bool = True) -> str:
     """
     Generate a MERGE node clause.
     """
 
     return f"""WITH $dict.rows AS rows
 UNWIND rows AS row
-MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties)}}})
-{generate_set_property(node.nonidentifying_properties)}"""
+MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties, strict_typing)}}})
+{generate_set_property(node.nonidentifying_properties, strict_typing)}"""
 
 
 def generate_merge_node_load_csv_clause(
@@ -507,6 +557,7 @@ def generate_merge_node_load_csv_clause(
     csv_name: str,
     method: str = "api",
     batch_size: int = 10000,
+    strict_typing: bool = True,
 ) -> str:
     """
     Generate a MERGE node clause for the LOAD CSV method.
@@ -516,14 +567,17 @@ def generate_merge_node_load_csv_clause(
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties)}}})
-    {generate_set_property(node.nonidentifying_properties)}
+    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties, strict_typing)}}})
+    {generate_set_property(node.nonidentifying_properties, strict_typing)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
 
 def generate_merge_relationship_clause_standard(
-    relationship: Relationship, source_node: Node, target_node: Node
+    relationship: Relationship,
+    source_node: Node,
+    target_node: Node,
+    strict_typing: bool = True,
 ) -> str:
     """
     Generate a MERGE relationship clause.
@@ -533,14 +587,14 @@ def generate_merge_relationship_clause_standard(
 UNWIND rows as row
 {generate_match_same_node_labels_clause(node=source_node)}
 MERGE (source)-[n:{relationship.type}]->(target)
-{generate_set_property(relationship.nonidentifying_properties)}"""
+{generate_set_property(relationship.nonidentifying_properties, strict_typing)}"""
     else:
         return f"""WITH $dict.rows AS rows
 UNWIND rows as row
 {generate_match_node_clause(source_node).replace('(n:', '(source:')}
 {generate_match_node_clause(target_node).replace('(n:', '(target:')}
 MERGE (source)-[n:{relationship.type}]->(target)
-{generate_set_property(relationship.nonidentifying_properties)}"""
+{generate_set_property(relationship.nonidentifying_properties, strict_typing)}"""
 
 
 def generate_merge_relationship_load_csv_clause(
@@ -550,6 +604,7 @@ def generate_merge_relationship_load_csv_clause(
     csv_name: str,
     method: str = "api",
     batch_size: int = 10000,
+    strict_typing: bool = True,
 ) -> str:
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
@@ -562,7 +617,7 @@ CALL {{
     WITH row
     {generate_match_same_node_labels_clause(node=source_node)}
     MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonidentifying_properties)}
+    {generate_set_property(relationship.nonidentifying_properties, strict_typing)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
     else:
@@ -572,7 +627,7 @@ CALL {{
     {generate_match_node_clause(source_node).replace('(n:', '(source:')}
     {generate_match_node_clause(target_node).replace('(n:', '(target:')}
     MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonidentifying_properties)}
+    {generate_set_property(relationship.nonidentifying_properties, strict_typing)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -595,7 +650,7 @@ def generate_relationship_key_constraint(
     return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_properties)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
 
 
-def cast_value(prop: Property) -> str:
+def cast_value(prop: Property, strict_typing: bool = True) -> str:
     """
     format property to be cast to correct type during ingestion.
     """
@@ -614,6 +669,9 @@ def cast_value(prop: Property) -> str:
 
     base = f"row.{csv_mapping}"
 
+    if not strict_typing:
+        return base
+
     if prop.type.lower().endswith("date"):
         return f"date({base})"
     elif prop.type.lower().endswith("datetime"):
@@ -630,3 +688,31 @@ def cast_value(prop: Property) -> str:
         return f"toBooleanOrNull({base})"
     else:
         return base
+
+
+def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
+    """
+    Format the given post ingest code into a String to be injected into the
+    PyIngest yaml file.
+    """
+
+    if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
+        res = ""
+        for cql in data.split(";")[:-1]:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+    elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
+        with open(data, "r") as f:
+            cql_file = f.read()
+        res = ""
+        for cql in cql_file.split(";")[:-1]:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+
+    elif isinstance(data, list):
+        res = ""
+        for cql in data:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+    else:
+        raise ValueError(f"Unable to parse post ingest code. data: {data}")

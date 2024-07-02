@@ -134,7 +134,9 @@ class TestIngestCodeGeneration(unittest.TestCase):
         for k in unique_map.keys():
             del prop_map[k]
         self.assertEqual(
-            generate_set_property(properties=self.node_a.nonunique_properties),
+            generate_set_property(
+                properties=self.node_a.nonunique_properties, strict_typing=False
+            ),
             set_properties_a,
         )
 
@@ -143,7 +145,9 @@ class TestIngestCodeGeneration(unittest.TestCase):
         for k in unique_map.keys():
             del prop_map[k]
         self.assertEqual(
-            generate_set_property(properties=self.node_b.nonunique_properties),
+            generate_set_property(
+                properties=self.node_b.nonunique_properties, strict_typing=False
+            ),
             set_properties_b,
         )
 
@@ -154,13 +158,13 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties=self.node_a.unique_properties
+                unique_properties=self.node_a.unique_properties, strict_typing=False
             ),
             set_unique_property_a,
         )
         self.assertEqual(
             generate_set_unique_property(
-                unique_properties=self.node_b.unique_properties
+                unique_properties=self.node_b.unique_properties, strict_typing=False
             ),
             set_unique_property_b,
         )
@@ -171,7 +175,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
         """
 
         self.assertEqual(
-            generate_merge_node_clause_standard(node=self.node_a),
+            generate_merge_node_clause_standard(node=self.node_a, strict_typing=False),
             merge_node_standard_a,
         )
 
@@ -182,7 +186,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
 
         self.assertEqual(
             generate_merge_node_load_csv_clause(
-                node=self.node_b, csv_name="test.csv", method="api"
+                node=self.node_b, csv_name="test.csv", method="api", strict_typing=False
             ),
             merge_node_load_csv_b,
         )
@@ -197,6 +201,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 relationship=self.rel_1,
                 source_node=self.node_a,
                 target_node=self.node_b,
+                strict_typing=True,
             ),
             merge_relationship_standard,
         )
@@ -214,6 +219,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 csv_name="test.csv",
                 method="browser",
                 batch_size=50,
+                strict_typing=True,
             ),
             merge_relationship_load_csv,
         )
@@ -258,6 +264,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 relationship=rel,
                 source_node=node,
                 target_node=node,
+                strict_typing=False,
             ),
             merge_relationship_standard_same_node,
         )
@@ -328,7 +335,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
             csv_mapping="p1",
             csv_mapping_other="p1b",
         )
-
+        print(prop_point.type.lower())
         self.assertEqual(cast_value(prop_str), "row.p1")
         self.assertEqual(cast_value(prop_point), "point(row.p1)")
 
