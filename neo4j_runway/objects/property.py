@@ -47,7 +47,7 @@ class Property(BaseModel):
             return "str"
         elif "float" in v.lower():
             return "float"
-        elif "int" in v.lower():
+        elif v.lower().startswith("int"):
             return "int"
         elif "bool" in v.lower():
             return "bool"

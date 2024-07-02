@@ -328,7 +328,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
             csv_mapping="p1",
             csv_mapping_other="p1b",
         )
-
+        print(prop_point.type.lower())
         self.assertEqual(cast_value(prop_str), "row.p1")
         self.assertEqual(cast_value(prop_point), "point(row.p1)")
 

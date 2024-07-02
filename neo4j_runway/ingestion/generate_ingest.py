@@ -246,6 +246,7 @@ class IngestionGenerator:
         global_batch_size: int = 100,
         global_field_separator: str = None,
         pyingest_file_config: Dict[str, Any] = {},
+        post_ingest_code: Union[str, List[str], None] = None,
     ) -> None:
         """
         Generate the PyIngest YAML config file.
@@ -261,6 +262,10 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
+        post_ingest_code: Union[str, List[str], None], optional
+            Code to be run after all data is ingested.
+            Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
+            Individual Cypher queries should be separated by a ';'.
         """
 
         if self.file_output_dir != "":
@@ -272,6 +277,7 @@ class IngestionGenerator:
                     global_batch_size=global_batch_size,
                     global_field_separator=global_field_separator,
                     pyingest_file_config=pyingest_file_config,
+                    post_ingest_code=post_ingest_code,
                 )
             )
 
@@ -280,6 +286,7 @@ class IngestionGenerator:
         global_batch_size: int = 100,
         global_field_separator: str = None,
         pyingest_file_config: Dict[str, Any] = {},
+        post_ingest_code: Union[str, List[str], None] = None,
     ) -> str:
         """
         Generate the PyIngest yaml in string format.
@@ -293,6 +300,10 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
+        post_ingest_code: Union[str, List[str], None], optional
+            Code to be run after all data is ingested.
+            Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
+            Individual Cypher queries should be separated by a ';'.
         """
 
         # reformat the keys if necessary
@@ -323,6 +334,12 @@ class IngestionGenerator:
         for constraint in self._constraints:
             to_return += f"  - {self._constraints[constraint]}"
         to_return += config_dump
+
+        if post_ingest_code:
+            post_ingest_code_string = format_pyingest_post_ingest_code(
+                data=post_ingest_code
+            )
+            to_return += "\npost_ingest:\n" + post_ingest_code_string
 
         return to_return
 
@@ -630,3 +647,31 @@ def cast_value(prop: Property) -> str:
         return f"toBooleanOrNull({base})"
     else:
         return base
+
+
+def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
+    """
+    Format the given post ingest code into a String to be injected into the
+    PyIngest yaml file.
+    """
+
+    if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
+        res = ""
+        for cql in data.split(";")[:-1]:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+    elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
+        with open(data, "r") as f:
+            cql_file = f.read()
+        res = ""
+        for cql in cql_file.split(";")[:-1]:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+
+    elif isinstance(data, list):
+        res = ""
+        for cql in data:
+            res += f"  - {cql.lstrip().replace('\n', '\n    ')}\n"
+        return res
+    else:
+        raise ValueError(f"Unable to parse post ingest code. data: {data}")
