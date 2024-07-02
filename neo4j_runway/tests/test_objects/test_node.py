@@ -64,7 +64,6 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(node.label, "Person")
         self.assertEqual(len(node.properties), 2)
-        print(arrows_node)
         node_from_arrows = Node.from_arrows(arrows_node=arrows_node)
 
         self.assertEqual(node_from_arrows.label, "Person")
@@ -72,6 +71,30 @@ class TestNode(unittest.TestCase):
         self.assertTrue(node_from_arrows.properties[0].is_unique)
         self.assertEqual(node_from_arrows.properties[0].type, "str")
         self.assertEqual(node_from_arrows.properties[1].type, "int")
+
+    def test_from_arrows_with_ignored_property(self) -> None:
+        """
+        Test init from arrows node with an ignored property.
+        """
+
+        arrows_node = ArrowsNode(
+            id="Person",
+            caption="",
+            position={"x": 0, "y": 0},
+            labels=["Person"],
+            properties={
+                "name": "first_name | str | unique",
+                "age": "age | int | ignore",
+            },
+        )
+
+        node = Node(label="Person", properties=[self.person_name])
+
+        self.assertEqual(node.label, "Person")
+        self.assertEqual(len(node.properties), 1)
+        node_from_arrows = Node.from_arrows(arrows_node=arrows_node)
+
+        self.assertEqual(len(node_from_arrows.properties), 1)
 
 
 if __name__ == "__main__":

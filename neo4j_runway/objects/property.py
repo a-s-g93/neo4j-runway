@@ -71,7 +71,7 @@ class Property(BaseModel):
     def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> Self:
         """
         Parse the arrows property representation into a standard Property model.
-        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique>.
+        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
         if "|" in list(arrows_property.values())[0]:
