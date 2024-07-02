@@ -1,9 +1,7 @@
 import unittest
 
 from ...objects import Node, Relationship, Property, DataModel
-from ...ingestion.generate_ingest import *
-
-# from ...tests.resources.ingestion_generation_answers import *
+from ...ingestion.generate_ingest import IngestionGenerator
 
 
 nodes = [
