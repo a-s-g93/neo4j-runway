@@ -232,7 +232,7 @@ class Node(BaseModel):
         props = [
             Property.from_arrows(arrows_property={k: v})
             for k, v in arrows_node.properties.items()
-            if k != "csv"
+            if k != "csv" and not v.lower().rstrip().endswith("ignore")
         ]
 
         csv_name = (

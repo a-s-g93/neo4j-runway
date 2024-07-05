@@ -52,7 +52,7 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
                         """
             )
 
-        PyIngest(yaml_string=people_pets_yaml_string, dataframe=cls.data)
+        PyIngest(config=people_pets_yaml_string, dataframe=cls.data)
 
     @classmethod
     def tearDownClass(cls) -> None:

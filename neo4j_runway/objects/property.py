@@ -42,13 +42,16 @@ class Property(BaseModel):
     # must_exist: bool
 
     @field_validator("type")
-    def validate_type(cls, v):
+    def validate_type(cls, v: str):
         if v.lower() == "object" or v.lower() == "string":
             return "str"
-        elif v.lower() == "float64":
+        elif "float" in v.lower():
             return "float"
-        elif v.lower() == "int64":
+        elif v.lower().startswith("int"):
             return "int"
+        elif "bool" in v.lower():
+            return "bool"
+
         if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) and v not in list(
             TYPES_MAP_PYTHON_KEYS.values()
         ):
@@ -68,7 +71,7 @@ class Property(BaseModel):
     def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> Self:
         """
         Parse the arrows property representation into a standard Property model.
-        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique>.
+        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
         if "|" in list(arrows_property.values())[0]:
