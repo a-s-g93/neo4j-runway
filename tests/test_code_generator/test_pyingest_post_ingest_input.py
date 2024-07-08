@@ -52,18 +52,14 @@ set t.var = 2;"""
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cypher_file(self) -> None:
-        post_ingest_file_path: str = (
-            "tests/resources/pyingest_post_ingest.cypher"
-        )
+        post_ingest_file_path: str = "tests/resources/pyingest_post_ingest.cypher"
         res = self.gen.generate_pyingest_yaml_string(
             post_ingest_code=post_ingest_file_path
         )
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cql_file(self) -> None:
-        post_ingest_file_path: str = (
-            "tests/resources/pyingest_post_ingest.cql"
-        )
+        post_ingest_file_path: str = "tests/resources/pyingest_post_ingest.cql"
         res = self.gen.generate_pyingest_yaml_string(
             post_ingest_code=post_ingest_file_path
         )

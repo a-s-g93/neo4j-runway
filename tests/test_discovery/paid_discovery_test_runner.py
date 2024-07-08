@@ -4,11 +4,7 @@ import unittest
 # import your test modules
 from . import *
 
-mods = [
-    x[:-3]
-    for x in os.listdir("tests/test_discovery/")
-    if x.startswith("test_")
-]
+mods = [x[:-3] for x in os.listdir("tests/test_discovery/") if x.startswith("test_")]
 
 # initialize the test suite
 loader = unittest.TestLoader()
