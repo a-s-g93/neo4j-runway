@@ -1,1 +1,0 @@
-python3 -m unittest tests.all_test_runner

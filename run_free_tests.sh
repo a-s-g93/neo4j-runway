@@ -1,1 +1,0 @@
-python3 -m unittest tests.free_test_runner

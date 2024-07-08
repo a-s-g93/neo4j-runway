@@ -12,6 +12,9 @@ free_tests:
 integration_tests:
 	python3 -m unittest tests.test_integration.paid_integration_test_runner
 
+init:
+	poetry install --with dev
+	./scripts/setup_precommit.sh
 
 ######################
 # LINTING AND FORMATTING
