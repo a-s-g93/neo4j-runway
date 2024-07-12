@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any, Self
+from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel, field_validator
 
@@ -187,7 +187,7 @@ class Relationship(BaseModel):
     @classmethod
     def from_arrows(
         cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]
-    ) -> Self:
+    ) -> "Relationship":
         """
         Initialize a relationship from an arrows relationship.
         """

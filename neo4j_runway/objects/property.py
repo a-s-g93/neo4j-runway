@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict, Union, Any, Self
+from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel, field_validator
 
@@ -68,7 +68,9 @@ class Property(BaseModel):
         return TYPES_MAP_PYTHON_KEYS[self.type]
 
     @classmethod
-    def from_arrows(cls, arrows_property: Dict[str, str], caption: str = "") -> Self:
+    def from_arrows(
+        cls, arrows_property: Dict[str, str], caption: str = ""
+    ) -> "Property":
         """
         Parse the arrows property representation into a standard Property model.
         Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
