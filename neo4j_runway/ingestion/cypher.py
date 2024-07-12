@@ -252,7 +252,7 @@ def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
     if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
         res = ""
         for cql in data.split(";")[:-1]:
-            cql_formatted = cql.lstrip().replace('\n', '\n    ')
+            cql_formatted = cql.lstrip().replace("\n", "\n    ")
             res += f"  - {cql_formatted}\n"
         return res
     elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
@@ -260,14 +260,14 @@ def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
             cql_file = f.read()
         res = ""
         for cql in cql_file.split(";")[:-1]:
-            cql_formatted = cql.lstrip().replace('\n', '\n    ')
+            cql_formatted = cql.lstrip().replace("\n", "\n    ")
             res += f"  - {cql_formatted}\n"
         return res
 
     elif isinstance(data, list):
         res = ""
         for cql in data:
-            cql_formatted = cql.lstrip().replace('\n', '\n    ')
+            cql_formatted = cql.lstrip().replace("\n", "\n    ")
             res += f"  - {cql_formatted}\n"
         return res
     else:
