@@ -3,7 +3,7 @@ This file contains the DataModel class which is the standard representation of a
 """
 
 from ast import literal_eval
-from typing import List, Dict, Union, Self
+from typing import List, Dict, Union
 
 from graphviz import Digraph
 from pydantic import BaseModel
@@ -355,7 +355,7 @@ class DataModel(BaseModel):
         return arrows_data_model
 
     @classmethod
-    def from_arrows(cls, file_path: str) -> Self:
+    def from_arrows(cls, file_path: str) -> "DataModel":
         """
         Construct a DataModel from an arrows data model JSON file.
 
@@ -366,7 +366,7 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        Self
+        ArrowsDataModel
             An instance of a DataModel.
         """
 

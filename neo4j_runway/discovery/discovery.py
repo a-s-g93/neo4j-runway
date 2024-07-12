@@ -7,7 +7,7 @@ import os
 from typing import Dict, Union
 import warnings
 
-from IPython.display import display, Markdown
+from IPython.display import display, Markdown  # type: ignore # this works even though I get an import warning for IPython...
 import pandas as pd
 
 from ..llm.llm import LLM

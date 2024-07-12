@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any, Self
+from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel, field_validator
 
@@ -224,7 +224,7 @@ class Node(BaseModel):
         )
 
     @classmethod
-    def from_arrows(cls, arrows_node: ArrowsNode) -> Self:
+    def from_arrows(cls, arrows_node: ArrowsNode) -> "Node":
         """
         Initialize a Node from an arrows node.
         """
