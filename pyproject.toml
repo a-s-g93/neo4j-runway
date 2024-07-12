@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neo4j-runway"
-version = "0.5.1"
+version = "0.5.2"
 description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
 authors = ["Alex Gilmore", "Jason Booth", "Dan Bukowski"]
 license = "MIT"
@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Database",
 ]
-exclude = ["neo4j_runway/tests*", "images/*", "test.ipynb", "data/"]
+exclude = ["tests/*", "images/*", "test.ipynb", "data/", "Makefile", "scripts/*"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
