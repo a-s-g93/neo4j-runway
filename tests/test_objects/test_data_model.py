@@ -2,7 +2,7 @@ import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
 
-from ..resources.data_model_yaml import data_model_dict, data_model_yaml
+from ..resources.answers.data_model_yaml import data_model_dict, data_model_yaml
 
 
 class TestDataModel(unittest.TestCase):
@@ -222,7 +222,7 @@ class TestDataModel(unittest.TestCase):
         """
 
         data_model = DataModel.from_arrows(
-            file_path="tests/resources/arrows-data-model.json"
+            file_path="tests/resources/data_models/arrows-data-model.json"
         )
 
         self.assertTrue(data_model.nodes[0].properties[0].is_unique)
@@ -243,7 +243,7 @@ class TestDataModel(unittest.TestCase):
 
     def test_data_model_with_multi_csv_from_arrows(self) -> None:
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-multi-csv.json"
+            "tests/resources/data_models/people-pets-arrows-multi-csv.json"
         )
 
         self.assertEqual(data_model.relationships[-1].csv_name, "shelters.csv")

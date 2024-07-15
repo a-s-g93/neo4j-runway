@@ -3,7 +3,7 @@ import unittest
 from neo4j_runway.ingestion.cypher import *
 from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from tests.resources.ingestion_generation_answers import *
+from tests.resources.answers.ingestion_generation_answers import *
 
 
 class TestIngestCodeGeneration(unittest.TestCase):

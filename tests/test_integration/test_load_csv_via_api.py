@@ -69,7 +69,7 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             )
 
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-for-load-csv.json"
+            "tests/resources/data_models/people-pets-arrows-for-load-csv.json"
         )
 
         gen = IngestionGenerator(

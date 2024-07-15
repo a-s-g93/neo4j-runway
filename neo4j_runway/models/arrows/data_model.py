@@ -3,9 +3,8 @@ This file contains the objects to construct a data model as it is represented in
 """
 
 from typing import Dict, List, Any
-import warnings
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 from .node import ArrowsNode
 from .relationship import ArrowsRelationship

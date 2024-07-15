@@ -52,7 +52,7 @@ class TestPyIngestPostIngestion(unittest.TestCase):
                         """
             )
 
-        PyIngest(yaml_string="tests/resources/post-ingest.yml")
+        PyIngest(yaml_string="tests/resources/configs/post-ingest.yml")
 
     @classmethod
     def tearDownClass(cls) -> None:

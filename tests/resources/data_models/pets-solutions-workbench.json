@@ -1,0 +1,432 @@
+{
+  "metadata": {
+    "cypherWorkbenchVersion": "1.5.1",
+    "title": "runway-pets",
+    "description": "Data model for testing integration with Neo4j Runway Python library",
+    "notes": "",
+    "customer": "",
+    "authors": "",
+    "tags": "",
+    "dateCreated": "1721049366747",
+    "dateUpdated": "1721050280226",
+    "viewSettings": {
+      "parentContainerViewSettings": {
+        "rightDrawerOpen": false,
+        "rightDrawerOpenWidth": "800px",
+        "destinationTabIndex": 1,
+        "exportSettings": {
+          "parallelRelationships": true,
+          "sourceNeo4jDatabaseConnection": {},
+          "destNeo4jDatabaseConnection": {}
+        }
+      },
+      "canvasViewSettings": {
+        "currentPan": {
+          "x": 0,
+          "y": 0
+        },
+        "currentOffset": {
+          "x": 0,
+          "y": 0
+        },
+        "scaleFactor": 1
+      }
+    }
+  },
+  "dataModel": {
+    "nodeLabels": {
+      "Node0": {
+        "classType": "NodeLabel",
+        "label": "Person",
+        "fromDataSources": [],
+        "key": "Node0",
+        "indexes": [],
+        "properties": {
+          "Prop1": {
+            "key": "Prop1",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "name, knows",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
+          },
+          "Prop2": {
+            "key": "Prop2",
+            "name": "age",
+            "datatype": "Integer",
+            "referenceData": "age",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": false,
+            "mustExist": false,
+            "hasUniqueConstraint": false
+          }
+        },
+        "secondaryNodeLabelKeys": [],
+        "isOnlySecondaryNodeLabel": false,
+        "description": "pets-2.csv",
+        "referenceData": "{\"secondaryNodeLabelKeys\":[],\"isOnlySecondaryNodeLabel\":false}",
+        "display": {
+          "color": "white",
+          "stroke": "black",
+          "strokeWidth": 4,
+          "x": 320,
+          "y": 200,
+          "radius": 40,
+          "size": "md",
+          "width": 80,
+          "height": 80,
+          "fontSize": 14,
+          "fontColor": "black",
+          "textLocation": "middle",
+          "isLocked": false,
+          "glyphs": []
+        },
+        "x": 320,
+        "y": 200,
+        "hasAnnotation": true
+      },
+      "Node2": {
+        "classType": "NodeLabel",
+        "label": "Pet",
+        "fromDataSources": [],
+        "key": "Node2",
+        "indexes": [],
+        "properties": {
+          "Prop3": {
+            "key": "Prop3",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "pet_name",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
+          },
+          "Prop4": {
+            "key": "Prop4",
+            "name": "kind",
+            "datatype": "String",
+            "referenceData": "pet",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": false,
+            "mustExist": false,
+            "hasUniqueConstraint": false
+          }
+        },
+        "secondaryNodeLabelKeys": [],
+        "isOnlySecondaryNodeLabel": false,
+        "description": "pets-2.csv",
+        "referenceData": "{\"secondaryNodeLabelKeys\":[],\"isOnlySecondaryNodeLabel\":false}",
+        "display": {
+          "color": "white",
+          "stroke": "black",
+          "strokeWidth": 4,
+          "x": 540,
+          "y": 120,
+          "radius": 40,
+          "size": "md",
+          "width": 80,
+          "height": 80,
+          "fontSize": 14,
+          "fontColor": "black",
+          "textLocation": "middle",
+          "isLocked": false,
+          "glyphs": []
+        },
+        "x": 540,
+        "y": 120,
+        "hasAnnotation": true
+      },
+      "Node4": {
+        "classType": "NodeLabel",
+        "label": "Toy",
+        "fromDataSources": [],
+        "key": "Node4",
+        "indexes": [],
+        "properties": {
+          "Prop5": {
+            "key": "Prop5",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "toy",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
+          },
+          "Prop6": {
+            "key": "Prop6",
+            "name": "kind",
+            "datatype": "String",
+            "referenceData": "toy_type",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": false,
+            "mustExist": false,
+            "hasUniqueConstraint": false
+          }
+        },
+        "secondaryNodeLabelKeys": [],
+        "isOnlySecondaryNodeLabel": false,
+        "description": "pets-2.csv",
+        "referenceData": "{\"secondaryNodeLabelKeys\":[],\"isOnlySecondaryNodeLabel\":false}",
+        "display": {
+          "color": "white",
+          "stroke": "black",
+          "strokeWidth": 4,
+          "x": 760,
+          "y": 60,
+          "radius": 40,
+          "size": "md",
+          "width": 80,
+          "height": 80,
+          "fontSize": 14,
+          "fontColor": "black",
+          "textLocation": "middle",
+          "isLocked": false,
+          "glyphs": []
+        },
+        "x": 760,
+        "y": 60,
+        "hasAnnotation": true
+      },
+      "Node6": {
+        "classType": "NodeLabel",
+        "label": "Shelter",
+        "fromDataSources": [],
+        "key": "Node6",
+        "indexes": [],
+        "properties": {
+          "Prop7": {
+            "key": "Prop7",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "shelter_name",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
+          }
+        },
+        "secondaryNodeLabelKeys": [],
+        "isOnlySecondaryNodeLabel": false,
+        "description": "shelters-2.csv",
+        "referenceData": "{\"secondaryNodeLabelKeys\":[],\"isOnlySecondaryNodeLabel\":false}",
+        "display": {
+          "color": "white",
+          "stroke": "black",
+          "strokeWidth": 4,
+          "x": 760,
+          "y": 200,
+          "radius": 40,
+          "size": "md",
+          "width": 80,
+          "height": 80,
+          "fontSize": 14,
+          "fontColor": "black",
+          "textLocation": "middle",
+          "isLocked": false,
+          "glyphs": []
+        },
+        "x": 760,
+        "y": 200,
+        "hasAnnotation": true
+      },
+      "Node7": {
+        "classType": "NodeLabel",
+        "label": "Address",
+        "fromDataSources": [],
+        "key": "Node7",
+        "indexes": [
+          {
+            "indexName": "address_city_street",
+            "propertyDefinitionKeys": [
+              "Prop8",
+              "Prop9"
+            ]
+          }
+        ],
+        "properties": {
+          "Prop8": {
+            "key": "Prop8",
+            "name": "city",
+            "datatype": "String",
+            "referenceData": "city",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": true,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": true,
+            "hasUniqueConstraint": true
+          },
+          "Prop9": {
+            "key": "Prop9",
+            "name": "street",
+            "datatype": "String",
+            "referenceData": "street",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": true,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": true,
+            "hasUniqueConstraint": true
+          }
+        },
+        "secondaryNodeLabelKeys": [],
+        "isOnlySecondaryNodeLabel": false,
+        "description": "pets-2.csv",
+        "referenceData": "{\"secondaryNodeLabelKeys\":[],\"isOnlySecondaryNodeLabel\":false}",
+        "display": {
+          "color": "white",
+          "stroke": "black",
+          "strokeWidth": 4,
+          "x": 540,
+          "y": 340,
+          "radius": 40,
+          "size": "md",
+          "width": 80,
+          "height": 80,
+          "fontSize": 14,
+          "fontColor": "black",
+          "textLocation": "middle",
+          "isLocked": false,
+          "glyphs": []
+        },
+        "hasAnnotation": true,
+        "x": 540,
+        "y": 340
+      }
+    },
+    "relationshipTypes": {
+      "Rel2": {
+        "classType": "RelationshipType",
+        "key": "Rel2",
+        "type": "HAS_PET",
+        "startNodeLabelKey": "Node0",
+        "endNodeLabelKey": "Node2",
+        "properties": {},
+        "referenceData": {},
+        "description": "pets-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
+      "Rel4": {
+        "classType": "RelationshipType",
+        "key": "Rel4",
+        "type": "PLAYS_WITH",
+        "startNodeLabelKey": "Node2",
+        "endNodeLabelKey": "Node4",
+        "properties": {},
+        "referenceData": {},
+        "description": "pets-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
+      "Rel6": {
+        "classType": "RelationshipType",
+        "key": "Rel6",
+        "type": "FROM_SHELTER",
+        "startNodeLabelKey": "Node2",
+        "endNodeLabelKey": "Node6",
+        "properties": {},
+        "referenceData": {},
+        "description": "shelters-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
+      "Rel7": {
+        "classType": "RelationshipType",
+        "key": "Rel7",
+        "type": "HAS_ADDRESS",
+        "startNodeLabelKey": "Node6",
+        "endNodeLabelKey": "Node7",
+        "properties": {},
+        "referenceData": {},
+        "description": "shelters-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
+      "Rel9": {
+        "classType": "RelationshipType",
+        "key": "Rel9",
+        "type": "HAS_ADDRESS",
+        "startNodeLabelKey": "Node0",
+        "endNodeLabelKey": "Node7",
+        "properties": {},
+        "referenceData": {},
+        "description": "pets-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      }
+    }
+  }
+}

@@ -71,7 +71,7 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
         # contains node csv in caption or property
         # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-multi-csv.json"
+            "tests/resources/data_models/people-pets-arrows-multi-csv.json"
         )
 
         gen = IngestionGenerator(

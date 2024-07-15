@@ -71,7 +71,7 @@ class TestLoadCSVViaAPIWithNodeKeys(unittest.TestCase):
         # contains node csv in caption or property
         # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-node-keys.json"
+            "tests/resources/data_models/people-pets-arrows-node-keys.json"
         )
 
         gen = IngestionGenerator(
