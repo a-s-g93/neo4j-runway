@@ -10,7 +10,8 @@ dirs = [
     "test_ingest/",
     "test_integration/",
     "test_modeler/",
-    "test_objects/",
+    "test_models/",
+    "test_inputs/",
     "test_utils/",
 ]
 
