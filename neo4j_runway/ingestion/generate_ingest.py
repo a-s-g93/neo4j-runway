@@ -8,7 +8,7 @@ from typing import Dict, List, Any, Union
 import yaml
 
 from .cypher import *
-from ..objects import DataModel
+from ..models import DataModel
 
 
 model_maps = []

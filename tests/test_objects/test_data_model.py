@@ -1,6 +1,6 @@
 import unittest
 
-from neo4j_runway.objects import Node, Relationship, Property, DataModel
+from neo4j_runway.models import Node, Relationship, Property, DataModel
 
 from ..resources.data_model_yaml import data_model_dict, data_model_yaml
 

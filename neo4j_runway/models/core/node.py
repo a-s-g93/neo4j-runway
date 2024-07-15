@@ -1,9 +1,9 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 
 from pydantic import BaseModel, field_validator
 
-from ..objects.arrows import ArrowsNode
-from ..objects.property import Property
+from ..arrows import ArrowsNode
+from .property import Property
 
 
 class Node(BaseModel):

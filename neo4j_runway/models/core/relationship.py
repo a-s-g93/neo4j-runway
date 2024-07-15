@@ -2,9 +2,8 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel, field_validator
 
-from ..objects.node import Node
-from ..objects.property import Property
-from ..objects.arrows import ArrowsRelationship
+from .property import Property
+from ..arrows import ArrowsRelationship
 
 
 class Relationship(BaseModel):

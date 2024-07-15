@@ -9,11 +9,11 @@ from graphviz import Digraph
 from pydantic import BaseModel
 import yaml
 
-from ..objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
-from ..objects.node import Node
-from ..objects.relationship import Relationship
-from ..resources.prompts.prompts import model_generation_rules
-from ..utils.naming_conventions import (
+from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
+from .node import Node
+from .relationship import Relationship
+from ...resources.prompts.prompts import model_generation_rules
+from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
     fix_relationship_type,

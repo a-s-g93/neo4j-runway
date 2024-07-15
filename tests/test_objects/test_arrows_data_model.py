@@ -3,7 +3,7 @@ import unittest
 
 from ast import literal_eval
 
-from neo4j_runway.objects import (
+from neo4j_runway.models import (
     Node,
     Relationship,
     Property,

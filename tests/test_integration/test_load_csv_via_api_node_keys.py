@@ -7,7 +7,7 @@ from neo4j.exceptions import AuthError
 
 from neo4j_runway.utils import test_database_connection
 from neo4j_runway.ingestion import IngestionGenerator
-from neo4j_runway.objects import DataModel
+from neo4j_runway.models import DataModel
 
 load_dotenv()
 
