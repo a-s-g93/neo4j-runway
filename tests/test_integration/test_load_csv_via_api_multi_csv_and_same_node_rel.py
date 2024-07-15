@@ -135,7 +135,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         with self.driver.session(database=database) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
-    
+
     def test_shelter_to_address_relationship_counts(self) -> None:
         cypher = "match (:Shelter)-[r:HAS_ADDRESS]-(:Address) return count(r)"
         with self.driver.session(database=database) as session:
