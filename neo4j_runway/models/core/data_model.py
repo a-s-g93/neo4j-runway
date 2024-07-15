@@ -3,7 +3,7 @@ This file contains the DataModel class which is the standard representation of a
 """
 
 from ast import literal_eval
-from typing import List, Dict, Union
+from typing import Any, List, Dict, Optional, Union
 
 from graphviz import Digraph
 from pydantic import BaseModel
@@ -27,11 +27,13 @@ class DataModel(BaseModel):
 
     nodes: List[Node]
     relationships: List[Relationship]
+    metadata: Optional[Dict[str, Any]] = None
 
     def __init__(
         self,
         nodes: List[Node],
         relationships: List[Relationship],
+        metadata: Optional[Dict[str, Any]] = None,
         use_neo4j_naming_conventions: bool = True,
     ) -> None:
         """
@@ -43,11 +45,16 @@ class DataModel(BaseModel):
             A list of the nodes in the data model.
         relationships : List[Relationship]
             A list of the relationships in the data model.
+        metadata: Optional[Dict[str, Any]]
+            Metadata from an import source such as Solutions Workbench, by default None
         use_neo4j_naming_conventions : bool, optional
             Whether to convert labels, relationships and properties to Neo4j naming conventions, by default True
         """
         super().__init__(
-            nodes=nodes, relationships=relationships, use_neo4j_naming_conventions=True
+            nodes=nodes,
+            relationships=relationships,
+            metadata=metadata,
+            use_neo4j_naming_conventions=True,
         )
 
         # default apply Neo4j naming conventions.
@@ -306,7 +313,7 @@ class DataModel(BaseModel):
         Output the data model to a yaml file and / or yaml string.
         """
 
-        yaml_string = yaml.dump(self.model_dump())
+        yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
 
         if write_file:
             with open(f"./{file_name}.yaml", "w") as f:

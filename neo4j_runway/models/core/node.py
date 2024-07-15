@@ -4,6 +4,7 @@ from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
 from .property import Property
+from ..solutions_workbench import SolutionsWorkbenchNode, SolutionsWorkbenchProperty
 
 
 class Node(BaseModel):
@@ -243,3 +244,39 @@ class Node(BaseModel):
 
         # support only single labels for now, take first label
         return cls(label=arrows_node.labels[0], properties=props, csv_name=csv_name)
+
+    def to_solutions_workbench(self, x: int, y: int) -> "SolutionsWorkbenchNode":
+        """
+        Return a Solutions Workbench compatible Node.
+        """
+
+        props = {prop.name: prop.to_solutions_workbench() for prop in self.properties}
+
+        return SolutionsWorkbenchNode(
+            key=self.label,
+            label=self.label,
+            properties=props,
+            x=x,
+            y=y,
+            description=self.csv_name,
+        )
+
+    @classmethod
+    def from_solutions_workbench(
+        cls, solutions_workbench_node: SolutionsWorkbenchNode
+    ) -> "Node":
+        """
+        Initialize a core Node from a Solutions Workbench Node.
+        """
+
+        props = [
+            Property.from_solutions_workbench(solutions_workbench_property=prop)
+            for prop in solutions_workbench_node.properties.values()
+        ]
+
+        csv_name = solutions_workbench_node.description
+
+        # support only single labels for now, take first label
+        return cls(
+            label=solutions_workbench_node.label, properties=props, csv_name=csv_name
+        )

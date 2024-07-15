@@ -1,29 +1,14 @@
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 from pydantic import BaseModel, field_validator
 
-
-TYPES_MAP_NEO4J_KEYS = {
-    "LIST": "list",
-    "MAP": "dict",
-    "BOOLEAN": "bool",
-    "INTEGER": "int",
-    "FLOAT": "float",
-    "STRING": "str",
-    "ByteArray": "bytearray",
-    "DATE": "neo4j.time.Date",
-    "ZONED TIME": "neo4j.time.Time",
-    "LOCAL TIME": "neo4j.time.Time",
-    "ZONED DATETIME": "neo4j.time.DateTime",
-    "LOCAL DATETIME": "neo4j.time.DateTime",
-    "DURATION": "neo4j.time.Duration",
-    "POINT": "neo4j.spatial.Point",
-    "POINT Cartesian": "neo4j.spatial.CartesianPoint",
-    "POINT WGS-84": "neo4j.spatial.WGS84Point",
-    "unknown": "unknown",
-}
-
-TYPES_MAP_PYTHON_KEYS = {v: k for k, v in TYPES_MAP_NEO4J_KEYS.items()}
+from ..solutions_workbench import SolutionsWorkbenchProperty
+from ...resources.mappings import (
+    TYPES_MAP_NEO4J_TO_PYTHON,
+    TYPES_MAP_PYTHON_TO_NEO4J,
+    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
+    TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
+)
 
 
 class Property(BaseModel):
@@ -34,7 +19,7 @@ class Property(BaseModel):
     name: str
     type: str
     csv_mapping: str
-    csv_mapping_other: Union[str, None] = None
+    csv_mapping_other: Optional[str] = None
     is_unique: bool = False
     part_of_key: bool = False
     # is_indexed: bool
@@ -51,12 +36,12 @@ class Property(BaseModel):
         elif "bool" in v.lower():
             return "bool"
 
-        if v not in list(TYPES_MAP_PYTHON_KEYS.keys()) and v not in list(
-            TYPES_MAP_PYTHON_KEYS.values()
-        ):
+        if v not in list(
+            TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH.keys()
+        ) and v not in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.values()):
             raise ValueError(f"{v} is an invalid type.")
-        if v in list(TYPES_MAP_PYTHON_KEYS.values()):
-            return TYPES_MAP_NEO4J_KEYS[v]
+        if v in list(TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH.values()):
+            return TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[v]
         return v
 
     @property
@@ -64,7 +49,7 @@ class Property(BaseModel):
         """
         The Neo4j property type.
         """
-        return TYPES_MAP_PYTHON_KEYS[self.type]
+        return TYPES_MAP_PYTHON_TO_NEO4J[self.type]
 
     @classmethod
     def from_arrows(
@@ -104,4 +89,54 @@ class Property(BaseModel):
             type=python_type,
             is_unique=is_unique,
             part_of_key=node_key,
+        )
+
+    @classmethod
+    def from_solutions_workbench(
+        cls, solutions_workbench_property: SolutionsWorkbenchProperty
+    ) -> "Property":
+        """
+        Parse the Solutions Workbench property into the standard property representation.
+        """
+
+        if "," in solutions_workbench_property.referenceData:
+            csv_mapping, csv_mapping_other = [
+                x.strip() for x in solutions_workbench_property.referenceData.split(",")
+            ]
+        else:
+            csv_mapping, csv_mapping_other = (
+                solutions_workbench_property.referenceData,
+                None,
+            )
+
+        return cls(
+            name=solutions_workbench_property.name,
+            csv_mapping=csv_mapping,
+            csv_mapping_other=csv_mapping_other,
+            type=TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[
+                solutions_workbench_property.datatype
+            ],
+            is_unique=solutions_workbench_property.hasUniqueConstraint,
+            part_of_key=solutions_workbench_property.isPartOfKey,
+        )
+
+    def to_solutions_workbench(self) -> "SolutionsWorkbenchProperty":
+        """
+        Parse into a Solutions Workbench property representation.
+        """
+        if self.csv_mapping_other:
+            reference_data = f"{self.csv_mapping}, {self.csv_mapping_other}"
+        else:
+            reference_data = self.csv_mapping
+
+        return SolutionsWorkbenchProperty(
+            key=self.name,
+            name=self.name,
+            datatype=TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH[self.type],
+            referenceData=reference_data,
+            isPartOfKey=self.part_of_key,
+            isIndexed=self.is_unique,
+            mustExist=False,
+            hasUniqueConstraint=self.is_unique,
+            isArray=True if self.type.startswith("List") else False,
         )
