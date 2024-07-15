@@ -7,6 +7,7 @@ import warnings
 
 from pydantic import BaseModel, field_validator
 
+
 class ArrowsNode(BaseModel):
     """
     Node representation in arrows.app.
