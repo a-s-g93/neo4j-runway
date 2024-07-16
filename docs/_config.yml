@@ -14,6 +14,12 @@ url                      : https://a-s-g93.github.io # the base hostname & proto
 baseurl                  : "/neo4j-runway" # the subpath of your site, e.g. "/blog"
 repository               : "a-s-g93/neo4j-runway"
 
+
+# Reading Files
+include:
+  - .htaccess
+  - _pages
+  
 # Defaults
 defaults:
   # _pages
