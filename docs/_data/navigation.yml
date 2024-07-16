@@ -1,16 +1,3 @@
-main:
-  - title: "API"
-    children:
-      - title: "Discovery"
-        url: /docs/api/discovery
-      - title: "LLM"
-        url: /docs/api/llm
-
-  - title: "Contribute"
-    children:
-      - title: Set Up
-        url: /contribute/
-
 docs:
   - title: "API"
     children:

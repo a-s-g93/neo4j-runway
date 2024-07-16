@@ -2,7 +2,6 @@
 permalink: //
 ---
 
-# Neo4j Runway
 Neo4j Runway is a Python library that simplifies the process of migrating your relational data into a graph. It provides tools that abstract communication with OpenAI to run discovery on your data and generate a data model, as well as tools to generate ingestion code and load your data into a Neo4j instance.
 
 <img src="./assets/images/neo4j-runway-logo.webp" width=300 height=400> 
