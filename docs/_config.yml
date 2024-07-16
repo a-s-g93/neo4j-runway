@@ -1,13 +1,33 @@
-title: Runway
-description: Runway
 remote_theme: "mmistakes/minimal-mistakes@4.26.2"
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 - jekyll-include-cache
 
-url: https://a-s-g93.github.io/neo4j-runway
+# Site Settings
+locale                   : "en-US"
+title                    : "Runway"
+title_separator          : "-"
+subtitle                 : "A Python package for Neo4j"
+name                     : &name "Alex Gilmore" # &name is a YAML anchor which can be *referenced later
+description              : &description  "An end to end solution for exploring relational data as a graph."
+url                      : https://a-s-g93.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
+baseurl                  : "/neo4j-runway" # the subpath of your site, e.g. "/blog"
+repository               : "a-s-g93/neo4j-runway"
 
-aux_links:
-  Template Repository: https://github.com/a-s-g93/neo4j-runway
+# Defaults
+defaults:
+  # _docs
+  - scope:
+      path: ""
+      type: docs
+    values:
+      layout: single
+      read_time: false
+      author_profile: false
+      share: false
+      comments: false
+      toc_sticky: true
+      sidebar:
+        nav: "docs"
 
 

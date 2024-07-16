@@ -1,7 +1,4 @@
 main:
-  - title: "Home"
-    url: /docs/
-
   - title: "API"
     children:
       - title: "Discovery"
@@ -14,4 +11,15 @@ main:
       - title: Set Up
         url: /docs/contribute/
 
+docs:
+  - title: "API"
+    children:
+      - title: "Discovery"
+        url: /docs/api/discovery
+      - title: "LLM"
+        url: /docs/api/llm
 
+  - title: "Contribute"
+    children:
+      - title: Set Up
+        url: /docs/contribute/
