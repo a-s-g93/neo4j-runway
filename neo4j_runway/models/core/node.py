@@ -245,7 +245,9 @@ class Node(BaseModel):
         # support only single labels for now, take first label
         return cls(label=arrows_node.labels[0], properties=props, csv_name=csv_name)
 
-    def to_solutions_workbench(self, key:str, x: int, y: int) -> "SolutionsWorkbenchNode":
+    def to_solutions_workbench(
+        self, key: str, x: int, y: int
+    ) -> "SolutionsWorkbenchNode":
         """
         Return a Solutions Workbench compatible Node.
         """

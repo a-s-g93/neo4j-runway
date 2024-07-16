@@ -89,7 +89,9 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
             csv_name="pets-2.csv",
         )
 
-        sw_rel: SolutionsWorkbenchRelationship = core_rel.to_solutions_workbench(key="rel0")
+        sw_rel: SolutionsWorkbenchRelationship = core_rel.to_solutions_workbench(
+            key="rel0"
+        )
 
         self.assertEqual("rel0", sw_rel.key)
         self.assertEqual(core_rel.type, sw_rel.type)
