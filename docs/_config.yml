@@ -9,12 +9,4 @@ url: https://a-s-g93.github.io/neo4j-runway
 aux_links:
   Template Repository: https://github.com/a-s-g93/neo4j-runway
 
-defaults:
-  # _docs
-  - scope:
-      path: ""
-      type: docs
-    values:
-      sidebar:
-        nav: "docs"
 

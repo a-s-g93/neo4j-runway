@@ -1,15 +1,15 @@
-docs:
-  - title: Home
+main:
+  - title: "Home"
     url: /docs/
-    
-  - title: API
+
+  - title: "API"
     children:
-      - title: Discovery
+      - title: "Discovery"
         url: /docs/api/discovery
-      - title: LLM
+      - title: "LLM"
         url: /docs/api/llm
 
-  - title: Contribute
+  - title: "Contribute"
     children:
       - title: Set Up
         url: /docs/contribute/
