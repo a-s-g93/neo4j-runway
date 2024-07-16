@@ -1,1 +1,4 @@
+---
+permalink: /index/
+---
 # MAIN PAGE

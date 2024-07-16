@@ -19,7 +19,7 @@ repository               : "a-s-g93/neo4j-runway"
 include:
   - .htaccess
   - _pages
-  
+
 # Defaults
 defaults:
   # _pages
@@ -29,6 +29,8 @@ defaults:
     values:
       layout: single
       author_profile: true
+      sidebar:
+        nav: "docs"
   # _docs
   - scope:
       path: ""
