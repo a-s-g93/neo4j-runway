@@ -41,7 +41,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '32.6'
+          ruby-version: '2.6'
           bundler-cache: true
           cache-version: 0
           working-directory: '${{ github.workspace }}/docs'
