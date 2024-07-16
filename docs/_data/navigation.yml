@@ -15,9 +15,9 @@ docs:
   - title: "API"
     children:
       - title: "Discovery"
-        url: /docs/api/discovery
+        url: /docs/discovery/
       - title: "LLM"
-        url: /docs/api/llm
+        url: /docs/llm/
 
   - title: "Contribute"
     children:
