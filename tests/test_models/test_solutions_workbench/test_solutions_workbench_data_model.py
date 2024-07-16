@@ -159,10 +159,10 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
             self.assertEqual(len(content["dataModel"]["nodeLabels"].keys()), 5)
             self.assertEqual(len(content["dataModel"]["relationshipTypes"].keys()), 6)
 
-        try:
-            os.remove(file_name + ".json")
-        except Exception as e:
-            print("No Solutions Workbench data model created.")
+        # try:
+        #     os.remove(file_name + ".json")
+        # except Exception as e:
+        #     print("No Solutions Workbench data model created.")
 
 
 if __name__ == "__main__":

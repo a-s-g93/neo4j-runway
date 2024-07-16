@@ -434,12 +434,12 @@ class DataModel(BaseModel):
             A representation of the data model in Solutions Workbench format.
         """
 
-        NODE_SPACING: int = 200
+        NODE_SPACING: int = 50
         y_current = 0
         sw_nodes = dict()
         for idx, n in enumerate(self.nodes):
             if (idx + 1) % 5 == 0:
-                y_current -= 200
+                y_current -= 50
             sw_nodes[n.label] = n.to_solutions_workbench(
                 key=n.label, x=NODE_SPACING * (idx % 5), y=y_current
             )

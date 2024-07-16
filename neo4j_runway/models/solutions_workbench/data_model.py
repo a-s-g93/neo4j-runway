@@ -2,7 +2,6 @@
 This file contains a data model as it is represented in Solutions Workbench.
 """
 
-from ast import literal_eval
 import json
 from typing import Any, Dict
 
