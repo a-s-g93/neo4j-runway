@@ -215,7 +215,7 @@ class Relationship(BaseModel):
             csv_name=csv_name,
         )
 
-    def to_solutions_workbench(self) -> "SolutionsWorkbenchRelationship":
+    def to_solutions_workbench(self, key: str) -> "SolutionsWorkbenchRelationship":
         """
         Returns a Solutions Workbench compatible Relationship.
         """
@@ -223,7 +223,7 @@ class Relationship(BaseModel):
         props = {prop.name: prop.to_solutions_workbench() for prop in self.properties}
 
         return SolutionsWorkbenchRelationship(
-            key=self.type,
+            key=key,
             type=self.type,
             properties=props,
             description=self.csv_name,

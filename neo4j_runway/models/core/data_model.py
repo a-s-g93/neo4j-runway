@@ -13,6 +13,7 @@ from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
 from ...resources.prompts.prompts import model_generation_rules
+from ..solutions_workbench import SolutionsWorkbenchDataModel, SolutionsWorkbenchNode, SolutionsWorkbenchProperty, SolutionsWorkbenchRelationship
 from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
@@ -354,7 +355,6 @@ class DataModel(BaseModel):
             nodes=arrows_nodes,
             relationships=[r.to_arrows() for r in self.relationships],
         )
-
         if write_file:
             with open(f"./{file_name}.json", "w") as f:
                 f.write(arrows_data_model.model_dump_json())
@@ -373,7 +373,7 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        ArrowsDataModel
+        DataModel
             An instance of a DataModel.
         """
 
@@ -410,9 +410,49 @@ class DataModel(BaseModel):
                 ],
             )
 
-    def to_solutions_workbench(self, file_name: str = "data-model") -> Dict[str, any]:
+    def to_solutions_workbench(self, file_name: str = "data-model", write_file: bool = True) -> SolutionsWorkbenchDataModel:
         """
-        NOT IMPLEMENTED | Output the data model to Solutions Workbench compatible JSON file.
+        Output the data model to Solutions Workbench compatible JSON file.
+
+        Parameters
+        ----------
+        file_path : str
+            The location and name of the Solutions Workbench JSON file to import.
+        write_file : bool, optional
+            Whether to write a file, by default True
+
+        Returns
+        -------
+        SolutionsWorkbenchDataModel
+            A representation of the data model in Solutions Workbench format.
+        """
+
+        NODE_SPACING: int = 200
+        y_current = 0
+        sw_nodes = dict()
+        for idx, n in enumerate(self.nodes):
+            if (idx + 1) % 5 == 0:
+                y_current -= 200
+            sw_nodes[n.label] = (
+                n.to_solutions_workbench(key=n.label, x=NODE_SPACING * (idx % 5), y=y_current)
+            )
+
+        solutions_workbench_data_model = SolutionsWorkbenchDataModel(
+            nodeLabels=sw_nodes,
+            relationshipTypes={r.type+str(i): r.to_solutions_workbench(key=r.type+str(i)) for i, r in enumerate(self.relationships)},
+            metadata=self.metadata if self.metadata else dict()
+        )
+
+        if write_file:
+            with open(f"./{file_name}.json", "w") as f:
+                f.write(solutions_workbench_data_model.model_dump_json())
+
+        return solutions_workbench_data_model
+
+    @classmethod
+    def from_solutions_workbench(cls, file_path: str) -> "DataModel":
+        """
+        Construct a DataModel from a Solutions Workbench data model JSON file.
 
         Parameters
         ----------
@@ -421,8 +461,8 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        Self
+        DataModel
             An instance of a DataModel.
         """
 
-        pass
+

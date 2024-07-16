@@ -136,7 +136,7 @@ class Property(BaseModel):
             referenceData=reference_data,
             isPartOfKey=self.part_of_key,
             isIndexed=self.is_unique,
-            mustExist=False,
+            mustExist=self.part_of_key,
             hasUniqueConstraint=self.is_unique,
             isArray=True if self.type.startswith("List") else False,
         )

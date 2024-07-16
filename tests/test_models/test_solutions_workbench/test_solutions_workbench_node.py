@@ -109,11 +109,12 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
 
         core_node = Node(label="Pet", csv_name="pets-2.csv", properties=[name, kind])
 
-        sw_node = core_node.to_solutions_workbench(x=0, y=0)
+        sw_node = core_node.to_solutions_workbench(key="node0", x=0, y=0)
 
         self.assertEqual(core_node.label, sw_node.label)
         self.assertEqual(core_node.property_names, list(sw_node.properties.keys()))
         self.assertEqual(core_node.csv_name, sw_node.description)
+        self.assertEqual("node0", sw_node.key)
 
     def test_init_to_core_node(self) -> None:
         sw_node = SolutionsWorkbenchNode(**self.json_input)

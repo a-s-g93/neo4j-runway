@@ -2,6 +2,8 @@
 This file contains a data model as it is represented in Solutions Workbench.
 """
 
+from ast import literal_eval
+import json
 from typing import Any, Dict
 
 from pydantic import BaseModel
@@ -33,12 +35,20 @@ class SolutionsWorkbenchDataModel(BaseModel):
             },
         }
 
-        return str(res)
+        return json.dumps(res)
+
+    # @property
+    # def nodeLabels_json(self):
+    #     return {k+str(i): v.model_dump() for i, (k, v) in enumerate(self.nodeLabels.items())}
+
+    # @property
+    # def relationshipTypes_json(self):
+    #     return {k+str(i): v.model_dump() for i, (k, v) in enumerate(self.relationshipTypes.items())}
 
     @property
     def nodeLabels_json(self):
-        return {k: v.to_json() for k, v in self.nodeLabels.items()}
+        return {k: v.model_dump() for (k, v) in self.nodeLabels.items()}
 
     @property
     def relationshipTypes_json(self):
-        return {k: v.to_json() for k, v in self.relationshipTypes.items()}
+        return {k: v.model_dump() for (k, v) in self.relationshipTypes.items()}
