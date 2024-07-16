@@ -30,16 +30,28 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         ]
 
         person_name = Property(
-            name="name", csv_mapping_other="knows", type="str", csv_mapping="name", is_unique=True
+            name="name",
+            csv_mapping_other="knows",
+            type="str",
+            csv_mapping="name",
+            is_unique=True,
         )
         person_age = Property(
             name="age", type="int", csv_mapping="age", is_unique=False
         )
         address_street = Property(
-            name="street", type="str", csv_mapping="street", is_unique=True, part_of_key=True
+            name="street",
+            type="str",
+            csv_mapping="street",
+            is_unique=True,
+            part_of_key=True,
         )
         address_city = Property(
-            name="city", type="str", csv_mapping="city", is_unique=True, part_of_key=True
+            name="city",
+            type="str",
+            csv_mapping="city",
+            is_unique=True,
+            part_of_key=True,
         )
         pet_name = Property(
             name="name", type="str", csv_mapping="pet_name", is_unique=True
@@ -49,7 +61,9 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         toy_kind = Property(
             name="kind", type="str", csv_mapping="toy_type", is_unique=False
         )
-        shelter_name = Property(name="name", csv_mapping="shelter_name", type="str", is_unique=True)
+        shelter_name = Property(
+            name="name", csv_mapping="shelter_name", type="str", is_unique=True
+        )
 
         cls.good_nodes = [
             Node(
@@ -68,7 +82,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
                 label="Toy",
                 properties=[toy_name, toy_kind],
             ),
-            Node(label="Shelter", properties=[shelter_name])
+            Node(label="Shelter", properties=[shelter_name]),
         ]
 
         cls.good_relationships = [
@@ -130,29 +144,26 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
 
         pass
 
-        
     def test_json_output(self) -> None:
         """
         Test the JSON generation for import into Solutions Workbench.
         """
 
         file_name = "test-solutions-workbench-output"
-        self.data_model.to_solutions_workbench(
-            file_name=file_name, write_file=True
-        )
+        self.data_model.to_solutions_workbench(file_name=file_name, write_file=True)
 
         with open(f"./{file_name}.json", "r") as f:
             content = json.loads(f.read())
-  
+
             self.assertEqual(set(content.keys()), {"dataModel", "metadata"})
             self.assertEqual(len(content["dataModel"]["nodeLabels"].keys()), 5)
             self.assertEqual(len(content["dataModel"]["relationshipTypes"].keys()), 6)
-
 
         try:
             os.remove(file_name + ".json")
         except Exception as e:
             print("No Solutions Workbench data model created.")
+
 
 if __name__ == "__main__":
     unittest.main()
