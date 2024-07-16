@@ -9,17 +9,17 @@ main:
   - title: "Contribute"
     children:
       - title: Set Up
-        url: /docs/contribute/
+        url: /contribute/
 
 docs:
   - title: "API"
     children:
       - title: "Discovery"
-        url: /docs/discovery/
+        url: /api/discovery/
       - title: "LLM"
-        url: /docs/llm/
+        url: /api/llm/
 
   - title: "Contribute"
     children:
       - title: Set Up
-        url: /docs/contribute/
+        url: /contribute/

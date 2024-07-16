@@ -1,4 +1,4 @@
 ---
-permalink: /llm/
+permalink: /api/llm/
 ---
 How to use LLM
