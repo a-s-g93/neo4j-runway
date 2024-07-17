@@ -36,13 +36,16 @@ class Property(BaseModel):
         elif "bool" in v.lower():
             return "bool"
 
-        if v not in list(
-            TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH.keys()
-        ) and v not in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.values()):
-            raise ValueError(f"{v} is an invalid type.")
-        if v in list(TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH.values()):
+        if v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.keys()):
             return TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[v]
-        return v
+        elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.keys()):
+            return TYPES_MAP_NEO4J_TO_PYTHON[v]
+        elif v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.values()):
+            return v
+        elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.values()):
+            return v
+        else:
+            raise ValueError(f"Invalid Property type given: {v}")
 
     @property
     def neo4j_type(self) -> str:

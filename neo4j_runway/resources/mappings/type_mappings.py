@@ -43,6 +43,7 @@ TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON = {
     "LocalDateTime Array": "List<neo4j.time.DateTime>",
     "Duration Array": "List<neo4j.time.Duration>",
     "Point Array": "List<neo4j.spatial.Point>",
+    "unknown": "unknown",
 }
 
 TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH = {
