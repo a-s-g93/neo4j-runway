@@ -2,7 +2,6 @@
 This is a modified PyIngest file for Neo4j Runway. It currently only supports Pandas DataFrame and CSV ingestion.
 """
 
-import os
 import datetime
 from typing import Optional, Union
 import warnings

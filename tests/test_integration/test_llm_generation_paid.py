@@ -32,7 +32,7 @@ class TestLLMGeneration(unittest.TestCase):
         }
 
         # test discovery generation
-        data = pd.read_csv("tests/resources/countries.csv")
+        data = pd.read_csv("tests/resources/data/countries.csv")
         disc = Discovery(data=data, llm=LLM(), user_input=USER_GENERATED_INPUT)
 
         disc.run(show_result=False)
@@ -48,7 +48,7 @@ class TestLLMGeneration(unittest.TestCase):
     def test_sequence_with_pets_data(self) -> None:
 
         # test discovery generation
-        data = pd.read_csv("tests/resources/pets.csv")
+        data = pd.read_csv("tests/resources/data/pets.csv")
         disc = Discovery(data=data, llm=LLM())
 
         disc.run(show_result=False)

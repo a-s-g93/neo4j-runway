@@ -7,7 +7,7 @@ from neo4j.exceptions import AuthError
 
 from neo4j_runway.utils import test_database_connection
 from neo4j_runway.ingestion import IngestionGenerator
-from neo4j_runway.objects import DataModel
+from neo4j_runway.models import DataModel
 
 load_dotenv()
 
@@ -69,7 +69,7 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             )
 
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-for-load-csv.json"
+            "tests/resources/data_models/people-pets-arrows-for-load-csv.json"
         )
 
         gen = IngestionGenerator(

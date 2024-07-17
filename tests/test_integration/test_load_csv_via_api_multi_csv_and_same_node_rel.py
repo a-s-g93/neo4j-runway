@@ -7,7 +7,7 @@ from neo4j.exceptions import AuthError
 
 from neo4j_runway.utils import test_database_connection
 from neo4j_runway.ingestion import IngestionGenerator
-from neo4j_runway.objects import DataModel
+from neo4j_runway.models import DataModel
 
 load_dotenv()
 
@@ -71,7 +71,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         # contains node csv in caption or property
         # contains rel csv in property
         data_model = DataModel.from_arrows(
-            "tests/resources/people-pets-arrows-multi-csv-and-same-node-rel.json"
+            "tests/resources/data_models/people-pets-arrows-multi-csv-and-same-node-rel.json"
         )
 
         gen = IngestionGenerator(
@@ -135,6 +135,12 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
         with self.driver.session(database=database) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
+
+    def test_shelter_to_address_relationship_counts(self) -> None:
+        cypher = "match (:Shelter)-[r:HAS_ADDRESS]-(:Address) return count(r)"
+        with self.driver.session(database=database) as session:
+            r = session.run(cypher).single().value()
+            self.assertEqual(2, r)
 
     def test_pet_to_toy_relationship_counts(self) -> None:
         cypher = "match (:Pet)-[r:PLAYS_WITH]-(:Toy) return count(r)"

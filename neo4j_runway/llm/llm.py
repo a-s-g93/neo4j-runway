@@ -10,7 +10,7 @@ from openai import OpenAI
 
 import instructor
 
-from ..objects.data_model import DataModel
+from ..models import DataModel
 from ..resources.prompts.prompts import system_prompts
 from ..resources.prompts.prompts import model_generation_rules
 

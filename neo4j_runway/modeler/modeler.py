@@ -5,7 +5,7 @@ from graphviz import Digraph
 
 from ..discovery import Discovery
 from ..llm import LLM
-from ..objects import DataModel, UserInput
+from ..models import DataModel, UserInput
 from ..resources.prompts.prompts import model_generation_rules, model_format
 
 

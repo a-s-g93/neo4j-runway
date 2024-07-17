@@ -3,17 +3,23 @@ This file contains the DataModel class which is the standard representation of a
 """
 
 from ast import literal_eval
-from typing import List, Dict, Union
+import json
+from typing import Any, List, Dict, Optional, Union
 
 from graphviz import Digraph
 from pydantic import BaseModel
 import yaml
 
-from ..objects.arrows import ArrowsNode, ArrowsRelationship, ArrowsDataModel
-from ..objects.node import Node
-from ..objects.relationship import Relationship
-from ..resources.prompts.prompts import model_generation_rules
-from ..utils.naming_conventions import (
+from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
+from .node import Node
+from .relationship import Relationship
+from ...resources.prompts.prompts import model_generation_rules
+from ..solutions_workbench import (
+    SolutionsWorkbenchDataModel,
+    SolutionsWorkbenchNode,
+    SolutionsWorkbenchRelationship,
+)
+from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
     fix_relationship_type,
@@ -27,11 +33,13 @@ class DataModel(BaseModel):
 
     nodes: List[Node]
     relationships: List[Relationship]
+    metadata: Optional[Dict[str, Any]] = None
 
     def __init__(
         self,
         nodes: List[Node],
         relationships: List[Relationship],
+        metadata: Optional[Dict[str, Any]] = None,
         use_neo4j_naming_conventions: bool = True,
     ) -> None:
         """
@@ -43,11 +51,16 @@ class DataModel(BaseModel):
             A list of the nodes in the data model.
         relationships : List[Relationship]
             A list of the relationships in the data model.
+        metadata: Optional[Dict[str, Any]]
+            Metadata from an import source such as Solutions Workbench, by default None
         use_neo4j_naming_conventions : bool, optional
             Whether to convert labels, relationships and properties to Neo4j naming conventions, by default True
         """
         super().__init__(
-            nodes=nodes, relationships=relationships, use_neo4j_naming_conventions=True
+            nodes=nodes,
+            relationships=relationships,
+            metadata=metadata,
+            use_neo4j_naming_conventions=True,
         )
 
         # default apply Neo4j naming conventions.
@@ -306,7 +319,7 @@ class DataModel(BaseModel):
         Output the data model to a yaml file and / or yaml string.
         """
 
-        yaml_string = yaml.dump(self.model_dump())
+        yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
 
         if write_file:
             with open(f"./{file_name}.yaml", "w") as f:
@@ -347,7 +360,6 @@ class DataModel(BaseModel):
             nodes=arrows_nodes,
             relationships=[r.to_arrows() for r in self.relationships],
         )
-
         if write_file:
             with open(f"./{file_name}.json", "w") as f:
                 f.write(arrows_data_model.model_dump_json())
@@ -366,13 +378,13 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        ArrowsDataModel
+        DataModel
             An instance of a DataModel.
         """
 
         with open(f"{file_path}", "r") as f:
             content = literal_eval(f.read())
-            node_id_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
+            node_id_to_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
             return cls(
                 nodes=[
                     Node.from_arrows(
@@ -397,15 +409,62 @@ class DataModel(BaseModel):
                             type=r["type"],
                             style=r["style"],
                         ),
-                        node_id_label_map=node_id_label_map,
+                        node_id_to_label_map=node_id_to_label_map,
                     )
                     for r in content["relationships"]
                 ],
             )
 
-    def to_solutions_workbench(self, file_name: str = "data-model") -> Dict[str, any]:
+    def to_solutions_workbench(
+        self, file_name: str = "data-model", write_file: bool = True
+    ) -> SolutionsWorkbenchDataModel:
         """
-        NOT IMPLEMENTED | Output the data model to Solutions Workbench compatible JSON file.
+        Output the data model to Solutions Workbench compatible JSON file.
+
+        Parameters
+        ----------
+        file_path : str
+            The location and name of the Solutions Workbench JSON file to import.
+        write_file : bool, optional
+            Whether to write a file, by default True
+
+        Returns
+        -------
+        SolutionsWorkbenchDataModel
+            A representation of the data model in Solutions Workbench format.
+        """
+
+        X_OFFSET: int = 500
+        NODE_SPACING: int = 200
+        Y_OFFSET: int = 300
+        y_current = 0 + Y_OFFSET
+        sw_nodes = dict()
+        for idx, n in enumerate(self.nodes):
+            if (idx + 1) % 5 == 0:
+                y_current -= 200
+            sw_nodes[n.label] = n.to_solutions_workbench(
+                key=n.label, x=X_OFFSET + (NODE_SPACING * (idx % 5)), y=y_current
+            )
+
+        solutions_workbench_data_model = SolutionsWorkbenchDataModel(
+            nodeLabels=sw_nodes,
+            relationshipTypes={
+                r.type + str(i): r.to_solutions_workbench(key=r.type + str(i))
+                for i, r in enumerate(self.relationships)
+            },
+            metadata=self.metadata if self.metadata else dict(),
+        )
+
+        if write_file:
+            with open(f"./{file_name}.json", "w") as f:
+                f.write(solutions_workbench_data_model.model_dump_json())
+
+        return solutions_workbench_data_model
+
+    @classmethod
+    def from_solutions_workbench(cls, file_path: str) -> "DataModel":
+        """
+        Construct a DataModel from a Solutions Workbench data model JSON file.
 
         Parameters
         ----------
@@ -414,8 +473,28 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        Self
+        DataModel
             An instance of a DataModel.
         """
 
-        pass
+        with open(f"{file_path}", "r") as f:
+            content = json.loads(f.read())
+            node_id_to_label_map = {
+                n["key"]: n["label"]
+                for n in content["dataModel"]["nodeLabels"].values()
+            }
+            return cls(
+                nodes=[
+                    Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
+                    # print(n, "\n")
+                    for n in content["dataModel"]["nodeLabels"].values()
+                ],
+                relationships=[
+                    Relationship.from_solutions_workbench(
+                        SolutionsWorkbenchRelationship(**r),
+                        node_id_to_label_map=node_id_to_label_map,
+                    )
+                    for r in content["dataModel"]["relationshipTypes"].values()
+                ],
+                metadata=content["metadata"],
+            )

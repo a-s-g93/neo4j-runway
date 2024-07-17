@@ -2,9 +2,12 @@ from typing import List, Dict, Union, Any
 
 from pydantic import BaseModel, field_validator
 
-from ..objects.node import Node
-from ..objects.property import Property
-from ..objects.arrows import ArrowsRelationship
+from .property import Property
+from ..arrows import ArrowsRelationship
+from ..solutions_workbench import (
+    SolutionsWorkbenchRelationship,
+    SolutionsWorkbenchProperty,
+)
 
 
 class Relationship(BaseModel):
@@ -186,7 +189,9 @@ class Relationship(BaseModel):
 
     @classmethod
     def from_arrows(
-        cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]
+        cls,
+        arrows_relationship: ArrowsRelationship,
+        node_id_to_label_map: Dict[str, str],
     ) -> "Relationship":
         """
         Initialize a relationship from an arrows relationship.
@@ -206,8 +211,52 @@ class Relationship(BaseModel):
 
         return cls(
             type=arrows_relationship.type,
-            source=node_id_label_map[arrows_relationship.fromId],
-            target=node_id_label_map[arrows_relationship.toId],
+            source=node_id_to_label_map[arrows_relationship.fromId],
+            target=node_id_to_label_map[arrows_relationship.toId],
             properties=props,
             csv_name=csv_name,
+        )
+
+    def to_solutions_workbench(self, key: str) -> "SolutionsWorkbenchRelationship":
+        """
+        Returns a Solutions Workbench compatible Relationship.
+        """
+
+        props = {prop.name: prop.to_solutions_workbench() for prop in self.properties}
+
+        return SolutionsWorkbenchRelationship(
+            key=key,
+            type=self.type,
+            properties=props,
+            description=self.csv_name,
+            startNodeLabelKey=self.source,
+            endNodeLabelKey=self.target,
+        )
+
+    @classmethod
+    def from_solutions_workbench(
+        cls,
+        solutions_workbench_relationship: SolutionsWorkbenchRelationship,
+        node_id_to_label_map: Dict[str, str],
+    ) -> "Relationship":
+        """
+        Initialize a core Relationship from a Solutions Workbench Relationship.
+        """
+
+        props = [
+            Property.from_solutions_workbench(solutions_workbench_property=prop)
+            for prop in solutions_workbench_relationship.properties.values()
+        ]
+
+        # support only single labels for now, take first label
+        return cls(
+            type=solutions_workbench_relationship.type,
+            properties=props,
+            csv_name=solutions_workbench_relationship.description,
+            source=node_id_to_label_map[
+                solutions_workbench_relationship.startNodeLabelKey
+            ],
+            target=node_id_to_label_map[
+                solutions_workbench_relationship.endNodeLabelKey
+            ],
         )

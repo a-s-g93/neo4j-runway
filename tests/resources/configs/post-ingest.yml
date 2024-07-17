@@ -11,7 +11,7 @@ files:
     UNWIND rows AS row
     MERGE (n:Person {name: row.name})
     SET n.age = row.age
-  url: tests/resources/people-pets.csv
+  url: tests/resources/data/people-pets.csv
 post_ingest:
 - create (t:Test)
   set t.var = 1;
