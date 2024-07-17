@@ -10,7 +10,7 @@ dirs = TEST_DIRS
 
 mods = []
 for dir in dirs:
-    mods += [dir + x[:-3] for x in os.listdir(f"tests/{dir}") if x.startswith('test_')]
+    mods += [dir + x[:-3] for x in os.listdir(f"tests/{dir}") if x.startswith("test_")]
 
 # initialize the test suite
 loader = unittest.TestLoader()
