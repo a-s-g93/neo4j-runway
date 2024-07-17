@@ -3,9 +3,11 @@ This file contains the objects to construct a data model as it is represented in
 """
 
 from typing import Dict, List, Any
-import warnings
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
+
+from .node import ArrowsNode
+from .relationship import ArrowsRelationship
 
 DEFAULT_STYLE = {
     "font-family": "Nunito Sans",
@@ -60,46 +62,6 @@ DEFAULT_STYLE = {
     "property-font-size": 20,
     "property-font-weight": "normal",
 }
-
-
-class ArrowsNode(BaseModel):
-    """
-    Node representation in arrows.app.
-    """
-
-    id: str
-    position: Dict[str, float]
-    caption: str = ""
-    labels: List[str]
-    properties: Dict[str, str] = {}
-    style: Dict[str, str] = {}
-
-    @field_validator("position")
-    def validate_position(cls, v):
-        if set(v.keys()) != {"x", "y"}:
-            raise ValueError("position must have format: {'x': <float>, 'y': <float>}")
-        return v
-
-    @field_validator("labels")
-    def validate_labels(cls, v):
-        if len(v) > 1:
-            warnings.warn(
-                f"Multiple labels detected in Arrows model, but Runway only currently supports single node labels. Input: {v}, Runway model will use {v[0]}."
-            )
-        return v
-
-
-class ArrowsRelationship(BaseModel):
-    """
-    Relationship representation in arrows.app.
-    """
-
-    id: str
-    fromId: str
-    toId: str
-    type: str
-    properties: Dict[str, str] = {}
-    style: Dict[str, str] = {}
 
 
 class ArrowsDataModel(BaseModel):

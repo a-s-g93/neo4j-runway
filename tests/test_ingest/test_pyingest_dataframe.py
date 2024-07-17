@@ -6,7 +6,7 @@ from neo4j import GraphDatabase
 import pandas as pd
 
 from neo4j_runway.ingestion.pyingest import PyIngest
-from ..resources.people_pets import people_pets_yaml_string
+from ..resources.answers.people_pets import people_pets_yaml_string
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
             uri=os.environ.get("NEO4J_URI"),
             auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")),
         )
-        data = pd.read_csv("tests/resources/people-pets.csv")
+        data = pd.read_csv("tests/resources/data/people-pets.csv")
         # convert to lists
         data["knows"] = data["knows"].apply(lambda x: x[1:-1].split(", "))
         # explode lists for data loading

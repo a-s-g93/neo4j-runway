@@ -1,6 +1,7 @@
 import unittest
 
-from neo4j_runway.objects.property import Property, TYPES_MAP_PYTHON_KEYS
+from neo4j_runway.models.core.property import Property
+from neo4j_runway.resources.mappings import TYPES_MAP_PYTHON_TO_NEO4J
 
 
 class TestProperty(unittest.TestCase):
@@ -71,7 +72,7 @@ class TestProperty(unittest.TestCase):
         Test the Neo4j property mapping.
         """
 
-        for k, v in TYPES_MAP_PYTHON_KEYS.items():
+        for k, v in TYPES_MAP_PYTHON_TO_NEO4J.items():
             self.assertEqual(
                 Property(
                     name="city", type=k, csv_mapping="city", is_unique=False
