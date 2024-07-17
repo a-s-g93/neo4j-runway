@@ -74,7 +74,7 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
     def test_init_from_json(self) -> None:
         sw_node = SolutionsWorkbenchNode(**self.json_input)
 
-        self.assertEqual(len(sw_node.__dict__.keys()), len(self.json_input.keys()))
+        self.assertEqual(len(sw_node.model_dump().keys()), len(self.json_input.keys()))
 
         test_keys = [
             "label",
@@ -83,8 +83,6 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
             "isOnlySecondaryNodeLabel",
             "description",
             "referenceData",
-            "x",
-            "y",
             "hasAnnotation",
         ]
 
@@ -109,8 +107,9 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
 
         core_node = Node(label="Pet", csv_name="pets-2.csv", properties=[name, kind])
 
-        sw_node = core_node.to_solutions_workbench(key="node0", x=0, y=0)
+        sw_node = core_node.to_solutions_workbench(key="node0", x=50, y=0)
 
+        print(sw_node.model_dump())
         self.assertEqual(core_node.label, sw_node.label)
         self.assertEqual(core_node.property_names, list(sw_node.properties.keys()))
         self.assertEqual(core_node.csv_name, sw_node.description)

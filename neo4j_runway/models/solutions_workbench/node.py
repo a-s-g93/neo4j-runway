@@ -2,13 +2,13 @@
 This file contains a node as it is represented in Solutions Workbench.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 from .property import SolutionsWorkbenchProperty
 
-DEFAULT_DISPLAY = {
+default_display = {
     "color": "white",
     "stroke": "black",
     "strokeWidth": 4,
@@ -38,10 +38,17 @@ class SolutionsWorkbenchNode(BaseModel):
     fromDataSources: List[str] = list()
     indexes: List[Dict[str, Any]] = list()
     properties: Dict[str, SolutionsWorkbenchProperty] = dict()
-    display: Dict[str, Any] = DEFAULT_DISPLAY
+    # display: Dict[str, Any] = default_display
     secondaryNodeLabelKeys: List[str] = list()
     isOnlySecondaryNodeLabel: bool = False
     referenceData: str = ""
     hasAnnotation: bool = False
-    x: int
-    y: int
+    x: Optional[int] = None
+    y: Optional[int] = None
+
+    @computed_field
+    @property
+    def display(self) -> Dict[str, Any]:
+        if self.x and self.y:
+            default_display.update({"x": self.x, "y": self.y})
+        return default_display

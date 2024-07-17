@@ -7,7 +7,6 @@ from neo4j_runway.models import Relationship, Property
 
 from neo4j_runway.models.solutions_workbench import (
     SolutionsWorkbenchRelationship,
-    SolutionsWorkbenchProperty,
 )
 
 

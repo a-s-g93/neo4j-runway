@@ -189,7 +189,9 @@ class Relationship(BaseModel):
 
     @classmethod
     def from_arrows(
-        cls, arrows_relationship: ArrowsRelationship, node_id_label_map: Dict[str, str]
+        cls,
+        arrows_relationship: ArrowsRelationship,
+        node_id_to_label_map: Dict[str, str],
     ) -> "Relationship":
         """
         Initialize a relationship from an arrows relationship.
@@ -209,8 +211,8 @@ class Relationship(BaseModel):
 
         return cls(
             type=arrows_relationship.type,
-            source=node_id_label_map[arrows_relationship.fromId],
-            target=node_id_label_map[arrows_relationship.toId],
+            source=node_id_to_label_map[arrows_relationship.fromId],
+            target=node_id_to_label_map[arrows_relationship.toId],
             properties=props,
             csv_name=csv_name,
         )

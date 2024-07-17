@@ -142,7 +142,17 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         Test init from SW data model.
         """
 
-        pass
+        dm = DataModel.from_solutions_workbench(
+            file_path="tests/resources/data_models/pets-solutions-workbench.json"
+        )
+
+        self.assertEqual(len(dm.nodes), 5)
+        self.assertEqual(len(dm.relationships), 6)
+        self.assertIsNotNone(dm.metadata)
+
+        sw_dm = dm.to_solutions_workbench(
+            file_name="converted-data-model-sw-test.json", write_file=True
+        )
 
     def test_json_output(self) -> None:
         """
@@ -159,10 +169,10 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
             self.assertEqual(len(content["dataModel"]["nodeLabels"].keys()), 5)
             self.assertEqual(len(content["dataModel"]["relationshipTypes"].keys()), 6)
 
-        # try:
-        #     os.remove(file_name + ".json")
-        # except Exception as e:
-        #     print("No Solutions Workbench data model created.")
+        try:
+            os.remove(file_name + ".json")
+        except Exception as e:
+            print("No Solutions Workbench data model created.")
 
 
 if __name__ == "__main__":

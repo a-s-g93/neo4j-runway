@@ -81,7 +81,7 @@ class TestRelationship(unittest.TestCase):
         """
         Test init from arrows node.
         """
-        node_id_label_map = {"n0": "NodeA", "n1": "NodeB"}
+        node_id_to_label_map = {"n0": "NodeA", "n1": "NodeB"}
         arrows_relationship = ArrowsRelationship(
             id="HAS_SIMILARNodeANodeB",
             type="HAS_SIMILAR",
@@ -105,13 +105,14 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(len(relationship.properties), 2)
 
         relationship_from_arrows = Relationship.from_arrows(
-            arrows_relationship=arrows_relationship, node_id_label_map=node_id_label_map
+            arrows_relationship=arrows_relationship,
+            node_id_to_label_map=node_id_to_label_map,
         )
 
         self.assertEqual(relationship_from_arrows.type, arrows_relationship.type)
         self.assertEqual(len(relationship_from_arrows.properties), 2)
-        self.assertEqual(relationship_from_arrows.source, node_id_label_map["n0"])
-        self.assertEqual(relationship_from_arrows.target, node_id_label_map["n1"])
+        self.assertEqual(relationship_from_arrows.source, node_id_to_label_map["n0"])
+        self.assertEqual(relationship_from_arrows.target, node_id_to_label_map["n1"])
         self.assertFalse(relationship_from_arrows.properties[0].is_unique)
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")

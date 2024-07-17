@@ -7,8 +7,8 @@
     "customer": "",
     "authors": "",
     "tags": "",
-    "dateCreated": "1721049366747",
-    "dateUpdated": "1721050280226",
+    "dateCreated": "1721229860856",
+    "dateUpdated": "1721229921041",
     "viewSettings": {
       "parentContainerViewSettings": {
         "rightDrawerOpen": false,
@@ -23,7 +23,7 @@
       "canvasViewSettings": {
         "currentPan": {
           "x": 0,
-          "y": 0
+          "y": -1
         },
         "currentOffset": {
           "x": 0,
@@ -42,19 +42,6 @@
         "key": "Node0",
         "indexes": [],
         "properties": {
-          "Prop1": {
-            "key": "Prop1",
-            "name": "name",
-            "datatype": "String",
-            "referenceData": "name, knows",
-            "description": null,
-            "fromDataSources": [],
-            "isPartOfKey": false,
-            "isArray": false,
-            "isIndexed": true,
-            "mustExist": false,
-            "hasUniqueConstraint": true
-          },
           "Prop2": {
             "key": "Prop2",
             "name": "age",
@@ -67,6 +54,19 @@
             "isIndexed": false,
             "mustExist": false,
             "hasUniqueConstraint": false
+          },
+          "Prop1": {
+            "key": "Prop1",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "name, knows",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
           }
         },
         "secondaryNodeLabelKeys": [],
@@ -77,7 +77,7 @@
           "color": "white",
           "stroke": "black",
           "strokeWidth": 4,
-          "x": 320,
+          "x": 300,
           "y": 200,
           "radius": 40,
           "size": "md",
@@ -89,9 +89,9 @@
           "isLocked": false,
           "glyphs": []
         },
-        "x": 320,
-        "y": 200,
-        "hasAnnotation": true
+        "hasAnnotation": true,
+        "x": 300,
+        "y": 200
       },
       "Node2": {
         "classType": "NodeLabel",
@@ -100,19 +100,6 @@
         "key": "Node2",
         "indexes": [],
         "properties": {
-          "Prop3": {
-            "key": "Prop3",
-            "name": "name",
-            "datatype": "String",
-            "referenceData": "pet_name",
-            "description": null,
-            "fromDataSources": [],
-            "isPartOfKey": false,
-            "isArray": false,
-            "isIndexed": true,
-            "mustExist": false,
-            "hasUniqueConstraint": true
-          },
           "Prop4": {
             "key": "Prop4",
             "name": "kind",
@@ -125,6 +112,19 @@
             "isIndexed": false,
             "mustExist": false,
             "hasUniqueConstraint": false
+          },
+          "Prop3": {
+            "key": "Prop3",
+            "name": "name",
+            "datatype": "String",
+            "referenceData": "pet_name",
+            "description": null,
+            "fromDataSources": [],
+            "isPartOfKey": false,
+            "isArray": false,
+            "isIndexed": true,
+            "mustExist": false,
+            "hasUniqueConstraint": true
           }
         },
         "secondaryNodeLabelKeys": [],
@@ -147,8 +147,6 @@
           "isLocked": false,
           "glyphs": []
         },
-        "x": 540,
-        "y": 120,
         "hasAnnotation": true
       },
       "Node4": {
@@ -205,8 +203,6 @@
           "isLocked": false,
           "glyphs": []
         },
-        "x": 760,
-        "y": 60,
         "hasAnnotation": true
       },
       "Node6": {
@@ -250,8 +246,6 @@
           "isLocked": false,
           "glyphs": []
         },
-        "x": 760,
-        "y": 200,
         "hasAnnotation": true
       },
       "Node7": {
@@ -269,11 +263,11 @@
           }
         ],
         "properties": {
-          "Prop8": {
-            "key": "Prop8",
-            "name": "city",
+          "Prop9": {
+            "key": "Prop9",
+            "name": "street",
             "datatype": "String",
-            "referenceData": "city",
+            "referenceData": "street",
             "description": null,
             "fromDataSources": [],
             "isPartOfKey": true,
@@ -282,11 +276,11 @@
             "mustExist": true,
             "hasUniqueConstraint": true
           },
-          "Prop9": {
-            "key": "Prop9",
-            "name": "street",
+          "Prop8": {
+            "key": "Prop8",
+            "name": "city",
             "datatype": "String",
-            "referenceData": "street",
+            "referenceData": "city",
             "description": null,
             "fromDataSources": [],
             "isPartOfKey": true,
@@ -316,12 +310,31 @@
           "isLocked": false,
           "glyphs": []
         },
-        "hasAnnotation": true,
-        "x": 540,
-        "y": 340
+        "hasAnnotation": true
       }
     },
     "relationshipTypes": {
+      "Rel9": {
+        "classType": "RelationshipType",
+        "key": "Rel9",
+        "type": "HAS_ADDRESS",
+        "startNodeLabelKey": "Node0",
+        "endNodeLabelKey": "Node7",
+        "properties": {},
+        "referenceData": {},
+        "description": "pets-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
       "Rel2": {
         "classType": "RelationshipType",
         "key": "Rel2",
@@ -364,27 +377,6 @@
           "glyph": null
         }
       },
-      "Rel6": {
-        "classType": "RelationshipType",
-        "key": "Rel6",
-        "type": "FROM_SHELTER",
-        "startNodeLabelKey": "Node2",
-        "endNodeLabelKey": "Node6",
-        "properties": {},
-        "referenceData": {},
-        "description": "shelters-2.csv",
-        "outMinCardinality": "0",
-        "outMaxCardinality": "many",
-        "inMinCardinality": "0",
-        "inMaxCardinality": "many",
-        "display": {
-          "color": "black",
-          "fontSize": 14,
-          "strokeWidth": 3,
-          "offset": 0,
-          "glyph": null
-        }
-      },
       "Rel7": {
         "classType": "RelationshipType",
         "key": "Rel7",
@@ -406,12 +398,33 @@
           "glyph": null
         }
       },
-      "Rel9": {
+      "Rel6": {
         "classType": "RelationshipType",
-        "key": "Rel9",
-        "type": "HAS_ADDRESS",
+        "key": "Rel6",
+        "type": "FROM_SHELTER",
+        "startNodeLabelKey": "Node2",
+        "endNodeLabelKey": "Node6",
+        "properties": {},
+        "referenceData": {},
+        "description": "shelters-2.csv",
+        "outMinCardinality": "0",
+        "outMaxCardinality": "many",
+        "inMinCardinality": "0",
+        "inMaxCardinality": "many",
+        "display": {
+          "color": "black",
+          "fontSize": 14,
+          "strokeWidth": 3,
+          "offset": 0,
+          "glyph": null
+        }
+      },
+      "Rel0": {
+        "classType": "RelationshipType",
+        "key": "Rel0",
+        "type": "KNOWS",
         "startNodeLabelKey": "Node0",
-        "endNodeLabelKey": "Node7",
+        "endNodeLabelKey": "Node0",
         "properties": {},
         "referenceData": {},
         "description": "pets-2.csv",
@@ -423,7 +436,7 @@
           "color": "black",
           "fontSize": 14,
           "strokeWidth": 3,
-          "offset": 0,
+          "offset": 40,
           "glyph": null
         }
       }
