@@ -6,6 +6,12 @@ images/*.svg
 runway-mode-generation-flow-V2.png
 test.ipynb
 
+# docs
+docs/.sass-cache
+docs/_site
+.sass-cache
+_site
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

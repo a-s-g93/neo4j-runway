@@ -24,13 +24,22 @@ format:
 	black . --fast
 
 ######################
+# DOCUMENTATION
+######################
+
+docs_preview:
+	BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve --source docs/
+
+######################
 # HELP
 ######################
 
 help:
 	@echo '----'
+	@echo 'init                         - initialize the repo for development (must still install Graphviz separately)'
 	@echo 'format                       - run code formatters'
 	@echo 'test                         - run all unit and integration tests'
 	@echo 'tests                        - run all unit and integration tests'
 	@echo 'integration_tests            - run all integration tests'
 	@echo 'free_tests                   - run all free unit and integration tests'
+	@echo 'docs_preview                 - preview the local documentation site'
