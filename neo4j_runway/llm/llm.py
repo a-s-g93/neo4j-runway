@@ -33,18 +33,21 @@ MODEL_OPTIONS = [
 class LLM:
     """
     Interface for interacting with different LLMs.
-
-    Attributes
-    ----------
-    model: str, optional
-        The OpenAI LLM to use., by default gpt-4o-2024-05-13
-    open_ai_key: Union[str, None], optional
-        Your OpenAI API key if it is not declared in an environment variable., by default None
     """
 
     def __init__(
         self, model: str = "gpt-4o-2024-05-13", open_ai_key: Union[str, None] = None
     ) -> None:
+        """
+        Interface for interacting with different LLMs.
+
+        Attributes
+        ----------
+        model: str, optional
+            The OpenAI LLM to use., by default gpt-4o-2024-05-13
+        open_ai_key: Union[str, None], optional
+            Your OpenAI API key if it is not declared in an environment variable., by default None
+        """
 
         if model not in MODEL_OPTIONS:
             raise ValueError("model must be one of the following: ", MODEL_OPTIONS)

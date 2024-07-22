@@ -30,6 +30,12 @@ format:
 docs_preview:
 	BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve --source docs/
 
+docs_refresh:
+	python3 scripts/refresh_class_documentation.py
+
+docs_add_example:
+	 python3 scripts/add_example_to_docs.py --notebook_path=$(file_path)
+
 ######################
 # HELP
 ######################

@@ -5,8 +5,40 @@ docs:
         url: /api/discovery/
       - title: "LLM"
         url: /api/llm/
+      - title: "IngestionGenerator"
+        url: /api/ingestion-generator/
+      - title: "DataModel"
+        url: /api/data-model/
+      - title: "PyIngest"
+        url: /api/pyingest/
+      - title: "Inputs"
+        url: /api/inputs/
+      - title: "GraphDataModeler"
+        url: /api/graph-data-modeler/
+      - title: "utils"
+        url: /api/utils/
+  
+  - title: "Examples"
+    children:
+      - title: "End-To-End Notebook"
+        url: /examples/countries/
+      - title: "arrows.app Data Model Import"
+        url: "examples/arrows/"
+  
+  - title: "Supported Integrations"
+    children:
+      - title: "arrows.app"
+        url: /supported-integrations/arrows-app/
+      - title: "LOAD CSV"
+        url: /supported-integrations/load-csv/
+      - title: "PyIngest" 
+        url: /supported-integrations/pyingest/
+      - title: "Solutions Workbench"
+        url: /supported-integrations/solutions-workbench/
 
   - title: "Contribute"
     children:
-      - title: Set Up
-        url: /contribute/
+      - title: "How To Contribute"
+        url: /contribute/how-to/
+      - title: "Future Work"
+        url: /contribute/future-work/
