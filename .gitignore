@@ -12,6 +12,7 @@ docs/_site
 .sass-cache
 _site
 images/presentation
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
