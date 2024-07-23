@@ -22,13 +22,18 @@ class LocalServer(object):
 
     def __init__(self):
         self._driver = GraphDatabase.driver(
-            global_config["server_uri"], auth=(global_config["admin_user"], global_config["admin_pass"])
+            global_config["server_uri"],
+            auth=(global_config["admin_user"], global_config["admin_pass"]),
         )
         self.db_config = {}
-        self.database = global_config["database"] if "database" in global_config else None
+        self.database = (
+            global_config["database"] if "database" in global_config else None
+        )
         if self.database is not None:
             self.db_config["database"] = self.database
-        self.basepath = global_config["basepath"] if "basepath" in global_config else None
+        self.basepath = (
+            global_config["basepath"] if "basepath" in global_config else None
+        )
 
     def close(self):
         self._driver.close()
@@ -128,7 +133,9 @@ def load_config(configuration):
     global_config = yaml.safe_load(configuration)
 
 
-def PyIngest(config: str = None, dataframe: Optional[pd.DataFrame] = None, **kwargs) -> None:
+def PyIngest(
+    config: str = None, dataframe: Optional[pd.DataFrame] = None, **kwargs
+) -> None:
     """
     Function to ingest data according to a configuration YAML.
     This is a modified version of the original PyIngest that focuses on loading local files.
