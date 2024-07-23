@@ -13,6 +13,7 @@ def drop_notebook_header(notebook):
     notebook["cells"] = notebook["cells"][1:]
     return header, notebook
 
+
 def import_notebook(file_path: str) -> Any:
     """
     Loads a Python notebook from the root directory of "https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/".
@@ -22,11 +23,13 @@ def import_notebook(file_path: str) -> Any:
     print("importing file")
     url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
     response = urlopen(url).read().decode()
-    
+
     return drop_notebook_header(nbformat.reads(response, as_version=4))
 
 
-def write_example_page(notebook_dict: Dict[str, Any], notebook_name: str, header: str) -> None:
+def write_example_page(
+    notebook_dict: Dict[str, Any], notebook_name: str, header: str
+) -> None:
     """
     The example will be saved to "docs/examples/notebook_name/notebook_name.md".
     svg files will be saved to "docs/examples/notebook_name/notebook_name_files/"
