@@ -10,6 +10,7 @@ Details on this process can be found in the [GitHub Documentation](https://docs.
 
 ## Dependency Management: Poetry and other env/dependency managers
 This project utilizes [Poetry](https://python-poetry.org/) v1.8.2+ as a dependency manager.
+
 ❗Note: *Before installing Poetry*, if you use Conda, create and activate a new Conda env (e.g. conda create -n langchain python=3.10)
 * [Poetry install instructions](https://python-poetry.org/docs/#installation).
 
