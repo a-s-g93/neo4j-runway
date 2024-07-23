@@ -1,10 +1,10 @@
 ---
 permalink: /api/pyingest/
+title: PyIngest
 toc: true
 toc_label: PyIngest
 toc_icon: "fa-solid fa-plane"
 ---
-# PyIngest
 
 Function to ingest data according to a configuration
         YAML.

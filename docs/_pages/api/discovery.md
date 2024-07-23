@@ -1,10 +1,10 @@
 ---
 permalink: /api/discovery/
+title: Discovery
 toc: true
 toc_label: Discovery
 toc_icon: "fa-solid fa-plane"
 ---
-# Discovery
 
 
 ## Class Methods

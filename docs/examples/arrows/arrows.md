@@ -1,11 +1,10 @@
 ---
 permalink: /examples/arrows/
+title: Arrows Integration Demo
 toc: true
 toc_label: 
 toc_icon: "fa-solid fa-plane"
 ---
-# Arrows Integration Demo
-
 This notebook will demonstrate how to use the arrows.app web app to design a data model, then use Runway to generate and ingest your data.
 
 ## Arrows
@@ -58,7 +57,7 @@ model.visualize()
 
 
     
-![svg](output_10_0.svg)
+![svg](output_9_0.svg)
     
 
 

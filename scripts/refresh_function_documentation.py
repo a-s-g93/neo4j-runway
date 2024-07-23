@@ -45,8 +45,7 @@ def read_summary(summary_file_path: str) -> str:
 def format_content(function_of_interest, summary_file_path: str) -> str:
     function_name_string = get_function_name_as_string(function_of_interest)
     summary_string = read_summary(summary_file_path) + "\n" if summary_file_path else ""
-    content = f"""# {function_name_string}
-{summary_string}
+    content = f"""{summary_string}
 {format_docstring(function_of_interest.__doc__).strip()}
 """
     return content
@@ -55,6 +54,7 @@ def format_content(function_of_interest, summary_file_path: str) -> str:
 def create_front_matter(label: str, file_path: str) -> str:
     return f"""---
 permalink: /{file_path[:-3].replace("_", "-")}/
+title: {label}
 toc: true
 toc_label: {label}
 toc_icon: "fa-solid fa-plane"
