@@ -1,5 +1,8 @@
 ---
 permalink: /examples/countries/
+toc: true
+toc_label: 
+toc_icon: "fa-solid fa-plane"
 ---
 # CSV --> Graph Demo
 

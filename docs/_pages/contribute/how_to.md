@@ -1,5 +1,8 @@
 ---
 permalink: /contribute/how-to/
+toc: true
+toc_label: How To Contribute
+toc_icon: "fa-solid fa-plane"
 ---
 
 # How To Contribute
@@ -78,7 +81,6 @@ Formatting will also be handled via a precommit hook.
 Runway uses the [NumPy documentation style guide](https://numpydoc.readthedocs.io/en/latest/format.html). All public facing classes and methods should be documented in this manner. 
 
 Documentation will be refreshed from the `main` branch upon a new release. 
-
 
 
 

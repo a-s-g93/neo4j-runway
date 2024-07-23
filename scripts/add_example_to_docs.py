@@ -42,6 +42,9 @@ def write_example_page(notebook_dict: Dict[str, Any], notebook_name: str) -> Non
         f.write(
             f"""---
 permalink: /examples/{notebook_name.replace("_", "-")}/
+toc: true
+toc_label: 
+toc_icon: "fa-solid fa-plane"
 ---
 """
         )

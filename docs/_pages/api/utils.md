@@ -1,5 +1,8 @@
 ---
 permalink: /api/utils/
+toc: true
+toc_label: test_database_connection
+toc_icon: "fa-solid fa-plane"
 ---
 # test_database_connection
 

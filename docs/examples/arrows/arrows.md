@@ -1,5 +1,8 @@
 ---
 permalink: /examples/arrows/
+toc: true
+toc_label: 
+toc_icon: "fa-solid fa-plane"
 ---
 # Arrows Integration Demo
 
@@ -74,7 +77,7 @@ We won't include a csv name here, since we identify the appropriate csv names in
 gen = IngestionGenerator(data_model=model, csv_dir="./")
 ```
 
-When generating the load csv code, we indicate the method as "browser" since we'll be copy and pasting the code into a Neo4j browser cell. If you plan on using the code with one of the Neo4j drivers or an api, then you can indicate the method as "api" or leave the field blank.
+When generating the LOAD CSV Cypher code, we indicate the method as "browser" since we'll be copy and pasting the code into a Neo4j browser cell. If you plan on using the code with one of the Neo4j drivers or an api, then you can indicate the method as "api" or leave the field blank.
 
 The below method will generate a Python string containing the LOAD CSV script.
 

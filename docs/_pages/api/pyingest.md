@@ -1,5 +1,8 @@
 ---
 permalink: /api/pyingest/
+toc: true
+toc_label: PyIngest
+toc_icon: "fa-solid fa-plane"
 ---
 # PyIngest
 

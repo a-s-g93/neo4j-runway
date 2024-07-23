@@ -1,5 +1,8 @@
 ---
 permalink: /api/data-model/
+toc: true
+toc_label: DataModel
+toc_icon: "fa-solid fa-plane"
 ---
 # DataModel
 This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 
@@ -8,8 +11,7 @@ This is the core data model class of Neo4j Runway. All imported data models will
 ## Class Methods
 
 
-__init__
----
+### __init__
 The standard Graph Data Model representation in Neo4j
         Runway.
 
@@ -28,8 +30,7 @@ The standard Graph Data Model representation in Neo4j
         True
 
 
-apply_neo4j_naming_conventions
----
+### apply_neo4j_naming_conventions
 Apply Neo4j naming conventions to all labels,
         relationships and properties in the data model.
     This is typically performed within the __init__ method
@@ -40,8 +41,7 @@ Apply Neo4j naming conventions to all labels,
     None
 
 
-to_arrows
----
+### to_arrows
 Output the data model to arrows compatible JSON file.
 
     Parameters
@@ -59,8 +59,7 @@ Output the data model to arrows compatible JSON file.
         format.
 
 
-to_json
----
+### to_json
 Output the data model to a json file.
 
     Parameters
@@ -74,8 +73,7 @@ Output the data model to a json file.
         A Python dictionary version of the json.
 
 
-to_solutions_workbench
----
+### to_solutions_workbench
 Output the data model to Solutions Workbench compatible
         JSON file.
 
@@ -94,8 +92,7 @@ Output the data model to Solutions Workbench compatible
         Workbench format.
 
 
-to_yaml
----
+### to_yaml
 Output the data model to a yaml file and String.
 
     Parameters
@@ -112,8 +109,7 @@ Output the data model to a yaml file and String.
         A String representation of the yaml file.
 
 
-validate_model
----
+### validate_model
 Perform additional validation on the data model.
 
     Parameters
@@ -126,8 +122,7 @@ Perform additional validation on the data model.
     None
 
 
-visualize
----
+### visualize
 Visualize the data model using Graphviz. Requires that
         Graphviz is installed.
 
@@ -141,8 +136,7 @@ Visualize the data model using Graphviz. Requires that
 ## Class Properties
 
 
-node_dict
----
+### node_dict
 Returns a dictionary of node label to Node.
 
     Returns
@@ -151,8 +145,7 @@ Returns a dictionary of node label to Node.
         A dictionary with node label keys and Node values.
 
 
-node_labels
----
+### node_labels
 Returns a list of node labels.
 
     Returns
@@ -161,8 +154,7 @@ Returns a list of node labels.
         A list of node labels.
 
 
-relationship_dict
----
+### relationship_dict
 Returns a dictionary of relationship type to
         Relationships.
 
@@ -173,8 +165,7 @@ Returns a dictionary of relationship type to
         Relationship values.
 
 
-relationship_types
----
+### relationship_types
 Returns a list of relationship types.
 
     Returns

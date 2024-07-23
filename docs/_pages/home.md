@@ -3,10 +3,8 @@ permalink: //
 ---
 
 
+{% include figure popup=true image_path="assets/images/neo4j-runway-logo.webp" alt="runway" %}
 
-<p align="center">
-<img src="./assets/images/neo4j-runway-logo.webp" width=300 height=400> 
-</p>
 
 # Runway
 
@@ -33,6 +31,7 @@ pip install neo4j-runway
 Now let's walk through a basic example.
 
 Here we import the modules we'll be using.
+
 ```Python
 import pandas as pd
 

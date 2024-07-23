@@ -36,6 +36,7 @@ docs_preview:
 docs_refresh:
 	python3 scripts/refresh_class_documentation.py
 	python3 scripts/refresh_function_documentation.py
+	python3 scripts/update_docs_version.py
 
 docs_add_example:
 	 python3 scripts/add_example_to_docs.py --notebook_path=$(file_path)

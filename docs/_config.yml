@@ -1,34 +1,35 @@
-remote_theme: "mmistakes/minimal-mistakes@4.26.2"
+remote_theme: mmistakes/minimal-mistakes@4.26.2
 plugins:
-- jekyll-remote-theme # add this line to the plugins list if you already have one
+- jekyll-remote-theme
 - jekyll-include-cache
-
-# Site Settings
-locale                   : "en-US"
-title                    : "Runway"
-title_separator          : "-"
-subtitle                 : "A Python package for Neo4j"
-name                     : &name "Alex Gilmore" # &name is a YAML anchor which can be *referenced later
-description              : &description  "An end to end solution for exploring relational data as a graph."
-url                      : https://a-s-g93.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
-baseurl                  : "/neo4j-runway" # the subpath of your site, e.g. "/blog"
-repository               : "a-s-g93/neo4j-runway"
-
-
-# Reading Files
+locale: en-US
+title: Runway
+title_separator: '-'
+subtitle: A Python package for Neo4j | v0.5.2
+name: Alex Gilmore
+description: An end to end solution for exploring relational data as a graph.
+url: https://a-s-g93.github.io
+baseurl: /neo4j-runway
+repository: a-s-g93/neo4j-runway
+enable_copy_code_button: true
+atom_feed:
+  hide: true
+footer:
+  links:
+  - label: GitHub
+    icon: fab fa-fw fa-github
+    url: https://github.com/a-s-g93/neo4j-runway
 include:
-  - .htaccess
-  - _pages
-
-# Conversion
+- .htaccess
+- _pages
 markdown: kramdown
 highlighter: rouge
 lsi: false
-excerpt_separator: "\n\n"
+excerpt_separator: '
+
+
+  '
 incremental: false
-
-
-# Markdown Processing
 kramdown:
   input: GFM
   hard_wrap: false
@@ -38,30 +39,24 @@ kramdown:
   toc_levels: 1..6
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
-  
-# Defaults
 defaults:
-  # _pages
-  - scope:
-      path: ""
-      type: pages
-    values:
-      layout: single
-      author_profile: true
-      sidebar:
-        nav: "docs"
-  # _docs
-  - scope:
-      path: ""
-      type: docs
-    values:
-      layout: single
-      read_time: false
-      author_profile: false
-      share: false
-      comments: false
-      toc_sticky: true
-      sidebar:
-        nav: "docs"
-
-
+- scope:
+    path: ''
+    type: pages
+  values:
+    layout: single
+    author_profile: true
+    sidebar:
+      nav: docs
+- scope:
+    path: ''
+    type: docs
+  values:
+    layout: single
+    read_time: false
+    author_profile: false
+    share: false
+    comments: false
+    toc_sticky: true
+    sidebar:
+      nav: docs

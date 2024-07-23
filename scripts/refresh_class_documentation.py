@@ -105,8 +105,7 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
 
     for m in methods_as_strings:
         content += f"""
-{m[0]}
----
+### {m[0]}
 {m[1].strip()}
 
 """
@@ -114,26 +113,31 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
         content += "\n\n## Class Properties\n\n"
     for p in properties_as_strings:
         content += f"""
-{p[0]}
----
+### {p[0]}
 {p[1].strip()}
 
 """
     return content
 
 
-def write_markdown_file(file_path: str, content: str) -> None:
+def create_front_matter(label: str, file_path: str) -> str:
+    return f"""---
+permalink: /{file_path[:-3].replace("_", "-")}/
+toc: true
+toc_label: {label}
+toc_icon: "fa-solid fa-plane"
+---
+"""
+
+
+def write_markdown_file(file_path: str, content: str, front_matter: str) -> None:
+
     base_path = "./docs/_pages/"
     path_parts = file_path.split("/")
     path_only = base_path + "/".join(path_parts[:-1])
     os.makedirs(path_only, exist_ok=True)
     with open(f"{base_path}{file_path}", "w") as f:
-        f.write(
-            f"""---
-permalink: /{file_path[:-3].replace("_", "-")}/
----
-"""
-        )
+        f.write(front_matter)
         f.write(content)
 
 
@@ -143,4 +147,7 @@ if __name__ == "__main__":
         write_markdown_file(
             file_path=m["file_path"],
             content=format_content(m["class"], m["summary_file_path"]),
+            front_matter=create_front_matter(
+                label=get_class_name_as_string(m["class"]), file_path=m["file_path"]
+            ),
         )

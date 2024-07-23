@@ -1,5 +1,8 @@
 ---
 permalink: /api/inputs/
+toc: true
+toc_label: UserInput
+toc_icon: "fa-solid fa-plane"
 ---
 # UserInput
 
@@ -7,8 +10,7 @@ permalink: /api/inputs/
 ## Class Methods
 
 
-__init__
----
+### __init__
 A container for user provided information about the
         data.
 

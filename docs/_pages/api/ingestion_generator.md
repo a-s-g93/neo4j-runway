@@ -1,5 +1,8 @@
 ---
 permalink: /api/ingestion-generator/
+toc: true
+toc_label: IngestionGenerator
+toc_icon: "fa-solid fa-plane"
 ---
 # IngestionGenerator
 
@@ -7,8 +10,7 @@ permalink: /api/ingestion-generator/
 ## Class Methods
 
 
-__init__
----
+### __init__
 Class responsible for generating the ingestion code.
 
     Attributes
@@ -38,8 +40,7 @@ Class responsible for generating the ingestion code.
         to, by default ""
 
 
-generate_constraints_cypher_file
----
+### generate_constraints_cypher_file
 Generate the Constraints cypher file.
 
     Parameters
@@ -52,8 +53,7 @@ Generate the Constraints cypher file.
     None
 
 
-generate_constraints_cypher_string
----
+### generate_constraints_cypher_string
 Generate the Constraints cypher file in string format.
 
     Returns
@@ -62,8 +62,7 @@ Generate the Constraints cypher file in string format.
         The constraints Cypher in String format.
 
 
-generate_load_csv_file
----
+### generate_load_csv_file
 Generate the LOAD CSV Cypher file.
 
     Parameters
@@ -85,8 +84,7 @@ Generate the LOAD CSV Cypher file.
     None
 
 
-generate_load_csv_string
----
+### generate_load_csv_string
 Generate the load_csv cypher in string format.
 
     Parameters
@@ -107,8 +105,7 @@ Generate the load_csv cypher in string format.
         The LOAD CSV Cypher in String format.
 
 
-generate_pyingest_yaml_file
----
+### generate_pyingest_yaml_file
 Generate the PyIngest YAML config file.
 
     Parameters
@@ -140,8 +137,7 @@ Generate the PyIngest YAML config file.
     None
 
 
-generate_pyingest_yaml_string
----
+### generate_pyingest_yaml_string
 Generate the PyIngest yaml in string format.
 
     Parameters

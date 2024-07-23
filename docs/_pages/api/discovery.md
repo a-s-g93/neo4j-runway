@@ -1,5 +1,8 @@
 ---
 permalink: /api/discovery/
+toc: true
+toc_label: Discovery
+toc_icon: "fa-solid fa-plane"
 ---
 # Discovery
 
@@ -7,8 +10,7 @@ permalink: /api/discovery/
 ## Class Methods
 
 
-__init__
----
+### __init__
 The Discovery module that handles summarization and
         discovery generation via an LLM.
 
@@ -29,8 +31,7 @@ The Discovery module that handles summarization and
         Will not call the LLM service.
 
 
-run
----
+### run
 Run the discovery process on the provided DataFrame.
     Access generated discovery with the .view_discovery()
         method of the Discovery class.
@@ -49,8 +50,7 @@ Run the discovery process on the provided DataFrame.
     None
 
 
-to_markdown
----
+### to_markdown
 Write the generated discovery to a Markdown file.
 
     Parameters
@@ -61,8 +61,7 @@ Write the generated discovery to a Markdown file.
         The name of the file, by default "discovery"
 
 
-to_txt
----
+### to_txt
 Write the generated discovery to a .txt file.
 
     Parameters
@@ -73,8 +72,7 @@ Write the generated discovery to a .txt file.
         The name of the file, by default "discovery"
 
 
-view_discovery
----
+### view_discovery
 Print the discovery information.
 
     Parameters

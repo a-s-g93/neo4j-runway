@@ -1,5 +1,3 @@
-import inspect
-from typing import List, Callable
 import textwrap
 import os
 
@@ -54,18 +52,23 @@ def format_content(function_of_interest, summary_file_path: str) -> str:
     return content
 
 
-def write_markdown_file(file_path: str, content: str) -> None:
+def create_front_matter(label: str, file_path: str) -> str:
+    return f"""---
+permalink: /{file_path[:-3].replace("_", "-")}/
+toc: true
+toc_label: {label}
+toc_icon: "fa-solid fa-plane"
+---
+"""
+
+
+def write_markdown_file(file_path: str, content: str, front_matter: str) -> None:
     base_path = "./docs/_pages/"
     path_parts = file_path.split("/")
     path_only = base_path + "/".join(path_parts[:-1])
     os.makedirs(path_only, exist_ok=True)
     with open(f"{base_path}{file_path}", "w") as f:
-        f.write(
-            f"""---
-permalink: /{file_path[:-3].replace("_", "-")}/
----
-"""
-        )
+        f.write(front_matter)
         f.write(content)
 
 
@@ -75,4 +78,8 @@ if __name__ == "__main__":
         write_markdown_file(
             file_path=f["file_path"],
             content=format_content(f["function"], f["summary_file_path"]),
+            front_matter=create_front_matter(
+                label=get_function_name_as_string(f["function"]),
+                file_path=f["file_path"],
+            ),
         )

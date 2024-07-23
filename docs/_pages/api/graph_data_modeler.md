@@ -1,5 +1,8 @@
 ---
 permalink: /api/graph-data-modeler/
+toc: true
+toc_label: GraphDataModeler
+toc_icon: "fa-solid fa-plane"
 ---
 # GraphDataModeler
 
@@ -7,8 +10,7 @@ permalink: /api/graph-data-modeler/
 ## Class Methods
 
 
-__init__
----
+### __init__
 Takes an LLM instance and Discovery information.
     Either a Discovery object can be provided, or each field
         can be provided individually.
@@ -46,8 +48,7 @@ Takes an LLM instance and Discovery information.
         the discovery or user_input arguments. By default []
 
 
-create_initial_model
----
+### create_initial_model
 Generate the initial model. This must be ran before a
         model can be interated on.
     You may access this model with the `get_model` method
@@ -59,8 +60,7 @@ Generate the initial model. This must be ran before a
         The generated data model.
 
 
-get_model
----
+### get_model
 Get the data model version specified.
     By default will return the most recent model.
     Version are 1-indexed.
@@ -85,8 +85,7 @@ Get the data model version specified.
     True
 
 
-iterate_model
----
+### iterate_model
 Iterate on the current model. A data model must exist in
         the `model_history` property to run.
 
@@ -115,8 +114,7 @@ Iterate on the current model. A data model must exist in
         The most recent generated data model.
 
 
-load_model
----
+### load_model
 Append a new data model to the end of the
         `model_history`.
     This will become the new `current_model`.
@@ -136,8 +134,7 @@ Append a new data model to the end of the
 ## Class Properties
 
 
-current_model
----
+### current_model
 Get the most recently created or loaded data model.
 
     Returns
@@ -146,8 +143,7 @@ Get the most recently created or loaded data model.
         The current data model.
 
 
-current_model_viz
----
+### current_model_viz
 Visualize the most recent model with Graphviz.
 
     Returns

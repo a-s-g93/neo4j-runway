@@ -1,5 +1,8 @@
 ---
 permalink: /api/llm/
+toc: true
+toc_label: LLM
+toc_icon: "fa-solid fa-plane"
 ---
 # LLM
 
@@ -7,8 +10,7 @@ permalink: /api/llm/
 ## Class Methods
 
 
-__init__
----
+### __init__
 Interface for interacting with different LLMs.
 
     Attributes
