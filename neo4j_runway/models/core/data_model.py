@@ -284,6 +284,7 @@ class DataModel(BaseModel):
     def apply_neo4j_naming_conventions(self) -> None:
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
+        This is typically performed within the __init__ method automatically.
 
         Returns
         -------
@@ -304,41 +305,65 @@ class DataModel(BaseModel):
             for prop in rel.properties:
                 prop.name = fix_property(prop.name)
 
-    def to_json(self, file_name: str = "data-model") -> Dict[str, any]:
+    def to_json(self, file_path: str = "data-model.json") -> Dict[str, any]:
         """
-        Output the data model to a JSON file.
+        Output the data model to a json file.
+
+        Parameters
+        ----------
+        file_path : str, optional
+            The file path to write, by default "data-model.json"
+
+        Returns
+        -------
+        Dict[str, any]
+            A Python dictionary version of the json.
         """
 
-        with open(f"./{file_name}.json", "w") as f:
+        with open(f"{file_path}", "w") as f:
             f.write(self.model_dump_json())
 
         return self.model_dump_json()
 
-    def to_yaml(self, file_name: str = "data-model", write_file: bool = True) -> str:
+    def to_yaml(
+        self, file_path: str = "data-model.yaml", write_file: bool = True
+    ) -> str:
         """
-        Output the data model to a yaml file and / or yaml string.
+        Output the data model to a yaml file and String.
+
+        Parameters
+        ----------
+        file_path : str, optional
+            The file path to write if write_file = True, by default "data-model.yaml"
+        write_file : bool, optional
+            Whether to write the file, by default True
+
+        Returns
+        -------
+        str
+            A String representation of the yaml file.
         """
 
         yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
 
         if write_file:
-            with open(f"./{file_name}.yaml", "w") as f:
+            with open(f"{file_path}", "w") as f:
                 f.write(yaml_string)
 
         return yaml_string
 
     def to_arrows(
-        self, file_name: str = "data-model", write_file: bool = True
+        self, file_path: str = "data-model.json", write_file: bool = True
     ) -> ArrowsDataModel:
         """
         Output the data model to arrows compatible JSON file.
 
         Parameters
         ----------
-        file_name : str, optional
-            The file name, by default "data-model"
+        file_path : str, optional
+            The file path to write if write_file = True, by default "data-model.json"
         write_file : bool, optional
-            Whether to write a file, by default True
+            Whether to write the file, by default True
 
         Returns
         -------
@@ -361,7 +386,7 @@ class DataModel(BaseModel):
             relationships=[r.to_arrows() for r in self.relationships],
         )
         if write_file:
-            with open(f"./{file_name}.json", "w") as f:
+            with open(f"{file_path}", "w") as f:
                 f.write(arrows_data_model.model_dump_json())
 
         return arrows_data_model
@@ -416,17 +441,17 @@ class DataModel(BaseModel):
             )
 
     def to_solutions_workbench(
-        self, file_name: str = "data-model", write_file: bool = True
+        self, file_path: str = "data-model.json", write_file: bool = True
     ) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.
 
         Parameters
         ----------
-        file_path : str
-            The location and name of the Solutions Workbench JSON file to import.
+        file_path : str, optional
+            The file path to write if write_file = True, by default "data-model.json"
         write_file : bool, optional
-            Whether to write a file, by default True
+            Whether to write the file, by default True
 
         Returns
         -------
@@ -456,7 +481,7 @@ class DataModel(BaseModel):
         )
 
         if write_file:
-            with open(f"./{file_name}.json", "w") as f:
+            with open(f"{file_path}", "w") as f:
                 f.write(solutions_workbench_data_model.model_dump_json())
 
         return solutions_workbench_data_model

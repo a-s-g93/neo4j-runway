@@ -147,7 +147,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         self.assertIsNotNone(dm.metadata)
 
         sw_dm = dm.to_solutions_workbench(
-            file_name="converted-data-model-sw-test.json", write_file=True
+            file_path="converted-data-model-sw-test.json", write_file=False
         )
 
     def test_json_output(self) -> None:
@@ -155,10 +155,10 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         Test the JSON generation for import into Solutions Workbench.
         """
 
-        file_name = "test-solutions-workbench-output"
-        self.data_model.to_solutions_workbench(file_name=file_name, write_file=True)
+        file_path = "test-solutions-workbench-output.json"
+        self.data_model.to_solutions_workbench(file_path=file_path, write_file=True)
 
-        with open(f"./{file_name}.json", "r") as f:
+        with open(f"./{file_path}", "r") as f:
             content = json.loads(f.read())
 
             self.assertEqual(set(content.keys()), {"dataModel", "metadata"})
@@ -166,7 +166,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
             self.assertEqual(len(content["dataModel"]["relationshipTypes"].keys()), 6)
 
         try:
-            os.remove(file_name + ".json")
+            os.remove(f"./{file_path}")
         except Exception as e:
             print("No Solutions Workbench data model created.")
 

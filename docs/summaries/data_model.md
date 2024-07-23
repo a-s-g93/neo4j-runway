@@ -1,0 +1,1 @@
+This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 

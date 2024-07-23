@@ -36,6 +36,8 @@ regex = "~2024"
 python-dotenv = "^1.0.1"
 black = "^24.4.2"
 ipykernel = "^6.29.5"
+nbconvert= "^7.16.4"
+toml = "^0.10.2"
 
 [build-system]
 requires = ["poetry-core"]

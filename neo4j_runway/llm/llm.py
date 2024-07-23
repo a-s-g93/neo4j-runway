@@ -33,18 +33,21 @@ MODEL_OPTIONS = [
 class LLM:
     """
     Interface for interacting with different LLMs.
-
-    Attributes
-    ----------
-    model: str, optional
-        The OpenAI LLM to use., by default gpt-4o-2024-05-13
-    open_ai_key: Union[str, None], optional
-        Your OpenAI API key if it is not declared in an environment variable., by default None
     """
 
     def __init__(
         self, model: str = "gpt-4o-2024-05-13", open_ai_key: Union[str, None] = None
     ) -> None:
+        """
+        Interface for interacting with different LLMs.
+
+        Attributes
+        ----------
+        model: str, optional
+            The OpenAI LLM to use., by default gpt-4o-2024-05-13
+        open_ai_key: Union[str, None], optional
+            Your OpenAI API key if it is not declared in an environment variable., by default None
+        """
 
         if model not in MODEL_OPTIONS:
             raise ValueError("model must be one of the following: ", MODEL_OPTIONS)
@@ -59,7 +62,7 @@ class LLM:
         )
         self.model = model
 
-    def get_discovery_response(self, formatted_prompt: str) -> str:
+    def _get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
@@ -74,7 +77,7 @@ class LLM:
         )
         return response.choices[0].message.content
 
-    def get_data_model_response(
+    def _get_data_model_response(
         self,
         formatted_prompt: str,
         csv_columns: List[str],
@@ -104,7 +107,7 @@ class LLM:
             validation = response.validate_model(csv_columns=csv_columns)
             if not validation["valid"]:
                 print("validation failed")
-                cot = self.get_chain_of_thought_response(
+                cot = self._get_chain_of_thought_response(
                     formatted_prompt=validation["message"]
                 )
 
@@ -123,7 +126,7 @@ class LLM:
 
         return response
 
-    def get_chain_of_thought_response(self, formatted_prompt: str) -> str:
+    def _get_chain_of_thought_response(self, formatted_prompt: str) -> str:
         """
         Generate fixes for the previous data model.
         """

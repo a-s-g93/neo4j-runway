@@ -1,9 +1,14 @@
-# Neo4j Runway
-Neo4j Runway is a Python library that simplifies the process of migrating your relational data into a graph. It provides tools that abstract communication with OpenAI to run discovery on your data and generate a data model, as well as tools to generate ingestion code and load your data into a Neo4j instance.
+---
+permalink: //
+---
 
-<img src="./docs/assets/images/neo4j-runway-logo.webp" width=300 height=400> 
+
+{% include figure popup=true image_path="assets/images/neo4j-runway-logo.webp" alt="runway" %}
 
 
+# Runway
+
+Runway is a Python library that simplifies the process of migrating your relational data into a graph. It provides tools that abstract communication with OpenAI to run discovery on your data and generate a data model, as well as tools to generate ingestion code and load your data into a Neo4j instance.
 
 ## Key Features
 
@@ -26,6 +31,7 @@ pip install neo4j-runway
 Now let's walk through a basic example.
 
 Here we import the modules we'll be using.
+
 ```Python
 import pandas as pd
 
@@ -73,7 +79,7 @@ If we have graphviz installed, we can take a look at our model.
 ```Python
 gdm.current_model.visualize()
 ```
-![countries-first-model.png](./images/countries-first-model.png)
+![countries-first-model.png](./assets/images/countries-first-model.png)
 
 Let's make some corrections to our model and view the results.
 ```Python
@@ -83,7 +89,7 @@ Remove The relationship between Country and Region.
 """)
 gdm.current_model.visualize()
 ```
-![countries-second-model.png](./images/countries-second-model.png)
+![countries-second-model.png](./assets/images/countries-second-model.png)
 
 ### Code Generation
 We can now use our data model to generate some ingestion code.
@@ -108,7 +114,7 @@ gen.generate_pyingest_yaml_file(file_name="countries")
 ```
 Here's a snapshot of our new graph!
 
-![countries-graph.png](./images/countries-graph-white-background.png)
+![countries-graph.png](./assets/images/countries-graph-white-background.png)
 
 ## Limitations
 The current project is in beta and has the following limitations:
