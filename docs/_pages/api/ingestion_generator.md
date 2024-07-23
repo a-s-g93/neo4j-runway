@@ -1,10 +1,10 @@
 ---
 permalink: /api/ingestion-generator/
+title: IngestionGenerator
 toc: true
 toc_label: IngestionGenerator
 toc_icon: "fa-solid fa-plane"
 ---
-# IngestionGenerator
 
 
 ## Class Methods

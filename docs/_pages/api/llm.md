@@ -1,10 +1,10 @@
 ---
 permalink: /api/llm/
+title: LLM
 toc: true
 toc_label: LLM
 toc_icon: "fa-solid fa-plane"
 ---
-# LLM
 
 
 ## Class Methods

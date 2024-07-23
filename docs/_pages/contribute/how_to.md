@@ -1,11 +1,11 @@
 ---
 permalink: /contribute/how-to/
+title: "How To Contribute"
 toc: true
 toc_label: How To Contribute
 toc_icon: "fa-solid fa-plane"
 ---
 
-# How To Contribute
 
 ## Fork & Clone Repository
 

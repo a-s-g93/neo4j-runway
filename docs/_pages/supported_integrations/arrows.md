@@ -1,8 +1,9 @@
 ---
 permalink: /supported-integrations/arrows-app/
+title: "arrows.app"
 ---
 
-# arrows.app
+
 
 [Application](arrows.app) | [GitHub](https://github.com/neo4j-labs/arrows.app)
 
