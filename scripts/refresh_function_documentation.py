@@ -25,7 +25,7 @@ MAX_TEXT_WIDTH: int = 60
 def format_docstring(docstring: str) -> str:
     if not docstring:
         return ""
-    docstring = docstring.replace("        ", "    ")
+    # docstring = docstring.replace("        ", "    ")
     res = ""
     for line in docstring.split("\n"):
         res += (

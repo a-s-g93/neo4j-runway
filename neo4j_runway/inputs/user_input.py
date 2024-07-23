@@ -19,7 +19,6 @@ class UserInput(BaseModel):
 
         Attributes
         ----------
-
         general_description : str, optional
             A general description of the CSV data, by default = ""
         column_descriptions : Dict[str, str]

@@ -11,7 +11,7 @@ __init__
 ---
 Class responsible for generating the ingestion code.
 
-    Parameters
+    Attributes
     ----------
     data_model : DataModel
         The data model to base ingestion code on.
@@ -47,15 +47,24 @@ Generate the Constraints cypher file.
     file_name : str, optional
         Name of the file, by default "constraints"
 
+    Returns
+    ----------
+    None
+
 
 generate_constraints_cypher_string
 ---
 Generate the Constraints cypher file in string format.
 
+    Returns
+    ----------
+    str
+        The constraints Cypher in String format.
+
 
 generate_load_csv_file
 ---
-Generate the load_csv cypher file.
+Generate the LOAD CSV Cypher file.
 
     Parameters
     ----------
@@ -70,6 +79,10 @@ Generate the load_csv cypher file.
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False). By
         defaut True
+
+    Returns
+    ----------
+    None
 
 
 generate_load_csv_string
@@ -87,6 +100,11 @@ Generate the load_csv cypher in string format.
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False). By
         defaut True
+
+    Returns
+    ----------
+    str
+        The LOAD CSV Cypher in String format.
 
 
 generate_pyingest_yaml_file
@@ -106,16 +124,20 @@ Generate the PyIngest YAML config file.
         Supported parameters are: batch_size <int>,
         skip_records <int>, skip_file <int> and
         field_separator <str>
-    post_ingest_code: Union[str, List[str], None], optional
+    post_ingest_code : Union[str, List[str], None], optional
         Code to be run after all data is ingested.
         Can be either a String of cypher code, .cypher file
         filepath or list of cypher commands.
         Individual Cypher queries should be separated by a
         ';'.
-    strict_typing: bool, optional
+    strict_typing : bool, optional
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False). By
         default True
+
+    Returns
+    ----------
+    None
 
 
 generate_pyingest_yaml_string
@@ -133,14 +155,19 @@ Generate the PyIngest yaml in string format.
         Supported parameters are: batch_size <int>,
         skip_records <int>, skip_file <int> and
         field_separator <str>
-    post_ingest_code: Union[str, List[str], None], optional
+    post_ingest_code : Union[str, List[str], None], optional
         Code to be run after all data is ingested.
         Can be either a String of cypher code, .cypher file
         filepath or list of cypher commands.
         Individual Cypher queries should be separated by a
         ';'.
-    strict_typing: bool, optional
+    strict_typing : bool, optional
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False). By
         defaut True
+
+    Returns
+    ----------
+    str
+        The yaml configuration in String format.
 

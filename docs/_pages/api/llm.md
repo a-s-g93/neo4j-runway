@@ -19,18 +19,3 @@ Interface for interacting with different LLMs.
         Your OpenAI API key if it is not declared in an
         environment variable., by default None
 
-
-get_chain_of_thought_response
----
-Generate fixes for the previous data model.
-
-
-get_data_model_response
----
-Get a data model response from the LLM.
-
-
-get_discovery_response
----
-Get a discovery response from the LLM.
-

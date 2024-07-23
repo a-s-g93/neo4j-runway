@@ -1,5 +1,5 @@
 ---
-permalink: /api/inputs/
+permalink: /api/user-input/
 ---
 # UserInput
 
@@ -31,7 +31,7 @@ A container for user provided information about the
 ## Class Properties
 
 
-formatted_dict
+_formatted_dict
 ---
 Dictionary representation of the user input to be used
         in Discovery.

@@ -32,6 +32,8 @@ apply_neo4j_naming_conventions
 ---
 Apply Neo4j naming conventions to all labels,
         relationships and properties in the data model.
+    This is typically performed within the __init__ method
+        automatically.
 
     Returns
     -------
@@ -44,10 +46,11 @@ Output the data model to arrows compatible JSON file.
 
     Parameters
     ----------
-    file_name : str, optional
-        The file name, by default "data-model"
+    file_path : str, optional
+        The file path to write if write_file = True, by
+        default "data-model.json"
     write_file : bool, optional
-        Whether to write a file, by default True
+        Whether to write the file, by default True
 
     Returns
     -------
@@ -58,7 +61,17 @@ Output the data model to arrows compatible JSON file.
 
 to_json
 ---
-Output the data model to a JSON file.
+Output the data model to a json file.
+
+    Parameters
+    ----------
+    file_path : str, optional
+        The file path to write, by default "data-model.json"
+
+    Returns
+    -------
+    Dict[str, any]
+        A Python dictionary version of the json.
 
 
 to_solutions_workbench
@@ -68,11 +81,11 @@ Output the data model to Solutions Workbench compatible
 
     Parameters
     ----------
-    file_path : str
-        The location and name of the Solutions Workbench
-        JSON file to import.
+    file_path : str, optional
+        The file path to write if write_file = True, by
+        default "data-model.json"
     write_file : bool, optional
-        Whether to write a file, by default True
+        Whether to write the file, by default True
 
     Returns
     -------
@@ -83,8 +96,20 @@ Output the data model to Solutions Workbench compatible
 
 to_yaml
 ---
-Output the data model to a yaml file and / or yaml
-        string.
+Output the data model to a yaml file and String.
+
+    Parameters
+    ----------
+    file_path : str, optional
+        The file path to write if write_file = True, by
+        default "data-model.yaml"
+    write_file : bool, optional
+        Whether to write the file, by default True
+
+    Returns
+    -------
+    str
+        A String representation of the yaml file.
 
 
 validate_model

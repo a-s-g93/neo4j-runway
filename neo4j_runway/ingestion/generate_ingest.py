@@ -61,7 +61,7 @@ class IngestionGenerator:
         """
         Class responsible for generating the ingestion code.
 
-        Parameters
+        Attributes
         ----------
         data_model : DataModel
             The data model to base ingestion code on.
@@ -272,12 +272,16 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
-        post_ingest_code: Union[str, List[str], None], optional
+        post_ingest_code : Union[str, List[str], None], optional
             Code to be run after all data is ingested.
             Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
             Individual Cypher queries should be separated by a ';'.
-        strict_typing: bool, optional
+        strict_typing : bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By default True
+
+        Returns
+        ----------
+        None
         """
 
         if self.file_output_dir != "":
@@ -314,12 +318,17 @@ class IngestionGenerator:
         pyingest_file_config: Dict[str, Any], optional
             A dictionary containing individual file parameters.
             Supported parameters are: batch_size <int>, skip_records <int>, skip_file <int> and field_separator <str>
-        post_ingest_code: Union[str, List[str], None], optional
+        post_ingest_code : Union[str, List[str], None], optional
             Code to be run after all data is ingested.
             Can be either a String of cypher code, .cypher file filepath or list of cypher commands.
             Individual Cypher queries should be separated by a ';'.
-        strict_typing: bool, optional
+        strict_typing : bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
+
+        Returns
+        ----------
+        str
+            The yaml configuration in String format.
         """
 
         # reformat the keys if necessary
@@ -368,6 +377,10 @@ class IngestionGenerator:
         ----------
         file_name : str, optional
             Name of the file, by default "constraints"
+
+        Returns
+        ----------
+        None
         """
 
         if self.file_output_dir != "":
@@ -381,6 +394,11 @@ class IngestionGenerator:
     def generate_constraints_cypher_string(self) -> str:
         """
         Generate the Constraints cypher file in string format.
+
+        Returns
+        ----------
+        str
+            The constraints Cypher in String format.
         """
 
         if not self._constraints:
@@ -401,7 +419,7 @@ class IngestionGenerator:
         strict_typing: bool = True,
     ) -> None:
         """
-        Generate the load_csv cypher file.
+        Generate the LOAD CSV Cypher file.
 
         Parameters
         ----------
@@ -413,6 +431,10 @@ class IngestionGenerator:
             The method that LOAD CSV will be run. Must be either "api" or "browser". By default "api"
         strict_typing: bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
+
+        Returns
+        ----------
+        None
         """
 
         if self.file_output_dir != "":
@@ -439,6 +461,11 @@ class IngestionGenerator:
             The method that LOAD CSV will be run. Must be either "api" or "browser". By default "api"
         strict_typing: bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By defaut True
+
+        Returns
+        ----------
+        str
+            The LOAD CSV Cypher in String format.
         """
 
         self._generate_base_information(

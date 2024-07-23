@@ -12,7 +12,7 @@ __init__
 The Discovery module that handles summarization and
         discovery generation via an LLM.
 
-    Parameters
+    Attributes
     ----------
     llm : LLM, optional
         The LLM instance used to generate data discovery.
@@ -35,24 +35,42 @@ Run the discovery process on the provided DataFrame.
     Access generated discovery with the .view_discovery()
         method of the Discovery class.
 
-    Returns
+    Parameters
     -------
-    show_result: bool
+    show_result : bool
         Whether to print the generated discovery upon
         retrieval.
-    notebook: bool
+    notebook : bool
         Whether code is executed in a notebook. Affects the
         result print formatting.
+
+    Returns
+    ----------
+    None
 
 
 to_markdown
 ---
-Save the generated discovery to a .md file.
+Write the generated discovery to a Markdown file.
+
+    Parameters
+    ----------
+    file_dir : str, optional
+        The file directory to write to, by default "./"
+    file_name : str, optional
+        The name of the file, by default "discovery"
 
 
 to_txt
 ---
-Save the generated discovery to a .txt file.
+Write the generated discovery to a .txt file.
+
+    Parameters
+    ----------
+    file_dir : str, optional
+        The file directory to write to, by default "./"
+    file_name : str, optional
+        The name of the file, by default "discovery"
 
 
 view_discovery
@@ -63,4 +81,8 @@ Print the discovery information.
     ----------
     notebook : bool, optional
         Whether executing in a notebook, by default True
+
+    Returns
+    ----------
+    None
 

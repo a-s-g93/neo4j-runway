@@ -40,7 +40,7 @@ CLASS_DIR = [
     {"class": LLM, "file_path": "api/llm.md", "summary_file_path": ""},
     {
         "class": UserInput,
-        "file_path": "api/user_input.md",
+        "file_path": "api/inputs.md",
         "summary_file_path": "",
     },
 ]
@@ -78,6 +78,7 @@ def get_properties_of_class(class_of_interest) -> List[str]:
         if "BaseModel" not in str(m[1])
         and "property" in str(m[1])
         and m[0] not in ignored_props
+        and not m[0].startswith("_")
     ]
 
 

@@ -19,37 +19,37 @@ class GraphDataModeler:
         self,
         llm: LLM,
         discovery: Union[str, Discovery] = "",
-        user_input: Union[Dict[str, str], UserInput] = {},
+        user_input: Union[Dict[str, str], UserInput] = dict(),
         general_data_description: str = "",
         numeric_data_description: str = "",
         categorical_data_description: str = "",
         feature_descriptions: str = "",
-        allowed_columns: List[str] = [],
+        allowed_columns: List[str] = list(),
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
         Either a Discovery object can be provided, or each field can be provided individually.
 
-        Parameters
+        Attributes
         ----------
         llm : LLM
             The LLM used to generate data models.
         discovery : Union[str, Discovery], optional
-            Either a string containing the LLM generated discovery or a Discovery object that has been ran.
+            Either a string containing the LLM generated discovery or a Discovery object that has been run.
             If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
         user_input : Dict[str, UserInput], optional
             Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
         general_data_description : str, optional
-            A general data description provided by Discovery, by default ""
+            A general data description provided by Pandas, by default ""
         numeric_data_description : str, optional
-            A numeric data description provided by Discovery, by default ""
+            A numeric data description provided by Pandas, by default ""
         categorical_data_description : str, optional
-            A categorical data description provided by Discovery, by default ""
+            A categorical data description provided by Pandas, by default ""
         feature_descriptions : str, optional
-            Feature descriptions provided by Discovery, by default ""
+            Feature (column) descriptions provided by Discovery, by default ""
         allowed_columns : List[str], optional
             The columns that may be used in the data model. The argument should only be used in no columns are specified in
-            the discovery or user_input arguments., by default []
+            the discovery or user_input arguments. By default []
         """
 
         self.llm = llm
@@ -101,17 +101,47 @@ class GraphDataModeler:
     @property
     def current_model(self) -> DataModel:
         """
-        The current data model.
+        Get the most recently created or loaded data model.
+
+        Returns
+        -------
+        DataModel
+            The current data model.
         """
 
         assert len(self.model_history) > 0, "No models found in history."
 
         return self.model_history[-1]
 
+    @property
+    def current_model_viz(self) -> Digraph:
+        """
+        Visualize the most recent model with Graphviz.
+
+        Returns
+        -------
+        Digraph
+            The object to visualize.
+        """
+
+        assert len(self.model_history) > 0, "No models found in history."
+
+        return self.current_model.visualize()
+
     def load_model(self, data_model: DataModel) -> None:
         """
-        Append a new data model to the end of the model_history.
-        This will become the new current_model.
+        Append a new data model to the end of the `model_history`.
+        This will become the new `current_model`.
+
+        Parameters
+        ----------
+        data_model : DataModel
+            The new data model.
+
+        Raises
+        ------
+        ValueError
+            If the data_model is not an instance of DataModel.
         """
 
         if not isinstance(data_model, DataModel):
@@ -124,9 +154,26 @@ class GraphDataModeler:
         self, version: int = -1, as_dict: bool = False
     ) -> Union[DataModel, Dict[str, Any]]:
         """
-        Returns the data model version specified. Example: Version 1 will return model_history index 0.
+        Get the data model version specified.
         By default will return the most recent model.
-        Allows access to the intial model.
+        Version are 1-indexed.
+
+        Parameters
+        ----------
+        version : int, optional
+            The model version, 1-indexed, by default -1
+        as_dict : bool, optional
+            whether to return as a Python dictionary. Will otherwise return a DataModel object, by default False
+
+        Returns
+        -------
+        Union[DataModel, Dict[str, Any]]
+            The data model in desired format.
+
+        Examples
+        --------
+        >>> gdm.get_model(1) == gdm.model_history[0]
+        True
         """
 
         assert len(self.model_history) > 0, "No models found in history."
@@ -143,16 +190,6 @@ class GraphDataModeler:
             if as_dict
             else self.model_history[version]
         )
-
-    @property
-    def current_model_viz(self) -> Digraph:
-        """
-        The current data model visualized with Graphviz.
-        """
-
-        assert len(self.model_history) > 0, "No models found in history."
-
-        return self.current_model.visualize()
 
     def _generate_initial_data_model_prompt(self) -> str:
         """
@@ -244,12 +281,18 @@ models, are there any improvements you would suggest to this model?
 
         return prompt
 
-    def create_initial_model(self) -> str:
+    def create_initial_model(self) -> DataModel:
         """
-        Create the initial model.
+        Generate the initial model. This must be ran before a model can be interated on.
+        You may access this model with the `get_model` method and providing `version=1`.
+
+        Returns
+        -------
+        DataModel
+            The generated data model.
         """
 
-        response = self.llm.get_data_model_response(
+        response = self.llm._get_data_model_response(
             formatted_prompt=self._generate_initial_data_model_prompt(),
             csv_columns=self.columns_of_interest,
         )
@@ -267,14 +310,31 @@ models, are there any improvements you would suggest to this model?
         use_yaml_data_model: bool = False,
     ) -> str:
         """
-        Iterate on the previous data model the number times indicated.
+        Iterate on the current model. A data model must exist in the `model_history` property to run.
+
+        Parameters
+        ----------
+        iterations : int, optional
+            How many times to perform model generation. Each successful iteration will be appended to the GraphDataModeler model_history.
+            For example if a value of 2 is provided, then two successful models will be appended to the model_history. Model generation will use the same
+            prompt for each generation attempt. By default 1
+        user_corrections : Union[str, None], optional
+            What changes the user would like the LLM to address in the next model, by default None
+        use_yaml_data_model : bool, optional
+            Whether to pass the data model in yaml format to the generation prompt.
+            This takes less tokens, but differs from the output format of json. By default False
+
+        Returns
+        -------
+        DataModel
+            The most recent generated data model.
         """
 
         assert self._initial_model_created, "No data model present to iterate on."
 
         def iterate() -> DataModel:
             for _ in range(0, iterations):
-                response = self.llm.get_data_model_response(
+                response = self.llm._get_data_model_response(
                     formatted_prompt=self._generate_data_model_iteration_prompt(
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,
