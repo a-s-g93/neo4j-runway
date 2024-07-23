@@ -7,7 +7,7 @@ from graphviz import Digraph
 
 
 class LLMMock:
-    def get_data_model_response(*args, **kargs) -> DataModel:
+    def _get_data_model_response(*args, **kargs) -> DataModel:
         return DataModel(
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],

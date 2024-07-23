@@ -109,7 +109,6 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
 
         sw_node = core_node.to_solutions_workbench(key="node0", x=50, y=0)
 
-        print(sw_node.model_dump())
         self.assertEqual(core_node.label, sw_node.label)
         self.assertEqual(core_node.property_names, list(sw_node.properties.keys()))
         self.assertEqual(core_node.csv_name, sw_node.description)

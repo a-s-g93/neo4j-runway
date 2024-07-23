@@ -12,7 +12,7 @@ import pandas as pd
 import yaml
 
 
-config = dict()
+global_config = dict()
 
 
 class LocalServer(object):
@@ -22,13 +22,13 @@ class LocalServer(object):
 
     def __init__(self):
         self._driver = GraphDatabase.driver(
-            config["server_uri"], auth=(config["admin_user"], config["admin_pass"])
+            global_config["server_uri"], auth=(global_config["admin_user"], global_config["admin_pass"])
         )
         self.db_config = {}
-        self.database = config["database"] if "database" in config else None
+        self.database = global_config["database"] if "database" in global_config else None
         if self.database is not None:
             self.db_config["database"] = self.database
-        self.basepath = config["basepath"] if "basepath" in config else None
+        self.basepath = global_config["basepath"] if "basepath" in global_config else None
 
     def close(self):
         self._driver.close()
@@ -50,7 +50,7 @@ class LocalServer(object):
 
     def load_dataframe(self, file, dataframe: pd.DataFrame) -> None:
         """
-        Load a Pandas DataFrame directly using a PyIngest yaml config file.
+        Load a Pandas DataFrame directly using a PyIngest yaml global_config file.
         """
         with self._driver.session(**self.db_config) as session:
             params = self.get_params(file)
@@ -103,8 +103,8 @@ class LocalServer(object):
         print("{} : Completed file", datetime.datetime.now())
 
     def pre_ingest(self):
-        if "pre_ingest" in config:
-            statements = config["pre_ingest"]
+        if "pre_ingest" in global_config:
+            statements = global_config["pre_ingest"]
             if len(statements) > 0:
                 with self._driver.session(**self.db_config) as session:
                     for statement in statements:
@@ -113,8 +113,8 @@ class LocalServer(object):
                 print("no pre ingest scripts found.")
 
     def post_ingest(self):
-        if "post_ingest" in config:
-            statements = config["post_ingest"]
+        if "post_ingest" in global_config:
+            statements = global_config["post_ingest"]
             if len(statements) > 0:
                 with self._driver.session(**self.db_config) as session:
                     for statement in statements:
@@ -124,11 +124,11 @@ class LocalServer(object):
 
 
 def load_config(configuration):
-    global config
-    config = yaml.safe_load(configuration)
+    global global_config
+    global_config = yaml.safe_load(configuration)
 
 
-def PyIngest(config: str, dataframe: Optional[pd.DataFrame] = None, **kwargs) -> None:
+def PyIngest(config: str = None, dataframe: Optional[pd.DataFrame] = None, **kwargs) -> None:
     """
     Function to ingest data according to a configuration YAML.
     This is a modified version of the original PyIngest that focuses on loading local files.
@@ -159,7 +159,7 @@ def PyIngest(config: str, dataframe: Optional[pd.DataFrame] = None, **kwargs) ->
 
     server = LocalServer()
     server.pre_ingest()
-    file_list = config["files"]
+    file_list = global_config["files"]
     for file in file_list:
         if dataframe is not None:
             server.load_dataframe(file, dataframe=dataframe)

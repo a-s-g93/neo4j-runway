@@ -109,17 +109,17 @@ class TestDataModel(unittest.TestCase):
         Test the JSON generation for import into arrows.app.
         """
 
-        file_name = "test-arrows-output"
-        dm_to_adm = self.data_model.to_arrows(file_name=file_name, write_file=True)
+        file_path = "test-arrows-output.json"
+        dm_to_adm = self.data_model.to_arrows(file_path=file_path, write_file=True)
 
-        with open(f"./{file_name}.json", "r") as f:
+        with open(f"./{file_path}", "r") as f:
             content = literal_eval(f.read())
             adm_copy = ArrowsDataModel(
                 nodes=content["nodes"], relationships=content["relationships"]
             )
 
         try:
-            os.remove(file_name + ".json")
+            os.remove(f"./{file_path}")
         except Exception as e:
             print("No arrows data model created.")
 
