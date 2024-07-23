@@ -73,7 +73,7 @@ If we have graphviz installed, we can take a look at our model.
 ```Python
 gdm.current_model.visualize()
 ```
-![countries-first-model.png](./images/countries-first-model.png)
+![countries-first-model.png](./docs/assets/images/countries-first-model.png)
 
 Let's make some corrections to our model and view the results.
 ```Python
@@ -83,7 +83,7 @@ Remove The relationship between Country and Region.
 """)
 gdm.current_model.visualize()
 ```
-![countries-second-model.png](./images/countries-second-model.png)
+![countries-second-model.png](./docs/assets/images/countries-second-model.png)
 
 ### Code Generation
 We can now use our data model to generate some ingestion code.
@@ -108,7 +108,7 @@ gen.generate_pyingest_yaml_file(file_name="countries")
 ```
 Here's a snapshot of our new graph!
 
-![countries-graph.png](./images/countries-graph-white-background.png)
+![countries-graph.png](./docs/assets/images/countries-graph-white-background.png)
 
 ## Limitations
 The current project is in beta and has the following limitations:
