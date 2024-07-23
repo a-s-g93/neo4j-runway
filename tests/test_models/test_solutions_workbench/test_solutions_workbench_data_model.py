@@ -147,7 +147,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         self.assertIsNotNone(dm.metadata)
 
         sw_dm = dm.to_solutions_workbench(
-            file_name="converted-data-model-sw-test.json", write_file=True
+            file_name="converted-data-model-sw-test.json", write_file=False
         )
 
     def test_json_output(self) -> None:

@@ -42,7 +42,7 @@ class Discovery:
             Whether to only generate discovery using Pandas. Will not call the LLM service.
         """
         if isinstance(user_input, UserInput):
-            self.user_input = user_input.formatted_dict
+            self.user_input = user_input._formatted_dict
         else:
             self.user_input = user_input
             if "general_description" not in self.user_input.keys():

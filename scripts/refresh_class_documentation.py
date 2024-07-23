@@ -3,7 +3,7 @@ import textwrap
 from typing import List
 import os
 
-from neo4j_runway import DataModel, IngestionGenerator, Discovery, LLM, GraphDataModeler
+from neo4j_runway import DataModel, IngestionGenerator, Discovery, LLM, GraphDataModeler, UserInput
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features
@@ -31,9 +31,14 @@ CLASS_DIR = [
         "summary_file_path": "",
     },
     {"class": LLM, "file_path": "api/llm.md", "summary_file_path": ""},
+    {
+        "class": UserInput,
+        "file_path": "api/user_input.md",
+        "summary_file_path": "",
+    },
 ]
 
-MAX_TEXT_WIDTH = 60
+MAX_TEXT_WIDTH: int = 60
 
 
 def format_docstring(docstring: str) -> str:

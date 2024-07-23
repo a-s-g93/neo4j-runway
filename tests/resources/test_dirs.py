@@ -10,3 +10,19 @@ TEST_DIRS = [
     "test_inputs/",
     "test_utils/",
 ]
+
+UNIT_TEST_DIRS = [
+    "test_code_generator/",
+    "test_discovery/",
+    "test_modeler/",
+    "test_models/test_arrows/",
+    "test_models/test_core/",
+    "test_models/test_solutions_workbench/",
+    "test_inputs/",
+    "test_utils/",
+]
+
+INTEGRATION_TEST_DIRS = [
+    "test_ingest/",
+    "test_integration/",
+]

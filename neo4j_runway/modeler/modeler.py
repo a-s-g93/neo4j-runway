@@ -68,7 +68,7 @@ class GraphDataModeler:
         else:
 
             if isinstance(user_input, UserInput):
-                self.user_input = user_input.formatted_dict
+                self.user_input = user_input._formatted_dict
 
             else:
                 self.user_input = user_input
