@@ -1,8 +1,7 @@
 ---
 permalink: /supported-integrations/solutions-workbench/
+title: "Solutions Workbench"
 ---
-
-# Solutions Workbench
 
 [Documentation](https://help.neo4j.solutions/neo4j-solutions/cypher-workbench/) | [GitHub](https://github.com/neo4j-labs/cypher-workbench)
 

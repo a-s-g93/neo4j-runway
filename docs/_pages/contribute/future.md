@@ -1,7 +1,7 @@
 ---
 permalink: /contribute/future-work/
+title: "Planned future work"
 ---
-# Planned future work
 
 * PyNeoInstance Integration
 * APOC Schema Integration

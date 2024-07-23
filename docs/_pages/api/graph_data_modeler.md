@@ -1,10 +1,10 @@
 ---
 permalink: /api/graph-data-modeler/
+title: GraphDataModeler
 toc: true
 toc_label: GraphDataModeler
 toc_icon: "fa-solid fa-plane"
 ---
-# GraphDataModeler
 
 
 ## Class Methods

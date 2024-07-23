@@ -1,11 +1,10 @@
 ---
 permalink: /examples/countries/
+title: CSV --> Graph Demo
 toc: true
 toc_label: 
 toc_icon: "fa-solid fa-plane"
 ---
-# CSV --> Graph Demo
-
 This notebooks demonstrates the data flow of generating a graph from a CSV file. 
 
 
@@ -338,7 +337,7 @@ gdm.current_model.visualize()
 
 
     
-![svg](output_21_0.svg)
+![svg](output_20_0.svg)
     
 
 
@@ -381,7 +380,7 @@ gdm.current_model.visualize()
 
 
     
-![svg](output_25_0.svg)
+![svg](output_24_0.svg)
     
 
 

@@ -7,6 +7,13 @@ from nbconvert import MarkdownExporter
 import nbformat
 
 
+def drop_notebook_header(notebook):
+    header_cell = notebook["cells"][0]
+    header = header_cell["source"][2:]
+    notebook["cells"] = notebook["cells"][1:]
+    return header, notebook
+
+
 def import_notebook(file_path: str) -> Any:
     """
     Loads a Python notebook from the root directory of "https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/".
@@ -17,10 +24,12 @@ def import_notebook(file_path: str) -> Any:
     url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
     response = urlopen(url).read().decode()
 
-    return nbformat.reads(response, as_version=4)
+    return drop_notebook_header(nbformat.reads(response, as_version=4))
 
 
-def write_example_page(notebook_dict: Dict[str, Any], notebook_name: str) -> None:
+def write_example_page(
+    notebook_dict: Dict[str, Any], notebook_name: str, header: str
+) -> None:
     """
     The example will be saved to "docs/examples/notebook_name/notebook_name.md".
     svg files will be saved to "docs/examples/notebook_name/notebook_name_files/"
@@ -42,6 +51,7 @@ def write_example_page(notebook_dict: Dict[str, Any], notebook_name: str) -> Non
         f.write(
             f"""---
 permalink: /examples/{notebook_name.replace("_", "-")}/
+title: {header}
 toc: true
 toc_label: 
 toc_icon: "fa-solid fa-plane"
@@ -60,5 +70,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     notebook_name = args.notebook_path.split("/")[-1][:-6]
-    nb = import_notebook(file_path=args.notebook_path)
-    write_example_page(notebook_dict=nb, notebook_name=notebook_name)
+    header, nb = import_notebook(file_path=args.notebook_path)
+    write_example_page(notebook_dict=nb, notebook_name=notebook_name, header=header)

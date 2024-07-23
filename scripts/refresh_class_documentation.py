@@ -96,8 +96,7 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
     methods_as_strings = get_method_docstrings_of_class(class_of_interest)
     properties_as_strings = get_properties_of_class(class_of_interest)
     summary_string = read_summary(summary_file_path) + "\n" if summary_file_path else ""
-    content = f"""# {class_name_string}
-{summary_string}
+    content = f"""{summary_string}
 
 ## Class Methods
 
@@ -123,6 +122,7 @@ def format_content(class_of_interest, summary_file_path: str) -> str:
 def create_front_matter(label: str, file_path: str) -> str:
     return f"""---
 permalink: /{file_path[:-3].replace("_", "-")}/
+title: {label}
 toc: true
 toc_label: {label}
 toc_icon: "fa-solid fa-plane"

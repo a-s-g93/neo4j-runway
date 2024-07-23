@@ -1,10 +1,10 @@
 ---
 permalink: /api/inputs/
+title: UserInput
 toc: true
 toc_label: UserInput
 toc_icon: "fa-solid fa-plane"
 ---
-# UserInput
 
 
 ## Class Methods
