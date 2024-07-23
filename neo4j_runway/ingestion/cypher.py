@@ -4,7 +4,7 @@ This file contains the functions to create cypher queries.
 
 from typing import List, Union
 
-from ..objects import Property, Node, Relationship
+from ..models import Property, Node, Relationship
 
 
 def generate_constraints_key(

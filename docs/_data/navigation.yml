@@ -1,0 +1,47 @@
+docs:
+  - title: "API"
+    children:
+      - title: "Discovery"
+        url: /api/discovery/
+      - title: "LLM"
+        url: /api/llm/
+      - title: "IngestionGenerator"
+        url: /api/ingestion-generator/
+      - title: "DataModel"
+        url: /api/data-model/
+      - title: "PyIngest"
+        url: /api/pyingest/
+      - title: "Inputs"
+        url: /api/inputs/
+      - title: "GraphDataModeler"
+        url: /api/graph-data-modeler/
+      - title: "Utils"
+        url: /api/utils/
+  
+  - title: "Examples"
+    children:
+      - title: "End-To-End Notebook"
+        url: /examples/countries/
+      - title: "arrows.app Data Model Import"
+        url: "examples/arrows/"
+  
+  - title: "Modeling Integrations"
+    children:
+    - title: "arrows.app"
+      url: /supported-integrations/arrows-app/
+    - title: "Solutions Workbench"
+      url: /supported-integrations/solutions-workbench/
+  
+  - title: "Ingestion Integrations"
+    children:
+    - title: "LOAD CSV"
+      url: /supported-integrations/load-csv/
+    - title: "PyIngest" 
+      url: /supported-integrations/pyingest/
+
+  - title: "Contribute"
+    children:
+      - title: "How To Contribute"
+        url: /contribute/how-to/
+      - title: "Future Work"
+        url: /contribute/future-work/

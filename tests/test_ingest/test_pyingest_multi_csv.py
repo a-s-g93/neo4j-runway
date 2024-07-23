@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
 from neo4j_runway.ingestion.pyingest import PyIngest
-from ..resources.people_pets import people_pets_multi_csv_yaml_string
+from ..resources.answers.people_pets import people_pets_multi_csv_yaml_string
 
 load_dotenv()
 

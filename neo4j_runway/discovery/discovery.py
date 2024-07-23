@@ -11,7 +11,7 @@ from IPython.display import display, Markdown  # type: ignore # this works even 
 import pandas as pd
 
 from ..llm.llm import LLM
-from ..objects.user_input import UserInput
+from ..inputs.user_input import UserInput
 
 
 class Discovery:
@@ -22,14 +22,14 @@ class Discovery:
     def __init__(
         self,
         data: pd.DataFrame,
-        user_input: Union[Dict[str, str], UserInput] = {},
+        user_input: Union[Dict[str, str], UserInput] = dict(),
         llm: LLM = None,
         pandas_only: bool = False,
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via an LLM.
 
-        Parameters
+        Attributes
         ----------
         llm : LLM, optional
             The LLM instance used to generate data discovery. Only required if pandas_only = False.
@@ -42,7 +42,7 @@ class Discovery:
             Whether to only generate discovery using Pandas. Will not call the LLM service.
         """
         if isinstance(user_input, UserInput):
-            self.user_input = user_input.formatted_dict
+            self.user_input = user_input._formatted_dict
         else:
             self.user_input = user_input
             if "general_description" not in self.user_input.keys():
@@ -130,18 +130,22 @@ overall details about the data? What are the most important features?
         Run the discovery process on the provided DataFrame.
         Access generated discovery with the .view_discovery() method of the Discovery class.
 
-        Returns
+        Parameters
         -------
-        show_result: bool
+        show_result : bool
             Whether to print the generated discovery upon retrieval.
-        notebook: bool
+        notebook : bool
             Whether code is executed in a notebook. Affects the result print formatting.
+
+        Returns
+        ----------
+        None
         """
 
         self._generate_csv_summary()
 
         if not self.pandas_only:
-            response = self.llm.get_discovery_response(
+            response = self.llm._get_discovery_response(
                 formatted_prompt=self._generate_discovery_prompt()
             )
         else:
@@ -161,19 +165,33 @@ overall details about the data? What are the most important features?
         ----------
         notebook : bool, optional
             Whether executing in a notebook, by default True
+
+        Returns
+        ----------
+        None
         """
 
         print(self.discovery) if not notebook else display(Markdown(self.discovery))
 
     def to_txt(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
-        Save the generated discovery to a .txt file.
+        Write the generated discovery to a .txt file.
+
+        Parameters
+        ----------
+        file_dir : str, optional
+            The file directory to write to, by default "./"
+        file_name : str, optional
+            The name of the file, by default "discovery"
         """
+
+        if not file_name.endswith(".txt"):
+            file_name = file_name + ".txt"
 
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
 
-        with open(f"./{file_dir}{file_name}.txt", "w") as f:
+        with open(f"./{file_dir}{file_name}", "w") as f:
 
             f.write(
                 f"""
@@ -193,13 +211,23 @@ LLM Generated Discovery
 
     def to_markdown(self, file_dir: str = "./", file_name: str = "discovery") -> None:
         """
-        Save the generated discovery to a .md file.
+        Write the generated discovery to a Markdown file.
+
+        Parameters
+        ----------
+        file_dir : str, optional
+            The file directory to write to, by default "./"
+        file_name : str, optional
+            The name of the file, by default "discovery"
         """
+
+        if not file_name.endswith(".md"):
+            file_name = file_name + ".md"
 
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
 
-        with open(f"./{file_dir}{file_name}.md", "w") as f:
+        with open(f"./{file_dir}{file_name}", "w") as f:
             f.write(
                 f"""
 Data General Info

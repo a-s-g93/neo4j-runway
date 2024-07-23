@@ -1,0 +1,62 @@
+remote_theme: mmistakes/minimal-mistakes@4.26.2
+plugins:
+- jekyll-remote-theme
+- jekyll-include-cache
+locale: en-US
+title: Runway
+title_separator: '-'
+subtitle: A Python package for Neo4j | v0.6.0
+name: Alex Gilmore
+description: An end to end solution for exploring relational data as a graph.
+url: https://a-s-g93.github.io
+baseurl: /neo4j-runway
+repository: a-s-g93/neo4j-runway
+enable_copy_code_button: true
+atom_feed:
+  hide: true
+footer:
+  links:
+  - label: GitHub
+    icon: fab fa-fw fa-github
+    url: https://github.com/a-s-g93/neo4j-runway
+include:
+- .htaccess
+- _pages
+markdown: kramdown
+highlighter: rouge
+lsi: false
+excerpt_separator: '
+
+
+  '
+incremental: false
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+defaults:
+- scope:
+    path: ''
+    type: pages
+  values:
+    layout: single
+    author_profile: true
+    sidebar:
+      nav: docs
+- scope:
+    path: ''
+    type: docs
+  values:
+    layout: single
+    read_time: false
+    author_profile: false
+    share: false
+    comments: false
+    toc_sticky: true
+    sidebar:
+      nav: docs

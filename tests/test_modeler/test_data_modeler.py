@@ -1,13 +1,13 @@
 import unittest
 
-from neo4j_runway.objects import UserInput, DataModel
+from neo4j_runway.models import UserInput, DataModel
 from neo4j_runway.modeler import GraphDataModeler
-from ..resources.data_model_yaml import data_model_dict
+from ..resources.answers.data_model_yaml import data_model_dict
 from graphviz import Digraph
 
 
 class LLMMock:
-    def get_data_model_response(*args, **kargs) -> DataModel:
+    def _get_data_model_response(*args, **kargs) -> DataModel:
         return DataModel(
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
