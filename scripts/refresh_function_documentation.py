@@ -4,10 +4,10 @@ import textwrap
 import os
 
 from neo4j_runway import PyIngest
-from neo4j_runway.utils import test_database_connection 
+from neo4j_runway.utils import test_database_connection
 
 FUNCTION_DIR = [
-     {
+    {
         "function": PyIngest,
         "file_path": "api/pyingest.md",
         "summary_file_path": "",
@@ -17,26 +17,33 @@ FUNCTION_DIR = [
         "file_path": "api/utils.md",
         "summary_file_path": "",
     },
-    
 ]
 
 MAX_TEXT_WIDTH: int = 60
 
+
 def format_docstring(docstring: str) -> str:
-    if not docstring: return ""
+    if not docstring:
+        return ""
     docstring = docstring.replace("        ", "    ")
     res = ""
     for line in docstring.split("\n"):
-        res+=(textwrap.fill(line, subsequent_indent="        ", width=MAX_TEXT_WIDTH) + "\n")
+        res += (
+            textwrap.fill(line, subsequent_indent="        ", width=MAX_TEXT_WIDTH)
+            + "\n"
+        )
     return res
+
 
 def get_function_name_as_string(fn) -> str:
     return str(fn).split(" ")[1]
 
+
 def read_summary(summary_file_path: str) -> str:
     with open(f"./docs/summaries/{summary_file_path}", "r") as f:
         return f.read()
-    
+
+
 def format_content(function_of_interest, summary_file_path: str) -> str:
     function_name_string = get_function_name_as_string(function_of_interest)
     summary_string = read_summary(summary_file_path) + "\n" if summary_file_path else ""
@@ -46,17 +53,20 @@ def format_content(function_of_interest, summary_file_path: str) -> str:
 """
     return content
 
+
 def write_markdown_file(file_path: str, content: str) -> None:
     base_path = "./docs/_pages/"
     path_parts = file_path.split("/")
     path_only = base_path + "/".join(path_parts[:-1])
     os.makedirs(path_only, exist_ok=True)
     with open(f"{base_path}{file_path}", "w") as f:
-                f.write(f"""---
+        f.write(
+            f"""---
 permalink: /{file_path[:-3].replace("_", "-")}/
 ---
-""")
-                f.write(content)  
+"""
+        )
+        f.write(content)
 
 
 if __name__ == "__main__":

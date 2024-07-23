@@ -3,7 +3,14 @@ import textwrap
 from typing import List
 import os
 
-from neo4j_runway import DataModel, IngestionGenerator, Discovery, LLM, GraphDataModeler, UserInput
+from neo4j_runway import (
+    DataModel,
+    IngestionGenerator,
+    Discovery,
+    LLM,
+    GraphDataModeler,
+    UserInput,
+)
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features

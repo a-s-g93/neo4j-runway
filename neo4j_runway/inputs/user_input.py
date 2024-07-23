@@ -11,7 +11,9 @@ class UserInput(BaseModel):
     general_description: str = ""
     column_descriptions: Dict[str, str]
 
-    def __init__(self, column_descriptions: Dict[str, str], general_description: str = "") -> None:
+    def __init__(
+        self, column_descriptions: Dict[str, str], general_description: str = ""
+    ) -> None:
         """
         A container for user provided information about the data.
 
@@ -27,7 +29,7 @@ class UserInput(BaseModel):
         """
         super().__init__(
             general_description=general_description,
-            column_descriptions=column_descriptions
+            column_descriptions=column_descriptions,
         )
 
     @field_validator("column_descriptions")
