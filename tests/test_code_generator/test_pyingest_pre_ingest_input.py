@@ -49,9 +49,7 @@ CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country
         self.assertEqual(res, ans)
 
     def test_pre_ingest_generation_from_cypher_file(self) -> None:
-        pre_ingest_file_path: str = (
-            "tests/resources/cypher/pyingest_pre_ingest.cypher"
-        )
+        pre_ingest_file_path: str = "tests/resources/cypher/pyingest_pre_ingest.cypher"
         res = self.gen.generate_pyingest_yaml_string(
             pre_ingest_code=pre_ingest_file_path
         )
@@ -67,7 +65,7 @@ CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country
     def test_pre_ingest_generation_from_list(self) -> None:
         pre_ingest: List[str] = [
             "CREATE INDEX rel_range_index_name FOR ()-[r:KNOWS]-() ON (r.since)",
-"CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country)"
+            "CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country)",
         ]
         res = self.gen.generate_pyingest_yaml_string(pre_ingest_code=pre_ingest)
         self.assertEqual(res, ans)

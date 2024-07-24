@@ -369,7 +369,7 @@ class IngestionGenerator:
                 data=pre_ingest_code
             )
             to_return += pre_ingest_code_string
-        
+
         for constraint in self._constraints:
             to_return += f"  - {self._constraints[constraint]}"
         to_return += config_dump

@@ -4,6 +4,7 @@ This file contains misc functions for Cypher generation.
 
 from typing import List, Union
 
+
 def format_pyingest_pre_or_post_ingest_code(data: Union[str, List[str], None]) -> str:
     """
     Format the given post ingest code into a String to be injected into the
