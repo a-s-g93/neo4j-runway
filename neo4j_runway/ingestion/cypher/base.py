@@ -6,6 +6,7 @@ from typing import List
 
 from ...models import Property, Node, Relationship
 
+
 def generate_match_node_clause(node: Node) -> str:
     """
     Generate a MATCH node clause.
@@ -162,8 +163,6 @@ CALL {{
     {generate_set_property(relationship.nonidentifying_properties, strict_typing)}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
-
-
 
 
 def cast_value(prop: Property, strict_typing: bool = True) -> str:

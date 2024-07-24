@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Union
 
 from ...models import Property
 
+
 def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
     """
     Format the given post ingest code into a String to be injected into the

@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Union
 
 from ...models import Property
 
+
 def generate_constraints_key(
     label_or_type: str, unique_property: Union[Property, List[Property]]
 ) -> str:
@@ -25,12 +26,14 @@ def generate_unique_constraint(label_or_type: str, unique_property: Property) ->
 
     return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.name.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property.name} IS UNIQUE;\n"
 
+
 def generate_node_key_constraint(label: str, unique_properties: List[Property]) -> str:
     """
     Generate a node key constraint.
     """
     props = "(" + ", ".join([f"n.{x.name}" for x in unique_properties]) + ")"
     return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_properties)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
+
 
 def generate_relationship_key_constraint(
     type: str, unique_properties: List[Property]
