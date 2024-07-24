@@ -11,7 +11,6 @@ import yaml
 from ..base import BaseCodeGenerator
 from ..cypher import format_pyingest_pre_or_post_ingest_code
 from ...models.core import DataModel
-from .._utils.prep_yaml import prep_yaml
 
 
 class PyIngestConfigGenerator(BaseCodeGenerator):

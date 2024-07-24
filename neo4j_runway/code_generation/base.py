@@ -2,10 +2,6 @@
 This file contains the base conde generator class. All code generation classes must inherit from this class.
 """
 
-"""
-This file contains the code to generate ingestion code.
-"""
-
 from abc import ABC
 from typing import Dict, Any
 
