@@ -110,7 +110,7 @@ class IngestionGenerator:
                         generate_constraints_key(
                             label_or_type=node.label, unique_property=unique_property
                         )
-                    ] = generate_constraint(
+                    ] = generate_unique_constraint(
                         label_or_type=node.label, unique_property=unique_property
                     )
             # node keys
@@ -153,7 +153,7 @@ class IngestionGenerator:
                         generate_constraints_key(
                             label_or_type=rel.type, unique_property=unique_property
                         )
-                    ] = generate_constraint(
+                    ] = generate_unique_constraint(
                         label_or_type=rel.type, unique_property=unique_property
                     )
 

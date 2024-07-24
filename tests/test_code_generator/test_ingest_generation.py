@@ -95,18 +95,18 @@ class TestIngestCodeGeneration(unittest.TestCase):
         label = self.node_a.label
         unique_props = self.node_a.unique_properties
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
+            generate_unique_constraint(label_or_type=label, unique_property=unique_props[0]),
             constraint_a_1,
         )
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[1]),
+            generate_unique_constraint(label_or_type=label, unique_property=unique_props[1]),
             constraint_a_3,
         )
 
         label = self.node_b.label
         unique_props = self.node_b.unique_properties
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
+            generate_unique_constraint(label_or_type=label, unique_property=unique_props[0]),
             constraint_b,
         )
 
