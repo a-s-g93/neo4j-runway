@@ -40,11 +40,17 @@ class TestIngestCodeGenerationPyIngestConfigInput(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         pyingest_config = {
-            "CSV_A.csv": {"field_separator": "|", "skip_file": False, "skip_records": 5},
+            "CSV_A.csv": {
+                "field_separator": "|",
+                "skip_file": False,
+                "skip_records": 5,
+            },
             "CSV_B.csv": {"skip_file": True, "batch_size": 1234},
         }
         cls.gen = PyIngestConfigGenerator(
-            data_model=data_model, file_directory="./", pyingest_file_config=pyingest_config
+            data_model=data_model,
+            file_directory="./",
+            pyingest_file_config=pyingest_config,
         )
 
     def test_code_generation_for_multi_csv(self) -> None:

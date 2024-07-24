@@ -13,6 +13,7 @@ from ..cypher import format_pyingest_pre_or_post_ingest_code
 from ...models.core import DataModel
 from .._utils.prep_yaml import prep_yaml
 
+
 class PyIngestConfigGenerator(BaseCodeGenerator):
     """
     Class responsible for generating the ingestion code.
@@ -90,7 +91,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         self.pyingest_file_config = pyingest_file_config
         self.pre_ingest_code = pre_ingest_code
         self.post_ingest_code = post_ingest_code
-        
+
         self._config_files_list = list()
 
         # reformat the keys if necessary
@@ -114,7 +115,10 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
 
                 # set distict file params
                 if self._cypher[item]["csv"] in self.pyingest_file_config:
-                    if "batch_size" in self.pyingest_file_config[self._cypher[item]["csv"]]:
+                    if (
+                        "batch_size"
+                        in self.pyingest_file_config[self._cypher[item]["csv"]]
+                    ):
                         file_dict["chunk_size"] = self.pyingest_file_config[
                             self._cypher[item]["csv"]
                         ]["batch_size"]
@@ -132,7 +136,10 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
                         file_dict["skip_records"] = self.pyingest_file_config[
                             self._cypher[item]["csv"]
                         ]["skip_records"]
-                    if "skip_file" in self.pyingest_file_config[self._cypher[item]["csv"]]:
+                    if (
+                        "skip_file"
+                        in self.pyingest_file_config[self._cypher[item]["csv"]]
+                    ):
                         file_dict["skip_file"] = self.pyingest_file_config[
                             self._cypher[item]["csv"]
                         ]["skip_file"]

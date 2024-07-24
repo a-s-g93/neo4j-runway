@@ -14,21 +14,25 @@ import yaml
 from .cypher import *
 from ..models import DataModel
 
+
 class folded_unicode(str):
     pass
+
 
 class literal_unicode(str):
     pass
 
+
 def folded_unicode_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=">")
+
 
 def literal_unicode_representer(dumper, data):
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
+
 yaml.add_representer(folded_unicode, folded_unicode_representer)
 yaml.add_representer(literal_unicode, literal_unicode_representer)
-
 
 
 class BaseCodeGenerator(ABC):
@@ -71,9 +75,7 @@ class BaseCodeGenerator(ABC):
         self._constraints: Dict[str, str] = dict()
         self._cypher: Dict[str, Dict[str, Any]] = dict()
 
-        self._generate_base_cypher(
-            strict_typing=self.strict_typing
-        )
+        self._generate_base_cypher(strict_typing=self.strict_typing)
 
     def _generate_base_cypher(
         self,
@@ -136,11 +138,12 @@ class BaseCodeGenerator(ABC):
             source = self.data_model.node_dict[rel.source]
             target = self.data_model.node_dict[rel.target]
             self._cypher[f"{rel.type}_{rel.source}_{rel.target}"] = {
-                "cypher": literal_unicode(generate_merge_relationship_clause_standard(
+                "cypher": literal_unicode(
+                    generate_merge_relationship_clause_standard(
                         relationship=rel,
                         source_node=source,
                         target_node=target,
-                        strict_typing=strict_typing, 
+                        strict_typing=strict_typing,
                     )
                 ),
                 "csv": f"$BASE/{self.file_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",

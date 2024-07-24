@@ -56,7 +56,9 @@ CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country
     def test_pre_ingest_generation_from_cypher_file(self) -> None:
         pre_ingest_file_path: str = "tests/resources/cypher/pyingest_pre_ingest.cypher"
         gen = PyIngestConfigGenerator(
-            data_model=data_model, file_directory="./", pre_ingest_code=pre_ingest_file_path
+            data_model=data_model,
+            file_directory="./",
+            pre_ingest_code=pre_ingest_file_path,
         )
         res = gen.generate_config_string()
         self.assertEqual(res, ans)
@@ -64,7 +66,9 @@ CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country
     def test_pre_ingest_generation_from_cql_file(self) -> None:
         pre_ingest_file_path: str = "tests/resources/cypher/pyingest_pre_ingest.cql"
         gen = PyIngestConfigGenerator(
-            data_model=data_model, file_directory="./", pre_ingest_code=pre_ingest_file_path
+            data_model=data_model,
+            file_directory="./",
+            pre_ingest_code=pre_ingest_file_path,
         )
         res = gen.generate_config_string()
         self.assertEqual(res, ans)
