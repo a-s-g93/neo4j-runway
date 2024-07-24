@@ -2,12 +2,9 @@
 This file contains misc functions for Cypher generation.
 """
 
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
-from ...models import Property
-
-
-def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
+def format_pyingest_pre_or_post_ingest_code(data: Union[str, List[str], None]) -> str:
     """
     Format the given post ingest code into a String to be injected into the
     PyIngest yaml file.
@@ -35,4 +32,4 @@ def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
             res += f"  - {cql_formatted}\n"
         return res
     else:
-        raise ValueError(f"Unable to parse post ingest code. data: {data}")
+        raise ValueError(f"Unable to parse ingest code. data: {data}")
