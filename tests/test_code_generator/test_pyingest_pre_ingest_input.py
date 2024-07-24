@@ -2,7 +2,7 @@ from typing import List
 import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation.generate_ingest import IngestionGenerator
 
 
 nodes = [
