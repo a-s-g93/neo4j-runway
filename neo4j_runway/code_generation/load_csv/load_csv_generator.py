@@ -96,14 +96,14 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
         for item in self._cypher:
             if "_" not in item:
                 cypher = generate_merge_node_load_csv_clause(
-                    csv_name=self._cypher[item]["csv"][6:], # remove the $BASE/ prefix
+                    csv_name=self._cypher[item]["csv"][6:],  # remove the $BASE/ prefix
                     method=self.method,
                     batch_size=self.batch_size,
                     standard_clause=self._cypher[item]["cypher"],
                 )
             else:
                 cypher = generate_merge_relationship_load_csv_clause(
-                    csv_name=self._cypher[item]["csv"][6:], # remove the $BASE/ prefix
+                    csv_name=self._cypher[item]["csv"][6:],  # remove the $BASE/ prefix
                     method=self.method,
                     batch_size=self.batch_size,
                     standard_clause=self._cypher[item]["cypher"],

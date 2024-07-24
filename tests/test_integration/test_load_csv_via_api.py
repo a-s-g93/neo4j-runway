@@ -73,7 +73,10 @@ class TestLoadCSVViaAPI(unittest.TestCase):
         )
 
         gen = LoadCSVCodeGenerator(
-            data_model=data_model, csv_name="pets-arrows.csv", method="api", file_directory=""
+            data_model=data_model,
+            csv_name="pets-arrows.csv",
+            method="api",
+            file_directory="",
         )
 
         load_csv_cypher = gen.generate_cypher_string()

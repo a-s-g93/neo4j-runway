@@ -102,7 +102,9 @@ def generate_merge_node_load_csv_clause(
 
     command = ":auto " if method == "browser" else ""
     if not standard_clause:
-        standard_clause = generate_merge_node_clause_standard(node=node, strict_typing=strict_typing)
+        standard_clause = generate_merge_node_clause_standard(
+            node=node, strict_typing=strict_typing
+        )
     standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
 
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
@@ -157,13 +159,11 @@ def generate_merge_relationship_load_csv_clause(
 
     command = ":auto " if method == "browser" else ""
     if not standard_clause:
-        standard_clause = (
-            generate_merge_relationship_clause_standard(
-                relationship=relationship,
-                source_node=source_node,
-                target_node=target_node,
-                strict_typing=strict_typing,
-            )
+        standard_clause = generate_merge_relationship_clause_standard(
+            relationship=relationship,
+            source_node=source_node,
+            target_node=target_node,
+            strict_typing=strict_typing,
         )
     standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
