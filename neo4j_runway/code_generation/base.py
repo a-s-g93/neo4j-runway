@@ -53,7 +53,7 @@ class BaseCodeGenerator(ABC):
         data_model: DataModel,
         file_directory: str = "./",
         csv_name: str = "",
-        strict_typing: bool = True
+        strict_typing: bool = True,
     ):
         """
         This is the base class for code generation. All code generation classes must inherit from this class.
@@ -65,7 +65,7 @@ class BaseCodeGenerator(ABC):
         file_directory : str, optional
             Where the files are located. By default = "./"
         csv_name : str, optional
-            The name of the CSV file. If more than one CSV is used, this arg should not be provided. 
+            The name of the CSV file. If more than one CSV is used, this arg should not be provided.
             CSV file names should be included within the data model. By default = ""
         strict_typing : bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By default True
@@ -77,7 +77,9 @@ class BaseCodeGenerator(ABC):
         self.strict_typing = strict_typing
 
         self._constraints: Dict[str, str] = {}
-        self._cypher: Dict[str, Dict[str, Any]] = self._generate_base_cypher(strict_typing=self.strict_typing)
+        self._cypher: Dict[str, Dict[str, Any]] = self._generate_base_cypher(
+            strict_typing=self.strict_typing
+        )
 
     def _generate_base_cypher(
         self,

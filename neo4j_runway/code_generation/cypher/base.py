@@ -97,11 +97,16 @@ def generate_merge_node_load_csv_clause(
     Generate a MERGE node clause for the LOAD CSV method.
     """
 
-    if not node and not standard_clause: raise ValueError("Either `node` or `standard_clause` arg must be provided!")
+    if not node and not standard_clause:
+        raise ValueError("Either `node` or `standard_clause` arg must be provided!")
 
     command = ":auto " if method == "browser" else ""
     if not standard_clause:
-        standard_clause = generate_merge_node_clause_standard(node=node, strict_typing=strict_typing).split("\n", 2)[2].replace("\n", "\n    ")
+        standard_clause = (
+            generate_merge_node_clause_standard(node=node, strict_typing=strict_typing)
+            .split("\n", 2)[2]
+            .replace("\n", "\n    ")
+        )
 
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
@@ -109,6 +114,7 @@ CALL {{
     {standard_clause}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
+
 
 def generate_merge_relationship_clause_standard(
     relationship: Relationship,
@@ -147,11 +153,23 @@ def generate_merge_relationship_load_csv_clause(
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
     """
-    if (not relationship or not source_node or not target_node) and not standard_clause: raise ValueError("Either (`relationship`, `source_node` and `target_node`) or `standard_clause` arg must be provided!")
+    if (not relationship or not source_node or not target_node) and not standard_clause:
+        raise ValueError(
+            "Either (`relationship`, `source_node` and `target_node`) or `standard_clause` arg must be provided!"
+        )
 
     command = ":auto " if method == "browser" else ""
     if not standard_clause:
-        standard_clause = generate_merge_relationship_clause_standard(relationship=relationship, source_node=source_node, target_node=target_node, strict_typing=strict_typing).split("\n", 2)[2].replace("\n", "\n    ")
+        standard_clause = (
+            generate_merge_relationship_clause_standard(
+                relationship=relationship,
+                source_node=source_node,
+                target_node=target_node,
+                strict_typing=strict_typing,
+            )
+            .split("\n", 2)[2]
+            .replace("\n", "\n    ")
+        )
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
