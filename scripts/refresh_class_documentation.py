@@ -35,7 +35,11 @@ CLASS_DIR = [
     #     "file_path": "api/ingestion_generator.md",
     #     "summary_file_path": "",
     # },
-    {"class": Discovery, "file_path": "api/discovery.md", "summary_file_path": ""},
+    {
+        "class": Discovery,
+        "file_path": "api/discovery.md",
+        "summary_file_path": "discovery.md",
+    },
     {
         "class": GraphDataModeler,
         "file_path": "api/graph_data_modeler.md",
