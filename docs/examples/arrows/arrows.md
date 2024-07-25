@@ -5,7 +5,7 @@ toc: true
 toc_label: 
 toc_icon: "fa-solid fa-plane"
 ---
-This notebook will demonstrate how to use the arrows.app web app to design a data model, then use Runway to generate and ingest your data.
+This notebook will demonstrate how to use the arrows.app web app to design a data model, then use Runway to generate and ingest your data. This notebook uses Runway v0.7.0
 
 ## Arrows
 
@@ -66,14 +66,14 @@ And then we can generate some ingestion code to get our data into Neo4j.
 
 
 ```python
-from neo4j_runway import IngestionGenerator
+from neo4j_runway.code_generation import LoadCSVCodeGenerator
 ```
 
 We won't include a csv name here, since we identify the appropriate csv names in the data model. We also identify the csv_dir argument as "./". This is because we are storing the data in the import directory of our local Neo4j instance and the LOAD CSV command will look relative to this directory.
 
 
 ```python
-gen = IngestionGenerator(data_model=model, csv_dir="./")
+gen = LoadCSVCodeGenerator(data_model=model, file_directory="./", method="browser")
 ```
 
 When generating the LOAD CSV Cypher code, we indicate the method as "browser" since we'll be copy and pasting the code into a Neo4j browser cell. If you plan on using the code with one of the Neo4j drivers or an api, then you can indicate the method as "api" or leave the field blank.
@@ -82,7 +82,7 @@ The below method will generate a Python string containing the LOAD CSV script.
 
 
 ```python
-load_csv_cypher = gen.generate_load_csv_string(method="browser")
+load_csv_cypher = gen.generate_cypher_string()
 ```
 
 
@@ -95,37 +95,37 @@ print(load_csv_cypher)
     CREATE CONSTRAINT pet_name IF NOT EXISTS FOR (n:Pet) REQUIRE n.name IS UNIQUE;
     CREATE CONSTRAINT toy_name IF NOT EXISTS FOR (n:Toy) REQUIRE n.name IS UNIQUE;
     CREATE CONSTRAINT shelter_name IF NOT EXISTS FOR (n:Shelter) REQUIRE n.name IS UNIQUE;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MERGE (n:Person {name: row.name})
-        SET n.age = row.age
+        SET n.age = toIntegerOrNull(row.age)
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MERGE (n:Address {city: row.city, street: row.street})
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MERGE (n:Pet {name: row.pet_name})
         SET n.kind = row.pet
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MERGE (n:Toy {name: row.toy})
         SET n.kind = row.toy_type
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///shelters-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./shelters-2.csv' as row
     CALL {
         WITH row
         MERGE (n:Shelter {name: row.shelter_name})
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Person {name: row.name})
@@ -133,7 +133,7 @@ print(load_csv_cypher)
         MERGE (source)-[n:HAS_ADDRESS]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Person {name: row.name})
@@ -141,7 +141,7 @@ print(load_csv_cypher)
         MERGE (source)-[n:HAS_PET]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Pet {name: row.pet_name})
@@ -149,7 +149,7 @@ print(load_csv_cypher)
         MERGE (source)-[n:PLAYS_WITH]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///shelters-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./shelters-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Pet {name: row.pet_name})
@@ -157,7 +157,7 @@ print(load_csv_cypher)
         MERGE (source)-[n:FROM_SHELTER]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///shelters-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./shelters-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Shelter {name: row.shelter_name})
@@ -165,11 +165,11 @@ print(load_csv_cypher)
         MERGE (source)-[n:HAS_ADDRESS]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
-    :auto LOAD CSV WITH HEADERS FROM 'file:///pets-2.csv' as row
+    :auto LOAD CSV WITH HEADERS FROM 'file:///./pets-2.csv' as row
     CALL {
         WITH row
         MATCH (source:Person {name: row.name})
-    MATCH (target:Person {name: row.knows})
+        MATCH (target:Person {name: row.knows})
         MERGE (source)-[n:KNOWS]->(target)
         
     } IN TRANSACTIONS OF 100 ROWS;
@@ -180,7 +180,7 @@ This method will output a LOAD CSV cypher file.
 
 
 ```python
-gen.generate_load_csv_file(file_name="pets_load_csv", method="browser")
+gen.generate_cypher_file(file_name="pets_load_csv.cypher")
 ```
 
 After running this code in the Neo4j browser cell, we get this graph.
