@@ -10,8 +10,8 @@ import warnings
 from IPython.display import display, Markdown  # type: ignore # this works even though I get an import warning for IPython...
 import pandas as pd
 
-from ..llm.llm import LLM
-from ..inputs.user_input import UserInput
+from ..llm import LLM
+from ..inputs import UserInput
 from ..resources.prompts import create_discovery_prompt
 
 

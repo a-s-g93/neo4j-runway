@@ -1,3 +1,7 @@
+from typing import Dict, Optional
+from ...models import DataModel
+from ...inputs import UserInput
+
 DATA_MODEL_GENERATION_RULES = """
 Please follow these rules strictly! Billions of dollars depend on you.
 A uniqueness constraint is what makes the associated node or relationship unique.
@@ -41,3 +45,84 @@ Format your data model as:
     "Relationships": [relationships]
 }
 """
+
+
+def create_initial_data_model_prompt(
+    discovery_text: str,
+    user_input: UserInput,
+    pandas_general_info: str,
+    feature_descriptions: Dict[str, str],
+) -> str:
+    """
+    Generate the initial data model request prompt.
+    """
+
+    prompt = f"""
+Here is the csv data information:
+{user_input.general_description}
+
+The following is a summary of the data features, data types, and missing values:
+{pandas_general_info}
+
+The following is a description of each feature in the data:
+{feature_descriptions}
+
+Here is the initial discovery findings:
+{discovery_text}
+
+Based upon your knowledge of the data in my .csv and 
+of high-quality Neo4j graph data models, I would like you to return your
+suggestion for translating the data in my .csv into a Neo4j graph data model.
+
+{DATA_MODEL_GENERATION_RULES}
+
+{DATA_MODEL_FORMAT}
+            """
+    return prompt
+
+
+def create_data_model_iteration_prompt(
+    discovery_text: str,
+    user_input: UserInput,
+    pandas_general_info: str,
+    feature_descriptions: Dict[str, str],
+    data_model_to_modify: DataModel,
+    user_corrections: Optional[str] = None,
+    use_yaml_data_model: bool = False,
+) -> str:
+    """
+    Generate the prompt to iterate on the previous data model.
+    """
+
+    if user_corrections is not None:
+        user_corrections = (
+            "Focus on this feedback when refactoring the model: \n" + user_corrections
+        )
+    else:
+        user_corrections = """Add features from the csv to each node and relationship as properties. 
+Ensure that these properties provide value to their respective node or relationship.
+"""
+
+    prompt = f"""
+Here is the csv data information:
+{user_input.general_description}
+
+The following is a summary of the data features, data types, and missing values:
+{pandas_general_info}
+
+The following is a description of each feature in the data:
+{feature_descriptions}
+
+Here is the initial discovery findings:
+{discovery_text}
+
+Based on your experience building high-quality graph data
+models, are there any improvements you would suggest to this model?
+{data_model_to_modify.to_yaml(write_file=False) if use_yaml_data_model else data_model_to_modify}
+
+{user_corrections}
+
+{DATA_MODEL_GENERATION_RULES}
+"""
+
+    return prompt

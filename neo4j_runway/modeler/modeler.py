@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union, List
+from typing import Any, Dict, List, Optional, Union
 import warnings
 
 from graphviz import Digraph
@@ -6,7 +6,10 @@ from graphviz import Digraph
 from ..discovery import Discovery
 from ..llm import LLM
 from ..models import DataModel, UserInput
-from ..resources.prompts import DATA_MODEL_GENERATION_RULES, DATA_MODEL_FORMAT
+from ..resources.prompts import (
+    create_initial_data_model_prompt,
+    create_data_model_iteration_prompt,
+)
 
 
 class GraphDataModeler:
@@ -199,96 +202,6 @@ class GraphDataModeler:
             else self.model_history[version]
         )
 
-    def _generate_initial_data_model_prompt(self) -> str:
-        """
-        Generate the initial data model request prompt.
-        """
-
-        gen_description_clause = (
-            f"""
-This is a general description of the data:
-{self.user_input['general_description']}
-"""
-            if "general_description" in self.user_input
-            else ""
-        )
-
-        prompt = f"""
-Here is the csv data information:
-{gen_description_clause}
-
-The following is a summary of the data features, data types, and missing values:
-{self.general_info}
-
-The following is a description of each feature in the data:
-{self.feature_descriptions}
-
-Here is the initial discovery findings:
-{self.discovery}
-
-Based upon your knowledge of the data in my .csv and 
-of high-quality Neo4j graph data models, I would like you to return your
-suggestion for translating the data in my .csv into a Neo4j graph data model.
-
-{DATA_MODEL_GENERATION_RULES}
-
-{DATA_MODEL_FORMAT}
-            """
-        return prompt
-
-    def _generate_data_model_iteration_prompt(
-        self,
-        user_corrections: Union[str, None] = None,
-        use_yaml_data_model: bool = False,
-    ) -> str:
-        """
-        Generate the prompt to iterate on the previous data model.
-        """
-
-        if user_corrections is not None:
-            user_corrections = (
-                "Focus on this feedback when refactoring the model: \n"
-                + user_corrections
-            )
-        else:
-            user_corrections = """
-                                Add features from the csv to each node and relationship as properties. 
-                                Ensure that these properties provide value to their respective node or relationship.
-                                """
-
-        gen_description_clause = (
-            f"""
-This is a general description of the data:
-{self.user_input['general_description']}
-"""
-            if "general_description" in self.user_input
-            else ""
-        )
-
-        prompt = f"""
-Here is the csv data information:
-{gen_description_clause}
-
-The following is a summary of the data features, data types, and missing values:
-{self.general_info}
-
-The following is a description of each feature in the data:
-{self.feature_descriptions}
-
-Here is the initial discovery findings:
-{self.discovery}
-
-Based on your experience building high-quality graph data
-models, are there any improvements you would suggest to this model?
-{self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
-
-{user_corrections}
-
-{DATA_MODEL_GENERATION_RULES}
-"""
-
-        return prompt
-
     def create_initial_model(self) -> DataModel:
         """
         Generate the initial model. This must be ran before a model can be interated on.
@@ -301,7 +214,12 @@ models, are there any improvements you would suggest to this model?
         """
 
         response = self.llm._get_data_model_response(
-            formatted_prompt=self._generate_initial_data_model_prompt(),
+            formatted_prompt=create_initial_data_model_prompt(
+                discovery_text=self.discovery,
+                user_input=self.user_input,
+                pandas_general_info=self.general_info,
+                feature_descriptions=self.feature_descriptions,
+            ),
             csv_columns=self.columns_of_interest,
         )
 
@@ -314,7 +232,7 @@ models, are there any improvements you would suggest to this model?
     def iterate_model(
         self,
         iterations: int = 1,
-        user_corrections: Union[str, None] = None,
+        user_corrections: Optional[str] = None,
         use_yaml_data_model: bool = False,
     ) -> str:
         """
@@ -343,7 +261,12 @@ models, are there any improvements you would suggest to this model?
         def iterate() -> DataModel:
             for _ in range(0, iterations):
                 response = self.llm._get_data_model_response(
-                    formatted_prompt=self._generate_data_model_iteration_prompt(
+                    formatted_prompt=create_data_model_iteration_prompt(
+                        discovery_text=self.discovery,
+                        user_input=self.user_input,
+                        pandas_general_info=self.general_info,
+                        feature_descriptions=self.feature_descriptions,
+                        data_model_to_modify=self.current_model,
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,
                     ),
