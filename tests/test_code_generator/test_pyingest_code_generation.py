@@ -1,7 +1,7 @@
 import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation import PyIngestConfigGenerator
 
 
 nodes = [
@@ -10,14 +10,14 @@ nodes = [
         properties=[
             Property(name="alpha", type="str", csv_mapping="au", is_unique=True)
         ],
-        csv_name="CSV_A",
+        csv_name="CSV_A.csv",
     ),
     Node(
         label="NodeB",
         properties=[
             Property(name="beta", type="str", csv_mapping="bu", is_unique=True)
         ],
-        csv_name="CSV_B",
+        csv_name="CSV_B.csv",
     ),
     Node(
         label="NodeC",
@@ -25,11 +25,11 @@ nodes = [
             Property(name="gamma", type="str", csv_mapping="cu", is_unique=True),
             Property(name="decorator", type="str", csv_mapping="dec", is_unique=False),
         ],
-        csv_name="CSV_A",
+        csv_name="CSV_A.csv",
     ),
 ]
 rel = Relationship(
-    type="REL_AC", source="NodeA", target="NodeC", properties=[], csv_name="CSV_A"
+    type="REL_AC", source="NodeA", target="NodeC", properties=[], csv_name="CSV_A.csv"
 )
 
 data_model = DataModel(nodes=nodes, relationships=[rel])
@@ -39,20 +39,27 @@ class TestIngestCodeGenerationPyIngestConfigInput(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.gen = IngestionGenerator(data_model=data_model, csv_dir="./")
+        pyingest_config = {
+            "CSV_A.csv": {
+                "field_separator": "|",
+                "skip_file": False,
+                "skip_records": 5,
+            },
+            "CSV_B.csv": {"skip_file": True, "batch_size": 1234},
+        }
+        cls.gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            pyingest_file_config=pyingest_config,
+        )
 
     def test_code_generation_for_multi_csv(self) -> None:
         """
         Test the code generation for a data model with data from multiple CSVs.
         """
-        pyingest_config = {
-            "CSV_A": {"field_separator": "|", "skip_file": False, "skip_records": 5},
-            "CSV_B": {"skip_file": True, "batch_size": 1234},
-        }
+
         self.maxDiff = None
-        res = self.gen.generate_pyingest_yaml_string(
-            pyingest_file_config=pyingest_config
-        )
+        res = self.gen.generate_config_string()
         self.assertEqual(res, ans)
 
 

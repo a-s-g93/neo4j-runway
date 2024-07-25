@@ -1,30 +1,10 @@
 """
-This file contains the functions to create cypher queries.
+This file contains the functions to create MATCH, MERGE and SET queries.
 """
 
-from typing import List, Union
+from typing import List, Optional
 
-from ..models import Property, Node, Relationship
-
-
-def generate_constraints_key(
-    label_or_type: str, unique_property: Union[Property, List[Property]]
-) -> str:
-    """
-    Generate the key for a unique or node key constraint.
-    """
-    if isinstance(unique_property, Property):
-        return f"{label_or_type.lower()}_{unique_property.name.lower()}"
-    else:
-        return f"{label_or_type.lower()}_{'_'.join([x.name.lower() for x in unique_property])}"
-
-
-def generate_constraint(label_or_type: str, unique_property: Property) -> str:
-    """
-    Generate a constrant string.
-    """
-
-    return f"CREATE CONSTRAINT {label_or_type.lower()}_{unique_property.name.lower()} IF NOT EXISTS FOR (n:{label_or_type}) REQUIRE n.{unique_property.name} IS UNIQUE;\n"
+from ...models import Property, Node, Relationship
 
 
 def generate_match_node_clause(node: Node) -> str:
@@ -106,22 +86,31 @@ MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.uni
 
 
 def generate_merge_node_load_csv_clause(
-    node: Node,
     csv_name: str,
     method: str = "api",
     batch_size: int = 10000,
+    node: Optional[Node] = None,
+    standard_clause: Optional[str] = None,
     strict_typing: bool = True,
 ) -> str:
     """
     Generate a MERGE node clause for the LOAD CSV method.
     """
 
+    if not node and not standard_clause:
+        raise ValueError("Either `node` or `standard_clause` arg must be provided!")
+
     command = ":auto " if method == "browser" else ""
+    if not standard_clause:
+        standard_clause = generate_merge_node_clause_standard(
+            node=node, strict_typing=strict_typing
+        )
+    standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
+
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.unique_properties, strict_typing)}}})
-    {generate_set_property(node.nonidentifying_properties, strict_typing)}
+    {standard_clause}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -151,56 +140,38 @@ MERGE (source)-[n:{relationship.type}]->(target)
 
 
 def generate_merge_relationship_load_csv_clause(
-    relationship: Relationship,
-    source_node: Node,
-    target_node: Node,
     csv_name: str,
     method: str = "api",
     batch_size: int = 10000,
+    relationship: Optional[Relationship] = None,
+    source_node: Optional[Node] = None,
+    target_node: Optional[Node] = None,
+    standard_clause: Optional[str] = None,
     strict_typing: bool = True,
 ) -> str:
     """
     Generate a MERGE relationship clause for the LOAD CSV method.
     """
+    if (not relationship or not source_node or not target_node) and not standard_clause:
+        raise ValueError(
+            "Either (`relationship`, `source_node` and `target_node`) or `standard_clause` arg must be provided!"
+        )
 
     command = ":auto " if method == "browser" else ""
-    if source_node.label == target_node.label:
-        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    if not standard_clause:
+        standard_clause = generate_merge_relationship_clause_standard(
+            relationship=relationship,
+            source_node=source_node,
+            target_node=target_node,
+            strict_typing=strict_typing,
+        )
+    standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    {generate_match_same_node_labels_clause(node=source_node)}
-    MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonidentifying_properties, strict_typing)}
+    {standard_clause}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
-    else:
-        return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
-CALL {{
-    WITH row
-    {generate_match_node_clause(source_node).replace('(n:', '(source:')}
-    {generate_match_node_clause(target_node).replace('(n:', '(target:')}
-    MERGE (source)-[n:{relationship.type}]->(target)
-    {generate_set_property(relationship.nonidentifying_properties, strict_typing)}
-}} IN TRANSACTIONS OF {str(batch_size)} ROWS;
-"""
-
-
-def generate_node_key_constraint(label: str, unique_properties: List[Property]) -> str:
-    """
-    Generate a node key constraint.
-    """
-    props = "(" + ", ".join([f"n.{x.name}" for x in unique_properties]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=label, unique_property=unique_properties)} IF NOT EXISTS FOR (n:{label}) REQUIRE {props} IS NODE KEY;\n"""
-
-
-def generate_relationship_key_constraint(
-    type: str, unique_properties: List[Property]
-) -> str:
-    """
-    Generate a relationship key constraint.
-    """
-    props = "(" + ", ".join([f"r.{x.name}" for x in unique_properties]) + ")"
-    return f"""CREATE CONSTRAINT {generate_constraints_key(label_or_type=type, unique_property=unique_properties)} IF NOT EXISTS FOR ()-[r:{type}]-() REQUIRE {props} IS RELATIONSHIP KEY;\n"""
 
 
 def cast_value(prop: Property, strict_typing: bool = True) -> str:
@@ -241,34 +212,3 @@ def cast_value(prop: Property, strict_typing: bool = True) -> str:
         return f"toBooleanOrNull({base})"
     else:
         return base
-
-
-def format_pyingest_post_ingest_code(data: Union[str, List[str], None]) -> str:
-    """
-    Format the given post ingest code into a String to be injected into the
-    PyIngest yaml file.
-    """
-
-    if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
-        res = ""
-        for cql in data.split(";")[:-1]:
-            cql_formatted = cql.lstrip().replace("\n", "\n    ")
-            res += f"  - {cql_formatted}\n"
-        return res
-    elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
-        with open(data, "r") as f:
-            cql_file = f.read()
-        res = ""
-        for cql in cql_file.split(";")[:-1]:
-            cql_formatted = cql.lstrip().replace("\n", "\n    ")
-            res += f"  - {cql_formatted}\n"
-        return res
-
-    elif isinstance(data, list):
-        res = ""
-        for cql in data:
-            cql_formatted = cql.lstrip().replace("\n", "\n    ")
-            res += f"  - {cql_formatted}\n"
-        return res
-    else:
-        raise ValueError(f"Unable to parse post ingest code. data: {data}")

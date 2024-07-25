@@ -1,7 +1,7 @@
 import unittest
 
-from neo4j_runway.ingestion.cypher import *
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation.cypher import *
+from neo4j_runway.code_generation.generate_ingest import IngestionGenerator
 from neo4j_runway.models import Node, Relationship, Property, DataModel
 from tests.resources.answers.ingestion_generation_answers import *
 
@@ -95,18 +95,24 @@ class TestIngestCodeGeneration(unittest.TestCase):
         label = self.node_a.label
         unique_props = self.node_a.unique_properties
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
+            generate_unique_constraint(
+                label_or_type=label, unique_property=unique_props[0]
+            ),
             constraint_a_1,
         )
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[1]),
+            generate_unique_constraint(
+                label_or_type=label, unique_property=unique_props[1]
+            ),
             constraint_a_3,
         )
 
         label = self.node_b.label
         unique_props = self.node_b.unique_properties
         self.assertEqual(
-            generate_constraint(label_or_type=label, unique_property=unique_props[0]),
+            generate_unique_constraint(
+                label_or_type=label, unique_property=unique_props[0]
+            ),
             constraint_b,
         )
 

@@ -5,11 +5,15 @@ import os
 
 from neo4j_runway import (
     DataModel,
-    IngestionGenerator,
     Discovery,
     LLM,
     GraphDataModeler,
     UserInput,
+)
+from neo4j_runway.code_generation import (
+    PyIngestConfigGenerator,
+    LoadCSVCodeGenerator,
+    StandardCypherCodeGenerator,
 )
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
@@ -26,22 +30,37 @@ CLASS_DIR = [
         "file_path": "api/data_model.md",
         "summary_file_path": "data_model.md",
     },
-    {
-        "class": IngestionGenerator,
-        "file_path": "api/ingestion_generator.md",
-        "summary_file_path": "",
-    },
+    # {
+    #     "class": IngestionGenerator,
+    #     "file_path": "api/ingestion_generator.md",
+    #     "summary_file_path": "",
+    # },
     {"class": Discovery, "file_path": "api/discovery.md", "summary_file_path": ""},
     {
         "class": GraphDataModeler,
         "file_path": "api/graph_data_modeler.md",
-        "summary_file_path": "",
+        "summary_file_path": "graph_data_modeler.md",
     },
-    {"class": LLM, "file_path": "api/llm.md", "summary_file_path": ""},
+    {"class": LLM, "file_path": "api/llm.md", "summary_file_path": "llm.md"},
     {
         "class": UserInput,
         "file_path": "api/inputs.md",
-        "summary_file_path": "",
+        "summary_file_path": "inputs.md",
+    },
+    {
+        "class": PyIngestConfigGenerator,
+        "file_path": "api/pyingest-config-generator.md",
+        "summary_file_path": "pyingest_config_generator.md",
+    },
+    {
+        "class": LoadCSVCodeGenerator,
+        "file_path": "api/load-csv-code-generator.md",
+        "summary_file_path": "load_csv_code_generator.md",
+    },
+    {
+        "class": StandardCypherCodeGenerator,
+        "file_path": "api/standard-cypher-code-generator.md",
+        "summary_file_path": "standard_cypher_code_generator.md",
     },
 ]
 

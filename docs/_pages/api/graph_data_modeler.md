@@ -6,6 +6,10 @@ toc_label: GraphDataModeler
 toc_icon: "fa-solid fa-plane"
 ---
 
+    from neo4j_runway import GraphDataModeler
+
+
+
 
 ## Class Methods
 
