@@ -117,6 +117,27 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
 
+    def test_validate_relationship_keys(self) -> None:
+
+        rel = Relationship(
+            type="relA",
+            properties=[
+                Property(
+                    name="rkey",
+                    type="str",
+                    csv_mapping="rkey",
+                    is_unique=False,
+                    part_of_key=True,
+                )
+            ],
+            source="A",
+            target="B",
+        )
+
+        errors = rel.validate_properties(csv_columns=["rkey"])
+        message = "The relationship relA has a relationship key on only one property rkey. Relationship keys must exist on two or more properties."
+        self.assertIn(message, errors)
+
 
 if __name__ == "__main__":
     unittest.main()
