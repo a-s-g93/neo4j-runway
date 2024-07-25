@@ -40,7 +40,7 @@ class TestStandardCypherCodeGeneration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-       
+
         cls.gen = StandardCypherCodeGenerator(data_model=data_model)
 
     def test_cypher_string_generation(self) -> None:
@@ -52,15 +52,22 @@ class TestStandardCypherCodeGeneration(unittest.TestCase):
         self.assertIn("NodeC", res)
         self.assertIn("REL_AC", res)
 
-
     def test_constraints_string_generation(self) -> None:
         res = self.gen.generate_constraints_string()
 
         self.assertIsInstance(res, str)
-        self.assertIn("CREATE CONSTRAINT nodea_alpha IF NOT EXISTS FOR (n:NodeA) REQUIRE n.alpha IS UNIQUE;", res)
-        self.assertIn("CREATE CONSTRAINT nodeb_beta IF NOT EXISTS FOR (n:NodeB) REQUIRE n.beta IS UNIQUE;", res)
-        self.assertIn("CREATE CONSTRAINT nodec_gamma IF NOT EXISTS FOR (n:NodeC) REQUIRE n.gamma IS UNIQUE;", res)
-
+        self.assertIn(
+            "CREATE CONSTRAINT nodea_alpha IF NOT EXISTS FOR (n:NodeA) REQUIRE n.alpha IS UNIQUE;",
+            res,
+        )
+        self.assertIn(
+            "CREATE CONSTRAINT nodeb_beta IF NOT EXISTS FOR (n:NodeB) REQUIRE n.beta IS UNIQUE;",
+            res,
+        )
+        self.assertIn(
+            "CREATE CONSTRAINT nodec_gamma IF NOT EXISTS FOR (n:NodeC) REQUIRE n.gamma IS UNIQUE;",
+            res,
+        )
 
     def test_write_cypher_file(self) -> None:
         self.gen.generate_cypher_file("test.cypher")
@@ -84,17 +91,23 @@ class TestStandardCypherCodeGeneration(unittest.TestCase):
         with open("test.cypher", "r") as f:
             res = f.read()
             self.assertIsInstance(res, str)
-            self.assertIn("CREATE CONSTRAINT nodea_alpha IF NOT EXISTS FOR (n:NodeA) REQUIRE n.alpha IS UNIQUE;", res)
-            self.assertIn("CREATE CONSTRAINT nodeb_beta IF NOT EXISTS FOR (n:NodeB) REQUIRE n.beta IS UNIQUE;", res)
-            self.assertIn("CREATE CONSTRAINT nodec_gamma IF NOT EXISTS FOR (n:NodeC) REQUIRE n.gamma IS UNIQUE;", res)
-        
+            self.assertIn(
+                "CREATE CONSTRAINT nodea_alpha IF NOT EXISTS FOR (n:NodeA) REQUIRE n.alpha IS UNIQUE;",
+                res,
+            )
+            self.assertIn(
+                "CREATE CONSTRAINT nodeb_beta IF NOT EXISTS FOR (n:NodeB) REQUIRE n.beta IS UNIQUE;",
+                res,
+            )
+            self.assertIn(
+                "CREATE CONSTRAINT nodec_gamma IF NOT EXISTS FOR (n:NodeC) REQUIRE n.gamma IS UNIQUE;",
+                res,
+            )
+
         try:
             os.remove(f"./test.cypher")
         except Exception as e:
             print("No constraints file data model created.")
-    
-
-
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ import yaml
 from ..base import BaseCodeGenerator
 from ...models.core import DataModel
 
+
 class StandardCypherCodeGenerator(BaseCodeGenerator):
     """
     A class for generating standard plain old Cypher code.

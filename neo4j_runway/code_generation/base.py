@@ -145,7 +145,7 @@ class BaseCodeGenerator(ABC):
                 ),
                 "csv": f"$BASE/{self.file_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",
             }
-    
+
     def generate_cypher_file(self, file_name: str = "ingest_code.cypher") -> None:
         """
         Generate a .cypher file containing the generated ingestion code.
@@ -159,9 +159,7 @@ class BaseCodeGenerator(ABC):
         if self.file_output_dir != "":
             os.makedirs(self.file_output_dir, exist_ok=True)
 
-        with open(
-            f"./{self.file_output_dir}{file_name}", "w"
-        ) as cypher:
+        with open(f"./{self.file_output_dir}{file_name}", "w") as cypher:
             cypher.write(self.generate_cypher_string())
 
     def generate_cypher_string(self) -> str:
@@ -194,9 +192,7 @@ class BaseCodeGenerator(ABC):
         if self.file_output_dir != "":
             os.makedirs(self.file_output_dir, exist_ok=True)
 
-        with open(
-            f"./{self.file_output_dir}{file_name}", "w"
-        ) as constraints_cypher:
+        with open(f"./{self.file_output_dir}{file_name}", "w") as constraints_cypher:
             constraints_cypher.write(self.generate_constraints_string())
 
     def generate_constraints_string(self) -> str:
