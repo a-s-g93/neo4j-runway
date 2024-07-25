@@ -79,15 +79,17 @@ class GraphDataModeler:
                 else:
                     warnings.warn(
                         "user_input should include key:value pair {general_description: ...} for best results. "
-                        
                     )
                 self.user_input = UserInput(
-                    general_description=general_description, column_descriptions=user_input
+                    general_description=general_description,
+                    column_descriptions=user_input,
                 )
             else:
                 self.user_input = user_input
 
-            self.columns_of_interest = allowed_columns or self.user_input.allowed_columns
+            self.columns_of_interest = (
+                allowed_columns or self.user_input.allowed_columns
+            )
 
             self.discovery = discovery
             self.general_info = general_data_description

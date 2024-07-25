@@ -55,7 +55,6 @@ class Discovery:
             else:
                 warnings.warn(
                     "user_input should include key:value pair {general_description: ...} for best results. "
-                    
                 )
             self.user_input = UserInput(
                 general_description=general_description, column_descriptions=user_input
