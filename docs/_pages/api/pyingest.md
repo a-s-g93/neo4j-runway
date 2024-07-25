@@ -6,6 +6,10 @@ toc_label: PyIngest
 toc_icon: "fa-solid fa-plane"
 ---
 
+    from neo4j_runway import PyIngest
+
+
+
 Function to ingest data according to a configuration
         YAML.
     This is a modified version of the original PyIngest that

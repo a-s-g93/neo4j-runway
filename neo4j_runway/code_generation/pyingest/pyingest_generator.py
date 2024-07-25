@@ -15,7 +15,7 @@ from ...models.core import DataModel
 
 class PyIngestConfigGenerator(BaseCodeGenerator):
     """
-    Class responsible for generating the ingestion code.
+    Class responsible for generating the PyIngest config yaml.
     """
 
     def __init__(
@@ -36,6 +36,9 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         post_ingest_code: Optional[Union[str, List[str]]] = None,
     ):
         """
+        Class responsible for generating the PyIngest config yaml. Output is compatible with Runway ingest as well as
+        the original PyIngest.
+
         Attributes
         ----------
         data_model : DataModel

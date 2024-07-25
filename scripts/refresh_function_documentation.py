@@ -8,12 +8,12 @@ FUNCTION_DIR = [
     {
         "function": PyIngest,
         "file_path": "api/pyingest.md",
-        "summary_file_path": "",
+        "summary_file_path": "pyingest.md",
     },
     {
         "function": test_database_connection,
         "file_path": "api/utils.md",
-        "summary_file_path": "",
+        "summary_file_path": "utils.md",
     },
 ]
 

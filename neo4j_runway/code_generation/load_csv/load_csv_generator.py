@@ -29,6 +29,8 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
         method: str = "api",
     ):
         """
+        Class responsible for generating the LOAD CSV code.
+
         Attributes
         ----------
         data_model : DataModel
