@@ -20,7 +20,7 @@ def import_notebook(file_path: str) -> Any:
     Example notebooks MUST be stored in the repo "https://github.com/a-s-g93/neo4j-runway-examples".
     Outside examples will not be accepted.
     """
-    print("importing file")
+    print("importing file", file_path)
     url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
     response = urlopen(url).read().decode()
 
@@ -35,7 +35,7 @@ def write_example_page(
     svg files will be saved to "docs/examples/notebook_name/notebook_name_files/"
     Images will need to be manually added to "docs/examples/images/".
     """
-    print("writing file")
+    print("writing file", notebook_name)
 
     markdown_exporter = MarkdownExporter(template_name="markdown", preprocessors=[])
 
