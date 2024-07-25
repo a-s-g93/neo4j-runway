@@ -11,8 +11,8 @@ from openai import OpenAI
 import instructor
 
 from ..models import DataModel
-from ..resources.prompts.prompts import system_prompts
-from ..resources.prompts.prompts import model_generation_rules
+from ..resources.prompts import SYSTEM_PROMPTS
+from ..resources.prompts import DATA_MODEL_GENERATION_RULES
 
 MODEL_OPTIONS = [
     "gpt-4o",
@@ -71,7 +71,7 @@ class LLM:
             model=self.model,
             temperature=0,
             messages=[
-                {"role": "system", "content": system_prompts["discovery"]},
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
                 {"role": "user", "content": formatted_prompt},
             ],
         )
@@ -99,7 +99,7 @@ class LLM:
                 temperature=0,
                 response_model=DataModel,
                 messages=[
-                    {"role": "system", "content": system_prompts["data_model"]},
+                    {"role": "system", "content": SYSTEM_PROMPTS["data_model"]},
                     {"role": "user", "content": formatted_prompt},
                 ],
             )
@@ -135,7 +135,7 @@ class LLM:
             model=self.model,
             temperature=0,
             messages=[
-                {"role": "system", "content": system_prompts["retry"]},
+                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
                 {"role": "user", "content": formatted_prompt},
             ],
         )
@@ -164,5 +164,5 @@ class LLM:
                 {model_to_fix}
 
                 Rules that must be followed:
-                {model_generation_rules}
+                {DATA_MODEL_GENERATION_RULES}
                 """

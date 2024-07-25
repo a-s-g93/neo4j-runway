@@ -6,7 +6,7 @@ from graphviz import Digraph
 from ..discovery import Discovery
 from ..llm import LLM
 from ..models import DataModel, UserInput
-from ..resources.prompts.prompts import model_generation_rules, model_format
+from ..resources.prompts import DATA_MODEL_GENERATION_RULES, DATA_MODEL_FORMAT
 
 
 class GraphDataModeler:
@@ -37,7 +37,7 @@ class GraphDataModeler:
         discovery : Union[str, Discovery], optional
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
             If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
-        user_input : Dict[str, UserInput], optional
+        user_input : Union[Dict[str, str], UserInput], optional
             Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
         general_data_description : str, optional
             A general data description provided by Pandas, by default ""
@@ -63,25 +63,31 @@ class GraphDataModeler:
             self.general_info = discovery.df_info
             self.description_numeric = discovery.numeric_data_description
             self.description_categorical = discovery.categorical_data_description
-            self.feature_descriptions = discovery.feature_descriptions
+            self.feature_descriptions = discovery.user_input.column_descriptions
 
         else:
 
-            if isinstance(user_input, UserInput):
-                self.user_input = user_input._formatted_dict
-
+            # we convert all user_input to a UserInput object
+            if not isinstance(user_input, UserInput):
+                general_description = (
+                    user_input["general_description"]
+                    if "general_description" in user_input
+                    else ""
+                )
+                if "general_description" in user_input.keys():
+                    del user_input["general_description"]
+                else:
+                    warnings.warn(
+                        "user_input should include key:value pair {general_description: ...} for best results. "
+                        
+                    )
+                self.user_input = UserInput(
+                    general_description=general_description, column_descriptions=user_input
+                )
             else:
                 self.user_input = user_input
 
-            if "general_description" not in self.user_input.keys():
-                warnings.warn(
-                    "user_input should include key:value pair {general_description: ...} for best results. "
-                    + f"Found keys {self.user_input.keys()}"
-                )
-
-            self.columns_of_interest = allowed_columns or list(self.user_input.keys())
-            if "general_description" in self.columns_of_interest:
-                self.columns_of_interest.remove("general_description")
+            self.columns_of_interest = allowed_columns or self.user_input.allowed_columns
 
             self.discovery = discovery
             self.general_info = general_data_description
@@ -222,9 +228,9 @@ Based upon your knowledge of the data in my .csv and
 of high-quality Neo4j graph data models, I would like you to return your
 suggestion for translating the data in my .csv into a Neo4j graph data model.
 
-{model_generation_rules}
+{DATA_MODEL_GENERATION_RULES}
 
-{model_format}
+{DATA_MODEL_FORMAT}
             """
         return prompt
 
@@ -276,7 +282,7 @@ models, are there any improvements you would suggest to this model?
 
 {user_corrections}
 
-{model_generation_rules}
+{DATA_MODEL_GENERATION_RULES}
 """
 
         return prompt

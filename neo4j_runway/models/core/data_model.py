@@ -13,7 +13,7 @@ import yaml
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts.prompts import model_generation_rules
+from ...resources.prompts import DATA_MODEL_GENERATION_RULES
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -153,7 +153,7 @@ class DataModel(BaseModel):
                     Column Options:
                     {csv_columns}
                     A data model must follow these rules:
-                    {model_generation_rules}
+                    {DATA_MODEL_GENERATION_RULES}
                     Consider adding Nodes if they don't exist.
                     Consider moving properties to different nodes.
                     Is there a column option that is semantically similar to an invalid property?

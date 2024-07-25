@@ -4,7 +4,7 @@ from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
 from .property import Property
-from ..solutions_workbench import SolutionsWorkbenchNode, SolutionsWorkbenchProperty
+from ..solutions_workbench import SolutionsWorkbenchNode
 
 
 class Node(BaseModel):
