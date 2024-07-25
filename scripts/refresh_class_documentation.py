@@ -10,7 +10,11 @@ from neo4j_runway import (
     GraphDataModeler,
     UserInput,
 )
-from neo4j_runway.code_generation import PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
+from neo4j_runway.code_generation import (
+    PyIngestConfigGenerator,
+    LoadCSVCodeGenerator,
+    StandardCypherCodeGenerator,
+)
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features
