@@ -60,7 +60,6 @@ class TestIngestCodeGenerationPyIngestConfigInput(unittest.TestCase):
 
         self.maxDiff = None
         res = self.gen.generate_config_string()
-        print(res)
         self.assertEqual(res, ans)
 
 
