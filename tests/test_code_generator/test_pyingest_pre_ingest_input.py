@@ -2,7 +2,7 @@ from typing import List
 import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation import PyIngestConfigGenerator
 
 
 nodes = [
@@ -33,33 +33,44 @@ class TestIngestPreIngestInput(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.gen = IngestionGenerator(data_model=data_model, csv_dir="./")
         cls.maxDiff = None
 
     def test_pre_ingest_generation_from_string_a(self) -> None:
         pre_ingest: str = """CREATE INDEX rel_range_index_name FOR ()-[r:KNOWS]-() ON (r.since);
 CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country);"""
-        res = self.gen.generate_pyingest_yaml_string(pre_ingest_code=pre_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", pre_ingest_code=pre_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_pre_ingest_generation_from_string_b(self) -> None:
         pre_ingest: str = """CREATE INDEX rel_range_index_name FOR ()-[r:KNOWS]-() ON (r.since);
 CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country);"""
-        res = self.gen.generate_pyingest_yaml_string(pre_ingest_code=pre_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", pre_ingest_code=pre_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_pre_ingest_generation_from_cypher_file(self) -> None:
         pre_ingest_file_path: str = "tests/resources/cypher/pyingest_pre_ingest.cypher"
-        res = self.gen.generate_pyingest_yaml_string(
-            pre_ingest_code=pre_ingest_file_path
+        gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            pre_ingest_code=pre_ingest_file_path,
         )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_pre_ingest_generation_from_cql_file(self) -> None:
         pre_ingest_file_path: str = "tests/resources/cypher/pyingest_pre_ingest.cql"
-        res = self.gen.generate_pyingest_yaml_string(
-            pre_ingest_code=pre_ingest_file_path
+        gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            pre_ingest_code=pre_ingest_file_path,
         )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_pre_ingest_generation_from_list(self) -> None:
@@ -67,7 +78,10 @@ CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country
             "CREATE INDEX rel_range_index_name FOR ()-[r:KNOWS]-() ON (r.since)",
             "CREATE INDEX composite_range_node_index_name FOR (n:Person) ON (n.age, n.country)",
         ]
-        res = self.gen.generate_pyingest_yaml_string(pre_ingest_code=pre_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", pre_ingest_code=pre_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
 

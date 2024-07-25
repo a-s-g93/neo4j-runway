@@ -6,6 +6,10 @@ toc_label: UserInput
 toc_icon: "fa-solid fa-plane"
 ---
 
+    from neo4j_runway import UserInput
+
+
+
 
 ## Class Methods
 

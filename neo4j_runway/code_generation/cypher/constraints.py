@@ -2,7 +2,7 @@
 This file contains the functions to create contraints.
 """
 
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
 from ...models import Property
 

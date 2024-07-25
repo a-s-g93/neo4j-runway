@@ -4,6 +4,7 @@ This file contains the code to generate ingestion code.
 
 import os
 from typing import Dict, List, Any, Union
+import warnings
 
 import yaml
 
@@ -93,6 +94,12 @@ class IngestionGenerator:
         self._config_files_list: Union[List[Dict[str, Any]], None] = []
         self._constraints: Dict[str, str] = {}
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
+
+    warnings.warn(
+        """The IngestionGenerator class will be removed in future releases! 
+    Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
+    You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
+    )
 
     def _generate_base_information(
         self,

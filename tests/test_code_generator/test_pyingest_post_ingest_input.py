@@ -2,7 +2,7 @@ from typing import List
 import unittest
 
 from neo4j_runway.models import Node, Relationship, Property, DataModel
-from neo4j_runway.ingestion.generate_ingest import IngestionGenerator
+from neo4j_runway.code_generation import PyIngestConfigGenerator
 
 
 nodes = [
@@ -33,14 +33,16 @@ class TestIngestPostIngestInput(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.gen = IngestionGenerator(data_model=data_model, csv_dir="./")
         cls.maxDiff = None
 
     def test_post_ingest_generation_from_string_a(self) -> None:
         post_ingest: str = (
             "create (t:Test)\nset t.var = 1;\ncreate (t:Test2)\nset t.var = 2;"
         )
-        res = self.gen.generate_pyingest_yaml_string(post_ingest_code=post_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_string_b(self) -> None:
@@ -48,23 +50,32 @@ class TestIngestPostIngestInput(unittest.TestCase):
 set t.var = 1;
 create (t:Test2)
 set t.var = 2;"""
-        res = self.gen.generate_pyingest_yaml_string(post_ingest_code=post_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cypher_file(self) -> None:
         post_ingest_file_path: str = (
             "tests/resources/cypher/pyingest_post_ingest.cypher"
         )
-        res = self.gen.generate_pyingest_yaml_string(
-            post_ingest_code=post_ingest_file_path
+        gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            post_ingest_code=post_ingest_file_path,
         )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_cql_file(self) -> None:
         post_ingest_file_path: str = "tests/resources/cypher/pyingest_post_ingest.cql"
-        res = self.gen.generate_pyingest_yaml_string(
-            post_ingest_code=post_ingest_file_path
+        gen = PyIngestConfigGenerator(
+            data_model=data_model,
+            file_directory="./",
+            post_ingest_code=post_ingest_file_path,
         )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
     def test_post_ingest_generation_from_list(self) -> None:
@@ -72,7 +83,10 @@ set t.var = 2;"""
             "create (t:Test)\nset t.var = 1",
             "create (t:Test2)\nset t.var = 2",
         ]
-        res = self.gen.generate_pyingest_yaml_string(post_ingest_code=post_ingest)
+        gen = PyIngestConfigGenerator(
+            data_model=data_model, file_directory="./", post_ingest_code=post_ingest
+        )
+        res = gen.generate_config_string()
         self.assertEqual(res, ans)
 
 
