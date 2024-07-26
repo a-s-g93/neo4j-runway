@@ -3,7 +3,10 @@ import warnings
 
 from ..user_input import UserInput
 
-def user_input_safe_construct(unsafe_user_input: Dict[str, Any], allowed_columns: List[str] = list()) -> UserInput:
+
+def user_input_safe_construct(
+    unsafe_user_input: Dict[str, Any], allowed_columns: List[str] = list()
+) -> UserInput:
     """
     Safely construct a UserInput object from a given dictionary.
 
@@ -33,12 +36,11 @@ def user_input_safe_construct(unsafe_user_input: Dict[str, Any], allowed_columns
             "user_input should include key:value pair {general_description: ...} for best results."
         )
 
-    # handle column descriptions 
+    # handle column descriptions
     if not unsafe_user_input:
         warnings.warn("No columns detected in user input. Defaulting to all columns.")
-    
+
     return UserInput(
         general_description=general_description,
         column_descriptions=unsafe_user_input or {k: "" for k in allowed_columns},
     )
-

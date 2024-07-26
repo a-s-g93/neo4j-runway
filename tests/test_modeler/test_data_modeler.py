@@ -13,7 +13,7 @@ class LLMMock:
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
         )
-    
+
     def _get_initial_data_model_response(*args, **kargs) -> DataModel:
         return DataModel(
             nodes=data_model_dict["nodes"],

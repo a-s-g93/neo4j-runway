@@ -77,7 +77,9 @@ class GraphDataModeler:
                 )
             # we convert all user_input to a UserInput object
             if not isinstance(user_input, UserInput):
-                self.user_input = user_input_safe_construct(unsafe_user_input=user_input, allowed_columns=allowed_columns)
+                self.user_input = user_input_safe_construct(
+                    unsafe_user_input=user_input, allowed_columns=allowed_columns
+                )
             else:
                 self.user_input = user_input
 
@@ -226,7 +228,7 @@ class GraphDataModeler:
         )
         if not isinstance(response, DataModel):
             return response
-        
+
         self.model_history.append(response)
 
         self._initial_model_created = True

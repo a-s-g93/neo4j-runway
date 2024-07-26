@@ -42,11 +42,17 @@ class TestUserInput(unittest.TestCase):
         unsafe_input = {"col_a": "this is col a.", "col_b": "this is col_b."}
         allowed_columns = ["col_a", "col_b"]
 
-        safe_input = user_input_safe_construct(unsafe_user_input=unsafe_input, allowed_columns=allowed_columns)
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
 
         self.assertEqual(safe_input.general_description, "")
-        self.assertEqual(set(unsafe_input.keys()), set(safe_input.column_descriptions.keys()))
-        self.assertEqual(set(unsafe_input.values()), set(safe_input.column_descriptions.values()))
+        self.assertEqual(
+            set(unsafe_input.keys()), set(safe_input.column_descriptions.keys())
+        )
+        self.assertEqual(
+            set(unsafe_input.values()), set(safe_input.column_descriptions.values())
+        )
         self.assertIn("col_a", safe_input.allowed_columns)
         self.assertIn("col_b", safe_input.allowed_columns)
 
@@ -54,11 +60,17 @@ class TestUserInput(unittest.TestCase):
         unsafe_input = {"general_description": "this is the general description."}
         allowed_columns = ["col_a", "col_b"]
 
-        safe_input = user_input_safe_construct(unsafe_user_input=unsafe_input, allowed_columns=allowed_columns)
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
 
-        self.assertEqual(safe_input.general_description, "this is the general description.")
-        self.assertEqual(set(allowed_columns), set(safe_input.column_descriptions.keys()))
-        self.assertIn('', set(safe_input.column_descriptions.values()))
+        self.assertEqual(
+            safe_input.general_description, "this is the general description."
+        )
+        self.assertEqual(
+            set(allowed_columns), set(safe_input.column_descriptions.keys())
+        )
+        self.assertIn("", set(safe_input.column_descriptions.values()))
         self.assertIn("col_a", safe_input.allowed_columns)
         self.assertIn("col_b", safe_input.allowed_columns)
 
@@ -66,14 +78,19 @@ class TestUserInput(unittest.TestCase):
         unsafe_input = {}
         allowed_columns = ["col_a", "col_b"]
 
-        safe_input = user_input_safe_construct(unsafe_user_input=unsafe_input, allowed_columns=allowed_columns)
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
 
         self.assertEqual(safe_input.general_description, "")
-        self.assertEqual(set(allowed_columns), set(safe_input.column_descriptions.keys()))
+        self.assertEqual(
+            set(allowed_columns), set(safe_input.column_descriptions.keys())
+        )
         print("SAFE_INPUT: ", safe_input.column_descriptions.values())
-        self.assertIn('', set(safe_input.column_descriptions.values()))
+        self.assertIn("", set(safe_input.column_descriptions.values()))
         self.assertIn("col_a", safe_input.allowed_columns)
         self.assertIn("col_b", safe_input.allowed_columns)
+
 
 if __name__ == "__main__":
     unittest.main()

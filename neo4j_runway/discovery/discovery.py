@@ -60,7 +60,9 @@ class Discovery:
             # self.user_input = UserInput(
             #     general_description=general_description, column_descriptions=user_input
             # )
-            self.user_input = user_input_safe_construct(unsafe_user_input=user_input, allowed_columns=data.columns)
+            self.user_input = user_input_safe_construct(
+                unsafe_user_input=user_input, allowed_columns=data.columns
+            )
         else:
             self.user_input = user_input
 
