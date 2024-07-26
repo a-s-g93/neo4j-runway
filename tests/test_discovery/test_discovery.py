@@ -4,9 +4,7 @@ import sys
 
 import pandas as pd
 
-from neo4j_runway.discovery.discovery import Discovery
-from neo4j_runway.llm.llm import LLM
-from neo4j_runway.models import UserInput
+from neo4j_runway import Discovery, LLM, UserInput
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",

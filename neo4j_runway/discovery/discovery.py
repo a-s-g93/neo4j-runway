@@ -4,14 +4,15 @@ The Discovery module that handles summarization and discovery generation via an 
 
 import io
 import os
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 import warnings
 
 from IPython.display import display, Markdown  # type: ignore # this works even though I get an import warning for IPython...
 import pandas as pd
 
-from ..llm.llm import LLM
-from ..inputs.user_input import UserInput
+from ..llm import LLM
+from ..inputs import UserInput
+from ..resources.prompts import create_discovery_prompt
 
 
 class Discovery:
@@ -23,7 +24,7 @@ class Discovery:
         self,
         data: pd.DataFrame,
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        llm: LLM = None,
+        llm: Optional[LLM] = None,
         pandas_only: bool = False,
     ) -> None:
         """
@@ -41,20 +42,29 @@ class Discovery:
         pandas_only : bool
             Whether to only generate discovery using Pandas. Will not call the LLM service.
         """
-        if isinstance(user_input, UserInput):
-            self.user_input = user_input._formatted_dict
-        else:
-            self.user_input = user_input
-            if "general_description" not in self.user_input.keys():
+
+        # we convert all user_input to a UserInput object
+        if not isinstance(user_input, UserInput):
+            general_description = (
+                user_input["general_description"]
+                if "general_description" in user_input
+                else ""
+            )
+            if "general_description" in user_input.keys():
+                del user_input["general_description"]
+            else:
                 warnings.warn(
                     "user_input should include key:value pair {general_description: ...} for best results. "
-                    + f"Found keys {self.user_input.keys()}"
                 )
+            self.user_input = UserInput(
+                general_description=general_description, column_descriptions=user_input
+            )
+        else:
+            self.user_input = user_input
+
         self.llm = llm
 
-        self.columns_of_interest = list(self.user_input.keys())
-        if "general_description" in self.columns_of_interest:
-            self.columns_of_interest.remove("general_description")
+        self.columns_of_interest = self.user_input.allowed_columns
 
         if self.columns_of_interest:
             self.data = data[self.columns_of_interest]
@@ -86,45 +96,6 @@ class Discovery:
         self.numeric_data_description = desc_numeric
         self.categorical_data_description = desc_categorical
 
-    def _generate_discovery_prompt(self) -> str:
-        """
-        Generate the initial discovery prompt.
-        """
-
-        self.feature_descriptions = ""
-        for col in self.numeric_data_description.columns:
-            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.numeric_data_description[col]} \n\n"""
-
-        for col in self.categorical_data_description.columns:
-            self.feature_descriptions += f"""{col}: {self.user_input[col] if col in self.user_input else ""} \n It has the following distribution: {self.categorical_data_description[col]} \n\n"""
-
-        gen_description_clause = (
-            f"""
-This is a general description of the data:
-{self.user_input['general_description']}
-"""
-            if "general_description" in self.user_input
-            else ""
-        )
-
-        prompt = f"""
-I want you to perform a preliminary analysis on my data to help us understand
-its characteristics before we brainstorm about the graph data model.
-
-{gen_description_clause}
-
-The following is a summary of the data features, data types, and missing values:
-{self.df_info}
-
-The following is a description of each feature in the data:
-{self.feature_descriptions}
-
-Provide me with your preliminary analysis of this data. What are important
-overall details about the data? What are the most important features?
-"""
-
-        return prompt
-
     def run(self, show_result: bool = True, notebook: bool = True) -> None:
         """
         Run the discovery process on the provided DataFrame.
@@ -146,7 +117,12 @@ overall details about the data? What are the most important features?
 
         if not self.pandas_only:
             response = self.llm._get_discovery_response(
-                formatted_prompt=self._generate_discovery_prompt()
+                formatted_prompt=create_discovery_prompt(
+                    pandas_general_description=self.df_info,
+                    pandas_categorical_feature_descriptions=self.categorical_data_description,
+                    pandas_numeric_feature_descriptions=self.numeric_data_description,
+                    user_input=self.user_input,
+                )
             )
         else:
             response = ""

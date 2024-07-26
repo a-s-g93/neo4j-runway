@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, List
 import warnings
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class UserInput(BaseModel):
@@ -38,12 +38,14 @@ class UserInput(BaseModel):
         return v
 
     @property
-    def _formatted_dict(self) -> Dict[str, str]:
+    def allowed_columns(self) -> List[str]:
         """
-        Dictionary representation of the user input to be used in Discovery.
+        The allowed columns.
+
+        Returns
+        -------
+        List[str]
+            A list of columns from the DataFrame.
         """
 
-        res = {k: v for k, v in self.column_descriptions.items()}
-        res["general_description"] = self.general_description
-
-        return res
+        return list(self.column_descriptions.keys())

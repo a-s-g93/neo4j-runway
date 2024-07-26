@@ -6,4 +6,3 @@ from .solutions_workbench import (
     SolutionsWorkbenchNode,
     SolutionsWorkbenchProperty,
 )
-from ..inputs.user_input import UserInput

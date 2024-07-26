@@ -13,7 +13,7 @@ import yaml
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts.prompts import model_generation_rules
+from ...resources.prompts import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -119,7 +119,7 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    def validate_model(self, csv_columns: List[str]) -> None:
+    def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
 
@@ -130,7 +130,8 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        None
+        Dict[str, Any]
+            A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         """
         errors = []
         for node in self.nodes:
@@ -143,32 +144,22 @@ class DataModel(BaseModel):
         errors += self._validate_csv_features_used_only_once()
 
         if len(errors) > 0:
-            message = f"""
-                    The following data model is invalid and must be fixed.
-                    Properties must be from the provided Column Options. 
-                    Data Model:
-                    {self.model_dump()}
-                    Errors:
-                    {str(errors)}
-                    Column Options:
-                    {csv_columns}
-                    A data model must follow these rules:
-                    {model_generation_rules}
-                    Consider adding Nodes if they don't exist.
-                    Consider moving properties to different nodes.
-                    Is there a column option that is semantically similar to an invalid property?
-                    Return an explanation of how you will fix each error while following the provided rules.
-                    """
+            message = create_data_model_errors_cot_prompt(
+                data_model_as_dictionary=self.model_dump(),
+                errors=errors,
+                allowed_columns=csv_columns,
+            )
+
             print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
-        return {"valid": True, "message": "", "errors": []}
+        return {"valid": True, "message": "", "errors": list()}
 
     def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
 
-        errors = []
+        errors = list()
         for rel in self.relationships:
             if rel.source not in self.node_labels:
                 errors.append(
@@ -185,8 +176,8 @@ class DataModel(BaseModel):
         Validate that each property is used no more than one time in the data model.
         """
 
-        used_features: Dict[str, List[str]] = {}
-        errors: List[str] = []
+        used_features: Dict[str, List[str]] = dict()
+        errors: List[str] = list()
 
         for node in self.nodes:
             for prop in node.properties:
@@ -285,10 +276,6 @@ class DataModel(BaseModel):
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
         This is typically performed within the __init__ method automatically.
-
-        Returns
-        -------
-        None
         """
 
         # fix node labels and properties
