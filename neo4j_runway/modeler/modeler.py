@@ -5,6 +5,7 @@ from graphviz import Digraph
 
 from ..discovery import Discovery
 from ..inputs import UserInput
+from ..inputs._utils.input_utils import user_input_safe_construct
 from ..llm import LLM
 from ..models import DataModel
 from ..resources.prompts import (
@@ -76,21 +77,7 @@ class GraphDataModeler:
                 )
             # we convert all user_input to a UserInput object
             if not isinstance(user_input, UserInput):
-                general_description = (
-                    user_input["general_description"]
-                    if "general_description" in user_input
-                    else ""
-                )
-                if "general_description" in user_input.keys():
-                    del user_input["general_description"]
-                else:
-                    warnings.warn(
-                        "user_input should include key:value pair {general_description: ...} for best results. "
-                    )
-                self.user_input = UserInput(
-                    general_description=general_description,
-                    column_descriptions=user_input or {k: "" for k in allowed_columns},
-                )
+                self.user_input = user_input_safe_construct(unsafe_user_input=user_input, allowed_columns=allowed_columns)
             else:
                 self.user_input = user_input
 
@@ -208,15 +195,16 @@ class GraphDataModeler:
 
     def create_initial_model(
         self, max_retries: int = 3, use_yaml_data_model: bool = False
-    ) -> DataModel:
+    ) -> Union[DataModel, Dict[str, Any]]:
         """
         Generate the initial model. This must be ran before a model can be interated on.
         You may access this model with the `get_model` method and providing `version=1`.
 
         Returns
         -------
-        DataModel
-            The generated data model.
+        Union[DataModel, str]
+            The generated data model if a valid model is generated.
+            A dictionary containing information about the failed generation attempt.
         """
 
         # response = self.llm._get_data_model_response(
@@ -236,6 +224,9 @@ class GraphDataModeler:
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
         )
+        if not isinstance(response, DataModel):
+            return response
+        
         self.model_history.append(response)
 
         self._initial_model_created = True
