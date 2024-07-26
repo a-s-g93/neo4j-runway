@@ -48,6 +48,7 @@ Format your data model as:
 
 def create_initial_data_model_prompt(
     discovery_text: str,
+    data_model_recommendations: Dict[str, Any],
     user_input: UserInput,
     pandas_general_info: str,
     feature_descriptions: Dict[str, str],
@@ -69,13 +70,16 @@ The following is a description of each feature in the data:
 Here is the initial discovery findings:
 {discovery_text}
 
+Here are recommendations to follow:
+{data_model_recommendations}
+
 Based upon the above information and of high-quality Neo4j graph data models, 
 I would like you to translate the data in my .csv into a Neo4j graph data model.
 
 {DATA_MODEL_GENERATION_RULES}
 
 {DATA_MODEL_FORMAT}
-            """
+"""
     return prompt
 
 
@@ -137,19 +141,44 @@ def create_retry_data_model_generation_prompt(
     """
 
     return f"""
-            Fix these errors in the data model by following the recommendations below and following the rules.
-            Do not return the same model!
-            {chain_of_thought_response}
+Fix these errors in the data model by following the recommendations below and following the rules.
+Do not return the same model!
+{chain_of_thought_response}
 
-            Errors:
-            {errors_to_fix}
+Errors:
+{errors_to_fix}
 
-            Data Model:
-            {model_to_fix}
+Data Model:
+{model_to_fix}
 
-            Rules that must be followed:
-            {DATA_MODEL_GENERATION_RULES}
-            """
+Rules that must be followed:
+{DATA_MODEL_GENERATION_RULES}
+"""
+
+
+def create_retry_initial_data_model_prep_generation_prompt(invalid_options: Dict[str, Any], errors: List[str]) -> str:  # type: ignore
+    """
+    Generate a retry prompt for the brainstorming stage of creating an initial data model.
+
+    Parameters
+    ----------
+    invalid_options : DataModelEntityPool
+        The initially returned suggestions that are invalid.
+    errors : List[str]
+        List of errors present in the suggestions.
+
+    Returns
+    -------
+    str
+        the retry prompt.
+    """
+    return f"""Fix these errors in the initial data model suggestions below.
+Errors:
+{errors}
+
+Initial Data Model Suggestions:
+{invalid_options}
+"""
 
 
 def create_data_model_errors_cot_prompt(
@@ -184,3 +213,45 @@ Consider moving properties to different nodes.
 Is there a column option that is semantically similar to an invalid property?
 Return an explanation of how you will fix each error while following the provided rules.
 """
+
+
+def create_initial_data_model_cot_prompt(
+    discovery_text: str,
+    feature_descriptions: Optional[Dict[str, str]],
+    allowed_features: List[str],
+) -> str:
+    """
+    Generate a prompt to find nodes, relationships and properties to include in a data model.
+    This is only for brainstorming, result of prompt should not be a DataModel.
+
+    Returns
+    -------
+    str
+        The prompt.
+    """
+    discovery = (
+        "Here is the initial discovery findings:\n" + f"{discovery_text}" + "\n"
+        if discovery_text is not None
+        else ""
+    )
+    feature_descriptions = (
+        "The following is a description of each feature in the data:\n"
+        + f"{feature_descriptions}"
+        + "\n"
+        if feature_descriptions is not None
+        else ""
+    )
+
+    prompt = f"""{discovery}
+{feature_descriptions}
+Based upon the above information and of high-quality graph data models, 
+return the following:
+* Nodes and their respective properties
+* Relationships and their respective source Nodes and target Nodes
+* Relationships and thier respective properties, if any
+
+All properties must be found in this list: {allowed_features}
+Do not return an actual data model!
+"""
+
+    return prompt
