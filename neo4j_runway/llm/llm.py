@@ -11,8 +11,10 @@ from openai import OpenAI
 import instructor
 
 from ..models import DataModel
-from ..resources.prompts import SYSTEM_PROMPTS
-from ..resources.prompts import DATA_MODEL_GENERATION_RULES
+from ..resources.prompts import (
+    SYSTEM_PROMPTS,
+    create_retry_data_model_generation_prompt,
+)
 
 MODEL_OPTIONS = [
     "gpt-4o",
@@ -111,7 +113,7 @@ class LLM:
                     formatted_prompt=validation["message"]
                 )
 
-                formatted_prompt = self._generate_retry_prompt(
+                formatted_prompt = create_retry_data_model_generation_prompt(
                     chain_of_thought_response=cot,
                     errors_to_fix=validation["errors"],
                     model_to_fix=(
@@ -140,29 +142,3 @@ class LLM:
             ],
         )
         return response.choices[0].message.content
-
-    def _generate_retry_prompt(
-        self,
-        chain_of_thought_response: str,
-        errors_to_fix: str,
-        model_to_fix: Union[DataModel, str],
-    ) -> str:
-        """
-        Generate a prompt to fix the data model using the errors found in previous model
-        and the chain of thought response containing ideas on how to fix the errors.
-        """
-
-        return f"""
-                Fix these errors in the data model by following the recommendations below and following the rules.
-                Do not return the same model!
-                {chain_of_thought_response}
-
-                Errors:
-                {errors_to_fix}
-
-                Data Model:
-                {model_to_fix}
-
-                Rules that must be followed:
-                {DATA_MODEL_GENERATION_RULES}
-                """

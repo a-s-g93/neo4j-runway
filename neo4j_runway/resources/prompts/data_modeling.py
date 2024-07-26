@@ -1,5 +1,4 @@
-from typing import Dict, Optional
-from ...models import DataModel
+from typing import Any, Dict, List, Optional, Union
 from ...inputs import UserInput
 
 DATA_MODEL_GENERATION_RULES = """
@@ -70,9 +69,8 @@ The following is a description of each feature in the data:
 Here is the initial discovery findings:
 {discovery_text}
 
-Based upon your knowledge of the data in my .csv and 
-of high-quality Neo4j graph data models, I would like you to return your
-suggestion for translating the data in my .csv into a Neo4j graph data model.
+Based upon the above information and of high-quality Neo4j graph data models, 
+I would like you to translate the data in my .csv into a Neo4j graph data model.
 
 {DATA_MODEL_GENERATION_RULES}
 
@@ -86,7 +84,7 @@ def create_data_model_iteration_prompt(
     user_input: UserInput,
     pandas_general_info: str,
     feature_descriptions: Dict[str, str],
-    data_model_to_modify: DataModel,
+    data_model_to_modify: "DataModel",  # type: ignore
     user_corrections: Optional[str] = None,
     use_yaml_data_model: bool = False,
 ) -> str:
@@ -117,12 +115,72 @@ Here is the initial discovery findings:
 {discovery_text}
 
 Based on your experience building high-quality graph data
-models, are there any improvements you would suggest to this model?
-{data_model_to_modify.to_yaml(write_file=False) if use_yaml_data_model else data_model_to_modify}
-
+models, please improve this graph data model according to the feedback below.
 {user_corrections}
+
+{data_model_to_modify.to_yaml(write_file=False) if use_yaml_data_model else data_model_to_modify}
 
 {DATA_MODEL_GENERATION_RULES}
 """
 
     return prompt
+
+
+def create_retry_data_model_generation_prompt(
+    chain_of_thought_response: str,
+    errors_to_fix: str,
+    model_to_fix: Union["DataModel", str],  # type: ignore
+) -> str:
+    """
+    Generate a prompt to fix the data model using the errors found in previous model
+    and the chain of thought response containing ideas on how to fix the errors.
+    """
+
+    return f"""
+            Fix these errors in the data model by following the recommendations below and following the rules.
+            Do not return the same model!
+            {chain_of_thought_response}
+
+            Errors:
+            {errors_to_fix}
+
+            Data Model:
+            {model_to_fix}
+
+            Rules that must be followed:
+            {DATA_MODEL_GENERATION_RULES}
+            """
+
+
+def create_data_model_errors_cot_prompt(
+    data_model_as_dictionary: Dict[str, Any],
+    errors: List[str],
+    allowed_columns: List[str],
+) -> str:
+    """
+    Generate a prompt to be sent to the LLM to perform a chain of thought response.
+    Prmopts the LLM to provide recommendations to solve the given problems.
+    No data model should be returned.
+
+    Returns
+    -------
+    str
+        The prompt.
+    """
+
+    return f"""
+The following data model is invalid and must be fixed.
+Properties must be from the provided Column Options. 
+Data Model:
+{data_model_as_dictionary}
+Errors:
+{errors}
+Column Options:
+{allowed_columns}
+A data model must follow these rules:
+{DATA_MODEL_GENERATION_RULES}
+Consider adding Nodes if they don't exist.
+Consider moving properties to different nodes.
+Is there a column option that is semantically similar to an invalid property?
+Return an explanation of how you will fix each error while following the provided rules.
+"""

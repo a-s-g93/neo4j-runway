@@ -4,8 +4,9 @@ import warnings
 from graphviz import Digraph
 
 from ..discovery import Discovery
+from ..inputs import UserInput
 from ..llm import LLM
-from ..models import DataModel, UserInput
+from ..models import DataModel
 from ..resources.prompts import (
     create_initial_data_model_prompt,
     create_data_model_iteration_prompt,
