@@ -17,6 +17,15 @@ def user_input_safe_construct(
     allowed_columns : List[str], optional
         A list of allowed columns for the graph data model to use, by default list()
 
+    Raises
+    ------
+    ValueError
+        If a column descriptions key is not found in the provided allowed_columns arg.
+
+    Warns
+    -----
+    If general_description is not included in unsafe_user_input arg.
+
     Returns
     -------
     UserInput
@@ -35,6 +44,16 @@ def user_input_safe_construct(
         warnings.warn(
             "user_input should include key:value pair {general_description: ...} for best results."
         )
+
+    # find unmatched columns
+    # assume remaining keys indicate columns
+    # only check if allowed_columns and unsafe_user_input > 0
+    if len(allowed_columns) > 0 and len(unsafe_user_input) > 0:
+        diff = set(unsafe_user_input.keys()).difference(set(allowed_columns))
+        if len(diff) > 0:
+            raise ValueError(
+                f"Column(s) {diff} is/are declared in the provided column descriptions, but is/are not found in the provided allowed_columns arg: {allowed_columns}."
+            )
 
     # handle column descriptions
     if not unsafe_user_input:

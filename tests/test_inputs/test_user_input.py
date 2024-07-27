@@ -86,10 +86,22 @@ class TestUserInput(unittest.TestCase):
         self.assertEqual(
             set(allowed_columns), set(safe_input.column_descriptions.keys())
         )
-        print("SAFE_INPUT: ", safe_input.column_descriptions.values())
         self.assertIn("", set(safe_input.column_descriptions.values()))
         self.assertIn("col_a", safe_input.allowed_columns)
         self.assertIn("col_b", safe_input.allowed_columns)
+
+    def test_unsafe_construction_columns_not_found_in_allowed_list(self) -> None:
+        unsafe_input = {
+            "general_description": "this is the general description.",
+            "col_a": "this is col a.",
+            "col_c": "this is col_c.",
+        }
+        allowed_columns = ["col_a", "col_b"]
+
+        with self.assertRaises(ValueError):
+            safe_input = user_input_safe_construct(
+                unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+            )
 
 
 if __name__ == "__main__":
