@@ -1,4 +1,4 @@
-from ...inputs import UserInput
+from ....inputs import UserInput
 import pandas as pd
 
 

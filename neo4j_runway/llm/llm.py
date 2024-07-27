@@ -14,6 +14,8 @@ from ..inputs import UserInput
 from ..models import DataModel
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
+)
+from ..resources.prompts.data_modeling import (
     create_retry_data_model_generation_prompt,
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,

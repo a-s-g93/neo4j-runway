@@ -13,7 +13,7 @@ import yaml
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts import create_data_model_errors_cot_prompt
+from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,

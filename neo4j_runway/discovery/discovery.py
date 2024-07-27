@@ -11,9 +11,8 @@ from IPython.display import display, Markdown  # type: ignore # this works even 
 import pandas as pd
 
 from ..llm import LLM
-from ..inputs import UserInput
-from ..inputs._utils.input_utils import user_input_safe_construct
-from ..resources.prompts import create_discovery_prompt
+from ..inputs import UserInput, user_input_safe_construct
+from ..resources.prompts.discovery import create_discovery_prompt
 
 
 class Discovery:

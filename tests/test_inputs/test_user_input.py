@@ -1,7 +1,6 @@
 import unittest
 
-from neo4j_runway.inputs import UserInput
-from neo4j_runway.inputs._utils.input_utils import user_input_safe_construct
+from neo4j_runway.inputs import UserInput, user_input_safe_construct
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",

@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
-from ..prompts import create_retry_initial_data_model_prep_generation_prompt
+from ..prompts.data_modeling import create_retry_initial_data_model_prep_generation_prompt
 
 
 @dataclass
