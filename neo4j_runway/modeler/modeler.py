@@ -208,16 +208,6 @@ class GraphDataModeler:
             A dictionary containing information about the failed generation attempt.
         """
 
-        # response = self.llm._get_data_model_response(
-        #     formatted_prompt=create_initial_data_model_prompt(
-        #         discovery_text=self.discovery,
-        #         user_input=self.user_input,
-        #         pandas_general_info=self.general_info,
-        #         feature_descriptions=self.feature_descriptions,
-        #     ),
-        #     csv_columns=self.columns_of_interest,
-        # )
-
         response = self.llm._get_initial_data_model_response(
             discovery_text=self.discovery,
             user_input=self.user_input,
@@ -269,8 +259,6 @@ class GraphDataModeler:
                     formatted_prompt=create_data_model_iteration_prompt(
                         discovery_text=self.discovery,
                         user_input=self.user_input,
-                        pandas_general_info=self.general_info,
-                        feature_descriptions=self.feature_descriptions,
                         data_model_to_modify=self.current_model,
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,

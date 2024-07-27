@@ -113,7 +113,7 @@ class LLM:
         while not validation["valid"] and part_one_retries < 2:
             formatted_prompt = create_initial_data_model_cot_prompt(
                 discovery_text=discovery_text,
-                feature_descriptions=user_input.column_descriptions,
+                user_input=user_input,
                 allowed_features=user_input.allowed_columns,
             )
             entity_pool: DataModelEntityPool = (
@@ -144,8 +144,6 @@ class LLM:
                 discovery_text=discovery_text,
                 data_model_recommendations=entity_pool.model_dump(),
                 user_input=user_input,
-                pandas_general_info=pandas_general_info,
-                feature_descriptions=user_input.column_descriptions,
             )
 
             print(formatted_prompt)

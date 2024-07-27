@@ -1,12 +1,15 @@
-from typing import Any, Dict, List, Optional
-from .constants import DATA_MODEL_GENERATION_RULES, DATA_MODEL_FORMAT
+from typing import Any, Dict, List
+from .constants import (
+    DATA_MODEL_GENERATION_RULES,
+    DATA_MODEL_GENERATION_RULES_ADVANCED,
+    DATA_MODEL_FORMAT,
+)
 from ....inputs import UserInput
+from .formatters import format_column_descriptions, format_discovery_text, format_use_cases, format_general_description
 
 
 def create_initial_data_model_cot_prompt(
-    discovery_text: str,
-    feature_descriptions: Optional[Dict[str, str]],
-    allowed_features: List[str],
+    discovery_text: str, allowed_features: List[str], user_input: UserInput
 ) -> str:
     """
     Generate a prompt to find nodes, relationships and properties to include in a data model.
@@ -17,29 +20,24 @@ def create_initial_data_model_cot_prompt(
     str
         The prompt.
     """
-    discovery = (
-        "Here is the initial discovery findings:\n" + f"{discovery_text}" + "\n"
-        if discovery_text is not None
-        else ""
-    )
-    feature_descriptions = (
-        "The following is a description of each feature in the data:\n"
-        + f"{feature_descriptions}"
-        + "\n"
-        if feature_descriptions is not None
-        else ""
-    )
+    discovery = format_discovery_text(discovery_text)
+    feature_descriptions = format_column_descriptions(user_input=user_input)
+    use_cases = format_use_cases(user_input=user_input)
 
     prompt = f"""{discovery}
 {feature_descriptions}
+{use_cases}
 Based upon the above information and of high-quality graph data models, 
 return the following:
 * Nodes and their respective properties
-* Relationships and their respective source Nodes and target Nodes
-* Relationships and thier respective properties, if any
+* Relationships and their respective possible source Nodes and target Nodes
+* Relationships and their respective properties, if any
+* Explanations for each decision and how it will benefit the data model 
+* All possible relationships for nodes
 
-All properties must be found in this list: {allowed_features}
-Do not return an actual data model!
+Remember 
+* All properties must be found in this list: {allowed_features}
+* Do not return an actual data model!
 """
 
     return prompt
@@ -49,33 +47,26 @@ def create_initial_data_model_prompt(
     discovery_text: str,
     data_model_recommendations: Dict[str, Any],
     user_input: UserInput,
-    pandas_general_info: str,
-    feature_descriptions: Dict[str, str],
 ) -> str:
     """
     Generate the initial data model request prompt.
     """
 
-    prompt = f"""
-Here is the csv data information:
-{user_input.general_description}
+    discovery = format_discovery_text(discovery_text)
+    feature_descriptions = format_column_descriptions(user_input=user_input)
+    use_cases = format_use_cases(user_input=user_input)
+    general_description = format_general_description(user_input=user_input)
 
-The following is a summary of the data features, data types, and missing values:
-{pandas_general_info}
 
-The following is a description of each feature in the data:
+    prompt = f"""{general_description}
+{discovery}
 {feature_descriptions}
-
-Here is the initial discovery findings:
-{discovery_text}
-
-Here are recommendations to follow:
-{data_model_recommendations}
-
 Based upon the above information and of high-quality Neo4j graph data models, 
 I would like you to translate the data in my .csv into a Neo4j graph data model.
 
+{use_cases}
 {DATA_MODEL_GENERATION_RULES}
+{DATA_MODEL_GENERATION_RULES_ADVANCED}
 
 {DATA_MODEL_FORMAT}
 """

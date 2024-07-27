@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import warnings
 from pydantic import BaseModel, field_validator
 
@@ -10,9 +10,13 @@ class UserInput(BaseModel):
 
     general_description: str = ""
     column_descriptions: Dict[str, str]
+    use_cases: Optional[List[str]] = None
 
     def __init__(
-        self, column_descriptions: Dict[str, str], general_description: str = ""
+        self,
+        column_descriptions: Dict[str, str],
+        general_description: str = "",
+        use_cases: List[str] = None,
     ) -> None:
         """
         A container for user provided information about the data.
@@ -25,10 +29,13 @@ class UserInput(BaseModel):
             A mapping of the desired CSV columns to their descriptions.
             The keys of this argument will determine which CSV columns are
             evaluated in discovery and used to generate a data model.
+        use_cases : List[str], optional
+            A list of use cases that the final data model should be able to answer.
         """
         super().__init__(
             general_description=general_description,
             column_descriptions=column_descriptions,
+            use_cases=use_cases,
         )
 
     @field_validator("column_descriptions")
@@ -50,12 +57,33 @@ class UserInput(BaseModel):
 
         return list(self.column_descriptions.keys())
 
+    @property
+    def pretty_use_cases(self) -> str:
+        """
+        Format the use cases in a more readable format.
+
+        Returns
+        -------
+        str
+            The formatted use cases as a String.
+        """
+
+        if self.use_cases is None:
+            return ""
+
+        res = ""
+        for uc in self.use_cases:
+            res += "* " + uc + "\n"
+        return res
+
 
 def user_input_safe_construct(
-    unsafe_user_input: Dict[str, Any], allowed_columns: List[str] = list()
+    unsafe_user_input: Dict[str, Any],
+    allowed_columns: List[str] = list(),
+    use_cases: Optional[List[str]] = None,
 ) -> UserInput:
     """
-    Safely construct a UserInput object from a given dictionary and allowed columns.
+    Safely construct a UserInput object from a given dictionary, allowed columns and use cases.
 
     Parameters
     ----------
@@ -63,6 +91,8 @@ def user_input_safe_construct(
         A dictionary containing general_description and column keys.
     allowed_columns : List[str], optional
         A list of allowed columns for the graph data model to use, by default list()
+    use_cases : List[str]
+        A list of use cases that the final data model should be able to answer.
 
     Raises
     ------
@@ -110,4 +140,5 @@ def user_input_safe_construct(
     return UserInput(
         general_description=general_description,
         column_descriptions=unsafe_user_input or {k: "" for k in allowed_columns},
+        use_cases=use_cases,
     )

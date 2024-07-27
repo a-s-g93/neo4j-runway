@@ -12,18 +12,23 @@ from ..prompts.data_modeling import (
 class EntityPoolNode:
     label: str
     properties: List[str]
+    explanation: str
 
 
 @dataclass
 class EntityPoolRelationship:
     type: str
+    possible_sources: List[str]
+    possible_targets: List[str]
     properties: List[str]
+    explantation: str
 
 
 class DataModelEntityPool(BaseModel):
 
     nodes: List[EntityPoolNode]
     relationships: List[EntityPoolRelationship]
+    explanation: str
 
     def validate_properties(self, allowed_features: List[str]) -> Dict[str, Any]:
         """
@@ -54,6 +59,19 @@ class DataModelEntityPool(BaseModel):
                     errors.append(
                         f"The relationship {rel.type} has the property {prop} which does not exist in the allowed features. {prop} should be removed or replaced from relationship {rel.type}."
                     )
+
+        for rel in self.relationships:
+            # validate exists
+            invalid_sources = set(rel.possible_sources) - {n.label for n in self.nodes}
+            if len(invalid_sources) > 0:
+                errors.append(
+                    f"The relationship {rel.type} has the sources {invalid_sources} which do not exist in generated Node labels."
+                )
+            invalid_targets = set(rel.possible_targets) - {n.label for n in self.nodes}
+            if len(invalid_targets) > 0:
+                errors.append(
+                    f"The relationship {rel.type} has the targets {invalid_targets} which do not exist in generated Node labels."
+                )
 
         valid: bool = len(errors) == 0
         message = ""

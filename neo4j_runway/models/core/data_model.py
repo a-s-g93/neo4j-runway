@@ -160,7 +160,9 @@ class DataModel(BaseModel):
         """
 
         errors = list()
+
         for rel in self.relationships:
+            # validate exists
             if rel.source not in self.node_labels:
                 errors.append(
                     f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels."
@@ -169,6 +171,19 @@ class DataModel(BaseModel):
                 errors.append(
                     f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels."
                 )
+
+            # validate same node label rels
+            if rel.source == rel.target:
+                valid_props = [
+                    prop
+                    for prop in self.node_dict[rel.source].properties
+                    if prop.csv_mapping_other is not None
+                ]
+                if len(valid_props) < 1:
+                    errors.append(
+                        f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared csv_mapping_other attribute."
+                    )
+
         return errors
 
     def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
