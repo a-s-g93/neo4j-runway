@@ -10,6 +10,7 @@ def format_general_description(user_input: UserInput) -> str:
     else:
         return ""
 
+
 def format_discovery_text(text: Optional[str]) -> str:
     return (
         "Here is the initial discovery findings:\n" + f"{text}" + "\n\n"
@@ -38,10 +39,13 @@ def format_use_cases(user_input: UserInput) -> str:
         else ""
     )
 
+
 def format_user_corrections(user_corrections: Optional[str]) -> str:
     if user_corrections is not None:
         return (
-            "Focus on this feedback when refactoring the model: \n" + user_corrections + "\n\n"
+            "Focus on this feedback when refactoring the model: \n"
+            + user_corrections
+            + "\n\n"
         )
     else:
         return """Add features from the csv to each node and relationship as properties. 

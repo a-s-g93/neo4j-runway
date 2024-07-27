@@ -5,7 +5,12 @@ from .constants import (
     DATA_MODEL_FORMAT,
 )
 from ....inputs import UserInput
-from .formatters import format_column_descriptions, format_discovery_text, format_use_cases, format_general_description
+from .formatters import (
+    format_column_descriptions,
+    format_discovery_text,
+    format_use_cases,
+    format_general_description,
+)
 
 
 def create_initial_data_model_cot_prompt(
@@ -56,7 +61,6 @@ def create_initial_data_model_prompt(
     feature_descriptions = format_column_descriptions(user_input=user_input)
     use_cases = format_use_cases(user_input=user_input)
     general_description = format_general_description(user_input=user_input)
-
 
     prompt = f"""{general_description}
 {discovery}
