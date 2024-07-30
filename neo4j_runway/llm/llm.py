@@ -130,13 +130,10 @@ class LLM:
                     ],
                 )
             )
-            validation = entity_pool.validate_properties(
+            validation = entity_pool.validate(
                 allowed_features=user_input.allowed_columns
             )
             part_one_retries += 1
-            print(entity_pool)
-            print()
-            print(validation)
 
         # part 2
         if validation["valid"]:
@@ -146,7 +143,6 @@ class LLM:
                 user_input=user_input,
             )
 
-            print(formatted_prompt)
             initial_data_model: DataModel = self._get_data_model_response(
                 formatted_prompt=formatted_prompt,
                 csv_columns=user_input.allowed_columns,

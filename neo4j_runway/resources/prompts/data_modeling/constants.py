@@ -23,11 +23,11 @@ Relationships
 * NEVER use symmetric relationships
 * Do NOT create self-referential relationships
 Properties
-* a csv_mapping must be an exact match to features in the .csv file
-* a csv_mapping may only be used ONCE in a data model. It may NOT be shared between nodes
+* A csv_mapping must be an exact match to features in the .csv file
+* A csv_mapping may only be used ONCE in a data model. It may NOT be shared between nodes
+* A property may NOT be unqiue AND a key
 General
 * Do NOT return a single-node data model
-* Assume unique properties ARE NOT node keys
 * If a cycle exists, consider removing a relationship while maintaining the meaning captured by the cycle
 * Do NOT generate csv_name values on Properties
 """
@@ -58,7 +58,7 @@ Format properties as:
     "type": <Python type>,
     "csv_mapping": <csv column that maps to property>,
     "csv_mapping_other": <a second csv column that maps to property, identifies relationship between two nodes of the same label>,
-    "is_unique": <property has a unique constraint>,
+    "is_unique": <property is a unique identifier>,
     "part_of_key": <property is part of a node or relationship key>
 }
 Format nodes as:

@@ -200,6 +200,10 @@ class Node(BaseModel):
                 errors.append(
                     f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
                 )
+            if prop.is_unique and prop.part_of_key:
+                errors.append(
+                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                )
 
         if len(self.node_keys) == 1:
             errors.append(

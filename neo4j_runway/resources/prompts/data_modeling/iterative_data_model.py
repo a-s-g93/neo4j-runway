@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 from .constants import DATA_MODEL_GENERATION_RULES, DATA_MODEL_GENERATION_RULES_ADVANCED
 from ....inputs import UserInput
 from .formatters import (
