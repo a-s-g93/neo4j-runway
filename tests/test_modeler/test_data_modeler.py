@@ -14,6 +14,12 @@ class LLMMock:
             relationships=data_model_dict["relationships"],
         )
 
+    def _get_initial_data_model_response(*args, **kargs) -> DataModel:
+        return DataModel(
+            nodes=data_model_dict["nodes"],
+            relationships=data_model_dict["relationships"],
+        )
+
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",

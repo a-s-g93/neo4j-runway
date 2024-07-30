@@ -11,8 +11,8 @@ from IPython.display import display, Markdown  # type: ignore # this works even 
 import pandas as pd
 
 from ..llm import LLM
-from ..inputs import UserInput
-from ..resources.prompts import create_discovery_prompt
+from ..inputs import UserInput, user_input_safe_construct
+from ..resources.prompts.discovery import create_discovery_prompt
 
 
 class Discovery:
@@ -45,19 +45,8 @@ class Discovery:
 
         # we convert all user_input to a UserInput object
         if not isinstance(user_input, UserInput):
-            general_description = (
-                user_input["general_description"]
-                if "general_description" in user_input
-                else ""
-            )
-            if "general_description" in user_input.keys():
-                del user_input["general_description"]
-            else:
-                warnings.warn(
-                    "user_input should include key:value pair {general_description: ...} for best results. "
-                )
-            self.user_input = UserInput(
-                general_description=general_description, column_descriptions=user_input
+            self.user_input = user_input_safe_construct(
+                unsafe_user_input=user_input, allowed_columns=data.columns
             )
         else:
             self.user_input = user_input
@@ -66,14 +55,7 @@ class Discovery:
 
         self.columns_of_interest = self.user_input.allowed_columns
 
-        if self.columns_of_interest:
-            self.data = data[self.columns_of_interest]
-        else:
-            warnings.warn(
-                "No columns detected in user input. Defaulting to all columns."
-            )
-            self.columns_of_interest = data.columns
-            self.data = data
+        self.data = data[self.columns_of_interest]
 
         self.pandas_only = not self.llm or pandas_only
         self._discovery_ran = False
@@ -125,7 +107,14 @@ class Discovery:
                 )
             )
         else:
-            response = ""
+            response = f"""Here are Summary Statistics generated with the Pandas Python library
+            
+{self.df_info}
+
+{self.categorical_data_description}
+
+{self.numeric_data_description}
+"""
 
         self._discovery_ran = True
         self.discovery = response

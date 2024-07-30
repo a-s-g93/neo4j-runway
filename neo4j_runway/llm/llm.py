@@ -3,18 +3,24 @@ This file contains the LLM module that interfaces with an OpenAI LLM via the Ins
 """
 
 import os
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 
 from openai import OpenAI
 
 import instructor
 
+from ..inputs import UserInput
 from ..models import DataModel
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
-    create_retry_data_model_generation_prompt,
 )
+from ..resources.prompts.data_modeling import (
+    create_retry_data_model_generation_prompt,
+    create_initial_data_model_cot_prompt,
+    create_initial_data_model_prompt,
+)
+from ..resources.llm_response_objects import DataModelEntityPool
 
 MODEL_OPTIONS = [
     "gpt-4o",
@@ -79,6 +85,76 @@ class LLM:
         )
         return response.choices[0].message.content
 
+    def _get_initial_data_model_response(
+        self,
+        discovery_text: str,
+        user_input: UserInput,
+        pandas_general_info: str,
+        # feature_descriptions: Dict[str, str],
+        # allowed_features: List[str],
+        max_retries: int = 3,
+        use_yaml_data_model: bool = False,
+    ) -> Union[DataModel, Dict[str, Any]]:
+        """
+        Performs at least 2 LLM calls:
+            1. Request the LLM to find nodes, relationships and properties that should be in the data model.
+            2. Construct and return the data model based on previous recommendations.
+
+        Step 2. may be repeated until max retries is reached or a valid data model is returned.
+
+        Returns
+        -------
+        DataModel
+            The final data model.
+        """
+        validation = {"valid": False}
+        part_one_retries = 0
+        # part 1
+        while not validation["valid"] and part_one_retries < 2:
+            formatted_prompt = create_initial_data_model_cot_prompt(
+                discovery_text=discovery_text,
+                user_input=user_input,
+                allowed_features=user_input.allowed_columns,
+            )
+            entity_pool: DataModelEntityPool = (
+                self.llm_instance.chat.completions.create(
+                    model=self.model,
+                    temperature=0,
+                    response_model=DataModelEntityPool,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": SYSTEM_PROMPTS["initial_data_model"],
+                        },
+                        {"role": "user", "content": formatted_prompt},
+                    ],
+                )
+            )
+            validation = entity_pool.validate(
+                allowed_features=user_input.allowed_columns
+            )
+            part_one_retries += 1
+
+        # part 2
+        if validation["valid"]:
+            formatted_prompt = create_initial_data_model_prompt(
+                discovery_text=discovery_text,
+                data_model_recommendations=entity_pool.model_dump(),
+                user_input=user_input,
+            )
+
+            initial_data_model: DataModel = self._get_data_model_response(
+                formatted_prompt=formatted_prompt,
+                csv_columns=user_input.allowed_columns,
+                max_retries=max_retries,
+                use_yaml_data_model=use_yaml_data_model,
+            )
+
+            return initial_data_model
+
+        else:
+            return validation
+
     def _get_data_model_response(
         self,
         formatted_prompt: str,
@@ -109,7 +185,7 @@ class LLM:
             validation = response.validate_model(csv_columns=csv_columns)
             if not validation["valid"]:
                 print("validation failed")
-                cot = self._get_chain_of_thought_response(
+                cot = self._get_chain_of_thought_for_error_recommendations_response(
                     formatted_prompt=validation["message"]
                 )
 
@@ -128,11 +204,33 @@ class LLM:
 
         return response
 
-    def _get_chain_of_thought_response(self, formatted_prompt: str) -> str:
+    def _get_chain_of_thought_for_error_recommendations_response(
+        self, formatted_prompt: str
+    ) -> str:
         """
         Generate fixes for the previous data model.
         """
-        print("performing chain of thought process...")
+        print("performing chain of thought process for error fix recommendations...")
+        response = self.llm_instance.chat.completions.create(
+            model=self.model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+        )
+        return response.choices[0].message.content
+
+    def _get_chain_of_thought_for_initial_model_generation_response(
+        self, formatted_prompt: str
+    ) -> str:
+        """
+        Generate nodes, relationships and properties for the previous data model.
+        Does NOT return a data model. Only suggestions.
+        """
+        print(
+            "performing chain of thought process for initial data model recommendations..."
+        )
         response = self.llm_instance.chat.completions.create(
             model=self.model,
             temperature=0,

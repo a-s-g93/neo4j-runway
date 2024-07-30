@@ -161,6 +161,11 @@ class Relationship(BaseModel):
                     errors.append(
                         f"The relationship {self.type} the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from relationship {self.type}."
                     )
+                if prop.is_unique and prop.part_of_key:
+                    errors.append(
+                        f"The relationship {self.type} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                    )
+
         if len(self.relationship_keys) == 1:
             errors.append(
                 f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."

@@ -4,10 +4,10 @@ import warnings
 from graphviz import Digraph
 
 from ..discovery import Discovery
-from ..inputs import UserInput
+from ..inputs import UserInput, user_input_safe_construct
 from ..llm import LLM
 from ..models import DataModel
-from ..resources.prompts import (
+from ..resources.prompts.data_modeling import (
     create_initial_data_model_prompt,
     create_data_model_iteration_prompt,
 )
@@ -24,10 +24,10 @@ class GraphDataModeler:
         llm: LLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        general_data_description: str = "",
-        numeric_data_description: str = "",
-        categorical_data_description: str = "",
-        feature_descriptions: str = "",
+        general_data_description: Optional[str] = None,
+        numeric_data_description: Optional[str] = None,
+        categorical_data_description: Optional[str] = None,
+        feature_descriptions: Optional[Dict[str, str]] = None,
         allowed_columns: List[str] = list(),
     ) -> None:
         """
@@ -44,13 +44,13 @@ class GraphDataModeler:
         user_input : Union[Dict[str, str], UserInput], optional
             Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
         general_data_description : str, optional
-            A general data description provided by Pandas, by default ""
+            A general data description provided by Pandas, by default None
         numeric_data_description : str, optional
-            A numeric data description provided by Pandas, by default ""
+            A numeric data description provided by Pandas, by default None
         categorical_data_description : str, optional
-            A categorical data description provided by Pandas, by default ""
-        feature_descriptions : str, optional
-            Feature (column) descriptions provided by Discovery, by default ""
+            A categorical data description provided by Pandas, by default None
+        feature_descriptions : [Dict[str, str], optional
+            Feature (column) descriptions provided by Discovery, by default None
         allowed_columns : List[str], optional
             The columns that may be used in the data model. The argument should only be used in no columns are specified in
             the discovery or user_input arguments. By default []
@@ -70,23 +70,14 @@ class GraphDataModeler:
             self.feature_descriptions = discovery.user_input.column_descriptions
 
         else:
-
+            if not allowed_columns and not user_input:
+                raise ValueError(
+                    "Not enough information provided. Please provide a Discovery object to the discovery arg, user_input or allowed_columns."
+                )
             # we convert all user_input to a UserInput object
             if not isinstance(user_input, UserInput):
-                general_description = (
-                    user_input["general_description"]
-                    if "general_description" in user_input
-                    else ""
-                )
-                if "general_description" in user_input.keys():
-                    del user_input["general_description"]
-                else:
-                    warnings.warn(
-                        "user_input should include key:value pair {general_description: ...} for best results. "
-                    )
-                self.user_input = UserInput(
-                    general_description=general_description,
-                    column_descriptions=user_input,
+                self.user_input = user_input_safe_construct(
+                    unsafe_user_input=user_input, allowed_columns=allowed_columns
                 )
             else:
                 self.user_input = user_input
@@ -96,10 +87,10 @@ class GraphDataModeler:
             )
 
             self.discovery = discovery
-            self.general_info = general_data_description
-            self.description_numeric = numeric_data_description
-            self.description_categorical = categorical_data_description
-            self.feature_descriptions = feature_descriptions
+            self.general_info = general_data_description or ""
+            self.description_numeric = numeric_data_description or ""
+            self.description_categorical = categorical_data_description or ""
+            self.feature_descriptions = feature_descriptions or ""
 
         if self.discovery == "":
             warnings.warn(
@@ -108,7 +99,7 @@ class GraphDataModeler:
 
         self._initial_model_created: bool = False
         self.model_iterations: int = 0
-        self.model_history: List[DataModel] = []
+        self.model_history: List[DataModel] = list()
 
     @property
     def current_model(self) -> DataModel:
@@ -203,26 +194,29 @@ class GraphDataModeler:
             else self.model_history[version]
         )
 
-    def create_initial_model(self) -> DataModel:
+    def create_initial_model(
+        self, max_retries: int = 3, use_yaml_data_model: bool = False
+    ) -> Union[DataModel, Dict[str, Any]]:
         """
         Generate the initial model. This must be ran before a model can be interated on.
         You may access this model with the `get_model` method and providing `version=1`.
 
         Returns
         -------
-        DataModel
-            The generated data model.
+        Union[DataModel, str]
+            The generated data model if a valid model is generated.
+            A dictionary containing information about the failed generation attempt.
         """
 
-        response = self.llm._get_data_model_response(
-            formatted_prompt=create_initial_data_model_prompt(
-                discovery_text=self.discovery,
-                user_input=self.user_input,
-                pandas_general_info=self.general_info,
-                feature_descriptions=self.feature_descriptions,
-            ),
-            csv_columns=self.columns_of_interest,
+        response = self.llm._get_initial_data_model_response(
+            discovery_text=self.discovery,
+            user_input=self.user_input,
+            pandas_general_info=self.general_info,
+            max_retries=max_retries,
+            use_yaml_data_model=use_yaml_data_model,
         )
+        if not isinstance(response, DataModel):
+            return response
 
         self.model_history.append(response)
 
@@ -265,8 +259,6 @@ class GraphDataModeler:
                     formatted_prompt=create_data_model_iteration_prompt(
                         discovery_text=self.discovery,
                         user_input=self.user_input,
-                        pandas_general_info=self.general_info,
-                        feature_descriptions=self.feature_descriptions,
                         data_model_to_modify=self.current_model,
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,
