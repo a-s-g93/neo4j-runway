@@ -39,10 +39,6 @@ Apply Neo4j naming conventions to all labels,
     This is typically performed within the __init__ method
         automatically.
 
-    Returns
-    -------
-    None
-
 
 ### to_arrows
 Output the data model to arrows compatible JSON file.
@@ -122,7 +118,10 @@ Perform additional validation on the data model.
 
     Returns
     -------
-    None
+    Dict[str, Any]
+        A dictionary containing keys 'valid' indicating
+        whether the data model is valid and 'message'
+        containing a list of errors.
 
 
 ### visualize

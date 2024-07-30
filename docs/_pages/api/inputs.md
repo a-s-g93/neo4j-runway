@@ -30,4 +30,29 @@ A container for user provided information about the
         columns are
         evaluated in discovery and used to generate a data
         model.
+    use_cases : List[str], optional
+        A list of use cases that the final data model should
+        be able to answer.
+
+
+
+## Class Properties
+
+
+### allowed_columns
+The allowed columns.
+
+    Returns
+    -------
+    List[str]
+        A list of columns from the DataFrame.
+
+
+### pretty_use_cases
+Format the use cases in a more readable format.
+
+    Returns
+    -------
+    str
+        The formatted use cases as a String.
 
