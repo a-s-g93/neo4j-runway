@@ -168,7 +168,9 @@ class Relationship(BaseModel):
 
         if len(self.relationship_keys) == 1:
             # only write error if this node is NOT also labeled as unique
-            if self.relationship_keys[0].name not in [prop.name for prop in self.unique_properties]:
+            if self.relationship_keys[0].name not in [
+                prop.name for prop in self.unique_properties
+            ]:
                 errors.append(
                     f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
                 )

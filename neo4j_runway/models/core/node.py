@@ -207,7 +207,9 @@ class Node(BaseModel):
 
         if len(self.node_keys) == 1:
             # only write error if this node is NOT also labeled as unique
-            if self.node_keys[0].name not in [prop.name for prop in self.unique_properties]:
+            if self.node_keys[0].name not in [
+                prop.name for prop in self.unique_properties
+            ]:
                 errors.append(
                     f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
                 )
