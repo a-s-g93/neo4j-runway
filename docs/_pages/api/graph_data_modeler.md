@@ -29,22 +29,22 @@ Takes an LLM instance and Discovery information.
         If a Discovery object is provided then the remaining
         discovery attributes don't need to be provided, by
         default ""
-    user_input : Dict[str, UserInput], optional
+    user_input : Union[Dict[str, str], UserInput], optional
         Either a dictionary with keys general_description
         and column names with descriptions or a UserInput
         object, by default {}
     general_data_description : str, optional
         A general data description provided by Pandas, by
-        default ""
+        default None
     numeric_data_description : str, optional
         A numeric data description provided by Pandas, by
-        default ""
+        default None
     categorical_data_description : str, optional
         A categorical data description provided by Pandas,
-        by default ""
-    feature_descriptions : str, optional
+        by default None
+    feature_descriptions : Dict[str, str], optional
         Feature (column) descriptions provided by Discovery,
-        by default ""
+        by default None
     allowed_columns : List[str], optional
         The columns that may be used in the data model. The
         argument should only be used in no columns are
@@ -60,8 +60,11 @@ Generate the initial model. This must be ran before a
 
     Returns
     -------
-    DataModel
-        The generated data model.
+    Union[DataModel, str]
+        The generated data model if a valid model is
+        generated.
+        A dictionary containing information about the failed
+        generation attempt.
 
 
 ### get_model

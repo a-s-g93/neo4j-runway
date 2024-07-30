@@ -49,7 +49,7 @@ class GraphDataModeler:
             A numeric data description provided by Pandas, by default None
         categorical_data_description : str, optional
             A categorical data description provided by Pandas, by default None
-        feature_descriptions : [Dict[str, str], optional
+        feature_descriptions : Dict[str, str], optional
             Feature (column) descriptions provided by Discovery, by default None
         allowed_columns : List[str], optional
             The columns that may be used in the data model. The argument should only be used in no columns are specified in
