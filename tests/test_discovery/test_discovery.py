@@ -91,13 +91,14 @@ class TestDiscovery(unittest.TestCase):
         )
 
     def test_pandas_only(self) -> None:
-            d = Discovery(data=pd.DataFrame(data))
-            d.run()
+        d = Discovery(data=pd.DataFrame(data))
+        d.run()
 
-            self.assertNotEqual(d.discovery, '')
-            self.assertIsNotNone(d.df_info)
-            self.assertIsNotNone(d.numeric_data_description)
-            self.assertIsNotNone(d.categorical_data_description)
+        self.assertNotEqual(d.discovery, "")
+        self.assertIsNotNone(d.df_info)
+        self.assertIsNotNone(d.numeric_data_description)
+        self.assertIsNotNone(d.categorical_data_description)
+
 
 if __name__ == "__main__":
     unittest.main()
