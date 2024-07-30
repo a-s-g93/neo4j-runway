@@ -13,7 +13,7 @@ import yaml
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
-from ...resources.prompts.prompts import model_generation_rules
+from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
     SolutionsWorkbenchNode,
@@ -119,7 +119,7 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    def validate_model(self, csv_columns: List[str]) -> None:
+    def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
 
@@ -130,7 +130,8 @@ class DataModel(BaseModel):
 
         Returns
         -------
-        None
+        Dict[str, Any]
+            A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         """
         errors = []
         for node in self.nodes:
@@ -143,33 +144,25 @@ class DataModel(BaseModel):
         errors += self._validate_csv_features_used_only_once()
 
         if len(errors) > 0:
-            message = f"""
-                    The following data model is invalid and must be fixed.
-                    Properties must be from the provided Column Options. 
-                    Data Model:
-                    {self.model_dump()}
-                    Errors:
-                    {str(errors)}
-                    Column Options:
-                    {csv_columns}
-                    A data model must follow these rules:
-                    {model_generation_rules}
-                    Consider adding Nodes if they don't exist.
-                    Consider moving properties to different nodes.
-                    Is there a column option that is semantically similar to an invalid property?
-                    Return an explanation of how you will fix each error while following the provided rules.
-                    """
+            message = create_data_model_errors_cot_prompt(
+                data_model_as_dictionary=self.model_dump(),
+                errors=errors,
+                allowed_columns=csv_columns,
+            )
+
             print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
-        return {"valid": True, "message": "", "errors": []}
+        return {"valid": True, "message": "", "errors": list()}
 
     def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
 
-        errors = []
+        errors = list()
+
         for rel in self.relationships:
+            # validate exists
             if rel.source not in self.node_labels:
                 errors.append(
                     f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels."
@@ -178,6 +171,19 @@ class DataModel(BaseModel):
                 errors.append(
                     f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels."
                 )
+
+            # validate same node label rels
+            if rel.source == rel.target:
+                valid_props = [
+                    prop
+                    for prop in self.node_dict[rel.source].properties
+                    if prop.csv_mapping_other is not None
+                ]
+                if len(valid_props) < 1:
+                    errors.append(
+                        f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared csv_mapping_other attribute."
+                    )
+
         return errors
 
     def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
@@ -185,8 +191,8 @@ class DataModel(BaseModel):
         Validate that each property is used no more than one time in the data model.
         """
 
-        used_features: Dict[str, List[str]] = {}
-        errors: List[str] = []
+        used_features: Dict[str, List[str]] = dict()
+        errors: List[str] = list()
 
         for node in self.nodes:
             for prop in node.properties:
@@ -285,10 +291,6 @@ class DataModel(BaseModel):
         """
         Apply Neo4j naming conventions to all labels, relationships and properties in the data model.
         This is typically performed within the __init__ method automatically.
-
-        Returns
-        -------
-        None
         """
 
         # fix node labels and properties

@@ -1,6 +1,6 @@
 import unittest
 
-from neo4j_runway.models import UserInput
+from neo4j_runway.inputs import UserInput, user_input_safe_construct
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -36,6 +36,71 @@ class TestUserInput(unittest.TestCase):
     def test_empty_col_description(self) -> None:
         with self.assertWarns(Warning):
             UserInput(general_description="gen", column_descriptions={})
+
+    def test_unsafe_construction_no_general_description(self) -> None:
+        unsafe_input = {"col_a": "this is col a.", "col_b": "this is col_b."}
+        allowed_columns = ["col_a", "col_b"]
+
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
+
+        self.assertEqual(safe_input.general_description, "")
+        self.assertEqual(
+            set(unsafe_input.keys()), set(safe_input.column_descriptions.keys())
+        )
+        self.assertEqual(
+            set(unsafe_input.values()), set(safe_input.column_descriptions.values())
+        )
+        self.assertIn("col_a", safe_input.allowed_columns)
+        self.assertIn("col_b", safe_input.allowed_columns)
+
+    def test_unsafe_construction_no_column_descriptions(self) -> None:
+        unsafe_input = {"general_description": "this is the general description."}
+        allowed_columns = ["col_a", "col_b"]
+
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
+
+        self.assertEqual(
+            safe_input.general_description, "this is the general description."
+        )
+        self.assertEqual(
+            set(allowed_columns), set(safe_input.column_descriptions.keys())
+        )
+        self.assertIn("", set(safe_input.column_descriptions.values()))
+        self.assertIn("col_a", safe_input.allowed_columns)
+        self.assertIn("col_b", safe_input.allowed_columns)
+
+    def test_unsafe_construction_no_input(self) -> None:
+        unsafe_input = {}
+        allowed_columns = ["col_a", "col_b"]
+
+        safe_input = user_input_safe_construct(
+            unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+        )
+
+        self.assertEqual(safe_input.general_description, "")
+        self.assertEqual(
+            set(allowed_columns), set(safe_input.column_descriptions.keys())
+        )
+        self.assertIn("", set(safe_input.column_descriptions.values()))
+        self.assertIn("col_a", safe_input.allowed_columns)
+        self.assertIn("col_b", safe_input.allowed_columns)
+
+    def test_unsafe_construction_columns_not_found_in_allowed_list(self) -> None:
+        unsafe_input = {
+            "general_description": "this is the general description.",
+            "col_a": "this is col a.",
+            "col_c": "this is col_c.",
+        }
+        allowed_columns = ["col_a", "col_b"]
+
+        with self.assertRaises(ValueError):
+            safe_input = user_input_safe_construct(
+                unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+            )
 
 
 if __name__ == "__main__":

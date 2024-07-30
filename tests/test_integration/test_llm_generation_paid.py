@@ -57,6 +57,7 @@ class TestLLMGeneration(unittest.TestCase):
 
         # test data modeler
         gdm = GraphDataModeler(llm=LLM(model="gpt-4o-2024-05-13"), discovery=disc)
-        gdm.create_initial_model()
+        print(gdm.create_initial_model())
 
+        self.assertEqual(len(gdm.model_history), 1)
         self.assertIsInstance(gdm.current_model, DataModel)

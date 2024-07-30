@@ -4,7 +4,7 @@ from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
 from .property import Property
-from ..solutions_workbench import SolutionsWorkbenchNode, SolutionsWorkbenchProperty
+from ..solutions_workbench import SolutionsWorkbenchNode
 
 
 class Node(BaseModel):
@@ -13,7 +13,7 @@ class Node(BaseModel):
     """
 
     label: str
-    properties: List[Property] = []
+    properties: List[Property]
     csv_name: str = ""
 
     def __init__(
@@ -27,8 +27,8 @@ class Node(BaseModel):
         -------
         label : str
             The node label.
-        properties : List[Property], optional
-            A list of the properties within the node, by default = []
+        properties : List[Property]
+            A list of the properties within the node.
         csv_name : str, optional
             The name of the CSV containing the node's information, by default = ""
         """
@@ -133,11 +133,11 @@ class Node(BaseModel):
     @property
     def node_keys(self) -> List[Property]:
         """
-        The node's keys.
+        The node key properties, if any.
 
         Returns
         -------
-        List[str]
+        List[Property]
             A list of the properties that make up a node key, if any.
         """
 
@@ -194,12 +194,21 @@ class Node(BaseModel):
 
     def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
         errors = []
-        if self.properties is not None:
-            for prop in self.properties:
-                if prop.csv_mapping not in csv_columns:
-                    errors.append(
-                        f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
-                    )
+
+        for prop in self.properties:
+            if prop.csv_mapping not in csv_columns:
+                errors.append(
+                    f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
+                )
+            if prop.is_unique and prop.part_of_key:
+                errors.append(
+                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                )
+
+        if len(self.node_keys) == 1:
+            errors.append(
+                f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
+            )
         return errors
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:

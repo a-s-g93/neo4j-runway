@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -6,7 +6,6 @@ from .property import Property
 from ..arrows import ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
-    SolutionsWorkbenchProperty,
 )
 
 
@@ -108,12 +107,12 @@ class Relationship(BaseModel):
         }
 
     @property
-    def relationship_keys(self) -> List[str]:
+    def relationship_keys(self) -> List[Property]:
         """
-        The relationship's keys.
+        The relationship's key properties, if any.
         """
 
-        return [prop.name for prop in self.properties if prop.part_of_key]
+        return [prop for prop in self.properties if prop.part_of_key]
 
     @property
     def relationship_key_mapping(self) -> Dict[str, str]:
@@ -162,6 +161,15 @@ class Relationship(BaseModel):
                     errors.append(
                         f"The relationship {self.type} the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from relationship {self.type}."
                     )
+                if prop.is_unique and prop.part_of_key:
+                    errors.append(
+                        f"The relationship {self.type} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                    )
+
+        if len(self.relationship_keys) == 1:
+            errors.append(
+                f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
+            )
         return errors
 
     def to_arrows(self) -> ArrowsRelationship:

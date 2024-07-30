@@ -1,12 +1,16 @@
-from typing import Dict, Any, Union, List
+from typing import Any, Dict, List, Optional, Union
 import warnings
 
 from graphviz import Digraph
 
 from ..discovery import Discovery
+from ..inputs import UserInput, user_input_safe_construct
 from ..llm import LLM
-from ..models import DataModel, UserInput
-from ..resources.prompts.prompts import model_generation_rules, model_format
+from ..models import DataModel
+from ..resources.prompts.data_modeling import (
+    create_initial_data_model_prompt,
+    create_data_model_iteration_prompt,
+)
 
 
 class GraphDataModeler:
@@ -20,10 +24,10 @@ class GraphDataModeler:
         llm: LLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        general_data_description: str = "",
-        numeric_data_description: str = "",
-        categorical_data_description: str = "",
-        feature_descriptions: str = "",
+        general_data_description: Optional[str] = None,
+        numeric_data_description: Optional[str] = None,
+        categorical_data_description: Optional[str] = None,
+        feature_descriptions: Optional[Dict[str, str]] = None,
         allowed_columns: List[str] = list(),
     ) -> None:
         """
@@ -37,16 +41,16 @@ class GraphDataModeler:
         discovery : Union[str, Discovery], optional
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
             If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
-        user_input : Dict[str, UserInput], optional
+        user_input : Union[Dict[str, str], UserInput], optional
             Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
         general_data_description : str, optional
-            A general data description provided by Pandas, by default ""
+            A general data description provided by Pandas, by default None
         numeric_data_description : str, optional
-            A numeric data description provided by Pandas, by default ""
+            A numeric data description provided by Pandas, by default None
         categorical_data_description : str, optional
-            A categorical data description provided by Pandas, by default ""
-        feature_descriptions : str, optional
-            Feature (column) descriptions provided by Discovery, by default ""
+            A categorical data description provided by Pandas, by default None
+        feature_descriptions : [Dict[str, str], optional
+            Feature (column) descriptions provided by Discovery, by default None
         allowed_columns : List[str], optional
             The columns that may be used in the data model. The argument should only be used in no columns are specified in
             the discovery or user_input arguments. By default []
@@ -63,31 +67,30 @@ class GraphDataModeler:
             self.general_info = discovery.df_info
             self.description_numeric = discovery.numeric_data_description
             self.description_categorical = discovery.categorical_data_description
-            self.feature_descriptions = discovery.feature_descriptions
+            self.feature_descriptions = discovery.user_input.column_descriptions
 
         else:
-
-            if isinstance(user_input, UserInput):
-                self.user_input = user_input._formatted_dict
-
+            if not allowed_columns and not user_input:
+                raise ValueError(
+                    "Not enough information provided. Please provide a Discovery object to the discovery arg, user_input or allowed_columns."
+                )
+            # we convert all user_input to a UserInput object
+            if not isinstance(user_input, UserInput):
+                self.user_input = user_input_safe_construct(
+                    unsafe_user_input=user_input, allowed_columns=allowed_columns
+                )
             else:
                 self.user_input = user_input
 
-            if "general_description" not in self.user_input.keys():
-                warnings.warn(
-                    "user_input should include key:value pair {general_description: ...} for best results. "
-                    + f"Found keys {self.user_input.keys()}"
-                )
-
-            self.columns_of_interest = allowed_columns or list(self.user_input.keys())
-            if "general_description" in self.columns_of_interest:
-                self.columns_of_interest.remove("general_description")
+            self.columns_of_interest = (
+                allowed_columns or self.user_input.allowed_columns
+            )
 
             self.discovery = discovery
-            self.general_info = general_data_description
-            self.description_numeric = numeric_data_description
-            self.description_categorical = categorical_data_description
-            self.feature_descriptions = feature_descriptions
+            self.general_info = general_data_description or ""
+            self.description_numeric = numeric_data_description or ""
+            self.description_categorical = categorical_data_description or ""
+            self.feature_descriptions = feature_descriptions or ""
 
         if self.discovery == "":
             warnings.warn(
@@ -96,7 +99,7 @@ class GraphDataModeler:
 
         self._initial_model_created: bool = False
         self.model_iterations: int = 0
-        self.model_history: List[DataModel] = []
+        self.model_history: List[DataModel] = list()
 
     @property
     def current_model(self) -> DataModel:
@@ -191,111 +194,29 @@ class GraphDataModeler:
             else self.model_history[version]
         )
 
-    def _generate_initial_data_model_prompt(self) -> str:
-        """
-        Generate the initial data model request prompt.
-        """
-
-        gen_description_clause = (
-            f"""
-This is a general description of the data:
-{self.user_input['general_description']}
-"""
-            if "general_description" in self.user_input
-            else ""
-        )
-
-        prompt = f"""
-Here is the csv data information:
-{gen_description_clause}
-
-The following is a summary of the data features, data types, and missing values:
-{self.general_info}
-
-The following is a description of each feature in the data:
-{self.feature_descriptions}
-
-Here is the initial discovery findings:
-{self.discovery}
-
-Based upon your knowledge of the data in my .csv and 
-of high-quality Neo4j graph data models, I would like you to return your
-suggestion for translating the data in my .csv into a Neo4j graph data model.
-
-{model_generation_rules}
-
-{model_format}
-            """
-        return prompt
-
-    def _generate_data_model_iteration_prompt(
-        self,
-        user_corrections: Union[str, None] = None,
-        use_yaml_data_model: bool = False,
-    ) -> str:
-        """
-        Generate the prompt to iterate on the previous data model.
-        """
-
-        if user_corrections is not None:
-            user_corrections = (
-                "Focus on this feedback when refactoring the model: \n"
-                + user_corrections
-            )
-        else:
-            user_corrections = """
-                                Add features from the csv to each node and relationship as properties. 
-                                Ensure that these properties provide value to their respective node or relationship.
-                                """
-
-        gen_description_clause = (
-            f"""
-This is a general description of the data:
-{self.user_input['general_description']}
-"""
-            if "general_description" in self.user_input
-            else ""
-        )
-
-        prompt = f"""
-Here is the csv data information:
-{gen_description_clause}
-
-The following is a summary of the data features, data types, and missing values:
-{self.general_info}
-
-The following is a description of each feature in the data:
-{self.feature_descriptions}
-
-Here is the initial discovery findings:
-{self.discovery}
-
-Based on your experience building high-quality graph data
-models, are there any improvements you would suggest to this model?
-{self.current_model.to_yaml(write_file=False) if use_yaml_data_model else self.current_model}
-
-{user_corrections}
-
-{model_generation_rules}
-"""
-
-        return prompt
-
-    def create_initial_model(self) -> DataModel:
+    def create_initial_model(
+        self, max_retries: int = 3, use_yaml_data_model: bool = False
+    ) -> Union[DataModel, Dict[str, Any]]:
         """
         Generate the initial model. This must be ran before a model can be interated on.
         You may access this model with the `get_model` method and providing `version=1`.
 
         Returns
         -------
-        DataModel
-            The generated data model.
+        Union[DataModel, str]
+            The generated data model if a valid model is generated.
+            A dictionary containing information about the failed generation attempt.
         """
 
-        response = self.llm._get_data_model_response(
-            formatted_prompt=self._generate_initial_data_model_prompt(),
-            csv_columns=self.columns_of_interest,
+        response = self.llm._get_initial_data_model_response(
+            discovery_text=self.discovery,
+            user_input=self.user_input,
+            pandas_general_info=self.general_info,
+            max_retries=max_retries,
+            use_yaml_data_model=use_yaml_data_model,
         )
+        if not isinstance(response, DataModel):
+            return response
 
         self.model_history.append(response)
 
@@ -306,7 +227,7 @@ models, are there any improvements you would suggest to this model?
     def iterate_model(
         self,
         iterations: int = 1,
-        user_corrections: Union[str, None] = None,
+        user_corrections: Optional[str] = None,
         use_yaml_data_model: bool = False,
     ) -> str:
         """
@@ -335,7 +256,10 @@ models, are there any improvements you would suggest to this model?
         def iterate() -> DataModel:
             for _ in range(0, iterations):
                 response = self.llm._get_data_model_response(
-                    formatted_prompt=self._generate_data_model_iteration_prompt(
+                    formatted_prompt=create_data_model_iteration_prompt(
+                        discovery_text=self.discovery,
+                        user_input=self.user_input,
+                        data_model_to_modify=self.current_model,
                         user_corrections=user_corrections,
                         use_yaml_data_model=use_yaml_data_model,
                     ),

@@ -96,6 +96,24 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(len(node_from_arrows.properties), 1)
 
+    def test_validate_node_keys(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    csv_mapping="nkey",
+                    is_unique=False,
+                    part_of_key=True,
+                )
+            ],
+        )
+
+        errors = node.validate_properties(csv_columns=["nkey"])
+        message = "The node nodeA has a node key on only one property nkey. Node keys must exist on two or more properties."
+        self.assertIn(message, errors)
+
 
 if __name__ == "__main__":
     unittest.main()

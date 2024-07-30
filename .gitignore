@@ -13,6 +13,7 @@ docs/_site
 _site
 images/presentation
 data/
+notebooks/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -4,9 +4,7 @@ import sys
 
 import pandas as pd
 
-from neo4j_runway.discovery.discovery import Discovery
-from neo4j_runway.llm.llm import LLM
-from neo4j_runway.models import UserInput
+from neo4j_runway import Discovery, LLM, UserInput
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -91,6 +89,15 @@ class TestDiscovery(unittest.TestCase):
         self.assertEqual(
             capturedOutput.getvalue().strip(), "<IPython.core.display.Markdown object>"
         )
+
+    def test_pandas_only(self) -> None:
+        d = Discovery(data=pd.DataFrame(data))
+        d.run()
+
+        self.assertNotEqual(d.discovery, "")
+        self.assertIsNotNone(d.df_info)
+        self.assertIsNotNone(d.numeric_data_description)
+        self.assertIsNotNone(d.categorical_data_description)
 
 
 if __name__ == "__main__":
