@@ -3,7 +3,7 @@ import unittest
 from neo4j_runway.inputs import UserInput
 from neo4j_runway.models import DataModel
 from neo4j_runway.modeler import GraphDataModeler
-from neo4j_runway.llm import LLM
+from neo4j_runway.llm.openai import OpenAIDataModelingLLM
 from ..resources.answers.data_model_yaml import data_model_dict
 
 
@@ -20,7 +20,7 @@ class TestGraphDataModelerWithYaml(unittest.TestCase):
             general_description="this is dummy data.",
             column_descriptions={"prop_" + str(i): "" for i in range(1, 8)},
         )
-        cls.gdm = GraphDataModeler(llm=LLM(), user_input=user_input)
+        cls.gdm = GraphDataModeler(llm=OpenAIDataModelingLLM(), user_input=user_input)
         cls.gdm.load_model(data_model=data_model)
 
     def test_generate_model_with_yaml_input(self) -> None:

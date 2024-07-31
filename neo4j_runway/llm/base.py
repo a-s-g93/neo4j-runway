@@ -1,14 +1,11 @@
 """
-This file contains the LLM module that interfaces with an OpenAI LLM via the Instructor library.
+This file contains the base LLM class that all other LLM classes must inherit from.
 """
 
-import os
-from typing import Any, Dict, List, Union
+from abc import ABC
+from typing import Any, Dict, List, Optional, Union
 
-
-from openai import OpenAI
-
-import instructor
+from instructor import Instructor
 
 from ..inputs import UserInput
 from ..models import DataModel
@@ -20,78 +17,91 @@ from ..resources.prompts.data_modeling import (
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
 )
-from ..resources.llm_response_objects import DataModelEntityPool
-
-MODEL_OPTIONS = [
-    "gpt-4o",
-    "gpt-4o-2024-05-13",
-    "gpt-4",
-    "gpt-3.5-turbo",
-    "gpt-4-0125-preview",
-    "gpt-4-turbo-preview",
-    "gpt-4-1106-preview",
-    "gpt-4-0613",
-    "gpt-4-32k",
-    "gpt-4-32k-0613",
-    "gpt-3.5-turbo-1106",
-    "gpt-3.5-turbo-0125",
-]
+from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
 
 
-class LLM:
+class BaseDiscoveryLLM(ABC):
     """
-    Interface for interacting with different LLMs.
+    The base class for interacting with different LLMs. All DiscoveryLLM classes must inherit from this class.
     """
 
     def __init__(
-        self, model: str = "gpt-4o-2024-05-13", open_ai_key: Union[str, None] = None
+        self,
+        model_name: str,
+        client: Instructor,
+        model_params: Optional[dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> None:
         """
-        Interface for interacting with different LLMs.
+        The base DiscoveryLLM class.
 
         Attributes
         ----------
-        model: str, optional
-            The OpenAI LLM to use. By default gpt-4o-2024-05-13
-        open_ai_key: Union[str, None], optional
-            Your OpenAI API key if it is not declared in an environment variable. By default None
+        model_name : str
+            The name of the model.
+        model_params : Optional[dict[str, Any]], optional
+            Any parameters to pass to the model, by default None
+        client : An LLM client.
+        kwargs : Parameters to pass to the model during initialization.
         """
 
-        if model not in MODEL_OPTIONS:
-            raise ValueError("model must be one of the following: ", MODEL_OPTIONS)
-        self.llm_instance = instructor.patch(
-            OpenAI(
-                api_key=(
-                    open_ai_key
-                    if open_ai_key is not None
-                    else os.environ.get("OPENAI_API_KEY")
-                )
-            )
-        )
-        self.model = model
+        self.model_name = model_name
+        self.model_params = model_params or dict()
+        if "temperature" not in self.model_params.keys():
+            self.model_params["temperature"] = 0
+        self.client = client
 
     def _get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
 
-        response = self.llm_instance.chat.completions.create(
-            model=self.model,
-            temperature=0,
+        response = self.client.chat.completions.create(
+            model=self.model_name,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
                 {"role": "user", "content": formatted_prompt},
             ],
+            **self.model_params,
         )
         return response.choices[0].message.content
+
+
+class BaseDataModelingLLM(ABC):
+    """
+    The base DataModelingLLM class for interacting with different LLMs. All DataModelingLLM classes must inherit from this class.
+    """
+
+    def __init__(
+        self,
+        model_name: str,
+        client: Instructor,
+        model_params: Optional[dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        The base DataModelingLLM class.
+
+        Attributes
+        ----------
+        model_name : str
+            The name of the model.
+        model_params : Optional[dict[str, Any]], optional
+            Any parameters to pass to the model, by default None
+        client : An LLM client patched with Instructor.
+        kwargs : Parameters to pass to the model during initialization.
+        """
+
+        self.model_name = model_name
+        self.model_params = model_params or dict()
+        if "temperature" not in self.model_params.keys():
+            self.model_params["temperature"] = 0
+        self.client = client
 
     def _get_initial_data_model_response(
         self,
         discovery_text: str,
         user_input: UserInput,
-        pandas_general_info: str,
-        # feature_descriptions: Dict[str, str],
-        # allowed_features: List[str],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
     ) -> Union[DataModel, Dict[str, Any]]:
@@ -116,19 +126,17 @@ class LLM:
                 user_input=user_input,
                 allowed_features=user_input.allowed_columns,
             )
-            entity_pool: DataModelEntityPool = (
-                self.llm_instance.chat.completions.create(
-                    model=self.model,
-                    temperature=0,
-                    response_model=DataModelEntityPool,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": SYSTEM_PROMPTS["initial_data_model"],
-                        },
-                        {"role": "user", "content": formatted_prompt},
-                    ],
-                )
+            entity_pool: DataModelEntityPool = self.client.chat.completions.create(
+                model=self.model_name,
+                response_model=DataModelEntityPool,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPTS["initial_data_model"],
+                    },
+                    {"role": "user", "content": formatted_prompt},
+                ],
+                **self.model_params,
             )
             validation = entity_pool.validate(
                 allowed_features=user_input.allowed_columns
@@ -172,14 +180,14 @@ class LLM:
 
             retries += 1  # increment retries each pass
 
-            response: DataModel = self.llm_instance.chat.completions.create(
-                model=self.model,
-                temperature=0,
+            response: DataModel = self.client.chat.completions.create(
+                model=self.model_name,
                 response_model=DataModel,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPTS["data_model"]},
                     {"role": "user", "content": formatted_prompt},
                 ],
+                **self.model_params,
             )
 
             validation = response.validate_model(csv_columns=csv_columns)
@@ -211,32 +219,33 @@ class LLM:
         Generate fixes for the previous data model.
         """
         print("performing chain of thought process for error fix recommendations...")
-        response = self.llm_instance.chat.completions.create(
-            model=self.model,
-            temperature=0,
+        response: ErrorRecommendations = self.client.chat.completions.create(
+            model=self.model_name,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
                 {"role": "user", "content": formatted_prompt},
             ],
+            response_model=ErrorRecommendations,
+            **self.model_params,
         )
-        return response.choices[0].message.content
+        return response.recommendations
 
-    def _get_chain_of_thought_for_initial_model_generation_response(
-        self, formatted_prompt: str
-    ) -> str:
-        """
-        Generate nodes, relationships and properties for the previous data model.
-        Does NOT return a data model. Only suggestions.
-        """
-        print(
-            "performing chain of thought process for initial data model recommendations..."
-        )
-        response = self.llm_instance.chat.completions.create(
-            model=self.model,
-            temperature=0,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
-                {"role": "user", "content": formatted_prompt},
-            ],
-        )
-        return response.choices[0].message.content
+    # def _get_chain_of_thought_for_initial_model_generation_response(
+    #     self, formatted_prompt: str
+    # ) -> str:
+    #     """
+    #     Generate nodes, relationships and properties for the previous data model.
+    #     Does NOT return a data model. Only suggestions.
+    #     """
+    #     print(
+    #         "performing chain of thought process for initial data model recommendations..."
+    #     )
+    #     response = self.client.chat.completions.create(
+    #         model=self.model_name,
+    #         messages=[
+    #             {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
+    #             {"role": "user", "content": formatted_prompt},
+    #         ],
+    #         **self.model_params
+    #     )
+    #     return response.choices[0].message.content

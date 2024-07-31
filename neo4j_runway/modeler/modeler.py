@@ -5,7 +5,7 @@ from graphviz import Digraph
 
 from ..discovery import Discovery
 from ..inputs import UserInput, user_input_safe_construct
-from ..llm import LLM
+from ..llm.base import BaseDataModelingLLM
 from ..models import DataModel
 from ..resources.prompts.data_modeling import (
     create_initial_data_model_prompt,
@@ -21,7 +21,7 @@ class GraphDataModeler:
 
     def __init__(
         self,
-        llm: LLM,
+        llm: BaseDataModelingLLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
         general_data_description: Optional[str] = None,
@@ -36,7 +36,7 @@ class GraphDataModeler:
 
         Attributes
         ----------
-        llm : LLM
+        llm : BaseLLM
             The LLM used to generate data models.
         discovery : Union[str, Discovery], optional
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
@@ -211,7 +211,6 @@ class GraphDataModeler:
         response = self.llm._get_initial_data_model_response(
             discovery_text=self.discovery,
             user_input=self.user_input,
-            pandas_general_info=self.general_info,
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
         )

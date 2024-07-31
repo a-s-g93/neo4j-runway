@@ -4,7 +4,8 @@ import unittest
 from dotenv import load_dotenv
 import pandas as pd
 
-from neo4j_runway import Discovery, GraphDataModeler, LLM, DataModel
+from neo4j_runway import Discovery, GraphDataModeler, DataModel
+from neo4j_runway.llm.openai import OpenAIDiscoveryLLM, OpenAIDataModelingLLM
 
 
 load_dotenv()
@@ -33,14 +34,18 @@ class TestLLMGeneration(unittest.TestCase):
 
         # test discovery generation
         data = pd.read_csv("tests/resources/data/countries.csv")
-        disc = Discovery(data=data, llm=LLM(), user_input=USER_GENERATED_INPUT)
+        disc = Discovery(
+            data=data, llm=OpenAIDiscoveryLLM(), user_input=USER_GENERATED_INPUT
+        )
 
         disc.run(show_result=False)
 
         self.assertIsInstance(disc.discovery, str)
 
         # test data modeler
-        gdm = GraphDataModeler(llm=LLM(model="gpt-4o-2024-05-13"), discovery=disc)
+        gdm = GraphDataModeler(
+            llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
+        )
         gdm.create_initial_model()
 
         self.assertIsInstance(gdm.current_model, DataModel)
@@ -49,14 +54,16 @@ class TestLLMGeneration(unittest.TestCase):
 
         # test discovery generation
         data = pd.read_csv("tests/resources/data/shelters.csv")
-        disc = Discovery(data=data, llm=LLM())
+        disc = Discovery(data=data, llm=OpenAIDiscoveryLLM())
 
         disc.run(show_result=False)
 
         self.assertIsInstance(disc.discovery, str)
 
         # test data modeler
-        gdm = GraphDataModeler(llm=LLM(model="gpt-4o-2024-05-13"), discovery=disc)
+        gdm = GraphDataModeler(
+            llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
+        )
         print(gdm.create_initial_model())
 
         self.assertEqual(len(gdm.model_history), 1)

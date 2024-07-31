@@ -150,8 +150,8 @@ class DataModel(BaseModel):
                 allowed_columns=csv_columns,
             )
 
-            print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
+
         return {"valid": True, "message": "", "errors": list()}
 
     def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
@@ -513,7 +513,6 @@ class DataModel(BaseModel):
             return cls(
                 nodes=[
                     Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
-                    # print(n, "\n")
                     for n in content["dataModel"]["nodeLabels"].values()
                 ],
                 relationships=[
