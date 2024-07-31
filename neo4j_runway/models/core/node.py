@@ -79,7 +79,7 @@ class Node(BaseModel):
 
         Returns
         -------
-        List[str]
+        List[Property]
             A list of unique properties.
         """
 
@@ -206,9 +206,13 @@ class Node(BaseModel):
                 )
 
         if len(self.node_keys) == 1:
-            errors.append(
-                f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
-            )
+            # only write error if this node is NOT also labeled as unique
+            if self.node_keys[0].name not in [
+                prop.name for prop in self.unique_properties
+            ]:
+                errors.append(
+                    f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
+                )
         return errors
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:

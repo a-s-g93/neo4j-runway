@@ -6,7 +6,7 @@ toc_label: LoadCSVCodeGenerator
 toc_icon: "fa-solid fa-plane"
 ---
 
-    from neo4j_runway.code_generation import GraphDataModeler
+    from neo4j_runway.code_generation import LoadCSVCodeGenerator
 
 
 

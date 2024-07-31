@@ -69,7 +69,7 @@ class Relationship(BaseModel):
         return {prop.name: prop.csv_mapping for prop in self.properties}
 
     @property
-    def unique_properties(self) -> List[str]:
+    def unique_properties(self) -> List[Property]:
         """
         The relationship's unique properties.
         """
@@ -163,13 +163,17 @@ class Relationship(BaseModel):
                     )
                 if prop.is_unique and prop.part_of_key:
                     errors.append(
-                        f"The relationship {self.type} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Assume uniqueness and set part_of_key to False."
                     )
 
         if len(self.relationship_keys) == 1:
-            errors.append(
-                f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
-            )
+            # only write error if this node is NOT also labeled as unique
+            if self.relationship_keys[0].name not in [
+                prop.name for prop in self.unique_properties
+            ]:
+                errors.append(
+                    f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
+                )
         return errors
 
     def to_arrows(self) -> ArrowsRelationship:
