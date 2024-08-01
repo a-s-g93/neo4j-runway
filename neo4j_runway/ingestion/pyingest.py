@@ -151,7 +151,7 @@ def PyIngest(
     kwargs : Any
         Additional params
     """
-    
+
     if "yaml_string" in kwargs:
         load_config(get_yaml(kwargs["yaml_string"]))
         warnings.warn(
