@@ -4,7 +4,8 @@ import sys
 
 import pandas as pd
 
-from neo4j_runway import Discovery, LLM, UserInput
+from neo4j_runway import Discovery, UserInput
+from neo4j_runway.llm.openai import OpenAIDiscoveryLLM
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -26,7 +27,9 @@ class TestDiscovery(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.disc = Discovery(
-            llm=LLM(), user_input=USER_GENERATED_INPUT, data=pd.DataFrame(data)
+            llm=OpenAIDiscoveryLLM(),
+            user_input=USER_GENERATED_INPUT,
+            data=pd.DataFrame(data),
         )
 
     def test_initialized_variables(self) -> None:
@@ -47,7 +50,7 @@ class TestDiscovery(unittest.TestCase):
         )
 
         self.test_disc = Discovery(
-            llm=LLM(), user_input=user_input, data=pd.DataFrame(data)
+            llm=OpenAIDiscoveryLLM(), user_input=user_input, data=pd.DataFrame(data)
         )
 
         self.assertEqual(self.test_disc.discovery, "")
@@ -57,14 +60,14 @@ class TestDiscovery(unittest.TestCase):
         self.assertEqual(set(self.test_disc.data.columns), {"feature_1", "feature_2"})
 
     def test_init_with_no_desired_columns(self) -> None:
-        d = Discovery(llm=LLM(), data=pd.DataFrame(data))
+        d = Discovery(llm=OpenAIDiscoveryLLM(), data=pd.DataFrame(data))
 
         self.assertEqual(
             {"id", "feature_1", "feature_2", "bad_feature"}, set(d.columns_of_interest)
         )
 
         with self.assertWarns(Warning):
-            Discovery(llm=LLM(), data=pd.DataFrame(data))
+            Discovery(llm=OpenAIDiscoveryLLM(), data=pd.DataFrame(data))
 
     def test_view_discovery_no_notebook(self) -> None:
         d = Discovery(data=pd.DataFrame(data))

@@ -23,3 +23,23 @@ class APOCVersionError(RunwayError):
 
 class APOCNotInstalledError(RunwayError):
     """Exception raised when APOC is required for operation, but not installed on Neo4j instance."""
+
+    pass
+
+
+class InvalidDataModelGenerationError(RunwayError):
+    """Exception raised when an invalid data model is returned by an LLM after all retry attempts have been exhausted."""
+
+    pass
+
+
+class InvalidArrowsDataModelError(RunwayError):
+    """Exception raised when an arrows.app data model is unable to be parsed into a Runway core data model."""
+
+    pass
+
+
+class InvalidSolutionsWorkbenchDataModelError(RunwayError):
+    """Exception raised when a Solutions Workbench data model is unable to be parsed into a Runway core data model."""
+
+    pass
