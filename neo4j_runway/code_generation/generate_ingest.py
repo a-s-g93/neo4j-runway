@@ -95,11 +95,11 @@ class IngestionGenerator:
         self._constraints: Dict[str, str] = {}
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
 
-    warnings.warn(
-        """The IngestionGenerator class will be removed in future releases! 
-    Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
-    You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
-    )
+        warnings.warn(
+            """The IngestionGenerator class will be removed in future releases! 
+        Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
+        You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
+        )
 
     def _generate_base_information(
         self,
