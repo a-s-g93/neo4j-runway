@@ -33,6 +33,17 @@ from ...utils.naming_conventions import (
 class DataModel(BaseModel):
     """
     The standard Graph Data Model representation in Neo4j Runway.
+
+    Attributes
+    ----------
+    nodes : List[Node]
+        A list of the nodes in the data model.
+    relationships : List[Relationship]
+        A list of the relationships in the data model.
+    metadata: Optional[Dict[str, Any]]
+        Metadata from an import source such as Solutions Workbench.
+    use_neo4j_naming_conventions : bool, optional
+        Whether to convert labels, relationships and properties to Neo4j naming conventions.
     """
 
     nodes: List[Node]
@@ -49,7 +60,7 @@ class DataModel(BaseModel):
         """
         The standard Graph Data Model representation in Neo4j Runway.
 
-        Attributes
+        Parameters
         ----------
         nodes : List[Node]
             A list of the nodes in the data model.
