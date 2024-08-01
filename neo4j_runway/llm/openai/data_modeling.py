@@ -18,6 +18,17 @@ from ..base import BaseDataModelingLLM
 class OpenAIDataModelingLLM(BaseDataModelingLLM):
     """
     Interface for interacting with OpenAI LLMs for data modeling services.
+
+    Attributes
+    ----------
+    model_name : str
+        The name of the model.
+    model_params : Optional[dict[str, Any]], optional
+        Any parameters to pass to the model.
+    open_ai_key : Optional[str], optional
+        Your OpenAI API key if it is not declared in an environment variable.
+    kwargs : Any
+        Parameters to pass to the model during initialization.
     """
 
     def __init__(
@@ -30,15 +41,16 @@ class OpenAIDataModelingLLM(BaseDataModelingLLM):
         """
         Interface for interacting with OpenAI LLMs for data modeling services.
 
-        Attributes
+        Parameters
         ----------
         model_name : str
             The name of the model. By default gpt-4o-2024-05-13
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        open_ai_key: Optional[str], optional
+        open_ai_key : Optional[str], optional
             Your OpenAI API key if it is not declared in an environment variable. By default None
-        kwargs : Parameters to pass to the model during initialization.
+        kwargs : Any
+            Parameters to pass to the model during initialization.
         """
 
         if openai is None:

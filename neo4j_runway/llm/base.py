@@ -41,8 +41,10 @@ class BaseDiscoveryLLM(ABC):
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : An LLM client.
-        kwargs : Parameters to pass to the model during initialization.
+        client : Any
+            An LLM client.
+        kwargs : Any
+            Parameters to pass to the model during initialization.
         """
 
         self.model_name = model_name
@@ -82,14 +84,16 @@ class BaseDataModelingLLM(ABC):
         """
         The base DataModelingLLM class.
 
-        Attributes
+        Parameters
         ----------
         model_name : str
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : An LLM client patched with Instructor.
-        kwargs : Parameters to pass to the model during initialization.
+        client : Any
+            An LLM client patched with Instructor.
+        kwargs : Any
+             Parameters to pass to the model during initialization.
         """
 
         self.model_name = model_name
@@ -229,23 +233,3 @@ class BaseDataModelingLLM(ABC):
             **self.model_params,
         )
         return response.recommendations
-
-    # def _get_chain_of_thought_for_initial_model_generation_response(
-    #     self, formatted_prompt: str
-    # ) -> str:
-    #     """
-    #     Generate nodes, relationships and properties for the previous data model.
-    #     Does NOT return a data model. Only suggestions.
-    #     """
-    #     print(
-    #         "performing chain of thought process for initial data model recommendations..."
-    #     )
-    #     response = self.client.chat.completions.create(
-    #         model=self.model_name,
-    #         messages=[
-    #             {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
-    #             {"role": "user", "content": formatted_prompt},
-    #         ],
-    #         **self.model_params
-    #     )
-    #     return response.choices[0].message.content

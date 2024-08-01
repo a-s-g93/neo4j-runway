@@ -59,7 +59,7 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
     def test_init_from_core_property_of_type_list(self) -> None:
         core_prop = Property(
             name="kind",
-            type="List<str>",
+            type="List[str]",
             csv_mapping="pet",
             csv_mapping_other=None,
             is_unique=True,
