@@ -14,7 +14,7 @@ _site
 images/presentation
 data/
 notebooks/
-_.ipynb
+*.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

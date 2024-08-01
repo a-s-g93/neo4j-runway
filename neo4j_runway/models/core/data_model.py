@@ -42,8 +42,6 @@ class DataModel(BaseModel):
         A list of the relationships in the data model.
     metadata: Optional[Dict[str, Any]]
         Metadata from an import source such as Solutions Workbench.
-    use_neo4j_naming_conventions : bool, optional
-        Whether to convert labels, relationships and properties to Neo4j naming conventions.
     """
 
     nodes: List[Node]
