@@ -11,6 +11,21 @@ toc_icon: "fa-solid fa-plane"
 This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 
 
 
+ The standard Graph Data Model representation in Neo4j
+        Runway.
+
+    Attributes
+    ----------
+    nodes : List[Node]
+        A list of the nodes in the data model.
+    relationships : List[Relationship]
+        A list of the relationships in the data model.
+    metadata: Optional[Dict[str, Any]]
+        Metadata from an import source such as Solutions
+        Workbench.
+
+
+
 ## Class Methods
 
 
@@ -18,7 +33,7 @@ This is the core data model class of Neo4j Runway. All imported data models will
 The standard Graph Data Model representation in Neo4j
         Runway.
 
-    Attributes
+    Parameters
     ----------
     nodes : List[Node]
         A list of the nodes in the data model.

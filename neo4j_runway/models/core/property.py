@@ -14,6 +14,21 @@ from ...resources.mappings import (
 class Property(BaseModel):
     """
     Property representation.
+
+    Attributes
+    ----------
+    name : str
+        The property name in Neo4j.
+    type : str
+        The Python type of the property.
+    csv_mapping : str
+        Which csv column the property is found under.
+    csv_mapping_other : Optional[str]
+        An optional second csv column that also indicates this property.
+    is_unique : bool
+        Whether the property is a unique identifier.
+    part_of_key : bool
+        Whether the property is part of a node or relationship key.
     """
 
     name: str

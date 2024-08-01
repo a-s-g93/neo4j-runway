@@ -48,7 +48,7 @@ class BaseCodeGenerator(ABC):
         """
         This is the base class for code generation. All code generation classes must inherit from this class.
 
-        Attributes
+        Parameters
         ----------
         data_model : DataModel
             The data model to base ingestion code on.

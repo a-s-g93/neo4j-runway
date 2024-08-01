@@ -70,6 +70,14 @@ class Neo4jGraph(BaseGraph):
 
     @property
     def schema(self) -> Dict[str, Any]:
+        """
+        The database schema provided by apoc.meta.schema
+
+        Returns
+        -------
+        Dict[str, Any]
+            The schema.
+        """
         if self._schema is None:
             self.refresh_schema()
         return self._schema

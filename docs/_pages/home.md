@@ -25,94 +25,111 @@ You'll need a Neo4j instance to fully utilize Runway. Start up a free cloud host
 
 ## Get Running in Minutes
 
-```
-pip install neo4j-runway
-```
+    pip install neo4j-runway
+
 
 Now let's walk through a basic example.
 
 Here we import the modules we'll be using.
+    
+    import pandas as pd
 
-```Python
-import pandas as pd
+    from neo4j_runway import Discovery, GraphDataModeler, PyIngest, UserInput
+    from neo4j_runway.code_generation import PyIngestConfigGenerator
+    from neo4j_runway.llm.openai import OpenAIDiscoveryLLM, OpenAIDataModelingLLM
 
-from neo4j_runway import Discovery, GraphDataModeler, IngestionGenerator, LLM, PyIngest
+### Discovery
+Now we...
+- Define a general description of our data
+- Provide brief descriptions of the columns of interest 
+- Provide any use cases we'd like our data model to address
+- Load the data with Pandas
 
 ```
-### Discovery
-Now we define a General Description of our data, provide brief descriptions of the columns of interest and load the data with Pandas.
-```Python
-USER_GENERATED_INPUT = {
-    'general_description': 'This is data on different countries.',
-    'id': 'unique id for a country.',
-    'name': 'the country name.',
-    'phone_code': 'country area code.',
-    'capital': 'the capital of the country.',
-    'currency_name': "name of the country's currency.",
-    'region': 'primary region of the country.',
-    'subregion': 'subregion location of the country.',
-    'timezones': 'timezones contained within the country borders.',
-    'latitude': 'the latitude coordinate of the country center.',
-    'longitude': 'the longitude coordinate of the country center.'
-}
+USER_GENERATED_INPUT = UserInput(
+    general_description='This is data on different countries.',
+    column_descriptions={
+        'id': 'unique id for a country.',
+        'name': 'the country name.',
+        'phone_code': 'country area code.',
+        'capital': 'the capital of the country.',
+        'currency_name': "name of the country's currency.",
+        'region': 'primary region of the country.',
+        'subregion': 'subregion location of the country.',
+        'timezones': 'timezones contained within the country borders.',
+        'latitude': 'the latitude coordinate of the country center.',
+        'longitude': 'the longitude coordinate of the country center.'
+    },
+    use_cases=[
+        "Which region contains the most subregions?", 
+        "What currencies are most popular?", 
+        "Which countries share timezones?"
+    ]
+)
 
 data = pd.read_csv("data/csv/countries.csv")
 ```
 
-We then initialize our llm. By default we use GPT-4o and define our OpenAI API key in an environment variable.
-```Python
-llm = LLM()
-```
+We then initialize our discovery llm. By default we use GPT-4o and define our OpenAI API key in an environment variable.
+
+    disc_llm = OpenAIDiscoveryLLM()
+
 
 And we run discovery on our data.
-```Python
-disc = Discovery(llm=llm, user_input=USER_GENERATED_INPUT, data=data)
-disc.run()
-```
+
+    disc = Discovery(
+                llm=disc_llm, 
+                user_input=USER_GENERATED_INPUT, 
+                data=data
+            )
+    disc.run()
+
 
 ### Data Modeling
 We can now pass our Discovery object to a GraphDataModeler to generate our initial data model. A Discovery object isn't required here, but it provides rich context to the LLM to achieve the best results.
-```Python
-gdm = GraphDataModeler(llm=llm, discovery=disc)
-gdm.create_initial_model()
-```
+
+    modeling_llm = OpenAIDataModelingLLM()
+
+    gdm = GraphDataModeler(llm=modeling_llm, discovery=disc)
+    gdm.create_initial_model()
+
 If we have graphviz installed, we can take a look at our model.
-```Python
-gdm.current_model.visualize()
-```
+
+    gdm.current_model.visualize()
+
 ![countries-first-model.png](./assets/images/countries-first-model.png)
 
 Let's make some corrections to our model and view the results.
-```Python
-gdm.iterate_model(user_corrections="""
-Make Region node have a HAS_SUBREGION relationship with Subregion node. 
-Remove The relationship between Country and Region.
-""")
-gdm.current_model.visualize()
-```
+
+    gdm.iterate_model(user_corrections="""
+    Make Region node have a HAS_SUBREGION relationship with Subregion node. 
+    Remove The relationship between Country and Region.
+    """)
+    gdm.current_model.visualize()
+
 ![countries-second-model.png](./assets/images/countries-second-model.png)
 
 ### Code Generation
 We can now use our data model to generate some ingestion code.
 
-```Python
-gen = IngestionGenerator(data_model=gdm.current_model, 
-                         username="neo4j", password="password", 
-                         uri="bolt://localhost:7687", database="neo4j", 
-                         csv_dir="data/csv/", csv_name="countries.csv")
+    gen = PyIngestConfigGenerator(
+                data_model=gdm.current_model, 
+                username="neo4j", password="password", 
+                uri="bolt://localhost:7687", database="neo4j", 
+                csv_dir="data/csv/", csv_name="countries.csv"
+            )
 
-pyingest_yaml = gen.generate_pyingest_yaml_string()
+    pyingest_yaml = gen.generate_config_string()
 
-```
 ### Ingestion
 We will use the generated PyIngest yaml config to ingest our CSV into our Neo4j instance. 
-```Python
-PyIngest(yaml_string=pyingest_yaml, dataframe=data)
-```
+
+    PyIngest(config=pyingest_yaml, dataframe=data)
+
 We can also save this as a .yaml file and use with the original [PyIngest](https://github.com/neo4j-field/pyingest).
-```Python
-gen.generate_pyingest_yaml_file(file_name="countries")
-```
+
+    gen.generate_config_yaml(file_name="countries.yaml")
+
 Here's a snapshot of our new graph!
 
 ![countries-graph.png](./assets/images/countries-graph-white-background.png)
@@ -122,7 +139,6 @@ The current project is in beta and has the following limitations:
 - Single CSV input only for data model generation
 - Nodes may only have a single label
 - Only uniqueness and node / relationship key constraints are supported
-- Relationships may not have uniqueness constraints
 - CSV columns that refer to the same node property are not supported in model generation
 - Only OpenAI models may be used at this time
 - The modified PyIngest function included with Runway only supports loading a local Pandas DataFrame or CSVs
