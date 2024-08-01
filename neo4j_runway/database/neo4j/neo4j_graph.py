@@ -68,7 +68,6 @@ class Neo4jGraph(BaseGraph):
 
         super().__init__(driver=self.driver, version=version)
 
-
     @property
     def schema(self) -> Dict[str, Any]:
         if self._schema is None:
@@ -127,7 +126,7 @@ class Neo4jGraph(BaseGraph):
             self.database_version, self.database_edition = response
         except Exception as e:
             self.driver.close()
-            
+
         return response
 
     def _get_apoc_version(self) -> Union[str, None]:
@@ -173,4 +172,6 @@ RETURN value as dataModel"""
             self.schema = response
             return response
         except Exception as e:
-            raise APOCNotInstalledError("APOC must be installed to perform `refresh_schema` operation.")
+            raise APOCNotInstalledError(
+                "APOC must be installed to perform `refresh_schema` operation."
+            )

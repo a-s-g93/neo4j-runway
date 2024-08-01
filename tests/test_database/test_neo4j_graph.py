@@ -18,7 +18,7 @@ class TestNeo4jGraph(unittest.TestCase):
     def test_init_with_provided_creds(self) -> None:
         g = Neo4jGraph(**self.creds)
         g.driver.close()
-    
+
     def test_init_without_creds(self) -> None:
         g = Neo4jGraph()
         self.assertEqual("peoplepets", g.database)
@@ -56,4 +56,3 @@ class TestNeo4jGraph(unittest.TestCase):
         res = g.verify()
         self.assertTrue(res["valid"])
         self.assertEqual(res["message"], "Connection and Auth Verified!")
-
