@@ -36,7 +36,6 @@ regex = "~2024"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"
 ipykernel = "^6.29.5"
 nbconvert= "^7.16.4"
 pre-commit = { version = "^3.6.2", python = "^3.10" }
