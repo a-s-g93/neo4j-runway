@@ -4,7 +4,7 @@ from neo4j import GraphDatabase
 
 
 def test_database_connection(
-    credentials: Dict[str, str]
+    credentials: Dict[str, str],
 ) -> Dict[str, Union[str, bool]]:
     """
     Verify accurate credentials upon user submission.

@@ -1,10 +1,10 @@
 import argparse
 import os
 from typing import Any, Dict
-
 from urllib.request import urlopen
-from nbconvert import MarkdownExporter
+
 import nbformat
+from nbconvert import MarkdownExporter
 
 
 def drop_notebook_header(notebook):
@@ -53,7 +53,7 @@ def write_example_page(
 permalink: /examples/{notebook_name.replace("_", "-")}/
 title: {header}
 toc: true
-toc_label: 
+toc_label:
 toc_icon: "fa-solid fa-plane"
 ---
 """

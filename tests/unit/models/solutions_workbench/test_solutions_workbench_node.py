@@ -1,12 +1,10 @@
 import unittest
 
 from neo4j_runway.models import Node, Property
-
 from neo4j_runway.models.solutions_workbench import SolutionsWorkbenchNode
 
 
 class TestSolutionsWorkbenchNode(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.json_input = {

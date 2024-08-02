@@ -1,8 +1,8 @@
 from .arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
-from .core import DataModel, Node, Relationship, Property
+from .core import DataModel, Node, Property, Relationship
 from .solutions_workbench import (
     SolutionsWorkbenchDataModel,
-    SolutionsWorkbenchRelationship,
     SolutionsWorkbenchNode,
     SolutionsWorkbenchProperty,
+    SolutionsWorkbenchRelationship,
 )

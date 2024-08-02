@@ -1,10 +1,11 @@
 import unittest
 
-from neo4j_runway.inputs import UserInput
-from neo4j_runway.models import DataModel
-from neo4j_runway.modeler import GraphDataModeler
-from tests.resources.answers.data_model_yaml import data_model_dict
 from graphviz import Digraph
+
+from neo4j_runway.inputs import UserInput
+from neo4j_runway.modeler import GraphDataModeler
+from neo4j_runway.models import DataModel
+from tests.resources.answers.data_model_yaml import data_model_dict
 
 
 class LLMMock:
@@ -41,10 +42,8 @@ USER_GENERATED_INPUT_BAD = {
 
 
 class TestGraphDataModeler(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
-
         cls.data_model = DataModel(
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
@@ -60,7 +59,6 @@ class TestGraphDataModeler(unittest.TestCase):
         )
 
     def test_load_model(self) -> None:
-
         self.gdm.load_model(data_model=self.data_model)
         self.assertEqual(self.gdm.current_model, self.data_model)
 
@@ -131,7 +129,6 @@ class TestGraphDataModeler(unittest.TestCase):
             )
 
     def test_no_discovery_no_user_input_with_allowed_columns(self) -> None:
-
         with self.assertWarns(Warning):
             gdm = GraphDataModeler(
                 llm="llm",

@@ -1,14 +1,12 @@
 import unittest
 
-from neo4j_runway.models import Relationship, Property
-
+from neo4j_runway.models import Property, Relationship
 from neo4j_runway.models.solutions_workbench import (
     SolutionsWorkbenchRelationship,
 )
 
 
 class TestSolutionsWorkbenchRelationship(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.json_input = {

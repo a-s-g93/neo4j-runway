@@ -2,8 +2,8 @@
 This file contains a node as it is represented in arrows.app.
 """
 
-from typing import Dict, List
 import warnings
+from typing import Dict, List
 
 from pydantic import BaseModel, field_validator
 

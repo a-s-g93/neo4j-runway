@@ -87,7 +87,7 @@ def is_camel_case(input: str) -> bool:
     if ord(input[0]) >= 65 and ord(input[0]) <= 90:
         return False
 
-    return not "_" in input and not " " in input
+    return "_" not in input and " " not in input
 
 
 def is_pascal_case(input: str) -> bool:
@@ -101,7 +101,7 @@ def is_pascal_case(input: str) -> bool:
     if ord(input[0]) < 65 or ord(input[0]) > 90:
         return False
 
-    return not "_" in input and not " " in input
+    return "_" not in input and " " not in input
 
 
 def is_snake_case(input: str) -> bool:
@@ -111,7 +111,7 @@ def is_snake_case(input: str) -> bool:
 
     assert len(input) > 0, "No input provided!"
 
-    return ("_" in input or input.isupper()) and not " " in input
+    return ("_" in input or input.isupper()) and " " not in input
 
 
 def is_mixed_case(input: str) -> bool:

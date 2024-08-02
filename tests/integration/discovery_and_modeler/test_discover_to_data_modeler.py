@@ -1,18 +1,16 @@
 import unittest
 import warnings
 
-from dotenv import load_dotenv
 import pandas as pd
+from dotenv import load_dotenv
 
-from neo4j_runway import Discovery, GraphDataModeler, DataModel
-from neo4j_runway.llm.openai import OpenAIDiscoveryLLM, OpenAIDataModelingLLM
-
+from neo4j_runway import DataModel, Discovery, GraphDataModeler
+from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
 
 load_dotenv()
 
 
 class TestDiscoveryToDataModeler(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         pass
@@ -55,7 +53,6 @@ class TestDiscoveryToDataModeler(unittest.TestCase):
         self.assertIsInstance(gdm.current_model, DataModel)
 
     def test_sequence_with_pets_data(self) -> None:
-
         # test discovery generation
         data = pd.read_csv("tests/resources/data/shelters.csv")
 

@@ -1,7 +1,7 @@
 import inspect
+import os
 import textwrap
 from typing import List
-import os
 
 import regex as re
 
@@ -12,8 +12,8 @@ from neo4j_runway import (
     UserInput,
 )
 from neo4j_runway.code_generation import (
-    PyIngestConfigGenerator,
     LoadCSVCodeGenerator,
+    PyIngestConfigGenerator,
     StandardCypherCodeGenerator,
 )
 from neo4j_runway.database import Neo4jGraph
@@ -33,11 +33,6 @@ CLASS_DIR = [
         "file_path": "api/data_model.md",
         "summary_file_path": "data_model.md",
     },
-    # {
-    #     "class": IngestionGenerator,
-    #     "file_path": "api/ingestion_generator.md",
-    #     "summary_file_path": "",
-    # },
     {
         "class": Discovery,
         "file_path": "api/discovery.md",
@@ -186,7 +181,6 @@ toc_icon: "fa-solid fa-plane"
 
 
 def write_markdown_file(file_path: str, content: str, front_matter: str) -> None:
-
     base_path = "./docs/_pages/"
     path_parts = file_path.split("/")
     path_only = base_path + "/".join(path_parts[:-1])

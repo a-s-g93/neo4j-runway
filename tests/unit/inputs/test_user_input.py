@@ -18,7 +18,6 @@ data = {
 
 
 class TestUserInput(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         pass

@@ -9,15 +9,15 @@ from instructor import Instructor
 
 from ..inputs import UserInput
 from ..models import DataModel
+from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
-    create_retry_data_model_generation_prompt,
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
+    create_retry_data_model_generation_prompt,
 )
-from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
 
 
 class BaseDiscoveryLLM(ABC):
@@ -181,7 +181,6 @@ class BaseDataModelingLLM(ABC):
         retries = 0
         valid_response = False
         while retries < max_retries and not valid_response:
-
             retries += 1  # increment retries each pass
 
             response: DataModel = self.client.chat.completions.create(

@@ -1,5 +1,6 @@
-from ....inputs import UserInput
 import pandas as pd
+
+from ....inputs import UserInput
 
 
 def create_discovery_prompt(

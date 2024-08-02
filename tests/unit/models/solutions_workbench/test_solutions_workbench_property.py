@@ -1,12 +1,10 @@
 import unittest
 
 from neo4j_runway.models import Property
-
 from neo4j_runway.models.solutions_workbench import SolutionsWorkbenchProperty
 
 
 class TestSolutionsWorkbenchProperty(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.json_input = {
@@ -24,7 +22,6 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
         }
 
     def test_init_from_json(self) -> None:
-
         prop = SolutionsWorkbenchProperty(**self.json_input)
 
         self.assertEqual(len(prop.__dict__.keys()), len(self.json_input.keys()))
@@ -33,7 +30,6 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
             self.assertEqual(self.json_input[k], v)
 
     def test_init_from_core_property(self) -> None:
-
         core_prop = Property(
             name="kind",
             type="str",

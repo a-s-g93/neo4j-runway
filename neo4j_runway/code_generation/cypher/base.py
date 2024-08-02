@@ -4,7 +4,7 @@ This file contains the functions to create MATCH, MERGE and SET queries.
 
 from typing import List, Optional
 
-from ...models import Property, Node, Relationship
+from ...models import Node, Property, Relationship
 
 
 def generate_match_node_clause(node: Node) -> str:

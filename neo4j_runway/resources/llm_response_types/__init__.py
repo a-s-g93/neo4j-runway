@@ -1,2 +1,2 @@
-from .initial_model_pool import DataModelEntityPool
 from .error_recommendations import ErrorRecommendations
+from .initial_model_pool import DataModelEntityPool

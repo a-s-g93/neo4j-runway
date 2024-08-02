@@ -55,7 +55,6 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-
         cls.driver.close()
 
     def test_person_node_count(self) -> None:

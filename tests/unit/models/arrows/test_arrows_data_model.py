@@ -1,19 +1,17 @@
 import os
 import unittest
-
 from ast import literal_eval
 
 from neo4j_runway.models import (
-    Node,
-    Relationship,
-    Property,
-    DataModel,
     ArrowsDataModel,
+    DataModel,
+    Node,
+    Property,
+    Relationship,
 )
 
 
 class TestDataModel(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.columns = [
@@ -120,7 +118,7 @@ class TestDataModel(unittest.TestCase):
 
         try:
             os.remove(f"./{file_path}")
-        except Exception as e:
+        except Exception:
             print("No arrows data model created.")
 
 
