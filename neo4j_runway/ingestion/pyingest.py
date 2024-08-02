@@ -3,7 +3,7 @@ This is a modified PyIngest file for Neo4j Runway. It currently only supports Pa
 """
 
 import datetime
-from typing import Optional, Union
+from typing import Optional
 import warnings
 
 from neo4j import GraphDatabase
@@ -160,16 +160,20 @@ def PyIngest(
     else:
         load_config(get_yaml(config))
 
-    server = LocalServer()
-    server.pre_ingest()
-    file_list = global_config["files"]
-    for file in file_list:
-        if dataframe is not None:
-            server.load_dataframe(file, dataframe=dataframe)
-        else:
-            server.load_csv(file)
-    server.post_ingest()
-    server.close()
+    with warnings.catch_warnings():
+        warnings.simplefilter(
+            action="ignore", category=FutureWarning
+        )  # pandas throws FutureWarning on `DataFrame.swapaxes in fromnumeric.py`. Is very annoying and not our problem.
+        server = LocalServer()
+        server.pre_ingest()
+        file_list = global_config["files"]
+        for file in file_list:
+            if dataframe is not None:
+                server.load_dataframe(file, dataframe=dataframe)
+            else:
+                server.load_csv(file)
+        server.post_ingest()
+        server.close()
 
 
 def get_yaml(data: str) -> str:
