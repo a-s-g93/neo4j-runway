@@ -3,11 +3,11 @@ import unittest
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-from neo4j.exceptions import AuthError
 
-from neo4j_runway.utils import test_database_connection
 from neo4j_runway.code_generation import LoadCSVCodeGenerator
 from neo4j_runway.models import DataModel
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -30,23 +30,12 @@ class TestLoadCSVViaAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.driver = GraphDatabase.driver(
-            uri=uri,
-            auth=(username, password),
+            uri=os.environ.get("NEO4J_URI"),
+            auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")),
         )
-
-        connection_info = test_database_connection(
-            credentials={
-                "uri": uri,
-                "username": username,
-                "password": password,
-            }
-        )
-
-        if not connection_info["valid"]:
-            raise AuthError(connection_info["message"])
 
         # clear all data in the database
-        with cls.driver.session(database=database) as session:
+        with cls.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             session.run(
                 """
                         match (n)-[r]-()
@@ -79,11 +68,13 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             file_directory="",
         )
 
-        load_csv_cypher = gen.generate_cypher_string()
+        load_csv_cypher = gen.generate_load_csv_cypher_string()
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
-            with cls.driver.session(database=database) as session:
+            with cls.driver.session(
+                database=os.environ.get("NEO4J_DATABASE")
+            ) as session:
                 session.run(query=query)
 
     @classmethod
@@ -92,49 +83,49 @@ class TestLoadCSVViaAPI(unittest.TestCase):
 
     def test_person_node_count(self) -> None:
         person_cypher = "match (p:Person) return count(p)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(person_cypher).single().value()
             self.assertEqual(5, r)
 
     def test_pet_node_count(self) -> None:
         pet_cypher = "match (p:Pet) return count(p)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(pet_cypher).single().value()
             self.assertEqual(5, r)
 
     def test_toy_node_count(self) -> None:
         toy_cypher = "match (p:Toy) return count(p)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(toy_cypher).single().value()
             self.assertEqual(5, r)
 
     def test_address_node_count(self) -> None:
         address_cypher = "match (p:Address) return count(p)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(address_cypher).single().value()
             self.assertEqual(3, r)
 
     def test_person_to_pet_relationship_counts(self) -> None:
         cypher = "match (:Person)-[r:HAS_PET]-(:Pet) return count(r)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
 
     def test_person_to_address_relationship_counts(self) -> None:
         cypher = "match (:Person)-[r:HAS_ADDRESS]-(:Address) return count(r)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
 
     def test_pet_to_toy_relationship_counts(self) -> None:
         cypher = "match (:Pet)-[r:PLAYS_WITH]-(:Toy) return count(r)"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = session.run(cypher).single().value()
             self.assertEqual(5, r)
 
     def test_constraints_present(self) -> None:
         cypher = "show constraints yield name return name"
-        with self.driver.session(database=database) as session:
+        with self.driver.session(database=os.environ.get("NEO4J_DATABASE")) as session:
             r = set(session.run(cypher).value())
             self.assertEqual(
                 {"person_name", "toy_name", "address_address", "pet_name"}, r

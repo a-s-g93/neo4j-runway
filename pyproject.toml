@@ -18,6 +18,9 @@ classifiers = [
 ]
 exclude = ["tests/*", "images/*", "test.ipynb", "data/", "Makefile", "scripts/*", "notebooks/*"]
 
+[[tool.poetry.packages]]
+include = "neo4j_runway"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 graphviz = "^0.20.1"
@@ -38,6 +41,8 @@ black = "^24.4.2"
 ipykernel = "^6.29.5"
 nbconvert= "^7.16.4"
 toml = "^0.10.2"
+pytest = "^8.3.2"
+
 
 [build-system]
 requires = ["poetry-core"]
