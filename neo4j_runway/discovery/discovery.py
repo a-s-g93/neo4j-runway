@@ -85,7 +85,7 @@ class Discovery:
         self._discovery_ran = False
         self.discovery = ""
 
-    def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
+    def _generate_csv_summary(self) -> None:
         """
         Generate the data summaries.
         """
