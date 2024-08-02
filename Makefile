@@ -14,7 +14,7 @@ test_unit:
 
 init:
 	poetry install --with dev
-	./scripts/setup_precommit.sh
+	pre-commit install
 
 ######################
 # LINTING AND FORMATTING
