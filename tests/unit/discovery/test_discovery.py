@@ -3,9 +3,12 @@ import unittest
 from io import StringIO
 
 import pandas as pd
+from dotenv import load_dotenv
 
 from neo4j_runway import Discovery, UserInput
 from neo4j_runway.llm.openai import OpenAIDiscoveryLLM
+
+load_dotenv()
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
