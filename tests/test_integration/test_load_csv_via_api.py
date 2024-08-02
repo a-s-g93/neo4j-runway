@@ -79,7 +79,7 @@ class TestLoadCSVViaAPI(unittest.TestCase):
             file_directory="",
         )
 
-        load_csv_cypher = gen.generate_cypher_string()
+        load_csv_cypher = gen.generate_load_csv_cypher_string()
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
