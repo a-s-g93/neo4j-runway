@@ -12,7 +12,6 @@ from .relationship import SolutionsWorkbenchRelationship
 
 
 class SolutionsWorkbenchDataModel(BaseModel):
-
     nodeLabels: Dict[str, SolutionsWorkbenchNode]
     relationshipTypes: Dict[str, SolutionsWorkbenchRelationship]
     metadata: Dict[str, Any] = dict()

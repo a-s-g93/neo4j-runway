@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from ....inputs import UserInput
 
@@ -30,7 +30,6 @@ def format_column_descriptions(user_input: UserInput) -> str:
 
 
 def format_use_cases(user_input: UserInput) -> str:
-
     return (
         "The final data model should address the following use cases:\n"
         + f"{user_input.pretty_use_cases}"
@@ -48,6 +47,6 @@ def format_user_corrections(user_corrections: Optional[str]) -> str:
             + "\n\n"
         )
     else:
-        return """Add features from the data to each node and relationship as properties. 
+        return """Add features from the data to each node and relationship as properties.
 Ensure that these properties provide value to their respective node or relationship.
 """

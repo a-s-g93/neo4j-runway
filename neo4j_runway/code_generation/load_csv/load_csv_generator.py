@@ -3,14 +3,13 @@ This file contains the code to generate LOAD CSV code.
 """
 
 import os
-from typing import Dict, List, Any, Union
 
+from ...models import DataModel
 from ..base import BaseCodeGenerator
 from ..cypher import (
     generate_merge_node_load_csv_clause,
     generate_merge_relationship_load_csv_clause,
 )
-from ...models import DataModel
 
 
 class LoadCSVCodeGenerator(BaseCodeGenerator):

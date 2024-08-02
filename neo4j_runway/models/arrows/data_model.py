@@ -2,7 +2,7 @@
 This file contains the objects to construct a data model as it is represented in arrows.app.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from pydantic import BaseModel
 

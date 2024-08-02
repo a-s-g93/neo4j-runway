@@ -25,7 +25,6 @@ class EntityPoolRelationship:
 
 
 class DataModelEntityPool(BaseModel):
-
     nodes: List[EntityPoolNode]
     relationships: List[EntityPoolRelationship]
     explanation: str

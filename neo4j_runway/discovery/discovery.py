@@ -5,13 +5,15 @@ The Discovery module that handles summarization and discovery generation via an 
 import io
 import os
 from typing import Dict, Optional, Union
-import warnings
 
-from IPython.display import display, Markdown  # type: ignore # this works even though I get an import warning for IPython...
 import pandas as pd
+from IPython.display import (  # type: ignore # this works even though I get an import warning for IPython...
+    Markdown,
+    display,
+)
 
-from ..llm.base import BaseDiscoveryLLM
 from ..inputs import UserInput, user_input_safe_construct
+from ..llm.base import BaseDiscoveryLLM
 from ..resources.prompts.discovery import create_discovery_prompt
 
 
@@ -83,7 +85,7 @@ class Discovery:
         self._discovery_ran = False
         self.discovery = ""
 
-    def _generate_csv_summary(self) -> Dict[str, pd.DataFrame]:
+    def _generate_csv_summary(self) -> None:
         """
         Generate the data summaries.
         """
@@ -126,7 +128,7 @@ class Discovery:
             )
         else:
             response = f"""Here are Summary Statistics generated with the Pandas Python library
-            
+
 {self.df_info}
 
 {self.categorical_data_description}
@@ -171,7 +173,6 @@ class Discovery:
             os.makedirs(file_dir, exist_ok=True)
 
         with open(f"./{file_dir}{file_name}", "w") as f:
-
             f.write(
                 f"""
 Data General Info

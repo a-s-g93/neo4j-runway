@@ -7,10 +7,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
-
+from ...models.core import DataModel
 from ..base import BaseCodeGenerator
 from ..cypher import format_pyingest_pre_or_post_ingest_code
-from ...models.core import DataModel
 
 
 class PyIngestConfigGenerator(BaseCodeGenerator):

@@ -1,6 +1,6 @@
-from io import StringIO
-import unittest
 import sys
+import unittest
+from io import StringIO
 
 import pandas as pd
 
@@ -23,7 +23,6 @@ data = {
 
 
 class TestDiscovery(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.disc = Discovery(

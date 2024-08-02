@@ -1,10 +1,10 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
-from .property import Property
 from ..solutions_workbench import SolutionsWorkbenchNode
+from .property import Property
 
 
 class Node(BaseModel):

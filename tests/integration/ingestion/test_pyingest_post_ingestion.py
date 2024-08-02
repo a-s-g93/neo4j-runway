@@ -55,7 +55,6 @@ class TestPyIngestPostIngestion(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-
         cls.driver.close()
 
     def test_test_node_present(self) -> None:

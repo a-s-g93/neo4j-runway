@@ -3,14 +3,13 @@ This file contains the code to generate ingestion code.
 """
 
 import os
-from typing import Dict, List, Any, Union
 import warnings
+from typing import Any, Dict, List, Union
 
 import yaml
 
-from .cypher import *
 from ..models import DataModel
-
+from .cypher import *
 
 model_maps = []
 nodes_map = {}
@@ -96,7 +95,7 @@ class IngestionGenerator:
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
 
         warnings.warn(
-            """The IngestionGenerator class will be removed in future releases! 
+            """The IngestionGenerator class will be removed in future releases!
         Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
         You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
         )

@@ -7,8 +7,6 @@ from neo4j import GraphDatabase
 from neo4j_runway.code_generation import LoadCSVCodeGenerator
 from neo4j_runway.models import DataModel
 
-from dotenv import load_dotenv
-
 load_dotenv()
 
 # These credentials are for the dummy data testing only. Do NOT use the same credentials here for production graphs.

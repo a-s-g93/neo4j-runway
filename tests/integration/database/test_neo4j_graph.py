@@ -5,7 +5,6 @@ from neo4j_runway.database import Neo4jGraph
 
 
 class TestNeo4jGraph(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         cls.creds = {

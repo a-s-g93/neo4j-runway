@@ -1,15 +1,13 @@
 import unittest
 
 from neo4j_runway.code_generation.cypher import *
-from neo4j_runway.models import Node, Relationship, Property, DataModel
+from neo4j_runway.models import DataModel, Node, Property, Relationship
 from tests.resources.answers.ingestion_generation_answers import *
 
 
 class TestIngestCodeGeneration(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
-
         prop_a_1 = Property(
             name="uniqueProp1", csv_mapping="unique_prop_1", type="str", is_unique=True
         )
@@ -220,7 +218,6 @@ class TestIngestCodeGeneration(unittest.TestCase):
         )
 
     def test_generate_match_same_labels_different_csv_mapping(self) -> None:
-
         node = Node(
             label="Person",
             properties=[

@@ -1,10 +1,9 @@
 import os
 import unittest
 
+import pandas as pd
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
-
-import pandas as pd
 
 from neo4j_runway.ingestion.pyingest import PyIngest
 from tests.resources.answers.people_pets import people_pets_yaml_string
@@ -56,7 +55,6 @@ class TestPyIngestLoadDataFrame(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-
         cls.driver.close()
 
     def test_person_node_count(self) -> None:

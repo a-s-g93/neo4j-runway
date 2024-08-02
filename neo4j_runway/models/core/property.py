@@ -2,13 +2,13 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, field_validator
 
-from ..solutions_workbench import SolutionsWorkbenchProperty
 from ...resources.mappings import (
     TYPES_MAP_NEO4J_TO_PYTHON,
     TYPES_MAP_PYTHON_TO_NEO4J,
-    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
     TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
+    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
 )
+from ..solutions_workbench import SolutionsWorkbenchProperty
 
 
 class Property(BaseModel):

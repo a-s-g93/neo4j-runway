@@ -4,7 +4,6 @@ from neo4j_runway.utils.naming_conventions import *
 
 
 class TestNamingConventions(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         pass
