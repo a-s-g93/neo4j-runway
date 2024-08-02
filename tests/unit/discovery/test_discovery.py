@@ -3,12 +3,8 @@ import unittest
 from io import StringIO
 
 import pandas as pd
-from dotenv import load_dotenv
 
 from neo4j_runway import Discovery, UserInput
-from neo4j_runway.llm.openai import OpenAIDiscoveryLLM
-
-load_dotenv()
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -25,11 +21,15 @@ data = {
 }
 
 
+class LLMMock:
+    pass
+
+
 class TestDiscovery(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.disc = Discovery(
-            llm=OpenAIDiscoveryLLM(),
+            llm=LLMMock(),
             user_input=USER_GENERATED_INPUT,
             data=pd.DataFrame(data),
         )
@@ -52,7 +52,7 @@ class TestDiscovery(unittest.TestCase):
         )
 
         self.test_disc = Discovery(
-            llm=OpenAIDiscoveryLLM(), user_input=user_input, data=pd.DataFrame(data)
+            llm=LLMMock(), user_input=user_input, data=pd.DataFrame(data)
         )
 
         self.assertEqual(self.test_disc.discovery, "")
@@ -63,7 +63,7 @@ class TestDiscovery(unittest.TestCase):
 
     def test_init_with_no_desired_columns(self) -> None:
         with self.assertWarns(Warning):
-            d = Discovery(llm=OpenAIDiscoveryLLM(), data=pd.DataFrame(data))
+            d = Discovery(llm=LLMMock(), data=pd.DataFrame(data))
 
             self.assertEqual(
                 {"id", "feature_1", "feature_2", "bad_feature"},
