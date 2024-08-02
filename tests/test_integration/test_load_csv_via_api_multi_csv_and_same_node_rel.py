@@ -32,7 +32,6 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
             auth=(username, password),
         )
 
-
         # clear all data in the database
         with cls.driver.session(database=database) as session:
             session.run(
