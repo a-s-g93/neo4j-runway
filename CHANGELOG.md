@@ -28,6 +28,6 @@
 
 * Implement chain-of-thought reasoning for initial data model generation. This improves responses by:
 
-* * Multi-hop traversals generated more reliably when appropriate
+  * Multi-hop traversals generated more reliably when appropriate
 
-* * Constriants generated more reliably
+  * Constraints generated more reliably
