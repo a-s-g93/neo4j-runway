@@ -51,7 +51,6 @@ class TestPyIngestLoadMultiCSV(unittest.TestCase):
                         """
             )
 
-        
         PyIngest(config=people_pets_multi_csv_yaml_string)
 
     @classmethod

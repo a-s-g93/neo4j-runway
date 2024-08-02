@@ -51,7 +51,6 @@ class TestPyIngestPostIngestion(unittest.TestCase):
                         """
             )
 
-        
         PyIngest(config="tests/resources/configs/post-ingest.yml")
 
     @classmethod

@@ -45,8 +45,6 @@ class TestIngestCodeGeneration(unittest.TestCase):
             nodes=[cls.node_a, cls.node_b], relationships=[cls.rel_1]
         )
 
-
-
     def test_generate_constraints_key(self) -> None:
         """
         Generate the key for a unique constraint.

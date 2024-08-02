@@ -20,6 +20,7 @@ class LLMMock:
             relationships=data_model_dict["relationships"],
         )
 
+
 class DiscoveryMock:
     discovery = "Fake Discovery"
 
@@ -54,7 +55,9 @@ class TestGraphDataModeler(unittest.TestCase):
             column_descriptions={"prop_" + str(i): "" for i in range(1, 8)},
         )
 
-        cls.gdm = GraphDataModeler(llm=LLMMock(), user_input=user_input, discovery=DiscoveryMock())
+        cls.gdm = GraphDataModeler(
+            llm=LLMMock(), user_input=user_input, discovery=DiscoveryMock()
+        )
 
     def test_load_model(self) -> None:
 

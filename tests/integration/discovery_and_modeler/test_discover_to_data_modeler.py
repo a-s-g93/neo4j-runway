@@ -1,5 +1,5 @@
 import unittest
-import warnings 
+import warnings
 
 from dotenv import load_dotenv
 import pandas as pd
@@ -43,10 +43,11 @@ class TestDiscoveryToDataModeler(unittest.TestCase):
         self.assertIsInstance(disc.discovery, str)
 
         # test data modeler
-        with warnings.catch_warnings(): # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
-            warnings.simplefilter(action='ignore', category=DeprecationWarning) 
+        with warnings.catch_warnings():  # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
+            warnings.simplefilter(action="ignore", category=DeprecationWarning)
             gdm = GraphDataModeler(
-                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
+                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"),
+                discovery=disc,
             )
             gdm.create_initial_model()
 
@@ -64,11 +65,12 @@ class TestDiscoveryToDataModeler(unittest.TestCase):
         disc.run(show_result=False)
 
         self.assertIsInstance(disc.discovery, str)
-        with warnings.catch_warnings(): # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
-            warnings.simplefilter(action='ignore', category=DeprecationWarning) 
+        with warnings.catch_warnings():  # Instructor throws DepprecationWarning only during testing... Needs fix on Instructor side
+            warnings.simplefilter(action="ignore", category=DeprecationWarning)
             # test data modeler
             gdm = GraphDataModeler(
-                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"), discovery=disc
+                llm=OpenAIDataModelingLLM(model_name="gpt-4o-2024-05-13"),
+                discovery=disc,
             )
 
             gdm.create_initial_model()

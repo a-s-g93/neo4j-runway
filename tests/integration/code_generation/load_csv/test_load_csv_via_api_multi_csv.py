@@ -65,7 +65,6 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
 
         load_csv_cypher = gen.generate_load_csv_cypher_string()
 
-        
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
             print("QUERY: ", query)

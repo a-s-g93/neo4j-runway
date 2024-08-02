@@ -161,7 +161,9 @@ def PyIngest(
         load_config(get_yaml(config))
 
     with warnings.catch_warnings():
-        warnings.simplefilter(action='ignore', category=FutureWarning) # pandas throws FutureWarning on `DataFrame.swapaxes in fromnumeric.py`. Is very annoying and not our problem.
+        warnings.simplefilter(
+            action="ignore", category=FutureWarning
+        )  # pandas throws FutureWarning on `DataFrame.swapaxes in fromnumeric.py`. Is very annoying and not our problem.
         server = LocalServer()
         server.pre_ingest()
         file_list = global_config["files"]

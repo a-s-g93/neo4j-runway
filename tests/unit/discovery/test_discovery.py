@@ -64,7 +64,8 @@ class TestDiscovery(unittest.TestCase):
             d = Discovery(llm=OpenAIDiscoveryLLM(), data=pd.DataFrame(data))
 
             self.assertEqual(
-                {"id", "feature_1", "feature_2", "bad_feature"}, set(d.columns_of_interest)
+                {"id", "feature_1", "feature_2", "bad_feature"},
+                set(d.columns_of_interest),
             )
 
     def test_view_discovery_no_notebook(self) -> None:
@@ -90,7 +91,8 @@ class TestDiscovery(unittest.TestCase):
             d.view_discovery(notebook=True)
             sys.stdout = sys.__stdout__
             self.assertEqual(
-                capturedOutput.getvalue().strip(), "<IPython.core.display.Markdown object>"
+                capturedOutput.getvalue().strip(),
+                "<IPython.core.display.Markdown object>",
             )
 
     def test_pandas_only(self) -> None:

@@ -40,7 +40,7 @@ class TestUserInput(unittest.TestCase):
     def test_unsafe_construction_no_general_description(self) -> None:
         unsafe_input = {"col_a": "this is col a.", "col_b": "this is col_b."}
         allowed_columns = ["col_a", "col_b"]
-        
+
         with self.assertWarns(Warning):
             safe_input = user_input_safe_construct(
                 unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
