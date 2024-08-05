@@ -64,12 +64,12 @@ class Neo4jGraph(BaseGraph):
         self.apoc_version = self._get_apoc_version()
         version, edition = self._get_database_version()
         self.database_edition = edition
-        self._schema = None
+        self._schema: Optional[Dict[str, Any]] = None
 
         super().__init__(driver=self.driver, version=version)
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> Union[Dict[str, Any], None]:
         """
         The database schema provided by apoc.meta.schema
 
@@ -121,20 +121,18 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session(database=self.database) as session:
-                response = (
-                    session.run(
-                        """CALL dbms.components()
+                response = session.run(
+                    """CALL dbms.components()
     YIELD versions, edition
     RETURN versions[0] as version, edition"""
-                    )
-                    .single()
-                    .values()
-                )
-            self.database_version, self.database_edition = response
+                ).single()
+            if response is not None:
+                self.database_version, self.database_edition = response.values()
+
         except Exception:
             self.driver.close()
 
-        return response
+        return [self.database_version, self.database_edition]
 
     def _get_apoc_version(self) -> Union[str, None]:
         """
@@ -147,7 +145,11 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session(database=self.database) as session:
-                return session.run("RETURN apoc.version()").single().value()
+                response = session.run("RETURN apoc.version()").single()
+                if response is not None:
+                    return str(response.value())
+                else:
+                    return None
         except Exception:
             warnings.warn(
                 "APOC is not found in the database. Some features such as schema retrieval depend on APOC."
@@ -170,7 +172,7 @@ class Neo4jGraph(BaseGraph):
         """
         try:
             with self.driver.session() as session:
-                response = session.run(
+                response: Dict[str, Any] = session.run(
                     """CALL apoc.meta.schema()
 YIELD value
 RETURN value as dataModel"""

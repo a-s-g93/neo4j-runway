@@ -100,7 +100,7 @@ class TestUserInput(unittest.TestCase):
         allowed_columns = ["col_a", "col_b"]
 
         with self.assertRaises(ValueError):
-            safe_input = user_input_safe_construct(
+            user_input_safe_construct(
                 unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
             )
 

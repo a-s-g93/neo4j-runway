@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 
 class BaseGraph(ABC):
@@ -24,5 +24,5 @@ class BaseGraph(ABC):
         pass
 
     @abstractmethod
-    def _get_database_version(self) -> str:
+    def _get_database_version(self) -> Union[str, List[str]]:
         pass

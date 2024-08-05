@@ -28,7 +28,7 @@ class BaseDiscoveryLLM(ABC):
     def __init__(
         self,
         model_name: str,
-        client: Instructor,
+        client: Any,
         model_params: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> None:
@@ -58,15 +58,20 @@ class BaseDiscoveryLLM(ABC):
         Get a discovery response from the LLM.
         """
 
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
-                {"role": "user", "content": formatted_prompt},
-            ],
-            **self.model_params,
+        response: str = (
+            self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                    {"role": "user", "content": formatted_prompt},
+                ],
+                **self.model_params,
+            )
+            .choices[0]
+            .message.content
         )
-        return response.choices[0].message.content
+
+        return response
 
 
 class BaseDataModelingLLM(ABC):
@@ -142,7 +147,7 @@ class BaseDataModelingLLM(ABC):
                 ],
                 **self.model_params,
             )
-            validation = entity_pool.validate(
+            validation = entity_pool.validate_pool(
                 allowed_features=user_input.allowed_columns
             )
             part_one_retries += 1

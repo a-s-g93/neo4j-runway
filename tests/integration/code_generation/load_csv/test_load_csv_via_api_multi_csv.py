@@ -67,7 +67,6 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:
-            print("QUERY: ", query)
             with cls.driver.session(database=database) as session:
                 session.run(query=query)
 

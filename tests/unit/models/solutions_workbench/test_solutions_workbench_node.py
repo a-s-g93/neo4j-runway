@@ -69,6 +69,8 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
     def test_init_from_json(self) -> None:
         sw_node = SolutionsWorkbenchNode(**self.json_input)
 
+        print("\n", sw_node.model_dump().keys(), "\n", self.json_input.keys())
+
         self.assertEqual(len(sw_node.model_dump().keys()), len(self.json_input.keys()))
 
         test_keys = [

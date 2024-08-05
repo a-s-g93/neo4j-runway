@@ -145,7 +145,7 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
         self.assertEqual(len(dm.relationships), 6)
         self.assertIsNotNone(dm.metadata)
 
-        sw_dm = dm.to_solutions_workbench(
+        dm.to_solutions_workbench(
             file_path="converted-data-model-sw-test.json", write_file=False
         )
 

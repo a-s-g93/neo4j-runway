@@ -41,7 +41,7 @@ class Property(BaseModel):
     # must_exist: bool
 
     @field_validator("type")
-    def validate_type(cls, v: str):
+    def validate_type(cls, v: str) -> str:
         if v.lower() == "object" or v.lower() == "string":
             return "str"
         elif "float" in v.lower():
@@ -78,6 +78,7 @@ class Property(BaseModel):
         Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
+        csv_mapping: str = ""
         if "|" in list(arrows_property.values())[0]:
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
@@ -87,14 +88,14 @@ class Property(BaseModel):
                     x.strip() for x in prop_props[0].split(",")
                 ]
             else:
-                csv_mapping: str = prop_props[0]
+                csv_mapping = prop_props[0]
                 csv_mapping_other = None
 
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
             node_key = "nodekey" in prop_props
         else:
-            csv_mapping: str = list(arrows_property.values())[0]
+            csv_mapping = list(arrows_property.values())[0]
             python_type = "unknown"
             csv_mapping_other = None
             is_unique = False

@@ -1,6 +1,14 @@
 import unittest
 
-from neo4j_runway.utils.naming_conventions import *
+from neo4j_runway.utils.naming_conventions import (
+    fix_node_label,
+    fix_property,
+    fix_relationship_type,
+    is_camel_case,
+    is_mixed_case,
+    is_pascal_case,
+    is_snake_case,
+)
 
 
 class TestNamingConventions(unittest.TestCase):

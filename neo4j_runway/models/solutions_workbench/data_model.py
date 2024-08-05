@@ -16,7 +16,7 @@ class SolutionsWorkbenchDataModel(BaseModel):
     relationshipTypes: Dict[str, SolutionsWorkbenchRelationship]
     metadata: Dict[str, Any] = dict()
 
-    def model_dump_json(self) -> str:
+    def model_dump_json(self, **kwargs: Any) -> str:
         """
         Overrides the Pydantic model_dump_json method.
 
@@ -33,20 +33,12 @@ class SolutionsWorkbenchDataModel(BaseModel):
             },
         }
 
-        return json.dumps(res)
-
-    # @property
-    # def nodeLabels_json(self):
-    #     return {k+str(i): v.model_dump() for i, (k, v) in enumerate(self.nodeLabels.items())}
-
-    # @property
-    # def relationshipTypes_json(self):
-    #     return {k+str(i): v.model_dump() for i, (k, v) in enumerate(self.relationshipTypes.items())}
+        return json.dumps(res, **kwargs)
 
     @property
-    def nodeLabels_json(self):
+    def nodeLabels_json(self) -> Dict[str, Dict[str, Any]]:
         return {k: v.model_dump() for (k, v) in self.nodeLabels.items()}
 
     @property
-    def relationshipTypes_json(self):
+    def relationshipTypes_json(self) -> Dict[str, Dict[str, Any]]:
         return {k: v.model_dump() for (k, v) in self.relationshipTypes.items()}

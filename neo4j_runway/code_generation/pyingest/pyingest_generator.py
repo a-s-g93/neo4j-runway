@@ -63,7 +63,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         database: Optional[str] = None,
         global_batch_size: int = 100,
         global_field_separator: Optional[str] = None,
-        pyingest_file_config: Optional[Dict[str, Any]] = dict(),
+        pyingest_file_config: Dict[str, Any] = dict(),
         pre_ingest_code: Optional[Union[str, List[str]]] = None,
         post_ingest_code: Optional[Union[str, List[str]]] = None,
     ):

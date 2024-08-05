@@ -29,7 +29,7 @@ class DataModelEntityPool(BaseModel):
     relationships: List[EntityPoolRelationship]
     explanation: str
 
-    def validate(self, allowed_features: List[str]) -> Dict[str, Any]:
+    def validate_pool(self, allowed_features: List[str]) -> Dict[str, Any]:
         """
         Validate that all generated properties exist in the allowed features.
 

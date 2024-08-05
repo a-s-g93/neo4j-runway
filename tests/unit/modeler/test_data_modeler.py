@@ -118,7 +118,7 @@ class TestGraphDataModeler(unittest.TestCase):
         """
 
         with self.assertWarns(Warning):
-            gdm = GraphDataModeler(
+            GraphDataModeler(
                 llm="llm",
                 user_input=USER_GENERATED_INPUT_BAD,
                 discovery="discovery",

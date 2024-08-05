@@ -5,6 +5,21 @@ repos:
     hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        name: Mypy Type Check
+        exclude: 'tests/.*|docs/.*|scripts/.*|neo4j_runway/code_generation/generate_ingest.py'
+        entry: mypy
+        language: python
+        types: [ python ]
+        stages: [ commit, push ]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        additional_dependencies:
+          - pytest
+          - pydantic
+          - types-PyYAML
   - repo: local
     hooks:
       - id: ruff-lint-isort
