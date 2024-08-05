@@ -28,7 +28,7 @@ class UserInput(BaseModel):
         self,
         column_descriptions: Dict[str, str],
         general_description: str = "",
-        use_cases: List[str] = None,
+        use_cases: Optional[List[str]] = None,
     ) -> None:
         """
         A container for user provided information about the data.
@@ -51,7 +51,7 @@ class UserInput(BaseModel):
         )
 
     @field_validator("column_descriptions")
-    def validate_column_description(cls, v) -> Dict[str, str]:
+    def validate_column_description(cls, v: Dict[str, str]) -> Dict[str, str]:
         if v == {}:
             warnings.warn("Empty column_descriptions dictionary is not recommended.")
         return v

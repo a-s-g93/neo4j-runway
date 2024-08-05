@@ -8,7 +8,7 @@ from typing import Any, Optional, Union
 try:
     import openai
 except ImportError:
-    openai = None  # type: ignore
+    openai = None  # type: ignore[unused-ignore, assignment]
 
 from ..base import BaseDiscoveryLLM
 
@@ -61,6 +61,8 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
                 "Could not import openai python client. "
                 "Please install it with `pip install openai`."
             )
+
+        client: Any
 
         if enable_async:
             client = openai.AsyncOpenAI(

@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, field_validator
 
@@ -201,8 +201,8 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
-        errors = []
+    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
+        errors: List[Optional[str]] = []
 
         for prop in self.properties:
             if prop.csv_mapping not in csv_columns:

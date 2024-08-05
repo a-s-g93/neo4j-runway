@@ -20,11 +20,11 @@ class literal_unicode(str):
     pass
 
 
-def folded_unicode_representer(dumper, data):
+def folded_unicode_representer(dumper: Any, data: Any) -> Any:
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=">")
 
 
-def literal_unicode_representer(dumper, data):
+def literal_unicode_representer(dumper: Any, data: Any) -> Any:
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
 
@@ -77,7 +77,7 @@ class BaseCodeGenerator(ABC):
     def _generate_base_cypher(
         self,
         strict_typing: bool = True,
-    ):
+    ) -> None:
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
                 # unique constraints

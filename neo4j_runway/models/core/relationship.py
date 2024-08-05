@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -87,7 +87,7 @@ class Relationship(BaseModel):
         }
 
     @property
-    def nonunique_properties(self) -> List[str]:
+    def nonunique_properties(self) -> List[Property]:
         """
         The node's nonunique properties.
         """
@@ -153,8 +153,8 @@ class Relationship(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
-        errors = []
+    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
+        errors: List[Optional[str]] = []
         if self.properties is not None:
             for prop in self.properties:
                 if prop.csv_mapping not in csv_columns:
@@ -190,7 +190,7 @@ class Relationship(BaseModel):
                 else ""
             )
             for x in self.properties
-            if x != "csv"
+            if x.name != "csv"
         }
         arrows_id = self.type + self.source + self.target
         return ArrowsRelationship(
@@ -257,10 +257,13 @@ class Relationship(BaseModel):
         Initialize a core Relationship from a Solutions Workbench Relationship.
         """
 
-        props = [
-            Property.from_solutions_workbench(solutions_workbench_property=prop)
-            for prop in solutions_workbench_relationship.properties.values()
-        ]
+        props = list()
+
+        if solutions_workbench_relationship.properties is not None:
+            props = [
+                Property.from_solutions_workbench(solutions_workbench_property=prop)
+                for prop in solutions_workbench_relationship.properties.values()
+            ]
 
         # support only single labels for now, take first label
         return cls(

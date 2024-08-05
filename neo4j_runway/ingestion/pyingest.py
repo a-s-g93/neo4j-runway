@@ -4,14 +4,14 @@ This is a modified PyIngest file for Neo4j Runway. It currently only supports Pa
 
 import datetime
 import warnings
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
 import yaml
 from neo4j import GraphDatabase
 
-global_config = dict()
+global_config: Dict[str, Any] = dict()
 
 
 class LocalServer(object):
@@ -19,7 +19,7 @@ class LocalServer(object):
     Handles data ingestion.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._driver = GraphDatabase.driver(
             global_config["server_uri"],
             auth=(global_config["admin_user"], global_config["admin_pass"]),
@@ -34,10 +34,10 @@ class LocalServer(object):
             global_config["basepath"] if "basepath" in global_config else None
         )
 
-    def close(self):
+    def close(self) -> None:
         self._driver.close()
 
-    def get_params(self, file):
+    def get_params(self, file: Dict[str, Any]) -> Dict[str, Any]:
         params = dict()
         params["skip_records"] = file.get("skip_records") or 0
         params["compression"] = file.get("compression") or "none"
@@ -52,7 +52,7 @@ class LocalServer(object):
         params["field_sep"] = file.get("field_separator") or ","
         return params
 
-    def load_dataframe(self, file, dataframe: pd.DataFrame) -> None:
+    def load_dataframe(self, file: Dict[str, Any], dataframe: pd.DataFrame) -> None:
         """
         Load a Pandas DataFrame directly using a PyIngest yaml global_config file.
         """
@@ -64,12 +64,14 @@ class LocalServer(object):
             for i, rows in enumerate(np.array_split(dataframe, partition)):
                 print("loading...", i, datetime.datetime.now(), flush=True)
                 # Chunk up the rows to enable additional fastness :-)
-                rows_dict = {"rows": rows.fillna(value="").to_dict("records")}
+                rows_dict = {
+                    "rows": pd.DataFrame(rows).fillna(value="").to_dict("records")
+                }
                 session.run(params["cql"], dict=rows_dict).consume()
 
         print("{} : Completed file", datetime.datetime.now())
 
-    def load_csv(self, file):
+    def load_csv(self, file: Dict[str, Any]) -> None:
         with self._driver.session(**self.db_config) as session:
             params = self.get_params(file)
 
@@ -101,12 +103,14 @@ class LocalServer(object):
                 for i, rows in enumerate(row_chunks):
                     print(params["url"], i, datetime.datetime.now(), flush=True)
                     # Chunk up the rows to enable additional fastness :-)
-                    rows_dict = {"rows": rows.fillna(value="").to_dict("records")}
+                    rows_dict = {
+                        "rows": pd.DataFrame(rows).fillna(value="").to_dict("records")
+                    }
                     session.run(params["cql"], dict=rows_dict).consume()
 
         print("{} : Completed file", datetime.datetime.now())
 
-    def pre_ingest(self):
+    def pre_ingest(self) -> None:
         if "pre_ingest" in global_config:
             statements = global_config["pre_ingest"]
             if len(statements) > 0:
@@ -116,7 +120,7 @@ class LocalServer(object):
             else:
                 print("no pre ingest scripts found.")
 
-    def post_ingest(self):
+    def post_ingest(self) -> None:
         if "post_ingest" in global_config:
             statements = global_config["post_ingest"]
             if len(statements) > 0:
@@ -127,13 +131,13 @@ class LocalServer(object):
                 print("no post ingest scripts found.")
 
 
-def load_config(configuration):
+def load_config(configuration: Any) -> None:
     global global_config
     global_config = yaml.safe_load(configuration)
 
 
 def PyIngest(
-    config: str = None, dataframe: Optional[pd.DataFrame] = None, **kwargs
+    config: str, dataframe: Optional[pd.DataFrame] = None, **kwargs: Any
 ) -> None:
     """
     Function to ingest data according to a configuration YAML.

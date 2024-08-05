@@ -111,7 +111,7 @@ class GraphDataModeler:
             self.general_info = general_data_description or ""
             self.description_numeric = numeric_data_description or ""
             self.description_categorical = categorical_data_description or ""
-            self.feature_descriptions = feature_descriptions or ""
+            self.feature_descriptions = feature_descriptions or dict()
 
         if self.discovery == "":
             warnings.warn(
@@ -249,7 +249,7 @@ class GraphDataModeler:
         iterations: int = 1,
         user_corrections: Optional[str] = None,
         use_yaml_data_model: bool = False,
-    ) -> str:
+    ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.
 

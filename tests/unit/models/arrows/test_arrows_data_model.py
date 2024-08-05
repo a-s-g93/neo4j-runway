@@ -100,7 +100,7 @@ class TestDataModel(unittest.TestCase):
         """
         Test init.
         """
-        dm_to_adm = self.data_model.to_arrows(write_file=False)
+        self.data_model.to_arrows(write_file=False)
 
     def test_json_generation(self) -> None:
         """
@@ -108,11 +108,11 @@ class TestDataModel(unittest.TestCase):
         """
 
         file_path = "test-arrows-output.json"
-        dm_to_adm = self.data_model.to_arrows(file_path=file_path, write_file=True)
+        self.data_model.to_arrows(file_path=file_path, write_file=True)
 
         with open(f"./{file_path}", "r") as f:
             content = literal_eval(f.read())
-            adm_copy = ArrowsDataModel(
+            ArrowsDataModel(
                 nodes=content["nodes"], relationships=content["relationships"]
             )
 

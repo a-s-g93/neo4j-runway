@@ -7,7 +7,7 @@ import os
 from typing import Dict, Optional, Union
 
 import pandas as pd
-from IPython.display import (  # type: ignore # this works even though I get an import warning for IPython...
+from IPython.display import (
     Markdown,
     display,
 )
@@ -117,7 +117,7 @@ class Discovery:
 
         self._generate_csv_summary()
 
-        if not self.pandas_only:
+        if not self.pandas_only and self.llm is not None:
             response = self.llm._get_discovery_response(
                 formatted_prompt=create_discovery_prompt(
                     pandas_general_description=self.df_info,

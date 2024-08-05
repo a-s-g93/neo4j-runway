@@ -1,8 +1,43 @@
 import unittest
 
-from neo4j_runway.code_generation.cypher import *
+from neo4j_runway.code_generation.cypher import (
+    cast_value,
+    generate_constraints_key,
+    generate_match_node_clause,
+    generate_match_same_node_labels_clause,
+    generate_merge_node_clause_standard,
+    generate_merge_node_load_csv_clause,
+    generate_merge_relationship_clause_standard,
+    generate_merge_relationship_load_csv_clause,
+    generate_node_key_constraint,
+    generate_relationship_key_constraint,
+    generate_set_property,
+    generate_set_unique_property,
+    generate_unique_constraint,
+)
 from neo4j_runway.models import DataModel, Node, Property, Relationship
-from tests.resources.answers.ingestion_generation_answers import *
+from tests.resources.answers.ingestion_generation_answers import (
+    constraint_a_1,
+    constraint_a_3,
+    constraint_b,
+    constraints_key_a_1,
+    constraints_key_a_3,
+    constraints_key_b,
+    match_node_a,
+    match_node_b,
+    match_same_labels,
+    merge_node_load_csv_b,
+    merge_node_standard_a,
+    merge_relationship_load_csv,
+    merge_relationship_standard,
+    merge_relationship_standard_same_node,
+    node_key_constraint_answer,
+    relationship_key_constraint_answer,
+    set_properties_a,
+    set_properties_b,
+    set_unique_property_a,
+    set_unique_property_b,
+)
 
 
 class TestIngestCodeGeneration(unittest.TestCase):

@@ -36,14 +36,30 @@ regex = "~2024"
 
 
 [tool.poetry.group.dev.dependencies]
+coverage = "^7.4.3"
 ipykernel = "^6.29.5"
+mypy = "^1.10.0"
 nbconvert= "^7.16.4"
 pre-commit = { version = "^3.6.2", python = "^3.10" }
 pytest = "^8.3.2"
 python-dotenv = "^1.0.1"
 ruff = "^0.3.0"
 toml = "^0.10.2"
+types-PyYAML = "^6.0.12.20240724"
 
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+disallow_untyped_calls = false
+exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py"]
+
+[tool.ruff]
+target-version = "py310"
+show-fixes = true
+
+[tool.coverage.paths]
+source = ["neo4j_runway"]
 
 [build-system]
 requires = ["poetry-core"]
