@@ -23,7 +23,7 @@ include = "neo4j_runway"
 
 [tool.poetry.dependencies]
 graphviz = "^0.20.1"
-instructor = "^1.2.0"
+instructor = "1.2.0"
 ipython = "^8.24.0"
 neo4j = "^5.19.0"
 numpy = "^1.26.3"
