@@ -1,0 +1,9 @@
+{"name":"Bob","age":25,"pet_name":"Benny","pet":"dog","city":"Chicago","street":"Michigan Ave","toy":"chuck-it","toy_type":"ball","knows":"Ben"}
+{"name":"Bob","age":25,"pet_name":"Benny","pet":"dog","city":"Chicago","street":"Michigan Ave","toy":"chuck-it","toy_type":"ball","knows":"Chelsea"}
+{"name":"Ben","age":54,"pet_name":"Spike","pet":"cat","city":"Milwaukee","street":"1st st","toy":"barry","toy_type":"stuffed animal","knows":"Bob"}
+{"name":"Ben","age":54,"pet_name":"Spike","pet":"cat","city":"Milwaukee","street":"1st st","toy":"barry","toy_type":"stuffed animal","knows":"Chelsea"}
+{"name":"Chelsea","age":30,"pet_name":"Mia","pet":"dog","city":"Chicago","street":"Clark st","toy":"bone","toy_type":"bone","knows":"Ben"}
+{"name":"Chelsea","age":30,"pet_name":"Mia","pet":"dog","city":"Chicago","street":"Clark st","toy":"bone","toy_type":"bone","knows":"Bob"}
+{"name":"Amy","age":77,"pet_name":"Donald","pet":"cat","city":"Naperville","street":"Main st","toy":"scratch pole","toy_type":"scratch pole","knows":"Ben"}
+{"name":"Dom","age":23,"pet_name":"Gerald","pet":"dog","city":"Chicago","street":"Clark st","toy":"duck","toy_type":"stuffed animal","knows":"Bob"}
+{"name":"Dom","age":23,"pet_name":"Gerald","pet":"dog","city":"Chicago","street":"Clark st","toy":"duck","toy_type":"stuffed animal","knows":"Chelsea"}

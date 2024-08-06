@@ -3,12 +3,12 @@ import unittest
 from ast import literal_eval
 
 from neo4j_runway.models import (
-    ArrowsDataModel,
     DataModel,
     Node,
     Property,
     Relationship,
 )
+from neo4j_runway.models.arrows import ArrowsDataModel
 
 
 class TestDataModel(unittest.TestCase):
