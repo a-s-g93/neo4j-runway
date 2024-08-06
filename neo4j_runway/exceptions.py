@@ -43,3 +43,9 @@ class InvalidSolutionsWorkbenchDataModelError(RunwayError):
     """Exception raised when a Solutions Workbench data model is unable to be parsed into a Runway core data model."""
 
     pass
+
+
+class DataNotSupportedError(RunwayError):
+    """Exception raised when an unsupported data format is given to a DataLoader class."""
+
+    pass
