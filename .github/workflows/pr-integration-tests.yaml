@@ -1,11 +1,6 @@
 name: 'Runway Integration Tests'
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    branches:
-      - main
-        pre-deployment
+on: pull_request
 
 env:
   NEO4J_USERNAME: neo4j
