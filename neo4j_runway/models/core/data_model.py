@@ -13,6 +13,7 @@ import yaml
 from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
 from .node import Node
 from .relationship import Relationship
+from .property import Property
 from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -25,6 +26,27 @@ from ...utils.naming_conventions import (
     fix_relationship_type,
 )
 
+'''
+DataModel ->
+
+design an interface on DataModel that exposes the Properties, through getters and setters
+
+//requirements
+-- node labels can have multiple permutations of properties
+-- there needs to be checks to make sure the node label actually exists. there are existing methods on the interface I can use
+
+
+get_node_label_properties(node_label: str) -> {node_label: str : Tuple(List[Property]}):
+get_relationship_label_properties(node_label: str) -> {node_label: str : Tuple(List[Property])
+get_all_node_label_properties() -> List[{node_label: str : Tuple(List[Property], List[Property])
+get_all_relationship_label_properties -> List[{node_label: str : Tuple(List[Property], List[Property])
+
+set_node_property(node_label: str) -> boolean
+set_relationship_property(node_label:s str) -> boolean 
+
+
+'''
+
 
 class DataModel(BaseModel):
     """
@@ -36,11 +58,11 @@ class DataModel(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
     def __init__(
-        self,
-        nodes: List[Node],
-        relationships: List[Relationship],
-        metadata: Optional[Dict[str, Any]] = None,
-        use_neo4j_naming_conventions: bool = True,
+            self,
+            nodes: List[Node],
+            relationships: List[Relationship],
+            metadata: Optional[Dict[str, Any]] = None,
+            use_neo4j_naming_conventions: bool = True,
     ) -> None:
         """
         The standard Graph Data Model representation in Neo4j Runway.
@@ -79,6 +101,39 @@ class DataModel(BaseModel):
         """
 
         return [n.label for n in self.nodes]
+
+    def get_node_label_properties(self, node_label: str) -> Dict[str, List[Property]]:
+        """
+        Retrieve properties for a specified node label, ensuring unique property names.
+
+        Parameters
+        ----------
+        node_label : str
+            The label of the node for which properties are to be retrieved.
+
+        Returns
+        -------
+        Dict[str, List[Property]]
+            A dictionary with the node label as the key and a list of properties as the value.
+
+        Raises
+        ------
+        ValueError
+        If the node label does not exist or if the node has multiple permutations of properties.
+        """
+
+        if node_label not in self.node_labels:
+            raise ValueError(f"node label {node_label} does not exist")
+
+        node = self.node_dict[node_label]
+
+        property_names = [prop.name for prop in node.properties]
+        if len(property_names) != len(set(property_names)):
+            raise ValueError(f'Node {node_label} has multiple permutations of properties. Please address')
+
+        return {node.label: node.properties}
+
+
 
     @property
     def relationship_types(self) -> List[str]:
@@ -256,12 +311,12 @@ class DataModel(BaseModel):
             result += "\n\nproperties:\n"
         for prop in node.properties:
             result = (
-                result
-                + prop.name
-                + f": {prop.csv_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
+                    result
+                    + prop.name
+                    + f": {prop.csv_mapping}"
+                    + (" *unique*" if prop.is_unique else "")
+                    + (" *key*" if prop.part_of_key else "")
+                    + "\n"
             )
 
         return result
@@ -277,12 +332,12 @@ class DataModel(BaseModel):
             result += "\n\nproperties:\n"
         for prop in relationship.properties:
             result = (
-                result
-                + prop.name
-                + f": {prop.csv_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
+                    result
+                    + prop.name
+                    + f": {prop.csv_mapping}"
+                    + (" *unique*" if prop.is_unique else "")
+                    + (" *key*" if prop.part_of_key else "")
+                    + "\n"
             )
 
         return result
@@ -328,7 +383,7 @@ class DataModel(BaseModel):
         return self.model_dump_json()
 
     def to_yaml(
-        self, file_path: str = "data-model.yaml", write_file: bool = True
+            self, file_path: str = "data-model.yaml", write_file: bool = True
     ) -> str:
         """
         Output the data model to a yaml file and String.
@@ -355,7 +410,7 @@ class DataModel(BaseModel):
         return yaml_string
 
     def to_arrows(
-        self, file_path: str = "data-model.json", write_file: bool = True
+            self, file_path: str = "data-model.json", write_file: bool = True
     ) -> ArrowsDataModel:
         """
         Output the data model to arrows compatible JSON file.
@@ -443,7 +498,7 @@ class DataModel(BaseModel):
             )
 
     def to_solutions_workbench(
-        self, file_path: str = "data-model.json", write_file: bool = True
+            self, file_path: str = "data-model.json", write_file: bool = True
     ) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.

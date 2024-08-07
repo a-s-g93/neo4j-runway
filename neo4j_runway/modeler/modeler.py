@@ -72,7 +72,8 @@ class GraphDataModeler:
         else:
             if not allowed_columns and not user_input:
                 raise ValueError(
-                    "Not enough information provided. Please provide a Discovery object to the discovery arg, user_input or allowed_columns."
+                    "Not enough information provided. Please provide a Discovery object to the discovery arg, "
+                    "user_input or allowed_columns."
                 )
             # we convert all user_input to a UserInput object
             if not isinstance(user_input, UserInput):

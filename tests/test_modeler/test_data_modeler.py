@@ -40,7 +40,6 @@ class TestGraphDataModelerFree(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-
         cls.data_model = DataModel(
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
@@ -53,7 +52,6 @@ class TestGraphDataModelerFree(unittest.TestCase):
         cls.gdm = GraphDataModeler(llm=LLMMock(), user_input=user_input)
 
     def test_load_model(self) -> None:
-
         self.gdm.load_model(data_model=self.data_model)
         self.assertEqual(self.gdm.current_model, self.data_model)
 
@@ -124,7 +122,6 @@ class TestGraphDataModelerFree(unittest.TestCase):
             )
 
     def test_no_discovery_no_user_input_with_allowed_columns(self) -> None:
-
         gdm = GraphDataModeler(
             llm="llm",
             discovery="discovery",

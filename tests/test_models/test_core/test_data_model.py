@@ -253,6 +253,24 @@ class TestDataModel(unittest.TestCase):
     def test_data_model_with_multi_csv_from_solutions_workbench(self) -> None:
         pass
 
+    def test_get_node_label_properties(self) -> None:
+        node_label = 'Person'
+
+        expected_properties = [
+            Property(name="name", type="str", csv_mapping="name", is_unique=True),
+            Property(name="age", type="str", csv_mapping="age", is_unique=False),
+        ]
+
+        data_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        properties = data_model.get_node_label_properties(node_label)
+
+        self.assertIn(node_label, properties)
+        self.assertEqual(properties[node_label], expected_properties)
+
+        with self.assertRaises(ValueError):
+            data_model.get_node_label_properties("NonExistentLabel")
+
 
 if __name__ == "__main__":
     unittest.main()
