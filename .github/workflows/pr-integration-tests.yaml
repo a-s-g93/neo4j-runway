@@ -1,11 +1,8 @@
 name: 'Runway Integration Tests'
 
 on:
-  push:
-    branches:
-      - main
-        pre-deployment
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
         pre-deployment
@@ -17,7 +14,7 @@ env:
   NEO4J_DATABASE: neo4j
 
 jobs:
-  e2e-tests:
+  integration-tests:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 6
