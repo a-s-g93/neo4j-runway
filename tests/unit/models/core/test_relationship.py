@@ -1,6 +1,7 @@
 import unittest
 
-from neo4j_runway.models import ArrowsRelationship, Property, Relationship
+from neo4j_runway.models import Property, Relationship
+from neo4j_runway.models.arrows import ArrowsRelationship
 
 
 class TestRelationship(unittest.TestCase):
