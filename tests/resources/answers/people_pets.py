@@ -2,7 +2,7 @@ people_pets_yaml_string = """
 server_uri: bolt://localhost:7687
 admin_user: neo4j
 admin_pass: password
-database: peoplepets
+database: neo4j
 basepath: file:./
 
 pre_ingest:
@@ -73,7 +73,7 @@ files:
 people_pets_multi_csv_yaml_string = """server_uri: bolt://localhost:7687
 admin_user: neo4j
 admin_pass: password
-database: peoplepets
+database: neo4j
 basepath: ./
 
 pre_ingest:
