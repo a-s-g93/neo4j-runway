@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, List, Optional, Set
+import warnings
+from typing import Any, Dict, List, Optional, Set, Union
 
 import pandas as pd
 
@@ -11,7 +12,7 @@ from .table_collection import TableCollection
 def load_local_files(
     data_directory: str,
     general_description: Optional[str] = None,
-    data_dictionary: Dict[str, Dict[str, str]] = dict(),
+    data_dictionary: Dict[str, Any] = dict(),
     use_cases: Optional[List[str]] = None,
     ignored_files: List[str] = list(),
     config: Dict[str, Dict[str, Any]] = dict(),
@@ -25,7 +26,7 @@ def load_local_files(
         The directory containing all data.
     general_description : Optional[str], optional
         A general description of the data, by default None
-    data_dictionary : Dict[str, Dict[str, str]], optional
+    data_dictionary : Dict[str, Any], optional
         A dictionary with file names as keys. Each key has a dictionary containing a description of each column in the file that is available for data modeling.
         Only columns identified here will be considered for inclusion in the data model. By default dict()
     use_cases : Optional[List[str]], optional
@@ -57,16 +58,17 @@ def load_local_files(
         allowed_columns = (
             list(data_dictionary.get(f, dict()))
             if f in data_dictionary.keys()
-            else list()
+            else None
         )
 
         conf = config.get(f, dict())
+        file_data_dict: Dict[str, str] = data_dictionary.get(f, data_dictionary)
         if f.lower().endswith(".json") or f.lower().endswith(".jsonl"):
             loaded_files.append(
                 load_json(
                     file_path=data_directory + f,
                     general_description=general_description,
-                    data_dictionary=data_dictionary.get(f, dict()),
+                    data_dictionary=file_data_dict,
                     use_cases=use_cases,
                     allowed_columns=allowed_columns,
                     config=conf,
@@ -77,7 +79,7 @@ def load_local_files(
                 load_csv(
                     file_path=data_directory + f,
                     general_description=general_description,
-                    data_dictionary=data_dictionary.get(f, dict()),
+                    data_dictionary=file_data_dict,
                     use_cases=use_cases,
                     allowed_columns=allowed_columns,
                     config=conf,
@@ -105,8 +107,10 @@ def load_csv(
     config: Dict[str, Any] = dict(),
 ) -> Table:
     if not config.get("usecols"):
-        config["usecols"] = allowed_columns or (
-            list(data_dictionary.keys()) if data_dictionary is not None else list()
+        config["usecols"] = (
+            allowed_columns
+            if allowed_columns is not None
+            else (list(data_dictionary.keys()))
         )
     try:
         data: pd.DataFrame = pd.read_csv(file_path, **config)

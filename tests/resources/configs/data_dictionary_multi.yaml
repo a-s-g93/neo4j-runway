@@ -1,0 +1,17 @@
+files:
+- name: a.csv
+  columns:
+  - name: col_a
+    desc: The column of the letter being a
+  - name: col_b
+    desc: The column of naming b
+  - name: col_c
+    desc: c is for column for which it has been named
+- name: b.csv
+  columns:
+  - name: col_d
+    desc: column d
+  - name: col_e
+    desc: column e
+  - name: col_f
+    desc: column f
