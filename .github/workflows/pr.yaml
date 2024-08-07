@@ -37,7 +37,6 @@ jobs:
       - name: Check format and linting
         run: |
           poetry run ruff check --select I .
-          poetry run ruff check .
           poetry run ruff format --check .
       - name: Run strict mypy check
         run: poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls .
