@@ -18,7 +18,6 @@ jobs:
         neo4j-version:
           - 5
         neo4j-edition:
-          - community
           - enterprise
     services:
       neo4j:
