@@ -1,11 +1,23 @@
-from typing import Any, Dict, List, Optional
 import warnings
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, field_validator
 
 
 class UserInput(BaseModel):
     """
     A container for user provided information about the data.
+
+    Attributes
+    ----------
+    general_description : str, optional
+        A general description of the CSV data.
+    column_descriptions : Dict[str, str]
+        A mapping of the desired CSV columns to their descriptions.
+        The keys of this argument will determine which CSV columns are
+        evaluated in discovery and used to generate a data model.
+    use_cases : List[str], optional
+        A list of use cases that the final data model should be able to answer.
     """
 
     general_description: str = ""
@@ -16,12 +28,12 @@ class UserInput(BaseModel):
         self,
         column_descriptions: Dict[str, str],
         general_description: str = "",
-        use_cases: List[str] = None,
+        use_cases: Optional[List[str]] = None,
     ) -> None:
         """
         A container for user provided information about the data.
 
-        Attributes
+        Parameters
         ----------
         general_description : str, optional
             A general description of the CSV data, by default = ""
@@ -39,7 +51,7 @@ class UserInput(BaseModel):
         )
 
     @field_validator("column_descriptions")
-    def validate_column_description(cls, v) -> Dict[str, str]:
+    def validate_column_description(cls, v: Dict[str, str]) -> Dict[str, str]:
         if v == {}:
             warnings.warn("Empty column_descriptions dictionary is not recommended.")
         return v

@@ -1,15 +1,24 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, field_validator
 
 from ..arrows import ArrowsNode
-from .property import Property
 from ..solutions_workbench import SolutionsWorkbenchNode
+from .property import Property
 
 
 class Node(BaseModel):
     """
     Standard Node representation.
+
+    Attributes
+    -------
+    label : str
+        The node label.
+    properties : List[Property]
+        A list of the properties within the node.
+    csv_name : str, optional
+        The name of the CSV containing the node's information.
     """
 
     label: str
@@ -23,8 +32,8 @@ class Node(BaseModel):
         """
         Standard Node representation.
 
-        Attributes
-        -------
+        Parameters
+        ----------
         label : str
             The node label.
         properties : List[Property]
@@ -192,8 +201,8 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Union[str, None]]:
-        errors = []
+    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
+        errors: List[Optional[str]] = []
 
         for prop in self.properties:
             if prop.csv_mapping not in csv_columns:

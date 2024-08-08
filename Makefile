@@ -4,27 +4,24 @@
 all: help
 
 test:
-	python3 -m unittest tests.all_test_runner
-
-test_free:
-	python3 -m unittest tests.free_test_runner
+	pytest tests
 
 test_integration:
-	python3 -m unittest tests.test_integration.paid_integration_test_runner
+	poetry run pytest tests/integration
 
 test_unit:
-	python3 -m unittest tests.unit_test_runner
+	poetry run pytest tests/unit
 
 init:
 	poetry install --with dev
-	./scripts/setup_precommit.sh
+	pre-commit install
 
 ######################
 # LINTING AND FORMATTING
 ######################
 
 format:
-	black . --fast
+	poetry run ruff format
 
 ######################
 # DOCUMENTATION
@@ -53,6 +50,5 @@ help:
 	@echo 'docs_refresh................ - refresh documentation for all public classes and functions'
 	@echo 'format...................... - run code formatters'
 	@echo 'test........................ - run all unit and integration tests'
-	@echo 'test_free................... - run all free unit and integration tests'
 	@echo 'test_unit................... - run all free unit tests'
-	@echo 'test_integration............ - run all integration tests'	
+	@echo 'test_integration............ - run all integration tests'

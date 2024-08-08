@@ -4,7 +4,7 @@ from neo4j import GraphDatabase
 
 
 def test_database_connection(
-    credentials: Dict[str, str]
+    credentials: Dict[str, str],
 ) -> Dict[str, Union[str, bool]]:
     """
     Verify accurate credentials upon user submission.
@@ -27,7 +27,6 @@ def test_database_connection(
     {"valid": valid, "message": "Connection and Auth Verified!"}
     """
 
-    valid = True
     try:
         d = GraphDatabase.driver(
             credentials["uri"], auth=(credentials["username"], credentials["password"])
@@ -35,12 +34,12 @@ def test_database_connection(
         d.verify_connectivity()
         d.verify_authentication()
     except Exception as e:
-        valid = False
+        d.close()
         return {
-            "valid": valid,
+            "valid": False,
             "message": f"""
                         Are your credentials correct?
                         Connection Error: {e}
                         """,
         }
-    return {"valid": valid, "message": "Connection and Auth Verified!"}
+    return {"valid": True, "message": "Connection and Auth Verified!"}

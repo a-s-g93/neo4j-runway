@@ -38,7 +38,6 @@ class SolutionsWorkbenchNode(BaseModel):
     fromDataSources: List[str] = list()
     indexes: List[Dict[str, Any]] = list()
     properties: Dict[str, SolutionsWorkbenchProperty] = dict()
-    # display: Dict[str, Any] = default_display
     secondaryNodeLabelKeys: List[str] = list()
     isOnlySecondaryNodeLabel: bool = False
     referenceData: str = ""
@@ -47,7 +46,6 @@ class SolutionsWorkbenchNode(BaseModel):
     y: Optional[int] = None
 
     @computed_field
-    @property
     def display(self) -> Dict[str, Any]:
         if self.x and self.y:
             default_display.update({"x": self.x, "y": self.y})

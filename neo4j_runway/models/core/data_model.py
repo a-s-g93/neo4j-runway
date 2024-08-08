@@ -2,33 +2,46 @@
 This file contains the DataModel class which is the standard representation of a graph data model in Neo4j Runway.
 """
 
-from ast import literal_eval
 import json
-from typing import Any, List, Dict, Optional, Union
+from ast import literal_eval
+from typing import Any, Dict, List, Optional
 
+import yaml
 from graphviz import Digraph
 from pydantic import BaseModel
-import yaml
 
-from ..arrows.data_model import ArrowsNode, ArrowsRelationship, ArrowsDataModel
-from .node import Node
-from .relationship import Relationship
-from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
-from ..solutions_workbench import (
-    SolutionsWorkbenchDataModel,
-    SolutionsWorkbenchNode,
-    SolutionsWorkbenchRelationship,
+from ...exceptions import (
+    InvalidArrowsDataModelError,
+    InvalidSolutionsWorkbenchDataModelError,
 )
+from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ...utils.naming_conventions import (
     fix_node_label,
     fix_property,
     fix_relationship_type,
 )
+from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
+from ..solutions_workbench import (
+    SolutionsWorkbenchDataModel,
+    SolutionsWorkbenchNode,
+    SolutionsWorkbenchRelationship,
+)
+from .node import Node
+from .relationship import Relationship
 
 
 class DataModel(BaseModel):
     """
     The standard Graph Data Model representation in Neo4j Runway.
+
+    Attributes
+    ----------
+    nodes : List[Node]
+        A list of the nodes in the data model.
+    relationships : List[Relationship]
+        A list of the relationships in the data model.
+    metadata: Optional[Dict[str, Any]]
+        Metadata from an import source such as Solutions Workbench.
     """
 
     nodes: List[Node]
@@ -45,7 +58,7 @@ class DataModel(BaseModel):
         """
         The standard Graph Data Model representation in Neo4j Runway.
 
-        Attributes
+        Parameters
         ----------
         nodes : List[Node]
             A list of the nodes in the data model.
@@ -133,7 +146,8 @@ class DataModel(BaseModel):
         Dict[str, Any]
             A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         """
-        errors = []
+        errors = list()
+
         for node in self.nodes:
             errors += node.validate_properties(csv_columns=csv_columns)
 
@@ -150,11 +164,11 @@ class DataModel(BaseModel):
                 allowed_columns=csv_columns,
             )
 
-            print("validation message: \n", message)
             return {"valid": False, "message": message, "errors": errors}
+
         return {"valid": True, "message": "", "errors": list()}
 
-    def _validate_relationship_sources_and_targets(self) -> List[Union[str, None]]:
+    def _validate_relationship_sources_and_targets(self) -> List[str]:
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
@@ -186,7 +200,7 @@ class DataModel(BaseModel):
 
         return errors
 
-    def _validate_csv_features_used_only_once(self) -> List[Union[str, None]]:
+    def _validate_csv_features_used_only_once(self) -> List[str]:
         """
         Validate that each property is used no more than one time in the data model.
         """
@@ -207,16 +221,18 @@ class DataModel(BaseModel):
                         used_features[prop.csv_mapping] = [node.label]
                     else:
                         used_features[prop.csv_mapping].append(node.label)
+
         for rel in self.relationships:
             for prop in rel.properties:
                 if prop.csv_mapping not in used_features:
                     used_features[prop.csv_mapping] = [rel.type]
                 else:
                     used_features[prop.csv_mapping].append(rel.type)
-        for prop, labels_or_types in used_features.items():
+
+        for prop_mapping, labels_or_types in used_features.items():
             if len(labels_or_types) > 1:
                 errors.append(
-                    f"The property csv_mapping {prop} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove."
+                    f"The property csv_mapping {prop_mapping} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove."
                 )
 
         return errors
@@ -307,7 +323,7 @@ class DataModel(BaseModel):
             for prop in rel.properties:
                 prop.name = fix_property(prop.name)
 
-    def to_json(self, file_path: str = "data-model.json") -> Dict[str, any]:
+    def to_json(self, file_path: str = "data-model.json") -> Dict[str, Any]:
         """
         Output the data model to a json file.
 
@@ -325,7 +341,7 @@ class DataModel(BaseModel):
         with open(f"{file_path}", "w") as f:
             f.write(self.model_dump_json())
 
-        return self.model_dump_json()
+        return self.model_dump()
 
     def to_yaml(
         self, file_path: str = "data-model.yaml", write_file: bool = True
@@ -346,7 +362,7 @@ class DataModel(BaseModel):
             A String representation of the yaml file.
         """
 
-        yaml_string = yaml.dump(self.model_dump(exclude=["metadata"]))
+        yaml_string = yaml.dump(self.model_dump(exclude={"metadata"}))
 
         if write_file:
             with open(f"{file_path}", "w") as f:
@@ -403,43 +419,54 @@ class DataModel(BaseModel):
         file_path : str
             The location and name of the arrows.app JSON file to import.
 
+        Raises
+        ------
+        InvalidArrowsDataModelError
+            If the json file is unable to be parsed.
+
         Returns
         -------
         DataModel
             An instance of a DataModel.
         """
-
-        with open(f"{file_path}", "r") as f:
-            content = literal_eval(f.read())
-            node_id_to_label_map = {n["id"]: n["labels"][0] for n in content["nodes"]}
-            return cls(
-                nodes=[
-                    Node.from_arrows(
-                        ArrowsNode(
-                            id=n["id"],
-                            position=n["position"],
-                            labels=n["labels"],
-                            properties=n["properties"],
-                            caption=n["caption"],
-                            style=n["style"],
+        try:
+            with open(f"{file_path}", "r") as f:
+                content = literal_eval(f.read())
+                node_id_to_label_map = {
+                    n["id"]: n["labels"][0] for n in content["nodes"]
+                }
+                return cls(
+                    nodes=[
+                        Node.from_arrows(
+                            ArrowsNode(
+                                id=n["id"],
+                                position=n["position"],
+                                labels=n["labels"],
+                                properties=n["properties"],
+                                caption=n["caption"],
+                                style=n["style"],
+                            )
                         )
-                    )
-                    for n in content["nodes"]
-                ],
-                relationships=[
-                    Relationship.from_arrows(
-                        ArrowsRelationship(
-                            id=r["id"],
-                            fromId=r["fromId"],
-                            toId=r["toId"],
-                            properties=r["properties"],
-                            type=r["type"],
-                            style=r["style"],
-                        ),
-                        node_id_to_label_map=node_id_to_label_map,
-                    )
-                    for r in content["relationships"]
-                ],
+                        for n in content["nodes"]
+                    ],
+                    relationships=[
+                        Relationship.from_arrows(
+                            ArrowsRelationship(
+                                id=r["id"],
+                                fromId=r["fromId"],
+                                toId=r["toId"],
+                                properties=r["properties"],
+                                type=r["type"],
+                                style=r["style"],
+                            ),
+                            node_id_to_label_map=node_id_to_label_map,
+                        )
+                        for r in content["relationships"]
+                    ],
+                )
+        except Exception:
+            raise InvalidArrowsDataModelError(
+                "Unable to parse the provided arrows.app data model json file."
             )
 
     def to_solutions_workbench(
@@ -498,30 +525,39 @@ class DataModel(BaseModel):
         file_path : str
             The location and name of the Solutions Workbench JSON file to import.
 
+        Raises
+        ------
+        InvalidSolutionsWorkbenchDataModelError
+            If the json file is unable to be parsed.
+
         Returns
         -------
         DataModel
             An instance of a DataModel.
         """
 
-        with open(f"{file_path}", "r") as f:
-            content = json.loads(f.read())
-            node_id_to_label_map = {
-                n["key"]: n["label"]
-                for n in content["dataModel"]["nodeLabels"].values()
-            }
-            return cls(
-                nodes=[
-                    Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
-                    # print(n, "\n")
+        try:
+            with open(f"{file_path}", "r") as f:
+                content = json.loads(f.read())
+                node_id_to_label_map = {
+                    n["key"]: n["label"]
                     for n in content["dataModel"]["nodeLabels"].values()
-                ],
-                relationships=[
-                    Relationship.from_solutions_workbench(
-                        SolutionsWorkbenchRelationship(**r),
-                        node_id_to_label_map=node_id_to_label_map,
-                    )
-                    for r in content["dataModel"]["relationshipTypes"].values()
-                ],
-                metadata=content["metadata"],
+                }
+                return cls(
+                    nodes=[
+                        Node.from_solutions_workbench(SolutionsWorkbenchNode(**n))
+                        for n in content["dataModel"]["nodeLabels"].values()
+                    ],
+                    relationships=[
+                        Relationship.from_solutions_workbench(
+                            SolutionsWorkbenchRelationship(**r),
+                            node_id_to_label_map=node_id_to_label_map,
+                        )
+                        for r in content["dataModel"]["relationshipTypes"].values()
+                    ],
+                    metadata=content["metadata"],
+                )
+        except Exception:
+            raise InvalidSolutionsWorkbenchDataModelError(
+                "Unable to parse the provided Solutions Workbench data model json file."
             )

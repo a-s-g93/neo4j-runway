@@ -2,18 +2,33 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, field_validator
 
-from ..solutions_workbench import SolutionsWorkbenchProperty
 from ...resources.mappings import (
     TYPES_MAP_NEO4J_TO_PYTHON,
     TYPES_MAP_PYTHON_TO_NEO4J,
-    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
     TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
+    TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
 )
+from ..solutions_workbench import SolutionsWorkbenchProperty
 
 
 class Property(BaseModel):
     """
     Property representation.
+
+    Attributes
+    ----------
+    name : str
+        The property name in Neo4j.
+    type : str
+        The Python type of the property.
+    csv_mapping : str
+        Which csv column the property is found under.
+    csv_mapping_other : Optional[str]
+        An optional second csv column that also indicates this property.
+    is_unique : bool
+        Whether the property is a unique identifier.
+    part_of_key : bool
+        Whether the property is part of a node or relationship key.
     """
 
     name: str
@@ -26,7 +41,7 @@ class Property(BaseModel):
     # must_exist: bool
 
     @field_validator("type")
-    def validate_type(cls, v: str):
+    def validate_type(cls, v: str) -> str:
         if v.lower() == "object" or v.lower() == "string":
             return "str"
         elif "float" in v.lower():
@@ -63,6 +78,7 @@ class Property(BaseModel):
         Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
+        csv_mapping: str = ""
         if "|" in list(arrows_property.values())[0]:
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
@@ -72,14 +88,14 @@ class Property(BaseModel):
                     x.strip() for x in prop_props[0].split(",")
                 ]
             else:
-                csv_mapping: str = prop_props[0]
+                csv_mapping = prop_props[0]
                 csv_mapping_other = None
 
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
             node_key = "nodekey" in prop_props
         else:
-            csv_mapping: str = list(arrows_property.values())[0]
+            csv_mapping = list(arrows_property.values())[0]
             python_type = "unknown"
             csv_mapping_other = None
             is_unique = False

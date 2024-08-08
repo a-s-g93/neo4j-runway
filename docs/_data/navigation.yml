@@ -3,22 +3,37 @@ docs:
     children:
       - title: "Discovery"
         url: /api/discovery/
+
       - title: "GraphDataModeler"
         url: /api/graph-data-modeler/
+
       - title: "DataModel"
         url: /api/data-model/
+
       - title: "LoadCSVCodeGenerator"
-        url: /api/load-csv-code-generator/
+        url: /api/code-generator/load-csv-code-generator/
+
       - title: "PyIngestConfigGenerator"
-        url: /api/pyingest-config-generator/
+        url: /api/code-generator/pyingest-config-generator/
+
       - title: "StandardCypherCodeGenerator"
-        url: /api/standard-cypher-code-generator/
+        url: /api/code-generator/standard-cypher-code-generator/
+
       - title: "PyIngest"
         url: /api/pyingest/
-      - title: "LLM"
-        url: /api/llm/
+
+      - title: "OpenAIDiscoveryLLM"
+        url: /api/llm/openai-discovery-llm/
+
+      - title: "OpenAIDataModelingLLM"
+        url: /api/llm/openai-data-modeling-llm/
+      
+      - title: "Neo4jGraph"
+        url: /api/database/neo4j-graph/
+
       - title: "Inputs"
         url: /api/inputs/
+
       - title: "Utils"
         url: /api/utils/
   

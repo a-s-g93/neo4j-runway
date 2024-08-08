@@ -3,7 +3,7 @@ name = "neo4j-runway"
 version = "0.8.2"
 description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
 authors = ["Alex Gilmore", "Jason Booth", "Dan Bukowski"]
-license = "MIT"
+license = "Apache License, Version 2.0"
 readme = "README.md"
 keywords = ["graph", "neo4j", "data model"]
 classifiers = [
@@ -18,26 +18,48 @@ classifiers = [
 ]
 exclude = ["tests/*", "images/*", "test.ipynb", "data/", "Makefile", "scripts/*", "notebooks/*"]
 
+[[tool.poetry.packages]]
+include = "neo4j_runway"
+
 [tool.poetry.dependencies]
-python = "^3.10"
 graphviz = "^0.20.1"
-instructor = "^1.2.0"
+instructor = "1.2.0"
 ipython = "^8.24.0"
 neo4j = "^5.19.0"
+numpy = "^1.26.3"
 openai = "^1.12.0"
 pandas = "^2.0.3"
 pydantic = "^2.6.1"
+python = "^3.10"
 pyyaml = "^6.0.1"
-numpy = "^1.26.3"
 regex = "~2024"
 
 
 [tool.poetry.group.dev.dependencies]
-python-dotenv = "^1.0.1"
-black = "^24.4.2"
+coverage = "^7.4.3"
 ipykernel = "^6.29.5"
+mypy = "^1.10.0"
 nbconvert= "^7.16.4"
+pre-commit = { version = "^3.6.2", python = "^3.10" }
+pytest = "^8.3.2"
+python-dotenv = "^1.0.1"
+ruff = "^0.3.0"
 toml = "^0.10.2"
+types-PyYAML = "^6.0.12.20240724"
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+disallow_untyped_calls = false
+exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py"]
+
+[tool.ruff]
+target-version = "py310"
+show-fixes = true
+
+[tool.coverage.paths]
+source = ["neo4j_runway"]
 
 [build-system]
 requires = ["poetry-core"]

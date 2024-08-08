@@ -11,7 +11,7 @@ def generate_range_index(label_or_type: str, property: Property) -> str:
     """
     Generate a range index for a single property.
     """
-    pass
+    return ""
 
 
 def generate_composite_range_index(
@@ -20,7 +20,7 @@ def generate_composite_range_index(
     """
     Generate a composite range index for multiple properties.
     """
-    pass
+    return ""
 
 
 def generate_text_index(
@@ -29,7 +29,7 @@ def generate_text_index(
     """
     Generate a text index on a single property. Property must be a STRING type.
     """
-    pass
+    return ""
 
 
 def generate_point_index(
@@ -38,7 +38,7 @@ def generate_point_index(
     """
     Generate a point index on a single property. Property must be a POINT type.
     """
-    pass
+    return ""
 
 
 def generate_full_text_index(
@@ -47,7 +47,7 @@ def generate_full_text_index(
     """
     Generate a full text index on one or many properties. Properties must be of type STRING.
     """
-    pass
+    return ""
 
 
 def generate_vector_index(
@@ -56,4 +56,4 @@ def generate_vector_index(
     """
     Generate a vector index on a property. Property must be of type LIST<FLOAT>.
     """
-    pass
+    return ""

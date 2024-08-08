@@ -5,6 +5,7 @@ This file contains a property as it is represented in Solutions Workbench.
 from typing import List, Optional
 
 from pydantic import BaseModel, field_validator
+
 from ...resources.mappings import TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON
 
 

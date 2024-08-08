@@ -3,20 +3,13 @@ This file contains the code to generate ingestion code.
 """
 
 import os
-from typing import Dict, List, Any, Union
 import warnings
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 
-from .cypher import *
 from ..models import DataModel
-
-
-model_maps = []
-nodes_map = {}
-create_constraints = {}
-
-missing_properties_err = []
+from .cypher import *
 
 
 class folded_unicode(str):
@@ -27,11 +20,11 @@ class literal_unicode(str):
     pass
 
 
-def folded_unicode_representer(dumper, data):
+def folded_unicode_representer(dumper: Any, data: Any) -> Any:
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=">")
 
 
-def literal_unicode_representer(dumper, data):
+def literal_unicode_representer(dumper: Any, data: Any) -> Any:
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
 
@@ -39,7 +32,7 @@ yaml.add_representer(folded_unicode, folded_unicode_representer)
 yaml.add_representer(literal_unicode, literal_unicode_representer)
 
 
-def lowercase_first_letter(s: str):
+def lowercase_first_letter(s: str) -> str:
     return s[0].lower() + s[1:]
 
 
@@ -95,20 +88,20 @@ class IngestionGenerator:
         self._constraints: Dict[str, str] = {}
         self._cypher_map: Dict[str, Dict[str, Any]] = {}
 
-    warnings.warn(
-        """The IngestionGenerator class will be removed in future releases! 
-    Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
-    You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
-    )
+        warnings.warn(
+            """The IngestionGenerator class will be removed in future releases!
+        Please instead use dedicated code generation classes: PyIngestConfigGenerator, LoadCSVCodeGenerator, StandardCypherCodeGenerator
+        You can use these classes by importing like so: from neo4j_runway.code_generation import `desired class`"""
+        )
 
     def _generate_base_information(
         self,
         method: str = "api",
         batch_size: int = 100,
-        field_separator: str = None,
+        field_separator: Optional[str] = None,
         pyingest_file_config: Dict[str, Any] = {},
         strict_typing: bool = True,
-    ):
+    ) -> None:
         for node in self.data_model.nodes:
             if len(node.unique_properties_column_mapping) > 0:
                 # unique constraints
@@ -260,7 +253,7 @@ class IngestionGenerator:
         self,
         file_name: str = "pyingest_config",
         global_batch_size: int = 100,
-        global_field_separator: str = None,
+        global_field_separator: Optional[str] = None,
         pyingest_file_config: Dict[str, Any] = {},
         pre_ingest_code: Union[str, List[str], None] = None,
         post_ingest_code: Union[str, List[str], None] = None,
@@ -312,8 +305,8 @@ class IngestionGenerator:
     def generate_pyingest_yaml_string(
         self,
         global_batch_size: int = 100,
-        global_field_separator: str = None,
-        pyingest_file_config: Dict[str, Any] = {},
+        global_field_separator: Optional[str] = None,
+        pyingest_file_config: Dict[str, Any] = dict(),
         pre_ingest_code: Union[str, List[str], None] = None,
         post_ingest_code: Union[str, List[str], None] = None,
         strict_typing: bool = True,

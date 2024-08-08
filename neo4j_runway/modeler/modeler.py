@@ -1,14 +1,13 @@
-from typing import Any, Dict, List, Optional, Union
 import warnings
+from typing import Any, Dict, List, Optional, Union
 
 from graphviz import Digraph
 
 from ..discovery import Discovery
 from ..inputs import UserInput, user_input_safe_construct
-from ..llm import LLM
+from ..llm.base import BaseDataModelingLLM
 from ..models import DataModel
 from ..resources.prompts.data_modeling import (
-    create_initial_data_model_prompt,
     create_data_model_iteration_prompt,
 )
 
@@ -17,11 +16,35 @@ class GraphDataModeler:
     """
     This class is responsible for generating a graph data model via communication with an LLM.
     It handles prompt generation, model generation history as well as access to the generated data models.
+
+     Attributes
+    ----------
+    llm : BaseLLM
+        The LLM used to generate data models.
+    discovery : Union[str, Discovery], optional
+        Either a string containing the LLM generated discovery or a Discovery object that has been run.
+        If a Discovery object is provided then the remaining discovery attributes don't need to be provided.
+    user_input : Union[Dict[str, str], UserInput], optional
+        Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
+    general_data_description : str, optional
+        A general data description provided by Pandas.
+    numeric_data_description : str, optional
+        A numeric data description provided by Pandas.
+    categorical_data_description : str, optional
+        A categorical data description provided by Pandas.
+    feature_descriptions : Dict[str, str], optional
+        Feature (column) descriptions provided by Discovery.
+    columns_of_interest : List[str], optional
+        The columns that may be used in the data model.
+    model_iterations: int
+        The number of times a valid model has been returned.
+    model_history: List[DataModel]
+        A list of all valid models generated.
     """
 
     def __init__(
         self,
-        llm: LLM,
+        llm: BaseDataModelingLLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
         general_data_description: Optional[str] = None,
@@ -34,9 +57,9 @@ class GraphDataModeler:
         Takes an LLM instance and Discovery information.
         Either a Discovery object can be provided, or each field can be provided individually.
 
-        Attributes
+        Parameters
         ----------
-        llm : LLM
+        llm : BaseLLM
             The LLM used to generate data models.
         discovery : Union[str, Discovery], optional
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
@@ -51,9 +74,7 @@ class GraphDataModeler:
             A categorical data description provided by Pandas, by default None
         feature_descriptions : Dict[str, str], optional
             Feature (column) descriptions provided by Discovery, by default None
-        allowed_columns : List[str], optional
-            The columns that may be used in the data model. The argument should only be used in no columns are specified in
-            the discovery or user_input arguments. By default []
+        columns_of_interest : List[str]
         """
 
         self.llm = llm
@@ -90,7 +111,7 @@ class GraphDataModeler:
             self.general_info = general_data_description or ""
             self.description_numeric = numeric_data_description or ""
             self.description_categorical = categorical_data_description or ""
-            self.feature_descriptions = feature_descriptions or ""
+            self.feature_descriptions = feature_descriptions or dict()
 
         if self.discovery == "":
             warnings.warn(
@@ -211,7 +232,6 @@ class GraphDataModeler:
         response = self.llm._get_initial_data_model_response(
             discovery_text=self.discovery,
             user_input=self.user_input,
-            pandas_general_info=self.general_info,
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
         )
@@ -229,7 +249,7 @@ class GraphDataModeler:
         iterations: int = 1,
         user_corrections: Optional[str] = None,
         use_yaml_data_model: bool = False,
-    ) -> str:
+    ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.
 
