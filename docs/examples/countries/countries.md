@@ -2,10 +2,10 @@
 permalink: /examples/countries/
 title: End To End Demo
 toc: true
-toc_label: 
+toc_label:
 toc_icon: "fa-solid fa-plane"
 ---
-This notebooks demonstrates the data flow of generating a graph from a CSV file using Runway v0.7.0
+This notebooks demonstrates the data flow of generating a graph from a CSV file using Runway v0.9.0
 
 
 ```python
@@ -14,8 +14,9 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 
-from neo4j_runway import Discovery, GraphDataModeler, LLM, PyIngest, UserInput
+from neo4j_runway import Discovery, GraphDataModeler, PyIngest, UserInput
 from neo4j_runway.code_generation import PyIngestConfigGenerator
+from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
 from neo4j_runway.utils import test_database_connection
 
 load_dotenv()
@@ -34,20 +35,26 @@ The USER_GENERATED_INPUT variable contains a general discription and feature des
 
 
 ```python
-USER_GENERATED_INPUT = UserInput(general_description='This is data on different countries.',
-                                 column_descriptions={
-                                     'id': 'unique id for a country.',
-                                    'name': 'the country name.',
-                                    'phone_code': 'country area code.',
-                                    'capital': 'the capital of the country.',
-                                    'currency_name': "name of the country's currency.",
-                                    'region': 'primary region of the country.',
-                                    'subregion': 'subregion location of the country.',
-                                    'timezones': 'timezones contained within the country borders.',
-                                    'latitude': 'the latitude coordinate of the country center.',
-                                    'longitude': 'the longitude coordinate of the country center.'
-                                    }   
-                                )
+USER_GENERATED_INPUT = UserInput(
+    general_description='This is data on different countries.',
+    column_descriptions={
+        'id': 'unique id for a country.',
+      'name': 'the country name.',
+      'phone_code': 'country area code.',
+      'capital': 'the capital of the country.',
+      'currency_name': "name of the country's currency.",
+      'region': 'primary region of the country.',
+      'subregion': 'subregion location of the country.',
+      'timezones': 'timezones contained within the country borders.',
+      'latitude': 'the latitude coordinate of the country center.',
+      'longitude': 'the longitude coordinate of the country center.'
+      },
+    use_cases=[
+        "Which region contains the most subregions?",
+        "What currencies are most popular?",
+        "Which countries share timezones?"
+    ]
+)
 ```
 
 
@@ -219,13 +226,14 @@ data.head()
 
 
 
-## Initialize LLM
+## Initialize LLMs
 
-We now initialize the LLM to use in data discovery and data model creation.
+We now initialize the LLMs to use in data discovery and data model creation.
 
 
 ```python
-llm = LLM(model='gpt-4o-2024-05-13')
+llm_disc = OpenAIDiscoveryLLM(model_name='gpt-4o-2024-05-13', model_params={"temperature": 0})
+llm_dm = OpenAIDataModelingLLM(model_name='gpt-4o-2024-05-13', model_params={"temperature": 0.5})
 ```
 
 ## Discovery
@@ -234,7 +242,7 @@ We now load the above data into a Discovery object.
 
 
 ```python
-disc = Discovery(llm=llm, user_input=USER_GENERATED_INPUT, data=data)
+disc = Discovery(llm=llm_disc, user_input=USER_GENERATED_INPUT, data=data)
 ```
 
 
@@ -243,62 +251,75 @@ disc.run(show_result=True, notebook=True)
 ```
 
 
-Based on the provided summary and description of the data, here is a preliminary analysis:
+### Preliminary Analysis of Country Data
 
-### Overall Details
+#### Overall Details
 
 1. **Data Completeness**:
-   - The dataset contains 250 entries (countries).
-   - Most columns are complete, but there are some missing values in the `capital`, `region`, and `subregion` columns.
-     - `capital`: 245 non-null (5 missing)
-     - `region`: 248 non-null (2 missing)
-     - `subregion`: 247 non-null (3 missing)
+   - The dataset contains 250 entries with 10 features.
+   - Most features are complete, but there are some missing values:
+     - `capital`: 5 missing values
+     - `region`: 2 missing values
+     - `subregion`: 3 missing values
 
 2. **Data Types**:
-   - The dataset includes a mix of data types:
-     - Numerical: `id`, `latitude`, `longitude`
-     - Categorical: `name`, `phone_code`, `capital`, `currency_name`, `region`, `subregion`, `timezones`
+   - `id`: Integer
+   - `name`, `phone_code`, `capital`, `currency_name`, `region`, `subregion`, `timezones`: String (Object)
+   - `latitude`, `longitude`: Float
 
 3. **Unique Values**:
-   - `name` (country names) and `id` are unique for each entry.
-   - `phone_code` has 235 unique values, indicating some countries share the same phone code.
-   - `capital` has 244 unique values, with "Kingston" appearing twice.
-   - `currency_name` has 161 unique values, with "Euro" being the most frequent (35 occurrences).
-   - `region` has 6 unique values, with "Africa" being the most frequent (60 occurrences).
-   - `subregion` has 22 unique values, with "Caribbean" being the most frequent (28 occurrences).
-   - `timezones` has 245 unique values, with the most frequent timezone appearing 3 times.
+   - `name`: 250 unique values (each country is unique)
+   - `phone_code`: 235 unique values (some countries share phone codes)
+   - `capital`: 244 unique values (one capital is shared by two countries)
+   - `currency_name`: 161 unique values (some currencies are shared by multiple countries)
+   - `region`: 6 unique values
+   - `subregion`: 22 unique values
+   - `timezones`: 245 unique values (some timezones are shared by multiple countries)
 
-### Important Features
+#### Use Case Analysis
 
-1. **Geographical Coordinates**:
-   - `latitude` and `longitude` provide the geographical center of each country. These are crucial for spatial analysis and mapping.
+1. **Which region contains the most subregions?**
+   - The `region` and `subregion` columns are crucial for this analysis.
+   - We need to count the number of unique subregions within each region.
 
-2. **Country Identifiers**:
-   - `id` and `name` uniquely identify each country. These are essential for referencing and linking data.
+2. **What currencies are most popular?**
+   - The `currency_name` column is essential for this analysis.
+   - We need to count the frequency of each currency to determine the most popular ones.
 
-3. **Phone Code**:
-   - `phone_code` is important for telecommunications and can be used to analyze regional calling patterns.
+3. **Which countries share timezones?**
+   - The `timezones` column is key for this analysis.
+   - We need to identify countries that have overlapping timezones.
+
+#### Important Features
+
+1. **Region and Subregion**:
+   - These features help in understanding the geographical and political divisions of the countries.
+   - They are essential for analyzing the distribution of subregions within regions.
+
+2. **Currency Name**:
+   - This feature is important for economic analysis and understanding the monetary systems of different countries.
+   - It helps in identifying the most commonly used currencies.
+
+3. **Timezones**:
+   - This feature is crucial for understanding the temporal aspects and time-related relationships between countries.
+   - It helps in identifying countries that share the same timezones, which can be important for various applications like business operations, travel, and communication.
 
 4. **Capital**:
-   - `capital` provides the primary city of governance, which is often a focal point for political and economic activities.
+   - Although not directly related to the use cases, the capital city is an important feature for general knowledge and can be useful in various analyses.
 
-5. **Currency**:
-   - `currency_name` is vital for economic analysis, especially in understanding trade and financial systems.
+5. **Latitude and Longitude**:
+   - These features provide geographical coordinates, which can be useful for spatial analysis and mapping.
 
-6. **Region and Subregion**:
-   - `region` and `subregion` help in categorizing countries into broader geographical and cultural areas. This is useful for regional analysis and comparisons.
+#### Summary
 
-7. **Timezones**:
-   - `timezones` indicate the time zones within a country, which is important for understanding time-related data and scheduling.
+- The dataset is relatively complete with a few missing values in the `capital`, `region`, and `subregion` columns.
+- The most important features for the given use cases are `region`, `subregion`, `currency_name`, and `timezones`.
+- Additional features like `latitude`, `longitude`, and `capital` can provide valuable context and support further analyses.
 
-### Summary
-
-- The dataset is relatively complete with a few missing values in `capital`, `region`, and `subregion`.
-- The data types are appropriate for the features, with a mix of numerical and categorical data.
-- Key features for analysis include geographical coordinates (`latitude`, `longitude`), country identifiers (`id`, `name`), and categorical attributes like `phone_code`, `capital`, `currency_name`, `region`, `subregion`, and `timezones`.
-- The dataset provides a comprehensive overview of countries, which can be used for various types of analysis, including geographical, economic, and regional studies.
-
-This preliminary analysis sets the stage for further exploration and potential modeling, including the creation of a graph data model.
+Next steps would involve:
+- Cleaning the data to handle missing values.
+- Aggregating and analyzing the data to answer the specific use cases.
+- Considering how to represent these relationships in a graph data model for Neo4j.
 
 
 ## Data Modeling
@@ -308,7 +329,7 @@ We can now use our Discovery object to provide context to the LLM for data model
 
 ```python
 gdm = GraphDataModeler(
-    llm=llm,
+    llm=llm_dm,
     discovery=disc
 )
 ```
@@ -320,13 +341,15 @@ We now generate our first pass data model.
 gdm.create_initial_model()
 ```
 
+    validation failed
+    performing chain of thought process for error fix recommendations...
     recieved a valid response
 
 
 
 
 
-    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=True), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Capital', properties=[Property(name='name', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Currency', properties=[Property(name='name', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Region', properties=[Property(name='name', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Subregion', properties=[Property(name='name', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='PhoneCode', properties=[Property(name='code', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Timezone', properties=[Property(name='zone', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name='')], relationships=[Relationship(type='HAS_CAPITAL', properties=[], source='Country', target='Capital', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='BELONGS_TO_REGION', properties=[], source='Country', target='Region', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='HAS_PHONE_CODE', properties=[], source='Country', target='PhoneCode', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name='')], metadata=None)
+    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='phoneCode', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='capital', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='region', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='subregion', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='currencyName', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='timezones', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='BELONGS_TO_REGION', properties=[], source='Country', target='Region', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
 
 
 
@@ -338,7 +361,7 @@ gdm.current_model
 
 
 
-    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=True), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Capital', properties=[Property(name='name', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Currency', properties=[Property(name='name', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Region', properties=[Property(name='name', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Subregion', properties=[Property(name='name', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='PhoneCode', properties=[Property(name='code', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name=''), Node(label='Timezone', properties=[Property(name='zone', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=True)], csv_name='')], relationships=[Relationship(type='HAS_CAPITAL', properties=[], source='Country', target='Capital', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='BELONGS_TO_REGION', properties=[], source='Country', target='Region', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='HAS_PHONE_CODE', properties=[], source='Country', target='PhoneCode', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name='')], metadata=None)
+    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='phoneCode', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='capital', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='region', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='subregion', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='currencyName', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='timezones', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='BELONGS_TO_REGION', properties=[], source='Country', target='Region', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
 
 
 
@@ -350,19 +373,17 @@ gdm.current_model.visualize()
 
 
 
-    
+
 ![svg](output_20_0.svg)
-    
 
 
 
-This doesn't look quite right, so let's prompt the LLM to make some corrections.
+
+We can clean this up a bit, so let's prompt the LLM to make some corrections.
 
 
 ```python
-gdm.iterate_model(user_corrections="""Make Region node have a HAS_SUBREGION relationship with Subregion node. 
-                  Remove The relationship between Country and Region.
-                  Set key = False for all properties.""")
+gdm.iterate_model(user_corrections="""Remove The relationship between Country and Region.""")
 ```
 
     recieved a valid response
@@ -371,7 +392,7 @@ gdm.iterate_model(user_corrections="""Make Region node have a HAS_SUBREGION rela
 
 
 
-    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Capital', properties=[Property(name='name', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='name', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='name', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='name', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='PhoneCode', properties=[Property(name='code', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='zone', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='HAS_CAPITAL', properties=[], source='Country', target='Capital', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='HAS_PHONE_CODE', properties=[], source='Country', target='PhoneCode', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
+    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='phoneCode', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='capital', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='subregion', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='currencyName', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='timezones', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='region', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
 
 
 
@@ -383,7 +404,7 @@ gdm.current_model
 
 
 
-    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Capital', properties=[Property(name='name', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='name', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='name', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='name', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='PhoneCode', properties=[Property(name='code', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='zone', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='HAS_CAPITAL', properties=[], source='Country', target='Capital', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='HAS_PHONE_CODE', properties=[], source='Country', target='PhoneCode', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
+    DataModel(nodes=[Node(label='Country', properties=[Property(name='id', type='int', csv_mapping='id', csv_mapping_other=None, is_unique=True, part_of_key=False), Property(name='name', type='str', csv_mapping='name', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='phoneCode', type='str', csv_mapping='phone_code', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='capital', type='str', csv_mapping='capital', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='latitude', type='float', csv_mapping='latitude', csv_mapping_other=None, is_unique=False, part_of_key=False), Property(name='longitude', type='float', csv_mapping='longitude', csv_mapping_other=None, is_unique=False, part_of_key=False)], csv_name=''), Node(label='Subregion', properties=[Property(name='subregion', type='str', csv_mapping='subregion', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Currency', properties=[Property(name='currencyName', type='str', csv_mapping='currency_name', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Timezone', properties=[Property(name='timezones', type='str', csv_mapping='timezones', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name=''), Node(label='Region', properties=[Property(name='region', type='str', csv_mapping='region', csv_mapping_other=None, is_unique=True, part_of_key=False)], csv_name='')], relationships=[Relationship(type='BELONGS_TO_SUBREGION', properties=[], source='Country', target='Subregion', csv_name=''), Relationship(type='USES_CURRENCY', properties=[], source='Country', target='Currency', csv_name=''), Relationship(type='HAS_TIMEZONE', properties=[], source='Country', target='Timezone', csv_name=''), Relationship(type='HAS_SUBREGION', properties=[], source='Region', target='Subregion', csv_name='')], metadata=None)
 
 
 
@@ -395,13 +416,13 @@ gdm.current_model.visualize()
 
 
 
-    
+
 ![svg](output_24_0.svg)
-    
 
 
 
-This is good enough for our demo. We can now create some ingestion code to get our data into our database.
+
+We can now create some ingestion code to get our data into our database.
 
 ## Ingestion Code Generation
 
@@ -409,19 +430,17 @@ We can provide our credentials here in this step if we plan on using PyIngest to
 
 
 ```python
-
-gen = PyIngestConfigGenerator(data_model=gdm.current_model, 
-                         username=os.environ.get("NEO4J_USERNAME"), 
-                         password=os.environ.get("NEO4J_PASSWORD"), 
-                         uri=os.environ.get("NEO4J_URI"), 
-                         database=os.environ.get("NEO4J_DATABASE"), 
+gen = PyIngestConfigGenerator(data_model=gdm.current_model,
+                         username=os.environ.get("NEO4J_USERNAME"),
+                         password=os.environ.get("NEO4J_PASSWORD"),
+                         uri=os.environ.get("NEO4J_URI"),
+                         database=os.environ.get("NEO4J_DATABASE"),
                          file_directory="data/csv/", csv_name="countries.csv")
 ```
 
 
 ```python
 pyingest_yaml = gen.generate_config_string()
-# gen.generate_pyingest_yaml_file(file_name="countries")
 print(pyingest_yaml)
 ```
 
@@ -430,81 +449,51 @@ print(pyingest_yaml)
     admin_pass: password
     database: neo4j
     basepath: ./
-    
+
     pre_ingest:
       - CREATE CONSTRAINT country_id IF NOT EXISTS FOR (n:Country) REQUIRE n.id IS UNIQUE;
-      - CREATE CONSTRAINT capital_name IF NOT EXISTS FOR (n:Capital) REQUIRE n.name IS UNIQUE;
-      - CREATE CONSTRAINT currency_name IF NOT EXISTS FOR (n:Currency) REQUIRE n.name IS UNIQUE;
-      - CREATE CONSTRAINT region_name IF NOT EXISTS FOR (n:Region) REQUIRE n.name IS UNIQUE;
-      - CREATE CONSTRAINT subregion_name IF NOT EXISTS FOR (n:Subregion) REQUIRE n.name IS UNIQUE;
-      - CREATE CONSTRAINT phonecode_code IF NOT EXISTS FOR (n:PhoneCode) REQUIRE n.code IS UNIQUE;
-      - CREATE CONSTRAINT timezone_zone IF NOT EXISTS FOR (n:Timezone) REQUIRE n.zone IS UNIQUE;
+      - CREATE CONSTRAINT subregion_subregion IF NOT EXISTS FOR (n:Subregion) REQUIRE n.subregion IS UNIQUE;
+      - CREATE CONSTRAINT currency_currencyname IF NOT EXISTS FOR (n:Currency) REQUIRE n.currencyName IS UNIQUE;
+      - CREATE CONSTRAINT timezone_timezones IF NOT EXISTS FOR (n:Timezone) REQUIRE n.timezones IS UNIQUE;
+      - CREATE CONSTRAINT region_region IF NOT EXISTS FOR (n:Region) REQUIRE n.region IS UNIQUE;
     files:
     - chunk_size: 100
       cql: |-
         WITH $dict.rows AS rows
         UNWIND rows AS row
         MERGE (n:Country {id: toIntegerOrNull(row.id)})
-        SET n.name = row.name, n.latitude = toFloatOrNull(row.latitude), n.longitude = toFloatOrNull(row.longitude)
+        SET n.name = row.name, n.phoneCode = row.phone_code, n.capital = row.capital, n.latitude = toFloatOrNull(row.latitude), n.longitude = toFloatOrNull(row.longitude)
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows AS row
-        MERGE (n:Capital {name: row.capital})
+        MERGE (n:Subregion {subregion: row.subregion})
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows AS row
-        MERGE (n:Currency {name: row.currency_name})
+        MERGE (n:Currency {currencyName: row.currency_name})
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows AS row
-        MERGE (n:Region {name: row.region})
+        MERGE (n:Timezone {timezones: row.timezones})
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows AS row
-        MERGE (n:Subregion {name: row.subregion})
-      url: $BASE/data/csv/countries.csv
-    - chunk_size: 100
-      cql: |
-        WITH $dict.rows AS rows
-        UNWIND rows AS row
-        MERGE (n:PhoneCode {code: row.phone_code})
-      url: $BASE/data/csv/countries.csv
-    - chunk_size: 100
-      cql: |
-        WITH $dict.rows AS rows
-        UNWIND rows AS row
-        MERGE (n:Timezone {zone: row.timezones})
+        MERGE (n:Region {region: row.region})
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows as row
         MATCH (source:Country {id: toIntegerOrNull(row.id)})
-        MATCH (target:Capital {name: row.capital})
-        MERGE (source)-[n:HAS_CAPITAL]->(target)
-      url: $BASE/data/csv/countries.csv
-    - chunk_size: 100
-      cql: |
-        WITH $dict.rows AS rows
-        UNWIND rows as row
-        MATCH (source:Country {id: toIntegerOrNull(row.id)})
-        MATCH (target:Currency {name: row.currency_name})
-        MERGE (source)-[n:USES_CURRENCY]->(target)
-      url: $BASE/data/csv/countries.csv
-    - chunk_size: 100
-      cql: |
-        WITH $dict.rows AS rows
-        UNWIND rows as row
-        MATCH (source:Country {id: toIntegerOrNull(row.id)})
-        MATCH (target:Subregion {name: row.subregion})
+        MATCH (target:Subregion {subregion: row.subregion})
         MERGE (source)-[n:BELONGS_TO_SUBREGION]->(target)
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
@@ -512,26 +501,26 @@ print(pyingest_yaml)
         WITH $dict.rows AS rows
         UNWIND rows as row
         MATCH (source:Country {id: toIntegerOrNull(row.id)})
-        MATCH (target:PhoneCode {code: row.phone_code})
-        MERGE (source)-[n:HAS_PHONE_CODE]->(target)
+        MATCH (target:Currency {currencyName: row.currency_name})
+        MERGE (source)-[n:USES_CURRENCY]->(target)
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows as row
         MATCH (source:Country {id: toIntegerOrNull(row.id)})
-        MATCH (target:Timezone {zone: row.timezones})
+        MATCH (target:Timezone {timezones: row.timezones})
         MERGE (source)-[n:HAS_TIMEZONE]->(target)
       url: $BASE/data/csv/countries.csv
     - chunk_size: 100
       cql: |
         WITH $dict.rows AS rows
         UNWIND rows as row
-        MATCH (source:Region {name: row.region})
-        MATCH (target:Subregion {name: row.subregion})
+        MATCH (source:Region {region: row.region})
+        MATCH (target:Subregion {subregion: row.subregion})
         MERGE (source)-[n:HAS_SUBREGION]->(target)
       url: $BASE/data/csv/countries.csv
-    
+
 
 
 ## Ingest Data
@@ -552,111 +541,47 @@ test_database_connection(credentials={"username": os.environ.get("NEO4J_USERNAME
 
 
 ```python
-PyIngest(yaml_string=pyingest_yaml, dataframe=data)
+PyIngest(config=pyingest_yaml, dataframe=data)
 ```
 
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/neo4j_runway/ingestion/pyingest.py:161: UserWarning: the yaml_string parameter will be depreciated in future releases. Please use the 'config' to identify the YAML file instead.
-      warnings.warn(
-
-
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:25.710875
-    loading... 1 2024-07-25 10:27:25.831961
-    {} : Completed file 2024-07-25 10:27:25.874371
+    loading... 0 2024-08-08 13:30:47.801049
+    loading... 1 2024-08-08 13:30:47.880631
+    {} : Completed file 2024-08-08 13:30:47.903632
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:25.874948
-
-
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-
-
-    loading... 1 2024-07-25 10:27:25.920787
-    {} : Completed file 2024-07-25 10:27:25.947479
+    loading... 0 2024-08-08 13:30:47.904284
+    loading... 1 2024-08-08 13:30:47.943986
+    {} : Completed file 2024-08-08 13:30:47.957237
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:25.947894
-    loading... 1 2024-07-25 10:27:26.000605
-    {} : Completed file 2024-07-25 10:27:26.026412
+    loading... 0 2024-08-08 13:30:47.957757
+    loading... 1 2024-08-08 13:30:47.987587
+    {} : Completed file 2024-08-08 13:30:48.007453
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.027022
-    loading... 1 2024-07-25 10:27:26.066024
-    {} : Completed file 2024-07-25 10:27:26.087253
+    loading... 0 2024-08-08 13:30:48.007837
+    loading... 1 2024-08-08 13:30:48.038595
+    {} : Completed file 2024-08-08 13:30:48.059046
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.087689
-    loading... 1 2024-07-25 10:27:26.139537
-
-
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-
-
-    {} : Completed file 2024-07-25 10:27:26.152920
+    loading... 0 2024-08-08 13:30:48.059566
+    loading... 1 2024-08-08 13:30:48.087154
+    {} : Completed file 2024-08-08 13:30:48.099672
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.153506
-    loading... 1 2024-07-25 10:27:26.194226
-    {} : Completed file 2024-07-25 10:27:26.217579
+    loading... 0 2024-08-08 13:30:48.100013
+    loading... 1 2024-08-08 13:30:48.134636
+    {} : Completed file 2024-08-08 13:30:48.158952
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.217974
-    loading... 1 2024-07-25 10:27:26.258016
-    {} : Completed file 2024-07-25 10:27:26.281699
+    loading... 0 2024-08-08 13:30:48.159475
+    loading... 1 2024-08-08 13:30:48.194488
+    {} : Completed file 2024-08-08 13:30:48.214928
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.282296
-    loading... 1 2024-07-25 10:27:26.349784
-
-
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-
-
-    {} : Completed file 2024-07-25 10:27:26.376528
+    loading... 0 2024-08-08 13:30:48.215646
+    loading... 1 2024-08-08 13:30:48.266017
+    {} : Completed file 2024-08-08 13:30:48.285937
     File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.376950
-    loading... 1 2024-07-25 10:27:26.435613
-    {} : Completed file 2024-07-25 10:27:26.459099
-    File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.459632
-    loading... 1 2024-07-25 10:27:26.514643
-    {} : Completed file 2024-07-25 10:27:26.535583
-    File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.536075
-
-
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-
-
-    loading... 1 2024-07-25 10:27:26.588542
-    {} : Completed file 2024-07-25 10:27:26.610934
-    File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.611535
-    loading... 1 2024-07-25 10:27:26.663684
-    {} : Completed file 2024-07-25 10:27:26.687132
-    File {} .//data/csv/countries.csv
-    loading... 0 2024-07-25 10:27:26.687787
-    loading... 1 2024-07-25 10:27:26.738352
-    {} : Completed file 2024-07-25 10:27:26.751575
-
-
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
-    /Users/alexandergilmore/Documents/projects/neo4j-runway-examples/venv/lib/python3.12/site-packages/numpy/core/fromnumeric.py:59: FutureWarning: 'DataFrame.swapaxes' is deprecated and will be removed in a future version. Please use 'DataFrame.transpose' instead.
-      return bound(*args, **kwds)
+    loading... 0 2024-08-08 13:30:48.286428
+    loading... 1 2024-08-08 13:30:48.321062
+    {} : Completed file 2024-08-08 13:30:48.333758
 
 
 If we check our database we can see that we've ingested our CSV according to the data model we've created!
 
-![countries-graph-0.7.0.png](./images/countries-graph-0.7.0.png)
+![countries-graph-0.9.0.png](./images/countries-graph-0.9.0.png)
