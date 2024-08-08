@@ -12,14 +12,6 @@
 
 ### Fixed
 
-### Changed
-
-### Added
-
-## 0.8.1
-
-### Fixed
-
 * pre-commit hooks now work properly and utilize ruff and mypy instead of black
 
 ### Changed
