@@ -37,10 +37,16 @@ jobs:
           - 7474:7474
         volumes:
           - ${{ github.workspace }}/tests/resources/data/import:/var/lib/neo4j/import
+        options: --name n4j
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name: Restart Database
+        # Restart MQTT after volumes have been checked out
+        uses: docker://docker
+        with:
+          args: docker restart n4j
       - name: Docker Prune
         run: |
           docker system prune -af
