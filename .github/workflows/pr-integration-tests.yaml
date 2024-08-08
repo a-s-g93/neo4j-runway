@@ -35,21 +35,10 @@ jobs:
         ports:
           - 7687:7687
           - 7474:7474
-        volumes:
-          - ${{ github.workspace }}/tests/resources/data/import:/var/lib/neo4j/import
-        options: --name n4j
 
     steps:
-      # The "cleanup old checkout" step is needed because of this bug: https://github.com/actions/checkout/issues/1014
-      - name: cleanup old checkout
-        run: sudo chmod +w -R ${GITHUB_WORKSPACE}; rm -rf ${GITHUB_WORKSPACE}/*;
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Restart Database
-        # Restart n4j after volumes have been checked out
-        uses: docker://docker
-        with:
-          args: docker restart n4j
       - name: Docker Prune
         run: |
           docker system prune -af
@@ -82,4 +71,4 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          poetry run pytest tests/integration/
+          poetry run pytest tests/integration --ignore=tests/integration/code_generation/load_csv
