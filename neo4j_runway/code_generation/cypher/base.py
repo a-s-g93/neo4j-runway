@@ -4,6 +4,7 @@ This file contains the functions to create MATCH, MERGE and SET queries.
 
 from typing import List, Optional
 
+from ...exceptions import LoadCSVCypherGenerationError
 from ...models import Node, Property, Relationship
 
 
@@ -106,12 +107,18 @@ def generate_merge_node_load_csv_clause(
             node=node, strict_typing=strict_typing
         )
     if standard_clause is not None:
-        standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
+        standard_clause = (
+            standard_clause.strip().split("\n", 2)[2].replace("\n", "\n    ")
+        )
+    else:
+        raise LoadCSVCypherGenerationError(
+            "Unable to construct MERGE node clause for LOAD CSV from provided arguments."
+        )
 
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    {standard_clause}
+    {standard_clause.strip()}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 
@@ -172,11 +179,17 @@ def generate_merge_relationship_load_csv_clause(
             strict_typing=strict_typing,
         )
     if standard_clause is not None:
-        standard_clause = standard_clause.split("\n", 2)[2].replace("\n", "\n    ")
+        standard_clause = (
+            standard_clause.strip().split("\n", 2)[2].replace("\n", "\n    ")
+        )
+    else:
+        raise LoadCSVCypherGenerationError(
+            "Unable to construct MERGE relationship clause for LOAD CSV from provided arguments."
+        )
     return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
 CALL {{
     WITH row
-    {standard_clause}
+    {standard_clause.strip()}
 }} IN TRANSACTIONS OF {str(batch_size)} ROWS;
 """
 

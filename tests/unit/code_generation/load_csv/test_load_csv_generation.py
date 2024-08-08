@@ -7,7 +7,6 @@ def test_generation() -> None:
         "./tests/resources/data_models/people-pets-arrows-for-load-csv.json"
     )
     gen = LoadCSVCodeGenerator(data_model=dm)
-    print(gen.generate_load_csv_cypher_string())
     assert gen.generate_load_csv_cypher_string() == load_csv_code_answer
 
 
@@ -25,7 +24,6 @@ LOAD CSV WITH HEADERS FROM 'file:///./pets-arrows.csv' as row
 CALL {
     WITH row
     MERGE (n:Address {address: row.address})
-
 } IN TRANSACTIONS OF 100 ROWS;
 LOAD CSV WITH HEADERS FROM 'file:///./pets-arrows.csv' as row
 CALL {
@@ -45,7 +43,6 @@ CALL {
     MATCH (source:Person {name: row.name})
     MATCH (target:Address {address: row.address})
     MERGE (source)-[n:HAS_ADDRESS]->(target)
-
 } IN TRANSACTIONS OF 100 ROWS;
 LOAD CSV WITH HEADERS FROM 'file:///./' as row
 CALL {
@@ -53,7 +50,6 @@ CALL {
     MATCH (source:Person {name: row.name})
     MATCH (target:Pet {name: row.pet_name})
     MERGE (source)-[n:HAS_PET]->(target)
-
 } IN TRANSACTIONS OF 100 ROWS;
 LOAD CSV WITH HEADERS FROM 'file:///./' as row
 CALL {
@@ -61,6 +57,5 @@ CALL {
     MATCH (source:Pet {name: row.pet_name})
     MATCH (target:Toy {name: row.toy})
     MERGE (source)-[n:PLAYS_WITH]->(target)
-
 } IN TRANSACTIONS OF 100 ROWS;
 """
