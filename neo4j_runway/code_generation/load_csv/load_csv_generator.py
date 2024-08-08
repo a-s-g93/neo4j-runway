@@ -91,7 +91,7 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
             os.makedirs(self.file_output_dir, exist_ok=True)
 
         with open(f"./{self.file_output_dir}{file_name}", "w") as load_csv_file:
-            load_csv_file.write(self.generate_cypher_string())
+            load_csv_file.write(self.generate_load_csv_cypher_string())
 
     def generate_load_csv_cypher_string(self) -> str:
         """

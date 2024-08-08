@@ -43,3 +43,9 @@ class InvalidSolutionsWorkbenchDataModelError(RunwayError):
     """Exception raised when a Solutions Workbench data model is unable to be parsed into a Runway core data model."""
 
     pass
+
+
+class LoadCSVCypherGenerationError(RunwayError):
+    """Exception raised when no standard clause can be constructed from provided arguments."""
+
+    pass
