@@ -37,7 +37,7 @@ jobs:
           - 7474:7474
         volumes:
           - ${{ github.workspace }}/tests/resources/data/import:/var/lib/neo4j/import
-        options: --name n4j
+        options: --name n4j --user root
 
     steps:
       - name: Check out repository code
