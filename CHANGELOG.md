@@ -8,6 +8,18 @@
 
 ### Added
 
+## 0.9.1
+
+### Fixed
+
+* Fix bug in LoadCSVCodeGenerator
+
+### Changed
+
+### Added
+
+* Unit tests for LoadCSVCodeGenerator and StandardCypherCodeGenerator classes
+
 ## 0.9.0
 
 ### Fixed
