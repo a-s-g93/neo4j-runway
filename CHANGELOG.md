@@ -6,15 +6,29 @@
 
 ### Changed
 
-* Refactor LLM class into base class with DiscoveryLLM and DataModelingLLM child classes for each LLM integration
+### Added
 
-* pre-commit hooks now work properly and utilize ruff instead of black
+## 0.8.1
+
+### Fixed
+
+* pre-commit hooks now work properly and utilize ruff and mypy instead of black
+
+### Changed
+
+* Refactor LLM class into base class with DiscoveryLLM and DataModelingLLM child classes for each LLM integration
 
 * Restructure and refactor tests directory to mirror the neo4j_runway package structure
 
 * Implement pytest to handle testing
 
 ### Added
+
+* Implement GitHub actions to automate unit and integration testing on PR
+
+* Implement GitHub actions to automate ruff and mypy checks on PR
+
+* Implement strict style guides utilizing ruff and mypy
 
 * Add Neo4jGraph module to handle database connections. This will be used in a future EDA module.
 
