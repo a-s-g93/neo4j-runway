@@ -42,7 +42,7 @@ jobs:
     steps:
       # The "cleanup old checkout" step is needed because of this bug: https://github.com/actions/checkout/issues/1014
       - name: cleanup old checkout
-        run: chmod +w -R ${GITHUB_WORKSPACE}; rm -rf ${GITHUB_WORKSPACE}/*;
+        run: sudo chmod +w -R ${GITHUB_WORKSPACE}; rm -rf ${GITHUB_WORKSPACE}/*;
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Restart Database
