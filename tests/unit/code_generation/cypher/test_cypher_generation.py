@@ -378,20 +378,6 @@ class TestIngestCodeGeneration(unittest.TestCase):
         self.assertEqual(cast_value(prop1), "row.`#p`")
         self.assertEqual(cast_value(prop2), "row.`$g`")
 
-    def test_generate_pyingest_string(self) -> None:
-        """
-        Test PyIngest string generation.
-        """
-
-        pass
-
-    def test_generate_load_csv_string(self) -> None:
-        """
-        Test LOAD CSV string generation.
-        """
-
-        pass
-
 
 if __name__ == "__main__":
     unittest.main()
