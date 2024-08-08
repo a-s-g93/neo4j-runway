@@ -12,7 +12,7 @@ docs/_site
 .sass-cache
 _site
 images/presentation
-data/
+/data/
 notebooks/
 *.ipynb
 .ruff_cache

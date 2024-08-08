@@ -7,7 +7,7 @@ test:
 	pytest tests
 
 test_integration:
-	poetry run pytest tests/integration
+	poetry run pytest tests/integration --ignore=tests/integration/code_generation/load_csv
 
 test_unit:
 	poetry run pytest tests/unit
