@@ -7,7 +7,7 @@ def test_generation() -> None:
         "./tests/resources/data_models/people-pets-arrows-for-load-csv.json"
     )
     gen = LoadCSVCodeGenerator(data_model=dm)
-
+    print(gen.generate_load_csv_cypher_string())
     assert gen.generate_load_csv_cypher_string() == load_csv_code_answer
 
 
