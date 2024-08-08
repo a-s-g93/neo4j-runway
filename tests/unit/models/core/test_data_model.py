@@ -252,5 +252,36 @@ class TestDataModel(unittest.TestCase):
         pass
 
 
+    def test_get_node(self) -> None:
+        """
+        Test get_node method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        # Test existing node label
+        node = test_model.get_node("Person")
+        self.assertIsNotNone(node)
+        self.assertEqual(node.label, "Person")
+
+        # Test non-existing node label
+        node = test_model.get_node("NonExistingNode")
+        self.assertIsNone(node)
+
+    def test_get_relationship(self) -> None:
+        """
+        Test get_relationship method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        # Test existing relationship label
+        relationship = test_model.get_relationship("HAS_ADDRESS")
+        self.assertIsNotNone(relationship)
+        self.assertEqual(relationship.type, "HAS_ADDRESS")
+
+        # Test non-existing relationship label
+        relationship = test_model.get_relationship("NON_EXISTING_REL")
+        self.assertIsNone(relationship)
+
+
 if __name__ == "__main__":
     unittest.main()

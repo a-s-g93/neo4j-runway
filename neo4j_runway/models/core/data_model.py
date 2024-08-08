@@ -49,11 +49,11 @@ class DataModel(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
 
     def __init__(
-        self,
-        nodes: List[Node],
-        relationships: List[Relationship],
-        metadata: Optional[Dict[str, Any]] = None,
-        use_neo4j_naming_conventions: bool = True,
+            self,
+            nodes: List[Node],
+            relationships: List[Relationship],
+            metadata: Optional[Dict[str, Any]] = None,
+            use_neo4j_naming_conventions: bool = True,
     ) -> None:
         """
         The standard Graph Data Model representation in Neo4j Runway.
@@ -131,6 +131,49 @@ class DataModel(BaseModel):
         """
 
         return {r.type: r for r in self.relationships}
+
+    def get_node(self, node_label: str) -> Optional[Node]:
+
+        """
+
+        Returns a Node given a specified label
+
+        Parameters
+        ----------
+        node_label : str
+            a specified node label
+
+        Returns
+        ----------
+        Node
+            a models.core.Node type
+        """
+
+        for label, node in self.node_dict.items():
+            if label == node_label:
+                return node
+
+        return None
+
+    def get_relationship(self, relationship_label: str) -> Optional[Relationship]:
+        """
+
+            Returns a Relationship given a specified label
+
+            Parameters
+            ----------
+            relationship_label : str
+                a specified node label
+
+            Returns
+            ----------
+            Relationship
+                a models.core.Relationship type
+            """
+        for label, rel in self.relationship_dict.items():
+            if label == relationship_label:
+                return rel
+        return None
 
     def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """
@@ -272,12 +315,12 @@ class DataModel(BaseModel):
             result += "\n\nproperties:\n"
         for prop in node.properties:
             result = (
-                result
-                + prop.name
-                + f": {prop.csv_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
+                    result
+                    + prop.name
+                    + f": {prop.csv_mapping}"
+                    + (" *unique*" if prop.is_unique else "")
+                    + (" *key*" if prop.part_of_key else "")
+                    + "\n"
             )
 
         return result
@@ -293,12 +336,12 @@ class DataModel(BaseModel):
             result += "\n\nproperties:\n"
         for prop in relationship.properties:
             result = (
-                result
-                + prop.name
-                + f": {prop.csv_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
+                    result
+                    + prop.name
+                    + f": {prop.csv_mapping}"
+                    + (" *unique*" if prop.is_unique else "")
+                    + (" *key*" if prop.part_of_key else "")
+                    + "\n"
             )
 
         return result
@@ -344,7 +387,7 @@ class DataModel(BaseModel):
         return self.model_dump()
 
     def to_yaml(
-        self, file_path: str = "data-model.yaml", write_file: bool = True
+            self, file_path: str = "data-model.yaml", write_file: bool = True
     ) -> str:
         """
         Output the data model to a yaml file and String.
@@ -371,7 +414,7 @@ class DataModel(BaseModel):
         return yaml_string
 
     def to_arrows(
-        self, file_path: str = "data-model.json", write_file: bool = True
+            self, file_path: str = "data-model.json", write_file: bool = True
     ) -> ArrowsDataModel:
         """
         Output the data model to arrows compatible JSON file.
@@ -470,7 +513,7 @@ class DataModel(BaseModel):
             )
 
     def to_solutions_workbench(
-        self, file_path: str = "data-model.json", write_file: bool = True
+            self, file_path: str = "data-model.json", write_file: bool = True
     ) -> SolutionsWorkbenchDataModel:
         """
         Output the data model to Solutions Workbench compatible JSON file.
