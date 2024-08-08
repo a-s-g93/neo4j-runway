@@ -62,8 +62,7 @@ class Neo4jGraph(BaseGraph):
         )
         self.database = database or read_environment("NEO4J_DATABASE") or "neo4j"
         self.apoc_version = self._get_apoc_version()
-        version, edition = self._get_database_version()
-        self.database_edition = edition
+        version, _ = self._get_database_version()
         self._schema: Optional[Dict[str, Any]] = None
 
         super().__init__(driver=self.driver, version=version)
