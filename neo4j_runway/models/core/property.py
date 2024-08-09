@@ -173,3 +173,10 @@ class Property(BaseModel):
             self.name,
             self.type
         ))
+
+    def __repr__(self) -> str:
+        return (
+            f"Property(name={self.name!r}, type={self.type!r}, "
+            f"csv_mapping={self.csv_mapping!r}, csv_mapping_other={self.csv_mapping_other!r}, "
+            f"is_unique={self.is_unique}, part_of_key={self.part_of_key})"
+        )

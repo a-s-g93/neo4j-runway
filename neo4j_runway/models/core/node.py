@@ -184,13 +184,13 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         }
 
-    def get_property(self, property: str) -> Optional[Property]:
+    def get_property(self, property_name: str) -> Optional[Property]:
         """
         Retrieve a property by its name from the node's non-unique properties.
 
         Parameters
         ----------
-        property : str
+        property_name : str
             The name of the property to retrieve.
 
         Returns
@@ -199,7 +199,7 @@ class Node(BaseModel):
             The property with the specified name if it exists, otherwise None.
         """
         for prop in self.nonunique_properties:
-            if prop == property:
+            if prop.name == property_name:
                 return prop
         return None
 
@@ -426,6 +426,12 @@ class Node(BaseModel):
 
     def __hash__(self) -> int:
         return hash(self.label, tuple(sorted(self.properties), key= lambda p: p.name))
+
+    def __repr__(self) -> str:
+        properties_repr = ", ".join(
+            [f"{prop.name} ({prop.type})" for prop in self.properties]
+        )
+        return f"Node(label='{self.label}', properties=[{properties_repr}], csv_name='{self.csv_name}')"
 
 
 

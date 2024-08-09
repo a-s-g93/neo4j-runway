@@ -296,3 +296,10 @@ class Relationship(BaseModel):
             tuple(sorted(self.properties, key= lambda p: p.name))
         ))
 
+    def __repr__(self) -> str:
+        return (
+            f"Relationship(type={self.type!r}, source={self.source!r}, "
+            f"target={self.target!r}, properties={self.properties!r}, "
+            f"csv_name={self.csv_name!r})"
+        )
+

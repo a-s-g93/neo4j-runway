@@ -20,6 +20,15 @@ class TestNode(unittest.TestCase):
         self.assertEqual(node.label, "Person")
         self.assertEqual(len(node.properties), 2)
 
+    def test_get_property(self) -> None:
+        node = Node(label="Person", properties=[self.person_name, self.person_age])
+
+
+        prop = node.get_property("age")
+        self.assertIsNotNone(prop)
+        self.assertEqual(prop.name, "age")
+
+
     def test_properties(self) -> None:
         node = Node(label="Person", properties=[self.person_name, self.person_age])
 
