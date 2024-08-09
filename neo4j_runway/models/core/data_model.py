@@ -133,35 +133,31 @@ class DataModel(BaseModel):
         return {r.type: r for r in self.relationships}
 
     def get_node(self, node_label: str) -> Optional[Node]:
-
         """
-
-        Returns a Node given a specified label
+        Returns a Node given a specified label.
 
         Parameters
         ----------
         node_label : str
-            a specified node label
+            A specified node label.
 
         Returns
         ----------
         Node
-            a models.core.Node type
+            A models.core.Node type or None if not found.
         """
-
-        for label, node in self.node_dict.items():
-            if label == node_label:
+        for node in self.nodes:
+            if node.label == node_label:
                 return node
-
         return None
 
-    def get_relationship(self, relationship_label: str) -> Optional[Relationship]:
+    def get_relationship(self, relationship_type: str) -> Optional[Relationship]:
         """
             Returns a Relationship given a specified label
 
             Parameters
             ----------
-            relationship_label : str
+            relationship_type : str
                 a specified node label
 
             Returns
@@ -169,116 +165,221 @@ class DataModel(BaseModel):
             Relationship
                 a models.core.Relationship type
             """
-        for label, rel in self.relationship_dict.items():
-            if label == relationship_label:
+        for rel in self.relationships:
+            if rel.type == relationship_type:
                 return rel
         return None
 
-    def mutate_node_label(self, current_label: str, new_label: str) -> Node:
+    def mutate_node(self, current_label: str, **kwargs) -> Node:
         """
-        Change the label of an existing node.
+        Mutate the attributes of an existing node.
 
         Parameters
         ----------
         current_label : str
             The current label of the node to be mutated.
-        new_label : str
-            The new label to assign to the node.
+        kwargs : dict
+            The attributes to be updated in the node.
 
         Returns
         -------
         Node
-            The mutated node with the updated label.
+            The mutated node with the updated attributes.
 
         Raises
         ------
         ValueError
-            If the node does not exist.
+            If the node with the specified current label does not exist.
+            If an invalid attribute is provided in kwargs.
         """
         model_node = self.get_node(current_label)
         if model_node is None:
             raise ValueError(f"Node with label '{current_label}' does not exist.")
 
-        model_node.label = new_label
+        for key, value in kwargs.items():
+            if hasattr(model_node, key):
+                setattr(model_node, key, value)
+            else:
+                raise ValueError(f"Node has no attribute '{key}'.")
+
         return model_node
 
-    def mutate_relationship_type(self, current_type: str, new_type: str) -> Relationship:
+    def mutate_relationship(self, current_type: str, **kwargs) -> Relationship:
         """
-        Change the type for an existing relationship.
+        Mutate the attributes of an existing relationship.
 
         Parameters
         ----------
         current_type : str
             The current type of the relationship to be mutated.
-        new_type : str
-            The new type to assign to the relationship.
+        kwargs : dict
+            The attributes to be updated in the relationship.
 
         Returns
         -------
         Relationship
-            The mutated relationship with the updated type.
+            The mutated relationship with the updated attributes.
 
         Raises
         ------
         ValueError
             If the relationship with the specified current type does not exist.
+            If an invalid attribute is provided in kwargs.
         """
         relationship = self.get_relationship(current_type)
         if relationship is None:
             raise ValueError(f"Relationship with type '{current_type}' does not exist.")
 
-        relationship.type = new_type
+        for key, value in kwargs.items():
+            if hasattr(relationship, key):
+                setattr(relationship, key, value)
+            else:
+                raise ValueError(f"Relationship has no attribute '{key}'.")
+
         return relationship
 
-    def set_node(self, node_label: str) -> Node:
+    def set_node(self, node_label: str, **kwargs) -> Node:
         """
-        Add a new node with the specified label to the graph.
+        Add a new node with the specified label to the graph or update an existing node.
 
         Parameters
         ----------
         node_label : str
-            The label of the node to be added.
+            The label of the node to be added or updated.
+        kwargs : dict
+            Additional attributes to set on the node.
 
         Returns
         -------
         Node
-            The newly created node with the specified label.
+            The newly created or updated node with the specified label.
 
         Raises
         ------
         ValueError
             If a node with the specified label already exists.
         """
-        if self.get_node(node_label) is None:
-            new_node = Node(label=node_label)
-            return new_node
-        else:
-            raise ValueError(f'Node with {node_label} already exists, try mutating it')
+        existing_node = self.get_node(node_label)
 
-    def set_relationship(self, relationship_type: str) -> Relationship:
+        if existing_node is not None:
+            for key, value in kwargs.items():
+                if hasattr(existing_node, key):
+                    setattr(existing_node, key, value)
+                else:
+                    raise ValueError(f"Node has no attribute '{key}'.")
+            return existing_node
+
+        new_node = Node(label=node_label, **kwargs)
+        self.nodes.append(new_node)
+        return new_node
+
+    def set_relationship(self, relationship_type: str, source_node_label: str, target_node_label: str,
+                         **kwargs) -> Relationship:
         """
-        Add a new relationship with the specified type to the graph.
+        Add a new relationship with the specified type to the graph or update an existing relationship.
 
         Parameters
         ----------
         relationship_type : str
-            The type of the relationship to be added.
+            The type of the relationship to be added or updated.
+        source_node_label : str
+            The label of the source node.
+        target_node_label : str
+            The label of the target node.
+        kwargs : dict
+            Additional attributes to set on the relationship.
 
         Returns
         -------
         Relationship
-            The newly created relationship with the specified type.
+            The newly created or updated relationship with the specified type.
 
         Raises
         ------
         ValueError
-            If a relationship with the specified type already exists.
+            If the source or destination node does not exist.
+            If an invalid attribute is provided in kwargs.
         """
-        if self.get_relationship(relationship_type) is None:
-            new_rel = Relationship(type=relationship_type)
-            return new_rel
-        else:
-            raise ValueError(f'Relationship with {relationship_type} already exists, try mutating it')
+        if not source_node_label or not target_node_label:
+            raise ValueError("Source and destination node labels must not be None or empty.")
+
+        if self.get_node(source_node_label) is None:
+            raise ValueError(f"Source node with label {source_node_label} does not exist.")
+
+        if self.get_node(target_node_label) is None:
+            raise ValueError(f"Target node with label {target_node_label} does not exist.")
+
+        existing_relationship = self.get_relationship(relationship_type)
+
+        valid_keys = {'type', 'source', 'target', 'properties', 'csv_name'}
+        for key in kwargs.keys():
+            if key not in valid_keys:
+                raise ValueError(f"Relationship has no attribute '{key}'.")
+
+        if existing_relationship is not None:
+            for key, value in kwargs.items():
+                if hasattr(existing_relationship, key):
+                    setattr(existing_relationship, key, value)
+                else:
+                    raise ValueError(f"Relationship has no attribute '{key}'.")
+            return existing_relationship
+
+        new_relationship = Relationship(
+            type=relationship_type,
+            source=source_node_label,
+            target=target_node_label,
+            **kwargs
+        )
+        self.relationships.append(new_relationship)
+        return new_relationship
+
+    def add_node(self, node: Node) -> None:
+        """
+        Add an existing node to the graph.
+
+        Parameters
+        ----------
+        node : Node
+            The node to be added.
+
+        Raises
+        ------
+        ValueError
+            If a node with the same label already exists.
+        """
+        if self.get_node(node.label) is not None:
+            raise ValueError(f"Node with label '{node.label}' already exists.")
+
+        self.nodes.append(node)
+
+    def add_relationship(self, relationship: Relationship) -> None:
+        """
+        Add an existing relationship to the graph.
+
+        Parameters
+        ----------
+        relationship : Relationship
+            The relationship to be added.
+
+        Raises
+        ------
+        ValueError
+            If a relationship with the same type already exists.
+            If the source or target node does not exist.
+        """
+        if self.get_node(relationship.source) is None:
+            raise ValueError(f"Source node with label '{relationship.source}' does not exist.")
+
+        if self.get_node(relationship.target) is None:
+            raise ValueError(f"Target node with label '{relationship.target}' does not exist.")
+
+        if self.get_relationship(relationship.type) is not None:
+            raise ValueError(f"Relationship with type '{relationship.type}' already exists.")
+
+        if relationship in self.relationships:
+            raise ValueError(f"Relationship already exists: {relationship}")
+
+
 
     def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """

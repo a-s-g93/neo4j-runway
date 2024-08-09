@@ -109,6 +109,31 @@ class TestNode(unittest.TestCase):
         message = "The node nodeA has a node key on only one property nkey. Node keys must exist on two or more properties."
         self.assertIn(message, errors)
 
+    def test_get_property(self) -> None:
+        """
+        Test get_property method.
+        """
+        # Create sample properties
+        person_height = Property(name="height", type="int", csv_mapping="height", is_unique=False)
+        person_weight = Property(name="weight", type="int", csv_mapping="weight", is_unique=False)
+        person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
+
+        # Create a node with non-unique properties
+        node = Node(label="Person", properties=[person_height, person_weight, person_name])
+
+        # Test retrieving an existing non-unique property
+        retrieved_property = node.get_property("height")
+        self.assertIsNotNone(retrieved_property)
+        self.assertEqual(retrieved_property.name, "height")
+
+        # Test retrieving a unique property (should return None)
+        unique_property = node.get_property("name")
+        self.assertIsNone(unique_property)
+
+        # Test retrieving a non-existing property (should return None)
+        non_existing_property = node.get_property("age")
+        self.assertIsNone(non_existing_property)
+
 
 if __name__ == "__main__":
     unittest.main()

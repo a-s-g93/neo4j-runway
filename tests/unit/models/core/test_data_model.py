@@ -99,6 +99,7 @@ class TestDataModel(unittest.TestCase):
             )
         ]
 
+
     def test_bad_init(self) -> None:
         """
         Test bad input for init.
@@ -284,65 +285,113 @@ class TestDataModel(unittest.TestCase):
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
 
         new_node_label = "NewNode"
-        new_node = test_model.set_node(new_node_label)
+        new_node = test_model.set_node(new_node_label, csv_name="new_nodes.csv")
         self.assertIsNotNone(new_node)
         self.assertEqual(new_node.label, new_node_label)
+        self.assertIn(new_node, test_model.nodes)
+
+        updated_node = test_model.set_node("Person", csv_name="people.csv")
+        self.assertEqual(updated_node.csv_name, "people.csv")
 
         with self.assertRaises(ValueError):
-            test_model.set_node("Person")
+            test_model.set_node("Person", invalid_attr="value")
 
     def test_set_relationship(self) -> None:
         """
         Test set_relationship method.
         """
+        # Ensure nodes are correctly initialized
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+        print("Nodes in test_model:", [node.label for node in test_model.nodes])
 
+        source_node_label = "Individual"
+        target_node_label = "Address"
+
+        assert test_model.get_node(source_node_label) is not None, "Source node does not exist"
+
+        # Adding a new relationship
         new_relationship_type = "NEW_REL"
-        new_relationship = test_model.set_relationship(new_relationship_type)
+        new_relationship = test_model.set_relationship(
+            new_relationship_type, source_node_label, target_node_label, csv_name="relationships.csv"
+        )
         self.assertIsNotNone(new_relationship)
         self.assertEqual(new_relationship.type, new_relationship_type)
+        self.assertEqual(new_relationship.source, source_node_label)
+        self.assertEqual(new_relationship.target, target_node_label)
+        self.assertIn(new_relationship, test_model.relationships)
 
+        # Updating an existing relationship
+        updated_relationship = test_model.set_relationship(
+            "HAS_ADDRESS", source_node_label, target_node_label, csv_name="addresses.csv"
+        )
+        self.assertEqual(updated_relationship.csv_name, "addresses.csv")
+
+        # Invalid attribute (should raise ValueError)
         with self.assertRaises(ValueError):
-            test_model.set_relationship("HAS_ADDRESS")
+            test_model.set_relationship("FRIENDS_WITH", source_node_label, target_node_label, invalid_attr="value")
 
-    def test_mutate_relationship_type(self) -> None:
+        # Non-existing source node (should raise ValueError)
+        with self.assertRaises(ValueError):
+            test_model.set_relationship("NEW_REL", "NonExistingNode", target_node_label)
+
+        # Non-existing target node (should raise ValueError)
+        with self.assertRaises(ValueError):
+            test_model.set_relationship("NEW_REL", source_node_label, "NonExistingNode")
+
+    def test_mutate_node(self) -> None:
         """
-        Test mutate_relationship_type method.
+        Test mutate_node method.
         """
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
 
-        # Test mutating an existing relationship type
-        current_type = "HAS_ADDRESS"
-        new_type = "HAS_NEW_ADDRESS"
-        mutated_relationship = test_model.mutate_relationship_type(current_type, new_type)
-        self.assertEqual(mutated_relationship.type, new_type)
+        current_label = "Person"
+        mutated_node = test_model.mutate_node(current_label, label="Individual")
+        self.assertEqual(mutated_node.label, "Individual")
 
-        # Ensure the change is reflected in the model
-        self.assertIsNotNone(test_model.get_relationship(new_type))
+        self.assertIsNotNone(test_model.get_node("Individual"))
+        self.assertIsNone(test_model.get_node(current_label))
+
+        with self.assertRaises(ValueError):
+            test_model.mutate_node("NonExistingNode", label="NewLabel")
+
+        with self.assertRaises(ValueError):
+            test_model.mutate_node("Person", invalid_attr="value")
+
+    def test_mutate_relationship(self) -> None:
+        """
+        Test mutate_relationship method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        current_type = "HAS_ADDRESS"
+        mutated_relationship = test_model.mutate_relationship(current_type, type="HAS_NEW_ADDRESS")
+        self.assertEqual(mutated_relationship.type, "HAS_NEW_ADDRESS")
+
+        self.assertIsNotNone(test_model.get_relationship("HAS_NEW_ADDRESS"))
         self.assertIsNone(test_model.get_relationship(current_type))
 
-        # Test mutating a non-existing relationship type (should raise ValueError)
         with self.assertRaises(ValueError):
-            test_model.mutate_relationship_type("NON_EXISTING_REL", "NEW_TYPE")
+            test_model.mutate_relationship("NON_EXISTING_REL", type="NEW_TYPE")
 
+        with self.assertRaises(ValueError):
+            test_model.mutate_relationship("FRIENDS_WITH", invalid_attr="value")
 
+    def test_add_node(self):
+        """
+        Test adding a new node to the data model.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+        print("Nodes in test_model:", [node.label for node in test_model.nodes])
 
-def test_mutate_node_label(self) -> None:
-    """
-    Test mutate_node_label method.
-    """
-    test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+        pet_name = Property(name="name", type="str", csv_mapping="pet_name", is_unique=True)
+        pet_kind = Property(name="kind", type="str", csv_mapping="pet_kind", is_unique=False)
+        pet_node = Node(label="LEGEND", properties=[pet_name, pet_kind])
 
-    current_label = "Person"
-    new_label = "Individual"
-    mutated_node = test_model.mutate_node_label(current_label, new_label)
-    self.assertEqual(mutated_node.label, new_label)
+        test_model.add_node(pet_node)
+        self.assertIn(pet_node, test_model.nodes)
 
-    self.assertIsNotNone(test_model.get_node(new_label))
-    self.assertIsNone(test_model.get_node(current_label))
-
-    with self.assertRaises(ValueError):
-        test_model.mutate_node_label("NonExistingNode", "NewLabel")
+        with self.assertRaises(ValueError):
+            test_model.add_node(pet_node)
 
 
 if __name__ == "__main__":

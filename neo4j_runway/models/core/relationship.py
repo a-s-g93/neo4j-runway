@@ -277,3 +277,22 @@ class Relationship(BaseModel):
                 solutions_workbench_relationship.endNodeLabelKey
             ],
         )
+
+    def __eq__(self, other:object) -> bool:
+        if not isinstance(other, Relationship):
+            return False
+        return (
+            self.type == other.type and
+            self.source == other.source and
+            self.target == other.target and
+            set(self.properties) == set(other.properties)
+        )
+
+    def __hash__(self) -> int:
+        return hash((
+            self.type,
+            self.source,
+            self.target,
+            tuple(sorted(self.properties, key= lambda p: p.name))
+        ))
+

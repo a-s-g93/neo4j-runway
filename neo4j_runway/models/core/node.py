@@ -184,6 +184,118 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         }
 
+    def get_property(self, property: str) -> Optional[Property]:
+        """
+        Retrieve a property by its name from the node's non-unique properties.
+
+        Parameters
+        ----------
+        property : str
+            The name of the property to retrieve.
+
+        Returns
+        -------
+        Optional[Property]
+            The property with the specified name if it exists, otherwise None.
+        """
+        for prop in self.nonunique_properties:
+            if prop == property:
+                return prop
+        return None
+
+    def mutate_property(self, current_prop_name: str, **kwargs) -> Property:
+        """
+        Mutate the attributes of an existing property.
+
+        Parameters
+        ----------
+        current_prop_name : str
+            The current name of the property to be mutated.
+        kwargs : dict
+            The attributes to be updated in the property.
+
+        Returns
+        -------
+        Property
+            The mutated property with the updated attributes.
+
+        Raises
+        ------
+        ValueError
+            If the property with the specified current name does not exist.
+        """
+        prop = self.get_property(current_prop_name)
+        if prop is None:
+            raise ValueError(f"Property with name {current_prop_name} not found.")
+
+        for key, value in kwargs.items():
+            if hasattr(prop, key):
+                setattr(prop, key, value)
+            else:
+                raise ValueError(f"Property has no attribute '{key}'.")
+
+        return prop
+
+    def add_property(self, new_property: Property) -> None:
+        """
+        Add a new property to the node's list of properties.
+
+        Parameters
+        ----------
+        new_property : Property
+            The new property to add to the node.
+
+        Raises
+        ------
+        ValueError
+            If a property with the same name already exists in the node.
+        """
+        # Check if a property with the same name already exists
+        if new_property.name in self.property_names:
+            raise ValueError(f"Property with name '{new_property.name}' already exists.")
+
+        self.properties.append(new_property)
+        return Property
+
+    def set_property(self, name: str, type: str, **kwargs) -> Property:
+        """
+        Add a new property with the specified name and type to the node
+        or update an existing property.
+
+        Parameters
+        ----------
+        name : str
+            The name of the property to be added or updated.
+        type : str
+            The type of the property to be added or updated.
+        kwargs : dict
+            Additional attributes to set on the property.
+
+        Returns
+        -------
+        Property
+            The newly created or updated property with the specified name.
+
+        Raises
+        ------
+        ValueError
+            If the property with the specified name already exists.
+        """
+        existing_property = next((prop for prop in self.properties if prop.name == name), None)
+
+        if existing_property is not None:
+            for key, value in kwargs.items():
+                if hasattr(existing_property, key):
+                    setattr(existing_property, key, value)
+                else:
+                    raise ValueError(f"Property has no attribute '{key}'.")
+            existing_property.type = type
+            return existing_property
+
+        new_property = Property(name=name, type=type, **kwargs)
+        self.properties.append(new_property)
+        return new_property
+
     @property
     def nonidentifying_properties(self) -> List[Property]:
         """
@@ -304,3 +416,16 @@ class Node(BaseModel):
         return cls(
             label=solutions_workbench_node.label, properties=props, csv_name=csv_name
         )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Node):
+            return False
+        return (
+            self.label == other.label and
+            set(self.properties) == set(other.properties))
+
+    def __hash__(self) -> int:
+        return hash(self.label, tuple(sorted(self.properties), key= lambda p: p.name))
+
+
+
