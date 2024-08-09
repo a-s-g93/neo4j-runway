@@ -153,6 +153,64 @@ class Relationship(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
+    def get_property(self, property_name: str) -> Optional[Property]:
+        """
+        Retrieve a property by its name from the relationship's properties.
+
+        Parameters
+        ----------
+        property_name : str
+            The name of the property to retrieve.
+
+        Returns
+        -------
+        Optional[Property]
+            The property with the specified name if it exists, otherwise None.
+        """
+        for prop in self.properties:
+            if prop.name == property_name:
+                return prop
+        return None
+
+    def set_property(self, name: str, type: str, **kwargs) -> Property:
+        """
+        Add a new property with the specified name and type to the relationship
+        or update an existing property.
+
+        Parameters
+        ----------
+        name : str
+            The name of the property to be added or updated.
+        type : str
+            The type of the property to be added or updated.
+        kwargs : dict
+            Additional attributes to set on the property.
+
+        Returns
+        -------
+        Property
+            The newly created or updated property with the specified name.
+
+        Raises
+        ------
+        ValueError
+            If the property with the specified name already exists.
+        """
+        existing_property = next((prop for prop in self.properties if prop.name == name), None)
+
+        if existing_property is not None:
+            for key, value in kwargs.items():
+                if hasattr(existing_property, key):
+                    setattr(existing_property, key, value)
+                else:
+                    raise ValueError(f"Property has no attribute '{key}'.")
+            existing_property.type = type
+            return existing_property
+
+        new_property = Property(name=name, type=type, **kwargs)
+        self.properties.append(new_property)
+        return new_property
+
     def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
         errors: List[Optional[str]] = []
         if self.properties is not None:
@@ -175,6 +233,26 @@ class Relationship(BaseModel):
                     f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
                 )
         return errors
+
+    def add_property(self, new_property: Property) -> None:
+        """
+        Add a new property to the relationship's list of properties.
+
+        Parameters
+        ----------
+        new_property : Property
+            The new property to add to the relationship.
+
+        Raises
+        ------
+        ValueError
+            If a property with the same name already exists in the relationship.
+        """
+        # Check if a property with the same name already exists
+        if self.get_property(new_property.name) is not None:
+            raise ValueError(f"Property with name '{new_property.name}' already exists.")
+
+        self.properties.append(new_property)
 
     def to_arrows(self) -> ArrowsRelationship:
         """

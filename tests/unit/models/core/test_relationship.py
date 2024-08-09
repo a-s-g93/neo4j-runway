@@ -132,6 +132,34 @@ class TestRelationship(unittest.TestCase):
         message = "The relationship relA has a relationship key on only one property rkey. Relationship keys must exist on two or more properties."
         self.assertIn(message, errors)
 
+    def test_get_property(self) -> None:
+        relationship = Relationship(
+            type="HAS_SIMILAR",
+            properties=[self.prop1, self.prop2],
+            source=self.source,
+            target=self.target,
+        )
+
+        self.assertEqual(relationship.get_property("score"), self.prop1)
+        self.assertEqual(relationship.get_property("current"), self.prop2)
+
+        self.assertIsNone(relationship.get_property("non_existent"))
+
+    def test_add_property(self) -> None:
+        """
+        Test adding a new property to the relationship.
+        """
+        self.relationship.add_property(self.prop3)
+        self.assertIn(self.prop3, self.relationship.properties)
+        self.assertEqual(len(self.relationship.properties), 3)
+
+        with self.assertRaises(ValueError) as context:
+            self.relationship.add_property(self.prop1)
+        self.assertEqual(
+            str(context.exception),
+            f"Property with name '{self.prop1.name}' already exists."
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
