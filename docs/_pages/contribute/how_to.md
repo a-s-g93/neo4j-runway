@@ -19,7 +19,7 @@ This project utilizes [Poetry](https://python-poetry.org/) v1.8.2+ as a depend
 
 ❗Note: If you use Conda or Pyenv as your environment/package manager, after installing Poetry, tell Poetry to use the virtualenv python environment (poetry config virtualenvs.prefer-active-python true)
 
-❗Note: Please ensure that you are developing and testing in Python 3.10 to ensure compatibility. 
+❗Note: Please ensure that you are developing and testing in Python 3.10 to ensure compatibility.
 
 ## Local Set Up
 
@@ -27,7 +27,7 @@ Install dependencies and set up precommit hooks:
 ```
 make init
 ```
-You must also install Graphviz if you intend to use visualization features. 
+You must also install Graphviz if you intend to use visualization features.
 * [Graphviz install instructions](https://graphviz.org/download/)
 * [Graphviz Python package documentation](https://graphviz.readthedocs.io/en/stable/manual.html#installation)
 
@@ -37,7 +37,7 @@ make test_unit
 ```
 - This will run all tests that don’t engage with the OpenAI API or require a database.
 
-Create an `.env` file that contains the contents of `example.env`. Replace the `OPENAI_API_KEY` value with your OpenAI key if you intend to contribute to LLM dependent modules. 
+Create an `.env` file that contains the contents of `example.env`. Replace the `OPENAI_API_KEY` value with your OpenAI key if you intend to contribute to LLM dependent modules.
 
 ## Testing
 
@@ -46,13 +46,13 @@ Run all tests:
 make test
 ```
 * This will require the OPENAI_API_KEY environment variable to be declared in the .env file.
-* This will require a local instance of Neo4j running to test against. 
+* This will require a local instance of Neo4j running to test against.
 
 Run all free tests:
 ```
 make test_free
 ```
-* This will require a local instance of Neo4j running to test against. 
+* This will require a local instance of Neo4j running to test against.
 
 Run all unit tests:
 ```
@@ -64,7 +64,7 @@ Run all integration tests:
 make test_integration
 ```
 * This will require the OPENAI_API_KEY environment variable to be declared in the .env file.
-* This will require a local instance of Neo4j running to test against. 
+* This will require a local instance of Neo4j running to test against.
 
 ## Formatting
 
@@ -72,15 +72,12 @@ Run formatter:
 ```
 make format
 ```
-* This will run black formatting over the project.
+* This will format the project.
 
-Formatting will also be handled via a precommit hook.
+Formatting checks will also be executed via a precommit hook.
 
 ## Documentation
 
-Runway uses the [NumPy documentation style guide](https://numpydoc.readthedocs.io/en/latest/format.html). All public facing classes and methods should be documented in this manner. 
+Runway uses the [NumPy documentation style guide](https://numpydoc.readthedocs.io/en/latest/format.html). All public facing classes and methods should be documented in this manner.
 
-Documentation will be refreshed from the `main` branch upon a new release. 
-
-
-
+Documentation will be refreshed from the `main` branch upon a new release.

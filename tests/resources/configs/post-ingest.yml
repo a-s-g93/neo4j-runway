@@ -1,7 +1,7 @@
 server_uri: bolt://localhost:7687
 admin_user: neo4j
 admin_pass: password
-database: peoplepets
+database: neo4j
 basepath: file:./
 
 files:

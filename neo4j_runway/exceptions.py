@@ -49,3 +49,9 @@ class DataNotSupportedError(RunwayError):
     """Exception raised when an unsupported data format is given to a DataLoader class."""
 
     pass
+
+
+class LoadCSVCypherGenerationError(RunwayError):
+    """Exception raised when no standard clause can be constructed from provided arguments."""
+
+    pass

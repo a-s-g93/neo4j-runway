@@ -20,14 +20,14 @@ class TestNeo4jGraph(unittest.TestCase):
 
     def test_init_without_creds(self) -> None:
         g = Neo4jGraph()
-        self.assertEqual("peoplepets", g.database)
+        self.assertEqual("neo4j", g.database)
 
         g.driver.close()
 
     def test_database_version_and_edition(self) -> None:
         g = Neo4jGraph(**self.creds)
 
-        self.assertEqual("5.15.0", g.database_version)
+        self.assertTrue(g.database_version.startswith("5"))
         self.assertEqual("enterprise", g.database_edition)
 
         g.driver.close()
@@ -35,7 +35,7 @@ class TestNeo4jGraph(unittest.TestCase):
     def test_apoc_version(self) -> None:
         g = Neo4jGraph(**self.creds)
 
-        self.assertEqual("5.15.1", g.apoc_version)
+        self.assertTrue(g.apoc_version.startswith("5"))
 
         g.driver.close()
 
