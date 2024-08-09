@@ -251,19 +251,16 @@ class TestDataModel(unittest.TestCase):
     def test_data_model_with_multi_csv_from_solutions_workbench(self) -> None:
         pass
 
-
     def test_get_node(self) -> None:
         """
         Test get_node method.
         """
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
 
-        # Test existing node label
         node = test_model.get_node("Person")
         self.assertIsNotNone(node)
         self.assertEqual(node.label, "Person")
 
-        # Test non-existing node label
         node = test_model.get_node("NonExistingNode")
         self.assertIsNone(node)
 
@@ -273,14 +270,79 @@ class TestDataModel(unittest.TestCase):
         """
         test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
 
-        # Test existing relationship label
         relationship = test_model.get_relationship("HAS_ADDRESS")
         self.assertIsNotNone(relationship)
         self.assertEqual(relationship.type, "HAS_ADDRESS")
 
-        # Test non-existing relationship label
         relationship = test_model.get_relationship("NON_EXISTING_REL")
         self.assertIsNone(relationship)
+
+    def test_set_node(self) -> None:
+        """
+        Test set_node method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        new_node_label = "NewNode"
+        new_node = test_model.set_node(new_node_label)
+        self.assertIsNotNone(new_node)
+        self.assertEqual(new_node.label, new_node_label)
+
+        with self.assertRaises(ValueError):
+            test_model.set_node("Person")
+
+    def test_set_relationship(self) -> None:
+        """
+        Test set_relationship method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        new_relationship_type = "NEW_REL"
+        new_relationship = test_model.set_relationship(new_relationship_type)
+        self.assertIsNotNone(new_relationship)
+        self.assertEqual(new_relationship.type, new_relationship_type)
+
+        with self.assertRaises(ValueError):
+            test_model.set_relationship("HAS_ADDRESS")
+
+    def test_mutate_relationship_type(self) -> None:
+        """
+        Test mutate_relationship_type method.
+        """
+        test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+        # Test mutating an existing relationship type
+        current_type = "HAS_ADDRESS"
+        new_type = "HAS_NEW_ADDRESS"
+        mutated_relationship = test_model.mutate_relationship_type(current_type, new_type)
+        self.assertEqual(mutated_relationship.type, new_type)
+
+        # Ensure the change is reflected in the model
+        self.assertIsNotNone(test_model.get_relationship(new_type))
+        self.assertIsNone(test_model.get_relationship(current_type))
+
+        # Test mutating a non-existing relationship type (should raise ValueError)
+        with self.assertRaises(ValueError):
+            test_model.mutate_relationship_type("NON_EXISTING_REL", "NEW_TYPE")
+
+
+
+def test_mutate_node_label(self) -> None:
+    """
+    Test mutate_node_label method.
+    """
+    test_model = DataModel(nodes=self.good_nodes, relationships=self.good_relationships)
+
+    current_label = "Person"
+    new_label = "Individual"
+    mutated_node = test_model.mutate_node_label(current_label, new_label)
+    self.assertEqual(mutated_node.label, new_label)
+
+    self.assertIsNotNone(test_model.get_node(new_label))
+    self.assertIsNone(test_model.get_node(current_label))
+
+    with self.assertRaises(ValueError):
+        test_model.mutate_node_label("NonExistingNode", "NewLabel")
 
 
 if __name__ == "__main__":

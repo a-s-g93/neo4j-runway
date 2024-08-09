@@ -157,7 +157,6 @@ class DataModel(BaseModel):
 
     def get_relationship(self, relationship_label: str) -> Optional[Relationship]:
         """
-
             Returns a Relationship given a specified label
 
             Parameters
@@ -174,6 +173,112 @@ class DataModel(BaseModel):
             if label == relationship_label:
                 return rel
         return None
+
+    def mutate_node_label(self, current_label: str, new_label: str) -> Node:
+        """
+        Change the label of an existing node.
+
+        Parameters
+        ----------
+        current_label : str
+            The current label of the node to be mutated.
+        new_label : str
+            The new label to assign to the node.
+
+        Returns
+        -------
+        Node
+            The mutated node with the updated label.
+
+        Raises
+        ------
+        ValueError
+            If the node does not exist.
+        """
+        model_node = self.get_node(current_label)
+        if model_node is None:
+            raise ValueError(f"Node with label '{current_label}' does not exist.")
+
+        model_node.label = new_label
+        return model_node
+
+    def mutate_relationship_type(self, current_type: str, new_type: str) -> Relationship:
+        """
+        Change the type for an existing relationship.
+
+        Parameters
+        ----------
+        current_type : str
+            The current type of the relationship to be mutated.
+        new_type : str
+            The new type to assign to the relationship.
+
+        Returns
+        -------
+        Relationship
+            The mutated relationship with the updated type.
+
+        Raises
+        ------
+        ValueError
+            If the relationship with the specified current type does not exist.
+        """
+        relationship = self.get_relationship(current_type)
+        if relationship is None:
+            raise ValueError(f"Relationship with type '{current_type}' does not exist.")
+
+        relationship.type = new_type
+        return relationship
+
+    def set_node(self, node_label: str) -> Node:
+        """
+        Add a new node with the specified label to the graph.
+
+        Parameters
+        ----------
+        node_label : str
+            The label of the node to be added.
+
+        Returns
+        -------
+        Node
+            The newly created node with the specified label.
+
+        Raises
+        ------
+        ValueError
+            If a node with the specified label already exists.
+        """
+        if self.get_node(node_label) is None:
+            new_node = Node(label=node_label)
+            return new_node
+        else:
+            raise ValueError(f'Node with {node_label} already exists, try mutating it')
+
+    def set_relationship(self, relationship_type: str) -> Relationship:
+        """
+        Add a new relationship with the specified type to the graph.
+
+        Parameters
+        ----------
+        relationship_type : str
+            The type of the relationship to be added.
+
+        Returns
+        -------
+        Relationship
+            The newly created relationship with the specified type.
+
+        Raises
+        ------
+        ValueError
+            If a relationship with the specified type already exists.
+        """
+        if self.get_relationship(relationship_type) is None:
+            new_rel = Relationship(type=relationship_type)
+            return new_rel
+        else:
+            raise ValueError(f'Relationship with {relationship_type} already exists, try mutating it')
 
     def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
         """
