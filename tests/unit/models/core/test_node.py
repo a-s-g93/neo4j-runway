@@ -127,21 +127,90 @@ class TestNode(unittest.TestCase):
         person_weight = Property(name="weight", type="int", csv_mapping="weight", is_unique=False)
         person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
 
-        # Create a node with non-unique properties
         node = Node(label="Person", properties=[person_height, person_weight, person_name])
 
-        # Test retrieving an existing non-unique property
         retrieved_property = node.get_property("height")
         self.assertIsNotNone(retrieved_property)
         self.assertEqual(retrieved_property.name, "height")
 
-        # Test retrieving a unique property (should return None)
         unique_property = node.get_property("name")
         self.assertIsNone(unique_property)
 
         # Test retrieving a non-existing property (should return None)
         non_existing_property = node.get_property("age")
         self.assertIsNone(non_existing_property)
+
+    def test_mutate_property(self) -> None:
+        """
+        Test mutate_property method.
+        """
+
+        person_height = Property(name="height", type="int", csv_mapping="height", is_unique=False)
+        person_weight = Property(name="weight", type="int", csv_mapping="weight", is_unique=False)
+        person_name = Property(name="name", type="str", csv_mapping="name", is_unique=True)
+
+        node = Node(label="Person", properties=[person_height, person_weight, person_name])
+
+        updated_property = node.mutate_property("height", type="float", csv_mapping="new_height")
+        self.assertEqual(updated_property.name, "height")
+        self.assertEqual(updated_property.type, "float")
+        self.assertEqual(updated_property.csv_mapping, "new_height")
+
+        property_in_node = node.get_property("height")
+        self.assertEqual(property_in_node.type, "float")
+        self.assertEqual(property_in_node.csv_mapping, "new_height")
+
+        with self.assertRaises(ValueError) as context:
+            node.mutate_property("nonexistent", type="str")
+        self.assertEqual(str(context.exception), "Property with name nonexistent not found.")
+
+        with self.assertRaises(ValueError) as context:
+            node.mutate_property("weight", invalid_attr="value")
+        self.assertEqual(str(context.exception), "Property has no attribute 'invalid_attr'.")
+
+    def test_add_property(self) -> None:
+        """
+        Test add_property method.
+        """
+        person_height = Property(name="height", type="int", csv_mapping="height", is_unique=False)
+        person_weight = Property(name="weight", type="int", csv_mapping="weight", is_unique=False)
+
+        node = Node(label="Person", properties=[person_height, person_weight])
+
+        new_property = Property(name="age", type="int", csv_mapping="age", is_unique=False)
+        node.add_property(new_property)
+        self.assertEqual(len(node.properties), 3)
+        self.assertEqual(node.get_property("age"), new_property)
+
+        with self.assertRaises(ValueError) as context:
+            duplicate_property = Property(name="height", type="float", csv_mapping="new_height")
+            node.add_property(duplicate_property)
+        self.assertEqual(str(context.exception), "Property with name 'height' already exists.")
+
+    def test_set_property(self) -> None:
+        """
+        Test set_property method.
+        """
+        person_height = Property(name="height", type="int", csv_mapping="height", is_unique=False)
+        person_weight = Property(name="weight", type="int", csv_mapping="weight", is_unique=False)
+
+        node = Node(label="Person", properties=[person_height, person_weight])
+
+        new_property = node.set_property(name="age", type="int", csv_mapping="age")
+        self.assertEqual(len(node.properties), 3)
+        self.assertEqual(new_property.name, "age")
+        self.assertEqual(new_property.type, "int")
+        self.assertEqual(new_property.csv_mapping, "age")
+
+        updated_property = node.set_property(name="height", type="float", csv_mapping="new_height")
+        self.assertEqual(len(node.properties), 3)
+        self.assertEqual(updated_property.name, "height")
+        self.assertEqual(updated_property.type, "float")
+        self.assertEqual(updated_property.csv_mapping, "new_height")
+
+        with self.assertRaises(ValueError) as context:
+            node.set_property(name="height", type="float", invalid_attr="value")
+        self.assertEqual(str(context.exception), "Property has no attribute 'invalid_attr'.")
 
 
 if __name__ == "__main__":
