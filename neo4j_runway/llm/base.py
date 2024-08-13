@@ -83,7 +83,7 @@ class BaseDiscoveryLLM(ABC):
         Get a discovery response from the LLM.
         """
 
-        return await self.client.chat.completions.create(  # type: ignore[no-any-return]
+        response: DiscoveryResponse = await self.client.chat.completions.create(
             model=self.model_name,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
@@ -91,7 +91,8 @@ class BaseDiscoveryLLM(ABC):
             ],
             response_model=DiscoveryResponse,
             **self.model_params,
-        ).response
+        )
+        return response.response
 
 
 class BaseDataModelingLLM(ABC):
