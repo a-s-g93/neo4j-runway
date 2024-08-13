@@ -3,7 +3,7 @@ This file contains the LLM module that interfaces with an OpenAI LLM for data di
 """
 
 import os
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 try:
     import openai
@@ -25,8 +25,8 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         Any parameters to pass to the model.
     open_ai_key: Union[str, None], optional
         Your OpenAI API key if it is not declared in an environment variable.
-    enable_async : bool
-        Whether to allow asynchronous LLM calls. This may be utilized in multi-csv input to improve response speed.
+    is_async : bool
+        Whether the client supports asynchronous API calls.
     kwargs : Any
         Parameters to pass to the model during initialization.
     """
@@ -35,7 +35,7 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         self,
         model_name: str = "gpt-4o-2024-05-13",
         model_params: Optional[dict[str, Any]] = None,
-        open_ai_key: Union[str, None] = None,
+        open_ai_key: Optional[str] = None,
         enable_async: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -84,5 +84,8 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
             )
 
         super().__init__(
-            model_name=model_name, model_params=model_params, client=client
+            model_name=model_name,
+            model_params=model_params,
+            client=client,
+            is_async=enable_async,
         )

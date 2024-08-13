@@ -3,13 +3,17 @@ This file contains the base LLM class that all other LLM classes must inherit fr
 """
 
 from abc import ABC
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Awaitable, Dict, List, Optional, Union
 
 from instructor import Instructor
 
 from ..inputs import UserInput
 from ..models import DataModel
-from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
+from ..resources.llm_response_types import (
+    DataModelEntityPool,
+    DiscoveryResponse,
+    ErrorRecommendations,
+)
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
@@ -28,21 +32,24 @@ class BaseDiscoveryLLM(ABC):
     def __init__(
         self,
         model_name: str,
-        client: Any,
+        client: Instructor,
+        is_async: bool = False,
         model_params: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> None:
         """
         The base DiscoveryLLM class.
 
-        Attributes
+        Parameters
         ----------
         model_name : str
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : Any
-            An LLM client.
+        client : Instructor
+            An LLM client patched with Instructor.
+        is_async : bool
+            Whether async calls may be made, by default False
         kwargs : Any
             Parameters to pass to the model during initialization.
         """
@@ -52,26 +59,39 @@ class BaseDiscoveryLLM(ABC):
         if "temperature" not in self.model_params.keys():
             self.model_params["temperature"] = 0
         self.client = client
+        self.is_async = is_async
 
     def _get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
 
-        response: str = (
-            self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            .choices[0]
-            .message.content
+        response: DiscoveryResponse = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+            response_model=DiscoveryResponse,
+            **self.model_params,
         )
 
-        return response
+        return response.response
+
+    async def _get_async_discovery_response(self, formatted_prompt: str) -> str:
+        """
+        Get a discovery response from the LLM.
+        """
+
+        return await self.client.chat.completions.create(  # type: ignore[no-any-return]
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+            response_model=DiscoveryResponse,
+            **self.model_params,
+        ).response
 
 
 class BaseDataModelingLLM(ABC):
@@ -95,7 +115,7 @@ class BaseDataModelingLLM(ABC):
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : Any
+        client : Instructor
             An LLM client patched with Instructor.
         kwargs : Any
              Parameters to pass to the model during initialization.

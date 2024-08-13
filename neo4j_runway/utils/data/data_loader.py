@@ -1,6 +1,5 @@
 import os
-import warnings
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
@@ -11,7 +10,7 @@ from .table_collection import TableCollection
 
 def load_local_files(
     data_directory: str,
-    general_description: Optional[str] = None,
+    general_description: str = "",
     data_dictionary: Dict[str, Any] = dict(),
     use_cases: Optional[List[str]] = None,
     ignored_files: List[str] = list(),
@@ -24,7 +23,7 @@ def load_local_files(
     ----------
     data_directory : str
         The directory containing all data.
-    general_description : Optional[str], optional
+    general_description : str
         A general description of the data, by default None
     data_dictionary : Dict[str, Any], optional
         A dictionary with file names as keys. Each key has a dictionary containing a description of each column in the file that is available for data modeling.
@@ -100,7 +99,7 @@ def load_local_files(
 
 def load_csv(
     file_path: str,
-    general_description: Optional[str] = None,
+    general_description: str = "",
     data_dictionary: Dict[str, str] = dict(),
     use_cases: Optional[List[str]] = None,
     allowed_columns: Optional[List[str]] = None,
@@ -131,13 +130,13 @@ def load_csv(
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,
-        discovery=None,
+        discovery_content=None,
     )
 
 
 def load_json(
     file_path: str,
-    general_description: Optional[str] = None,
+    general_description: str = "",
     data_dictionary: Dict[str, str] = dict(),
     use_cases: Optional[List[str]] = None,
     allowed_columns: Optional[List[str]] = None,
@@ -167,7 +166,7 @@ def load_json(
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,
-        discovery=None,
+        discovery_content=None,
     )
 
 

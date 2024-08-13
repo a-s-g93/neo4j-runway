@@ -82,12 +82,12 @@ class GraphDataModeler:
         if isinstance(discovery, Discovery):
             self.user_input = discovery.user_input
 
-            self.columns_of_interest = discovery.columns_of_interest
+            # self.columns_of_interest = discovery.columns_of_interest
 
-            self.discovery = discovery.discovery
-            self.general_info = discovery.df_info
-            self.description_numeric = discovery.numeric_data_description
-            self.description_categorical = discovery.categorical_data_description
+            # self.discovery = discovery.discovery
+            # self.general_info = discovery.df_info
+            # self.description_numeric = discovery.numeric_data_description
+            # self.description_categorical = discovery.categorical_data_description
             self.feature_descriptions = discovery.user_input.column_descriptions
 
         else:

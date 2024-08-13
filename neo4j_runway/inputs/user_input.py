@@ -12,7 +12,7 @@ class UserInput(BaseModel):
     ----------
     general_description : str, optional
         A general description of the CSV data.
-    column_descriptions : Dict[str, str]
+    column_descriptions : Dict[str, str], optional
         A mapping of the desired CSV columns to their descriptions.
         The keys of this argument will determine which CSV columns are
         evaluated in discovery and used to generate a data model.
@@ -21,12 +21,12 @@ class UserInput(BaseModel):
     """
 
     general_description: str = ""
-    column_descriptions: Dict[str, str]
+    column_descriptions: Dict[str, str] = dict()
     use_cases: Optional[List[str]] = None
 
     def __init__(
         self,
-        column_descriptions: Dict[str, str],
+        column_descriptions: Dict[str, str] = dict(),
         general_description: str = "",
         use_cases: Optional[List[str]] = None,
     ) -> None:
