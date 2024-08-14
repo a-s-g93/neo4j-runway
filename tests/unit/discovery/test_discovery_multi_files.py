@@ -143,9 +143,10 @@ def test_create_discovery_prompts_for_multi_file_num_calls_same_as_file_count(
         )
         == 0
     )
-    assert len(res["prompt_id_to_prompt"]) == 3
+    # call count should be one less than given, there will be a final summarization call as well
+    assert len(res["prompt_id_to_prompt"]) == 2
     mock_create_discovery_prompt_multi_file.assert_called()
-    assert mock_create_discovery_prompt_multi_file.call_count == 3
+    assert mock_create_discovery_prompt_multi_file.call_count == 2
 
 
 def test_create_discovery_prompts_for_multi_file_num_calls_more_than_file_count(
@@ -170,7 +171,7 @@ def test_create_discovery_prompts_for_multi_file_num_calls_more_than_file_count(
 def test_create_discovery_prompts_for_multi_file_num_calls_less_than_file_count(
     mock_create_discovery_prompt_multi_file: MockerFixture,
 ) -> None:
-    res = _create_discovery_prompts_for_multi_file(data=table_collection, num_calls=1)
+    res = _create_discovery_prompts_for_multi_file(data=table_collection, num_calls=2)
 
     assert len(res["table_to_prompt_id"]) == 3
     assert (
@@ -226,16 +227,108 @@ def test_run_pandas_only() -> None:
         assert t.discovery_content.discovery != ""
 
 
-def test_run_llm_call(mock_llm: MagicMock) -> None:
+def test_run_llm_call_custom(
+    mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
     assert not mock_llm.is_async
 
     d = Discovery(data=table_collection, llm=mock_llm)
 
+    d.run(show_result=False, custom_batches=[["a.csv", "c.csv"], ["b.csv"]])
 
-def test_run_async_llm_call(mock_async_llm: MagicMock) -> None:
+    assert mock_create_discovery_prompt_multi_file.call_count == 2
+    assert mock_llm._get_discovery_response.call_count == 3
+
+
+def test_run_llm_call_bulk(
+    mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert not mock_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_llm)
+
+    d.run(show_result=False, bulk_process=True)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 1
+    assert mock_llm._get_discovery_response.call_count == 2
+
+
+def test_run_llm_call_num_calls(
+    mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert not mock_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_llm)
+
+    d.run(show_result=False, num_calls=3)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 2
+    assert mock_llm._get_discovery_response.call_count == 3
+
+
+def test_run_llm_call_batch(
+    mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert not mock_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_llm)
+
+    d.run(show_result=False, batch_size=1)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 3
+    assert mock_llm._get_discovery_response.call_count == 4
+
+
+def test_run_async_llm_call_custom(
+    mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
     assert mock_async_llm.is_async
 
     d = Discovery(data=table_collection, llm=mock_async_llm)
+
+    d.run_async(show_result=False, custom_batches=[["a.csv", "c.csv"], ["b.csv"]])
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 2
+    assert mock_async_llm._get_async_discovery_response.call_count == 3
+
+
+def test_run_async_llm_call_bulk(
+    mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert mock_async_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_async_llm)
+
+    d.run_async(show_result=False, bulk_process=True)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 1
+    assert mock_async_llm._get_async_discovery_response.call_count == 2
+
+
+def test_run_async_llm_call_num_calls(
+    mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert mock_async_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_async_llm)
+
+    d.run_async(show_result=False, num_calls=3)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 2
+    assert mock_async_llm._get_async_discovery_response.call_count == 3
+
+
+def test_run_async_llm_call_batch(
+    mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
+) -> None:
+    assert mock_async_llm.is_async
+
+    d = Discovery(data=table_collection, llm=mock_async_llm)
+
+    d.run_async(show_result=False, batch_size=1)
+
+    assert mock_create_discovery_prompt_multi_file.call_count == 3
+    assert mock_async_llm._get_async_discovery_response.call_count == 4
 
 
 def test_raise_error_with_non_async_llm_and_async_run(mock_llm: MagicMock) -> None:

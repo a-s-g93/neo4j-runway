@@ -441,12 +441,11 @@ def _create_discovery_prompts_for_multi_file(
         )
 
     elif num_calls is not None:
+        num_calls -= 1  # there is always a summarization call
         if num_calls < 1:
             num_calls = 1
         # split files into equal sizes according to desired number of LLM calls
-        batch_size = data.size // num_calls
-        if batch_size != 1:
-            batch_size += 1
+        batch_size = data.size // num_calls + 1
 
         for i in range(0, data.size, batch_size):
             if i + batch_size < data.size:
