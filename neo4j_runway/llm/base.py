@@ -78,7 +78,9 @@ class BaseDiscoveryLLM(ABC):
 
         return response.response
 
-    async def _get_async_discovery_response(self, formatted_prompt: str) -> str:
+    async def _get_async_discovery_response(
+        self, formatted_prompt: str
+    ) -> DiscoveryResponse:
         """
         Get a discovery response from the LLM.
         """
@@ -92,7 +94,7 @@ class BaseDiscoveryLLM(ABC):
             response_model=DiscoveryResponse,
             **self.model_params,
         )
-        return response.response
+        return response
 
 
 class BaseDataModelingLLM(ABC):

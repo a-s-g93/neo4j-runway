@@ -11,10 +11,12 @@ def create_discovery_prompt_single_file(
     pandas_numeric_feature_descriptions: pd.DataFrame,
     pandas_categorical_feature_descriptions: pd.DataFrame,
     data_dictionary: Dict[str, str] = dict(),
-    use_cases: Optional[List[str]] = None,
+    use_cases: str = "",
 ) -> str:
     """
     Generate the initial discovery prompt for a single Pandas DataFrame.
+
+    Use cases should be provided via the `pretty_use_cases` property.
     """
 
     feature_descriptions: str = ""
@@ -54,10 +56,12 @@ def create_discovery_prompt_multi_file(
     user_provided_general_data_description: str,
     data: List[Table],
     total_files: int,
-    use_cases: Optional[List[str]] = None,
+    use_cases: str = "",
 ) -> str:
     """
     Generate the initial discovery prompt for many Pandas DataFrames.
+
+    Use cases should be provided via the `pretty_use_cases` property.
     """
     general_desc = (
         "\nThis is a general description of the entire dataset:\n"
@@ -103,3 +107,26 @@ The following is a description of each feature in the data:
 """
 
     return prefix + file_info + suffix
+
+
+def create_discovery_summary_prompt(
+    sub_discoveries: List[str], use_cases: str = ""
+) -> str:
+    """
+    Use cases should be provided via the `pretty_use_cases` property.
+    """
+
+    prefix = f"""The following are insights gathered about the data. Summarize these insights to be used as context for generating a graph data model.
+Identify possible unique identifiers, significant properties, possible node labels and relationships that may exist.
+Ensure that your findings are grounded in the provided summaries and address the following use cases:
+{use_cases}
+
+"""
+
+    suffix = f"""
+
+Keep these use cases in mind as you summarize the above content.
+use cases:
+{use_cases}"""
+
+    return prefix + str([d + "\n\n-------\n" for d in sub_discoveries]) + suffix

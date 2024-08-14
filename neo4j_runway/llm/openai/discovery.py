@@ -5,6 +5,8 @@ This file contains the LLM module that interfaces with an OpenAI LLM for data di
 import os
 from typing import Any, Optional
 
+import instructor
+
 try:
     import openai
 except ImportError:
@@ -65,22 +67,26 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         client: Any
 
         if enable_async:
-            client = openai.AsyncOpenAI(
-                api_key=(
-                    open_ai_key
-                    if open_ai_key is not None
-                    else os.environ.get("OPENAI_API_KEY")
-                ),
-                **kwargs,
+            client = instructor.from_openai(
+                openai.AsyncOpenAI(
+                    api_key=(
+                        open_ai_key
+                        if open_ai_key is not None
+                        else os.environ.get("OPENAI_API_KEY")
+                    ),
+                    **kwargs,
+                )
             )
         else:
-            client = openai.OpenAI(
-                api_key=(
-                    open_ai_key
-                    if open_ai_key is not None
-                    else os.environ.get("OPENAI_API_KEY")
-                ),
-                **kwargs,
+            client = instructor.from_openai(
+                openai.OpenAI(
+                    api_key=(
+                        open_ai_key
+                        if open_ai_key is not None
+                        else os.environ.get("OPENAI_API_KEY")
+                    ),
+                    **kwargs,
+                )
             )
 
         super().__init__(

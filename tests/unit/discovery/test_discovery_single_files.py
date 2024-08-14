@@ -61,7 +61,7 @@ class TestDiscovery(unittest.TestCase):
         Ensure that all initial variables are set accurately.
         """
 
-        self.assertEqual(self.disc.discovery, "")
+        self.assertIsNone(self.disc.data.discovery)
         self.assertEqual(
             set(self.disc.data.data[0].data.columns), {"id", "feature_1", "feature_2"}
         )
@@ -77,7 +77,7 @@ class TestDiscovery(unittest.TestCase):
         )
 
         self.assertIsInstance(self.test_disc.data, TableCollection)
-        self.assertEqual(self.test_disc.discovery, "")
+        self.assertIsNone(self.test_disc.data.discovery)
         self.assertEqual(
             set(self.test_disc.data.data[0].data.columns), {"feature_1", "feature_2"}
         )
@@ -95,12 +95,7 @@ class TestDiscovery(unittest.TestCase):
         with self.assertWarns(Warning):
             d = Discovery(data=pd.DataFrame(data))
             test_disc = "TEST\ntest"
-            d.data.discovery_content = DiscoveryContent(
-                discovery=test_disc,
-                pandas_general_description="",
-                pandas_numerical_description=pd.DataFrame(),
-                pandas_categorical_description=pd.DataFrame(),
-            )
+            d.data.discovery = test_disc
 
             capturedOutput = StringIO()
             sys.stdout = capturedOutput
@@ -112,12 +107,7 @@ class TestDiscovery(unittest.TestCase):
         with self.assertWarns(Warning):
             d = Discovery(data=pd.DataFrame(data))
             test_disc = "TEST\ntest"
-            d.data.discovery_content = DiscoveryContent(
-                discovery=test_disc,
-                pandas_general_description="",
-                pandas_numerical_description=pd.DataFrame(),
-                pandas_categorical_description=pd.DataFrame(),
-            )
+            d.data.discovery = test_disc
 
             capturedOutput = StringIO()
             sys.stdout = capturedOutput

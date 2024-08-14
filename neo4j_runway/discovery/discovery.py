@@ -4,14 +4,14 @@ The Discovery module that handles summarization and discovery generation via an 
 
 import asyncio
 import io
-import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Coroutine, Dict, List, Optional, Union
 
 import pandas as pd
 from IPython.display import (
     Markdown,
     display,
 )
+from numpy import number
 
 from ..exceptions import PandasDataSummariesNotGeneratedError
 from ..inputs import UserInput, user_input_safe_construct
@@ -19,6 +19,7 @@ from ..llm.base import BaseDiscoveryLLM
 from ..resources.prompts.discovery import (
     create_discovery_prompt_multi_file,
     create_discovery_prompt_single_file,
+    create_discovery_summary_prompt,
 )
 from ..utils.data import Table, TableCollection
 from .discovery_content import DiscoveryContent
@@ -26,7 +27,7 @@ from .discovery_content import DiscoveryContent
 
 class Discovery:
     """
-    The Discovery module that handles summarization and discovery generation via an LLM.
+    The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
 
     Attributes
     ----------
@@ -46,7 +47,7 @@ class Discovery:
         llm: Optional[BaseDiscoveryLLM] = None,
     ) -> None:
         """
-        The Discovery module that handles summarization and discovery generation via an LLM.
+        The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
 
         Parameters
         ----------
@@ -119,10 +120,17 @@ class Discovery:
                 ref.data.info(buf=buffer)
 
                 df_info = buffer.getvalue()
-                desc_numeric = ref.data.describe(
-                    percentiles=[0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99]
-                )
-                desc_categorical = ref.data.describe(include="object")
+                try:
+                    desc_numeric = ref.data.describe(
+                        percentiles=[0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99],
+                        include=[number],
+                    )
+                except ValueError as e:
+                    desc_numeric = pd.DataFrame()
+                try:
+                    desc_categorical = ref.data.describe(include="object")
+                except ValueError as e:
+                    desc_categorical = pd.DataFrame()
 
                 ref.discovery_content = DiscoveryContent(
                     pandas_categorical_description=desc_categorical,
@@ -130,7 +138,7 @@ class Discovery:
                     pandas_numerical_description=desc_numeric,
                 )
 
-    async def run(
+    def run(
         self,
         show_result: bool = True,
         notebook: bool = True,
@@ -153,22 +161,24 @@ class Discovery:
             Whether code is executed in a notebook. Affects the result print formatting.
         """
 
+        if self.llm is not None and self.llm.is_async:
+            raise RuntimeError(
+                "Provided LLM class contains an async client. Please provide a different LLM or use the 'run_async' method instead."
+            )
+
         self._generate_data_summaries(ignore_files=ignore_files)
 
         # single or multi Pandas only response
         if pandas_only or self.llm is None:
             response = self.data.get_pandas_summary(ignore_files=ignore_files)
-            if self.data.discovery is not None:
-                self.data.discovery = response
+
+            self.data.discovery = response
             for t in self.data.data:
                 if t.name not in ignore_files and t.discovery_content is not None:
-                    t.discovery_content.discovery = response
-        # single file input
+                    t.discovery_content.discovery = t.discovery_content.pandas_response
+        # single file input LLM call
         elif self.data.size == 1:
-            if (
-                self.data.discovery is not None
-                and self.data.data[0].discovery_content is not None
-            ):
+            if self.data.data[0].discovery_content is not None:
                 response = self.llm._get_discovery_response(
                     formatted_prompt=create_discovery_prompt_single_file(
                         user_provided_general_data_description=self.data.general_description
@@ -185,14 +195,19 @@ class Discovery:
                         data_dictionary=self.data.data_dictionary,
                     )
                 )
+
+                self.data.discovery = response
+                self.data.data[0].discovery_content.discovery = response
+
             else:
                 raise PandasDataSummariesNotGeneratedError(
                     "Pandas data summaries were not generated somehow."
                 )
 
-        # multi file input
+        # multi file input LLM call
         else:
-            prompts: Dict[str, Any] = _create_discovery_prompts_for_multi_file(
+            # prompt_dicts contains table_to_prompt_id and prompt_id_to_prompt
+            prompt_dicts: Dict[str, Any] = _create_discovery_prompts_for_multi_file(
                 data=self.data,
                 batch_size=batch_size,
                 bulk_process=bulk_process,
@@ -201,14 +216,125 @@ class Discovery:
                 ignore_files=ignore_files,
             )
 
-            if self.llm.is_async:
-                tasks = [self.llm._get_async_discovery_response(p) for p in prompts]
-                responses = await asyncio.gather(*tasks)
+            prompt_id_to_response = {
+                id: self.llm._get_discovery_response(p)
+                for id, p in prompt_dicts["prompt_id_to_prompt"].items()
+            }
+
+            for name in prompt_dicts["table_to_prompt_id"].keys():
+                response = prompt_id_to_response[
+                    prompt_dicts["table_to_prompt_id"][name]
+                ]
+                if self.data.table_dict[name].discovery_content is not None:
+                    self.data.table_dict[name].discovery = response
+
+            # final summarization call
+            self.data.discovery = self.llm._get_discovery_response(
+                formatted_prompt=create_discovery_summary_prompt(
+                    sub_discoveries=self.data.sub_discoveries,
+                    use_cases=self.data.pretty_use_cases,
+                )
+            )
 
         self._discovery_ran = True
-        # self.discovery = response
 
-        # assign discovery contents to proper Tables
+        if show_result:
+            self.view_discovery(notebook=notebook)
+
+    def run_async(
+        self,
+        show_result: bool = True,
+        notebook: bool = True,
+        ignore_files: List[str] = list(),
+        batch_size: int = 1,
+        bulk_process: bool = False,
+        num_calls: Optional[int] = None,
+        custom_batches: Optional[List[List[str]]] = None,
+    ) -> None:
+        """
+        Run the discovery process on the provided data asynchronously. This method is only for multi-file inputs that require LLM calls.
+        Use a non-async LLM class and the `run` method for single file inputs.
+        Use the `run` method for Pandas only discovery.
+        Access generated discovery with the .view_discovery() method of the Discovery class.
+
+        Parameters
+        ----------
+        show_result : bool
+            Whether to print the generated discovery upon retrieval.
+        notebook : bool
+            Whether code is executed in a notebook. Affects the result print formatting.
+        """
+
+        assert self.llm is not None
+
+        if not self.llm.is_async:
+            raise RuntimeError(
+                "Provided LLM class does not contain an async client. Please provide a different LLM or use the 'run' method instead."
+            )
+
+        self._generate_data_summaries(ignore_files=ignore_files)
+
+        # prompt_dicts contains table_to_prompt_id and prompt_id_to_prompt
+        prompt_dicts: Dict[str, Any] = _create_discovery_prompts_for_multi_file(
+            data=self.data,
+            batch_size=batch_size,
+            bulk_process=bulk_process,
+            num_calls=num_calls,
+            custom_batches=custom_batches,
+            ignore_files=ignore_files,
+        )
+
+        async def _get_responses() -> Dict[str, str]:
+            if self.llm is not None:
+                # prompt ids are the index
+                ordered_prompts: List[str] = [
+                    prompt_dicts["prompt_id_to_prompt"][x]
+                    for x in sorted(prompt_dicts["prompt_id_to_prompt"])
+                ]
+
+                tasks = [
+                    self.llm._get_async_discovery_response(p) for p in ordered_prompts
+                ]
+
+                responses = await asyncio.gather(*tasks)
+                return {
+                    str(idx): responses[idx].response
+                    for idx in range(len(ordered_prompts))
+                }
+            else:
+                raise ValueError("No llm argument was provided.")
+
+        def _run_async(method: Any) -> Any:
+            loop = asyncio.get_event_loop()
+            return loop.run_until_complete(method)
+
+        prompt_id_to_response = _run_async(method=_get_responses())
+
+        for name in prompt_dicts["table_to_prompt_id"].keys():
+            assert self.data.table_dict[name].discovery_content is not None
+
+            response = prompt_id_to_response[prompt_dicts["table_to_prompt_id"][name]]
+            self.data.table_dict[name].discovery = response
+
+        async def _get_summary_response() -> str:
+            assert self.llm is not None
+
+            tasks = [
+                self.llm._get_async_discovery_response(
+                    formatted_prompt=create_discovery_summary_prompt(
+                        sub_discoveries=self.data.sub_discoveries,
+                        use_cases=self.data.pretty_use_cases,
+                    )
+                )
+            ]
+
+            responses = await asyncio.gather(*tasks)
+            return str(responses[0].response)
+
+        # final summarization call
+        self.data.discovery = _run_async(method=_get_summary_response())
+
+        self._discovery_ran = True
 
         if show_result:
             self.view_discovery(notebook=notebook)
@@ -232,7 +358,7 @@ class Discovery:
         else:
             table = self.data.table_dict.get(file_name)
             if table is not None and table.discovery_content is not None:
-                discovery = table.discovery_content.discovery
+                discovery = table.discovery
             else:
                 raise ValueError(f"file_name {file_name} not found in data.")
 
@@ -296,7 +422,7 @@ def _create_discovery_prompts_for_multi_file(
             prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
                 user_provided_general_data_description=data.general_description,
                 data=tables,
-                use_cases=data.use_cases,
+                use_cases=data.pretty_use_cases,
                 total_files=data.size,
             )
             prompt_id += 1
@@ -305,20 +431,22 @@ def _create_discovery_prompts_for_multi_file(
         # call discovery with single prompt
         tables = [t for t in data.data if t.name not in ignore_files]
 
-        table_to_prompt_id.update(
-            {t.name: str(prompt_id) for t in data.data if t.name not in ignore_files}
-        )
+        table_to_prompt_id.update({t.name: str(prompt_id) for t in tables})
 
         prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
             user_provided_general_data_description=data.general_description,
             data=data.data,
-            use_cases=data.use_cases,
+            use_cases=data.pretty_use_cases,
             total_files=data.size,
         )
 
     elif num_calls is not None:
+        if num_calls < 1:
+            num_calls = 1
         # split files into equal sizes according to desired number of LLM calls
-        batch_size = data.size // num_calls + 1
+        batch_size = data.size // num_calls
+        if batch_size != 1:
+            batch_size += 1
 
         for i in range(0, data.size, batch_size):
             if i + batch_size < data.size:
@@ -337,18 +465,12 @@ def _create_discovery_prompts_for_multi_file(
 
             else:
                 tables = [t for t in data.data[i:] if t.name not in ignore_files]
-                table_to_prompt_id.update(
-                    {
-                        t.name: str(prompt_id)
-                        for t in data.data[i:]
-                        if t.name not in ignore_files
-                    }
-                )
+                table_to_prompt_id.update({t.name: str(prompt_id) for t in tables})
 
             prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
                 user_provided_general_data_description=data.general_description,
                 data=tables,
-                use_cases=data.use_cases,
+                use_cases=data.pretty_use_cases,
                 total_files=data.size,
             )
 
@@ -387,7 +509,7 @@ def _create_discovery_prompts_for_multi_file(
             prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
                 user_provided_general_data_description=data.general_description,
                 data=tables,
-                use_cases=data.use_cases,
+                use_cases=data.pretty_use_cases,
                 total_files=data.size,
             )
 
