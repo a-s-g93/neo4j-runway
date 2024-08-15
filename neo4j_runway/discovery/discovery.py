@@ -370,6 +370,7 @@ class Discovery:
             tasks = [self.llm._get_async_discovery_response(p) for p in ordered_prompts]
 
             responses = await asyncio.gather(*tasks)
+
             return {
                 str(idx): responses[idx].response for idx in range(len(ordered_prompts))
             }
@@ -490,11 +491,11 @@ class Discovery:
         assert file_type in [".txt", ".md"], "Unsupported file type provided."
 
         if file_name == "final":
-            self.data.to_markdown(
+            self.data._export_to_file(
                 file_dir=file_dir, file_name="final_discovery" + file_type
             )
         elif file_name == "all":
-            self.data.to_markdown(
+            self.data._export_to_file(
                 file_dir=file_dir, file_name="final_discovery" + file_type
             )
             for t in self.data.data:
@@ -504,7 +505,7 @@ class Discovery:
                     name = t.name.split(".")[0] + "_discovery" + file_type
                 else:
                     name = t.name + "_discovery" + file_type
-                t.discovery_content.to_markdown(
+                t.discovery_content._export_to_file(
                     file_dir=file_dir,
                     file_name=name,
                     include_pandas=include_pandas,
@@ -518,7 +519,7 @@ class Discovery:
                 name = t.name.split(".")[0] + "_discovery" + file_type
             else:
                 name = t.name + "_discovery" + file_type
-            t.discovery_content.to_markdown(
+            t.discovery_content._export_to_file(
                 file_dir=file_dir,
                 file_name=name,
                 include_pandas=include_pandas,

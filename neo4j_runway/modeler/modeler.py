@@ -84,7 +84,7 @@ class GraphDataModeler:
 
             # self.columns_of_interest = discovery.columns_of_interest
 
-            # self.discovery = discovery.discovery
+            self.discovery = discovery.discovery
             # self.general_info = discovery.df_info
             # self.description_numeric = discovery.numeric_data_description
             # self.description_categorical = discovery.categorical_data_description
