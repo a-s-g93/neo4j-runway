@@ -65,14 +65,11 @@ LLM Generated Discovery
             Whether to include the Pandas summaries, by default True
         """
 
-        if file_dir != "./":
-            os.makedirs(file_dir, exist_ok=True)
+        assert file_name.endswith(".txt"), "File name is not .txt"
 
-        with open(f"./{file_dir}{file_name}", "w") as f:
-            if include_pandas:
-                f.write(self.__str__())
-            else:
-                f.write(self.discovery)
+        self._export_to_file(
+            file_name=file_name, file_dir=file_dir, include_pandas=include_pandas
+        )
 
     def to_markdown(
         self,
@@ -93,6 +90,15 @@ LLM Generated Discovery
             Whether to include the Pandas summaries, by default True
         """
 
+        assert file_name.endswith(".md"), "File name is not .md"
+
+        self._export_to_file(
+            file_name=file_name, file_dir=file_dir, include_pandas=include_pandas
+        )
+
+    def _export_to_file(
+        self, file_name: str, file_dir: str = "./", include_pandas: bool = True
+    ) -> None:
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
 

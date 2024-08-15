@@ -163,13 +163,9 @@ class TableCollection:
             The name of the file, by default "discovery.txt"
         """
 
-        assert self.discovery is not None, "No discovery information to write."
+        assert file_name.endswith(".txt"), "File name is not .txt"
 
-        if file_dir != "./":
-            os.makedirs(file_dir, exist_ok=True)
-
-        with open(f"./{file_dir}{file_name}", "w") as f:
-            f.write(self.discovery)
+        self._export_to_file(file_dir=file_dir, file_name=file_name)
 
     def to_markdown(
         self, file_dir: str = "./", file_name: str = "discovery.md"
@@ -185,6 +181,11 @@ class TableCollection:
             The name of the file, by default "discovery.md"
         """
 
+        assert file_name.endswith(".md"), "File name is not .md"
+
+        self._export_to_file(file_dir=file_dir, file_name=file_name)
+
+    def _export_to_file(self, file_name: str, file_dir: str = "./") -> None:
         assert self.discovery is not None, "No discovery information to write."
 
         if file_dir != "./":
