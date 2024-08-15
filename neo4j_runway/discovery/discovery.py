@@ -76,7 +76,7 @@ class Discovery:
         #   2. UserInput content
         if isinstance(data, pd.DataFrame):
             t = Table(
-                name="",
+                name="dataframe",
                 file_path="",
                 data=data[self.user_input.allowed_columns],
                 general_description=self.user_input.general_description,
@@ -364,11 +364,108 @@ class Discovery:
 
         print(discovery) if not notebook else display(Markdown(discovery))
 
-    def to_txt(self) -> str:
-        return ""
+    def to_txt(
+        self, file_dir: str = "./", file_name: str = "all", include_pandas: bool = True
+    ) -> None:
+        """
+        Output findings to a .txt file.
 
-    def to_markdown(self) -> str:
-        return ""
+        Parameters
+        ----------
+        file_dir : str, optional
+            The directory to save files to, by default "./"
+        file_name : str, optional
+            'all' to export all data, 'final' to export only final discovery result, file name to export the desired file only, by default "all"
+        include_pandas : bool, optional
+            Whether to include the Pandas summaries, by default True
+        """
+
+        if file_name == "final":
+            self.data.to_txt(file_dir=file_dir, file_name="final_discovery.txt")
+        elif file_name == "all":
+            self.data.to_txt(file_dir=file_dir, file_name="final_discovery.txt")
+            for t in self.data.data:
+                assert t.discovery_content is not None
+
+                if "." in t.name:
+                    name = t.name.split(".")[0] + "_discovery.txt"
+                else:
+                    name = t.name + "_discovery.txt"
+                t.discovery_content.to_txt(
+                    file_dir=file_dir,
+                    file_name=name,
+                    include_pandas=include_pandas,
+                )
+        elif file_name in self.data.table_dict.keys():
+            t = self.data.table_dict[file_name]
+
+            assert t.discovery_content is not None
+
+            if "." in t.name:
+                name = t.name.split(".")[0] + "_discovery.txt"
+            else:
+                name = t.name + "_discovery.txt"
+
+            t.discovery_content.to_txt(
+                file_dir=file_dir,
+                file_name=name,
+                include_pandas=include_pandas,
+            )
+        else:
+            raise ValueError(
+                f"Table with file_name {file_name} not found in TableCollection."
+            )
+
+    def to_markdown(
+        self, file_dir: str = "./", file_name: str = "all", include_pandas: bool = True
+    ) -> None:
+        """
+        Output findings to a .md file.
+
+        Parameters
+        ----------
+        file_dir : str, optional
+            The directory to save files to, by default "./"
+        file_name : str, optional
+            'all' to export all data, 'final' to export only final discovery result, file name to export the desired file only, by default "all"
+        include_pandas : bool, optional
+            Whether to include the Pandas summaries, by default True
+        """
+
+        if file_name == "final":
+            self.data.to_markdown(file_dir=file_dir, file_name="final_discovery.md")
+        elif file_name == "all":
+            self.data.to_markdown(file_dir=file_dir, file_name="final_discovery.md")
+            for t in self.data.data:
+                assert t.discovery_content is not None
+
+                if "." in t.name:
+                    name = t.name.split(".")[0] + "_discovery.md"
+                else:
+                    name = t.name + "_discovery.md"
+                t.discovery_content.to_markdown(
+                    file_dir=file_dir,
+                    file_name=name,
+                    include_pandas=include_pandas,
+                )
+        elif file_name in self.data.table_dict:
+            t = self.data.table_dict[file_name]
+
+            assert t.discovery_content is not None
+
+            if "." in t.name:
+                name = t.name.split(".")[0] + "_discovery.md"
+            else:
+                name = t.name + "_discovery.md"
+            t.discovery_content.to_markdown(
+                file_dir=file_dir,
+                file_name=name,
+                include_pandas=include_pandas,
+            )
+        else:
+            raise ValueError(
+                f"Table with file_name {file_name} not found in TableCollection."
+            )
 
 
 def _create_discovery_prompts_for_multi_file(

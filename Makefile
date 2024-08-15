@@ -3,6 +3,11 @@
 # Default target executed when no arguments are given to make.
 all: help
 
+
+coverage:
+	poetry run coverage run -m pytest tests/unit
+	poetry run coverage report --fail-under=90
+
 test:
 	pytest tests
 
@@ -46,6 +51,7 @@ docs_add_example:
 help:
 	@echo '----'
 	@echo 'init........................ - initialize the repo for development (must still install Graphviz separately)'
+	@echo 'coverage.................... - run coverage report of unit tests'
 	@echo 'docs_add_example............ - args: file_path, add specified example notebook from the a-s-g93/neo4j-runway-examples/main github repo'
 	@echo 'docs_preview................ - preview the local documentation site'
 	@echo 'docs_refresh................ - refresh documentation for all public classes and functions'

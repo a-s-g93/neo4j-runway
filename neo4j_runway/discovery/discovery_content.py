@@ -31,24 +31,8 @@ class DiscoveryContent:
 
 {self.pandas_numerical_description}"""
 
-    def to_txt(self, file_dir: str = "./", file_name: str = "discovery.txt") -> None:
-        """
-        Write the generated discovery to a .txt file.
-
-        Parameters
-        ----------
-        file_dir : str, optional
-            The file directory to write to, by default "./"
-        file_name : str, optional
-            The name of the file, by default "discovery"
-        """
-
-        if file_dir != "./":
-            os.makedirs(file_dir, exist_ok=True)
-
-        with open(f"./{file_dir}{file_name}", "w") as f:
-            f.write(
-                f"""
+    def __str__(self) -> str:
+        return f"""
 Data General Info
 {self.pandas_general_description}
 
@@ -61,38 +45,59 @@ Categorical Data Descriptions
 LLM Generated Discovery
 {self.discovery}
             """
-            )
 
-    def to_markdown(
-        self, file_dir: str = "./", file_name: str = "discovery.md"
+    def to_txt(
+        self,
+        file_dir: str = "./",
+        file_name: str = "discovery.txt",
+        include_pandas: bool = True,
     ) -> None:
         """
-        Write the generated discovery to a Markdown file.
+        Write the generated discovery content to a .txt file.
 
         Parameters
         ----------
         file_dir : str, optional
             The file directory to write to, by default "./"
         file_name : str, optional
-            The name of the file, by default "discovery"
+            The name of the file, by default "discovery.txt"
+        include_pandas : bool
+            Whether to include the Pandas summaries, by default True
         """
 
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
 
         with open(f"./{file_dir}{file_name}", "w") as f:
-            f.write(
-                f"""
-Data General Info
-{self.pandas_general_description}
+            if include_pandas:
+                f.write(self.__str__())
+            else:
+                f.write(self.discovery)
 
-Numeric Data Descriptions
-{self.pandas_numerical_description}
+    def to_markdown(
+        self,
+        file_dir: str = "./",
+        file_name: str = "discovery.md",
+        include_pandas: bool = True,
+    ) -> None:
+        """
+        Write the generated discovery content to a Markdown file.
 
-Categorical Data Descriptions
-{self.pandas_categorical_description}
+        Parameters
+        ----------
+        file_dir : str, optional
+            The file directory to write to, by default "./"
+        file_name : str, optional
+            The name of the file, by default "discovery.md"
+        include_pandas : bool
+            Whether to include the Pandas summaries, by default True
+        """
 
-LLM Generated Discovery
-{self.discovery}
-            """
-            )
+        if file_dir != "./":
+            os.makedirs(file_dir, exist_ok=True)
+
+        with open(f"./{file_dir}{file_name}", "w") as f:
+            if include_pandas:
+                f.write(self.__str__())
+            else:
+                f.write(self.discovery)

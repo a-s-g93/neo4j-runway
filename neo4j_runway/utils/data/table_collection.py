@@ -1,6 +1,6 @@
+import os
 from typing import Any, Dict, List, Optional
 
-from ...discovery.discovery_content import DiscoveryContent
 from .table import Table
 
 
@@ -57,7 +57,7 @@ class TableCollection:
         use_cases : Optional[List[str]], optional
             Any use cases that the graph data model should address, by default None
         discovery : Optional[str], optional
-        Any insights gathered about the data as a whole. By default = None
+        Any insights gathered about the data as a whole. By default None
         """
         self.data_directory = data_directory
         self.data = data
@@ -84,6 +84,14 @@ class TableCollection:
 
     @property
     def table_dict(self) -> Dict[str, Table]:
+        """
+        A dictionary of Table name to Table.
+
+        Returns
+        -------
+        Dict[str, Table]
+            The dictionary.
+        """
         return {t.name: t for t in self.data}
 
     @property
@@ -119,10 +127,19 @@ class TableCollection:
         return list({t.discovery for t in self.data})
 
     def get_pandas_summary(self, ignore_files: List[str] = list()) -> str:
-        # priority:
-        #   custom batches
-        #   batch size & ignore files
+        """
+        A String containing all Pandas summaries generated for the contained Tables.
 
+        Parameters
+        ----------
+        ignore_files : List[str], optional
+            Any files to ignore, by default list()
+
+        Returns
+        -------
+        str
+            The Pandas summaries formatted into a String.
+        """
         response = (
             "Here are Summary Statistics generated with the Pandas Python library"
         )
@@ -133,3 +150,45 @@ class TableCollection:
                 )
 
         return response
+
+    def to_txt(self, file_dir: str = "./", file_name: str = "discovery.txt") -> None:
+        """
+        Write the generated discovery to a .txt file.
+
+        Parameters
+        ----------
+        file_dir : str, optional
+            The file directory to write to, by default "./"
+        file_name : str, optional
+            The name of the file, by default "discovery.txt"
+        """
+
+        assert self.discovery is not None, "No discovery information to write."
+
+        if file_dir != "./":
+            os.makedirs(file_dir, exist_ok=True)
+
+        with open(f"./{file_dir}{file_name}", "w") as f:
+            f.write(self.discovery)
+
+    def to_markdown(
+        self, file_dir: str = "./", file_name: str = "discovery.md"
+    ) -> None:
+        """
+        Write the generated discovery to a Markdown file.
+
+        Parameters
+        ----------
+        file_dir : str, optional
+            The file directory to write to, by default "./"
+        file_name : str, optional
+            The name of the file, by default "discovery.md"
+        """
+
+        assert self.discovery is not None, "No discovery information to write."
+
+        if file_dir != "./":
+            os.makedirs(file_dir, exist_ok=True)
+
+        with open(f"./{file_dir}{file_name}", "w") as f:
+            f.write(self.discovery)
