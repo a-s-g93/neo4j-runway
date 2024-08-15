@@ -97,6 +97,8 @@ class TestDiscovery(unittest.TestCase):
             test_disc = "TEST\ntest"
             d.data.discovery = test_disc
 
+            self.assertIsNotNone(d.discovery)
+
             capturedOutput = StringIO()
             sys.stdout = capturedOutput
             d.view_discovery(notebook=False)
@@ -108,6 +110,8 @@ class TestDiscovery(unittest.TestCase):
             d = Discovery(data=pd.DataFrame(data))
             test_disc = "TEST\ntest"
             d.data.discovery = test_disc
+
+            self.assertIsNotNone(d.discovery)
 
             capturedOutput = StringIO()
             sys.stdout = capturedOutput
@@ -124,6 +128,7 @@ class TestDiscovery(unittest.TestCase):
             d.run()
 
             self.assertNotEqual(d.data.discovery, "")
+            self.assertIsNotNone(d.discovery)
 
     def test_init_with_table(self) -> None:
         d = Discovery(llm=LLMMock(), data=table)
