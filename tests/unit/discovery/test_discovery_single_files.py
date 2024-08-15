@@ -4,7 +4,10 @@ from io import StringIO
 
 import pandas as pd
 
-from neo4j_runway import Discovery, UserInput
+from neo4j_runway.discovery import Discovery
+from neo4j_runway.discovery.discovery_content import DiscoveryContent
+from neo4j_runway.inputs import UserInput
+from neo4j_runway.utils.data import Table, TableCollection
 
 USER_GENERATED_INPUT = {
     "general_description": "This is data on some interesting data.",
@@ -19,6 +22,25 @@ data = {
     "feature_2": ["z", "y", "x", "w", "v"],
     "bad_feature": [11, 22, 33, 44, 55],
 }
+
+table = Table(
+    name="test.csv",
+    file_path="./test.csv",
+    data=pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "feature_1": ["a", "b", "c", "d", "e"],
+            "feature_2": ["z", "y", "x", "w", "v"],
+        }
+    ),
+    general_description=USER_GENERATED_INPUT["general_description"],
+    data_dictionary={
+        "id": "unique id for a node.",
+        "feature_1": "this is a feature",
+        "feature_2": "this is also a feature",
+    },
+    use_cases=["What do?"],
+)
 
 
 class LLMMock:
@@ -39,13 +61,12 @@ class TestDiscovery(unittest.TestCase):
         Ensure that all initial variables are set accurately.
         """
 
-        self.assertEqual(self.disc.discovery, "")
+        self.assertIsNone(self.disc.data.discovery)
         self.assertEqual(
-            set(self.disc.columns_of_interest), {"id", "feature_1", "feature_2"}
+            set(self.disc.data.data[0].data.columns), {"id", "feature_1", "feature_2"}
         )
-        self.assertEqual(set(self.disc.data.columns), {"id", "feature_1", "feature_2"})
 
-    def test_init_with_UserInput(self) -> None:
+    def test_init_with_UserInput_dataframe(self) -> None:
         user_input = UserInput(
             general_description="This is a general description.",
             column_descriptions={"feature_1": "column one", "feature_2": " column two"},
@@ -55,26 +76,28 @@ class TestDiscovery(unittest.TestCase):
             llm=LLMMock(), user_input=user_input, data=pd.DataFrame(data)
         )
 
-        self.assertEqual(self.test_disc.discovery, "")
+        self.assertIsInstance(self.test_disc.data, TableCollection)
+        self.assertIsNone(self.test_disc.data.discovery)
         self.assertEqual(
-            set(self.test_disc.columns_of_interest), {"feature_1", "feature_2"}
+            set(self.test_disc.data.data[0].data.columns), {"feature_1", "feature_2"}
         )
-        self.assertEqual(set(self.test_disc.data.columns), {"feature_1", "feature_2"})
 
-    def test_init_with_no_desired_columns(self) -> None:
+    def test_init_with_no_desired_columns_dataframe(self) -> None:
         with self.assertWarns(Warning):
             d = Discovery(llm=LLMMock(), data=pd.DataFrame(data))
 
             self.assertEqual(
                 {"id", "feature_1", "feature_2", "bad_feature"},
-                set(d.columns_of_interest),
+                set(d.data.data[0].data.columns),
             )
 
     def test_view_discovery_no_notebook(self) -> None:
         with self.assertWarns(Warning):
             d = Discovery(data=pd.DataFrame(data))
             test_disc = "TEST\ntest"
-            d.discovery = test_disc
+            d.data.discovery = test_disc
+
+            self.assertIsNotNone(d.discovery)
 
             capturedOutput = StringIO()
             sys.stdout = capturedOutput
@@ -86,7 +109,9 @@ class TestDiscovery(unittest.TestCase):
         with self.assertWarns(Warning):
             d = Discovery(data=pd.DataFrame(data))
             test_disc = "TEST\ntest"
-            d.discovery = test_disc
+            d.data.discovery = test_disc
+
+            self.assertIsNotNone(d.discovery)
 
             capturedOutput = StringIO()
             sys.stdout = capturedOutput
@@ -97,15 +122,36 @@ class TestDiscovery(unittest.TestCase):
                 "<IPython.core.display.Markdown object>",
             )
 
-    def test_pandas_only(self) -> None:
+    def test_pandas_only_single_file_dataframe(self) -> None:
         with self.assertWarns(Warning):
             d = Discovery(data=pd.DataFrame(data))
             d.run()
 
-            self.assertNotEqual(d.discovery, "")
-            self.assertIsNotNone(d.df_info)
-            self.assertIsNotNone(d.numeric_data_description)
-            self.assertIsNotNone(d.categorical_data_description)
+            self.assertNotEqual(d.data.discovery, "")
+            self.assertIsNotNone(d.discovery)
+
+    def test_init_with_table(self) -> None:
+        d = Discovery(llm=LLMMock(), data=table)
+
+        self.assertIsInstance(d.data, TableCollection)
+        self.assertEqual(
+            set(d.data.data_dictionary.keys()), set(table.data_dictionary.keys())
+        )
+        self.assertEqual(
+            set(d.data.data[0].data_dictionary.keys()),
+            set(table.data_dictionary.keys()),
+        )
+        self.assertEqual(d.data.size, 1)
+        self.assertEqual(len(d.data.data[0].data), 5)
+        self.assertEqual(d.data.use_cases[0], "What do?")
+
+    def test_init_with_no_desired_columns_table(self) -> None:
+        d = Discovery(llm=LLMMock(), data=table)
+
+        self.assertEqual(
+            {"id", "feature_1", "feature_2"},
+            set(d.data.data[0].data.columns),
+        )
 
 
 if __name__ == "__main__":

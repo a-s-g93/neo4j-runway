@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "neo4j-runway"
-version = "0.8.2"
+version = "0.9.1"
 description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
 authors = ["Alex Gilmore", "Jason Booth", "Dan Bukowski"]
-license = "MIT"
+license = "Apache License, Version 2.0"
 readme = "README.md"
 keywords = ["graph", "neo4j", "data model"]
 classifiers = [
@@ -53,7 +53,7 @@ strict = true
 ignore_missing_imports = true
 allow_subclassing_any = true
 disallow_untyped_calls = false
-exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py"]
+exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py", "neo4j_runway/llm/base.py"]
 
 [tool.ruff]
 target-version = "py310"

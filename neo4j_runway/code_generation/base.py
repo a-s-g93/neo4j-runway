@@ -175,7 +175,7 @@ class BaseCodeGenerator(ABC):
         to_return = ""
 
         for cypher in self._cypher:
-            to_return = to_return + self._cypher[cypher]["cypher"]
+            to_return = to_return + self._cypher[cypher]["cypher"] + ";\n"
 
         return to_return
 

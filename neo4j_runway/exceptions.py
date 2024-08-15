@@ -49,3 +49,15 @@ class DataNotSupportedError(RunwayError):
     """Exception raised when an unsupported data format is given to a DataLoader class."""
 
     pass
+
+
+class LoadCSVCypherGenerationError(RunwayError):
+    """Exception raised when no standard clause can be constructed from provided arguments."""
+
+    pass
+
+
+class PandasDataSummariesNotGeneratedError(RunwayError):
+    """Exception raised when the Discovery class 'run' method is ran and Pandas data summaries are not generated."""
+
+    pass

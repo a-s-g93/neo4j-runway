@@ -134,7 +134,7 @@ def test_load_local_files(mocker) -> None:
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,
-        discovery=None,
+        discovery_content=None,
     )
     mocker.patch(
         "neo4j_runway.utils.data.data_loader.load_csv", return_value=return_value

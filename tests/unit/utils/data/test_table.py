@@ -19,4 +19,5 @@ def test_init() -> None:
     assert t.general_description == "general"
     assert "col_a" in t.data_dictionary.keys()
     assert "A use case." in t.use_cases
-    assert t.discovery is None
+    assert t.discovery_content is None
+    assert t.discovery == ""
