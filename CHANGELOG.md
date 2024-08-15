@@ -16,6 +16,8 @@
   * parameters in `discovery.run()` and `discovery.run_async()` to control process
   * async capability to improve response time for multi file
 
+### Added
+
 ## 0.9.1
 
 ### Fixed
