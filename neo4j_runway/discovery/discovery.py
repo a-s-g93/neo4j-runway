@@ -380,41 +380,12 @@ class Discovery:
             Whether to include the Pandas summaries, by default True
         """
 
-        if file_name == "final":
-            self.data.to_txt(file_dir=file_dir, file_name="final_discovery.txt")
-        elif file_name == "all":
-            self.data.to_txt(file_dir=file_dir, file_name="final_discovery.txt")
-            for t in self.data.data:
-                assert t.discovery_content is not None
-
-                if "." in t.name:
-                    name = t.name.split(".")[0] + "_discovery.txt"
-                else:
-                    name = t.name + "_discovery.txt"
-                t.discovery_content.to_txt(
-                    file_dir=file_dir,
-                    file_name=name,
-                    include_pandas=include_pandas,
-                )
-        elif file_name in self.data.table_dict.keys():
-            t = self.data.table_dict[file_name]
-
-            assert t.discovery_content is not None
-
-            if "." in t.name:
-                name = t.name.split(".")[0] + "_discovery.txt"
-            else:
-                name = t.name + "_discovery.txt"
-
-            t.discovery_content.to_txt(
-                file_dir=file_dir,
-                file_name=name,
-                include_pandas=include_pandas,
-            )
-        else:
-            raise ValueError(
-                f"Table with file_name {file_name} not found in TableCollection."
-            )
+        self._export_to_files(
+            file_type=".txt",
+            file_dir=file_dir,
+            file_name=file_name,
+            include_pandas=include_pandas,
+        )
 
     def to_markdown(
         self, file_dir: str = "./", file_name: str = "all", include_pandas: bool = True
@@ -432,17 +403,37 @@ class Discovery:
             Whether to include the Pandas summaries, by default True
         """
 
+        self._export_to_files(
+            file_type=".md",
+            file_dir=file_dir,
+            file_name=file_name,
+            include_pandas=include_pandas,
+        )
+
+    def _export_to_files(
+        self,
+        file_type: str,
+        file_dir: str = "./",
+        file_name: str = "all",
+        include_pandas: bool = True,
+    ) -> None:
+        assert file_type in [".txt", ".md"], "Unsupported file type provided."
+
         if file_name == "final":
-            self.data.to_markdown(file_dir=file_dir, file_name="final_discovery.md")
+            self.data.to_markdown(
+                file_dir=file_dir, file_name="final_discovery" + file_type
+            )
         elif file_name == "all":
-            self.data.to_markdown(file_dir=file_dir, file_name="final_discovery.md")
+            self.data.to_markdown(
+                file_dir=file_dir, file_name="final_discovery" + file_type
+            )
             for t in self.data.data:
                 assert t.discovery_content is not None
 
                 if "." in t.name:
-                    name = t.name.split(".")[0] + "_discovery.md"
+                    name = t.name.split(".")[0] + "_discovery" + file_type
                 else:
-                    name = t.name + "_discovery.md"
+                    name = t.name + "_discovery" + file_type
                 t.discovery_content.to_markdown(
                     file_dir=file_dir,
                     file_name=name,
@@ -454,9 +445,9 @@ class Discovery:
             assert t.discovery_content is not None
 
             if "." in t.name:
-                name = t.name.split(".")[0] + "_discovery.md"
+                name = t.name.split(".")[0] + "_discovery" + file_type
             else:
-                name = t.name + "_discovery.md"
+                name = t.name + "_discovery" + file_type
             t.discovery_content.to_markdown(
                 file_dir=file_dir,
                 file_name=name,
