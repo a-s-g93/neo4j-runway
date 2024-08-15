@@ -78,14 +78,12 @@ class BaseDiscoveryLLM(ABC):
 
         return response.response
 
-    async def _get_async_discovery_response(
-        self, formatted_prompt: str
-    ) -> DiscoveryResponse:
+    async def _get_async_discovery_response(self, formatted_prompt: str) -> Any:
         """
         Get a discovery response from the LLM.
         """
 
-        response: DiscoveryResponse = await self.client.chat.completions.create(
+        response = await self.client.chat.completions.create(
             model=self.model_name,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
