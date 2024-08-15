@@ -6,7 +6,15 @@
 
 ### Changed
 
+* All data input to Discovery is converted to TableCollection class
+* Discovery generated content is contained in Table on `discovery_content` attribute
+* Discovery file output is handled on Table and TableCollection classes instead of Discovery class
+
 ### Added
+
+* Multi file support for Discovery process
+  * parameters in `discovery.run()` and `discovery.run_async()` to control process
+  * async capability to improve response time for multi file
 
 ## 0.9.1
 
