@@ -47,10 +47,10 @@ class TestUserInput(unittest.TestCase):
 
             self.assertEqual(safe_input.general_description, "")
             self.assertEqual(
-                set(unsafe_input.keys()), set(safe_input.column_descriptions.keys())
+                set(unsafe_input.keys()), set(safe_input.data_dictionary.keys())
             )
             self.assertEqual(
-                set(unsafe_input.values()), set(safe_input.column_descriptions.values())
+                set(unsafe_input.values()), set(safe_input.data_dictionary.values())
             )
             self.assertIn("col_a", safe_input.allowed_columns)
             self.assertIn("col_b", safe_input.allowed_columns)
@@ -68,9 +68,9 @@ class TestUserInput(unittest.TestCase):
                 safe_input.general_description, "this is the general description."
             )
             self.assertEqual(
-                set(allowed_columns), set(safe_input.column_descriptions.keys())
+                set(allowed_columns), set(safe_input.data_dictionary.keys())
             )
-            self.assertIn("", set(safe_input.column_descriptions.values()))
+            self.assertIn("", set(safe_input.data_dictionary.values()))
             self.assertIn("col_a", safe_input.allowed_columns)
             self.assertIn("col_b", safe_input.allowed_columns)
 
@@ -85,9 +85,9 @@ class TestUserInput(unittest.TestCase):
 
             self.assertEqual(safe_input.general_description, "")
             self.assertEqual(
-                set(allowed_columns), set(safe_input.column_descriptions.keys())
+                set(allowed_columns), set(safe_input.data_dictionary.keys())
             )
-            self.assertIn("", set(safe_input.column_descriptions.values()))
+            self.assertIn("", set(safe_input.data_dictionary.values()))
             self.assertIn("col_a", safe_input.allowed_columns)
             self.assertIn("col_b", safe_input.allowed_columns)
 
@@ -103,6 +103,23 @@ class TestUserInput(unittest.TestCase):
             user_input_safe_construct(
                 unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
             )
+
+    def test_is_multifile_true(self) -> None:
+        dd = {
+            "a.csv": {"a": "desc", "b": "desc2"},
+            "b.csv": {"c": "desc3", "d": "desc4"},
+        }
+
+        u = UserInput(general_description="general", data_dictionary=dd)
+
+        self.assertTrue(u.is_multifile)
+
+    def test_is_multifile_false(self) -> None:
+        dd = {"a": "desc", "b": "desc2"}
+
+        u = UserInput(general_description="general", data_dictionary=dd)
+
+        self.assertFalse(u.is_multifile)
 
 
 if __name__ == "__main__":

@@ -24,9 +24,9 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
         Where the files are located.
     file_output_directory : str, optional
         The location that generated files should be saved to.
-    csv_name : str, optional
-        The name of the CSV file. If more than one CSV is used, this arg should not be provided.
-        CSV file names should be included within the data model.
+    source_name : str, optional
+        The name of the data file. If more than one file is used, this arg should not be provided.
+        File names should be included within the data model. By default = ""
     strict_typing : bool, optional
         Whether to use the types declared in the data model (True), or infer types during ingestion (False). By default True
     batch_size : int, optional
@@ -40,7 +40,7 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
         data_model: DataModel,
         file_directory: str = "./",
         file_output_directory: str = "./",
-        csv_name: str = "",
+        source_name: str = "",
         strict_typing: bool = True,
         batch_size: int = 100,
         method: str = "api",
@@ -56,7 +56,7 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
             Where the files are located. By default = "./"
         file_output_directory : str, optional
             The location that generated files should be saved to, by default "./"
-        csv_name : str, optional
+        source_name : str, optional
             The name of the CSV file. If more than one CSV is used, this arg should not be provided.
             CSV file names should be included within the data model. By default = ""
         strict_typing : bool, optional
@@ -71,7 +71,7 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
             data_model=data_model,
             file_directory=file_directory,
             file_output_directory=file_output_directory,
-            csv_name=csv_name,
+            source_name=source_name,
             strict_typing=strict_typing,
         )
         self.batch_size: int = batch_size
@@ -111,14 +111,18 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
         for item in self._cypher:
             if "_" not in item:
                 cypher = generate_merge_node_load_csv_clause(
-                    csv_name=self._cypher[item]["csv"][6:],  # remove the $BASE/ prefix
+                    source_name=self._cypher[item]["csv"][
+                        6:
+                    ],  # remove the $BASE/ prefix
                     method=self.method,
                     batch_size=self.batch_size,
                     standard_clause=self._cypher[item]["cypher"],
                 )
             else:
                 cypher = generate_merge_relationship_load_csv_clause(
-                    csv_name=self._cypher[item]["csv"][6:],  # remove the $BASE/ prefix
+                    source_name=self._cypher[item]["csv"][
+                        6:
+                    ],  # remove the $BASE/ prefix
                     method=self.method,
                     batch_size=self.batch_size,
                     standard_clause=self._cypher[item]["cypher"],

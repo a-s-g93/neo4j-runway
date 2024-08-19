@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel
 
@@ -29,13 +29,15 @@ class DataModelEntityPool(BaseModel):
     relationships: List[EntityPoolRelationship]
     explanation: str
 
-    def validate_pool(self, allowed_features: List[str]) -> Dict[str, Any]:
+    def validate_pool(
+        self, valid_columns: Union[Dict[str, List[str]], List[str]]
+    ) -> Dict[str, Any]:
         """
         Validate that all generated properties exist in the allowed features.
 
         Parameters
         ----------
-        allowed_features : List[str]
+        valid_columns : List[str]
             Features that exist in the data.
 
         Returns
@@ -48,13 +50,13 @@ class DataModelEntityPool(BaseModel):
 
         for node in self.nodes:
             for prop in node.properties:
-                if prop not in allowed_features:
+                if prop not in valid_columns:
                     errors.append(
                         f"The node {node.label} has the property {prop} which does not exist in the allowed features. {prop} should be removed or replaced from node {node.label}."
                     )
         for rel in self.relationships:
             for prop in rel.properties:
-                if prop not in allowed_features:
+                if prop not in valid_columns:
                     errors.append(
                         f"The relationship {rel.type} has the property {prop} which does not exist in the allowed features. {prop} should be removed or replaced from relationship {rel.type}."
                     )

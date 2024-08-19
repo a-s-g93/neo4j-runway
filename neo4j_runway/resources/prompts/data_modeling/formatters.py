@@ -1,12 +1,12 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from ....inputs import UserInput
 
 
-def format_general_description(user_input: UserInput) -> str:
-    if user_input.general_description != "":
-        return f"""Here is the csv data information:
-{user_input.general_description}"""
+def format_general_description(general_description: Optional[str]) -> str:
+    if general_description is not None:
+        return f"""Here is the data information:
+{general_description}"""
     else:
         return ""
 
@@ -19,22 +19,30 @@ def format_discovery_text(text: Optional[str]) -> str:
     )
 
 
-def format_column_descriptions(user_input: UserInput) -> str:
-    return (
-        "The following is a description of each feature in the data:\n"
-        + f"{user_input.column_descriptions}"
-        + "\n\n"
-        if user_input.column_descriptions is not None
-        else ""
-    )
+def format_data_dictionary(
+    data_dictionary: Optional[Dict[str, Any]], multifile: bool
+) -> str:
+    assert data_dictionary is not None, "data dictionary must be provided."
+    if multifile:
+        return (
+            "The following is a description of each feature in the data and the file they belong to:\n"
+            + f"{data_dictionary}"
+            + "\n\n"
+        )
+    else:
+        return (
+            "The following is a description of each feature in the data:\n"
+            + f"{data_dictionary}"
+            + "\n\n"
+        )
 
 
-def format_use_cases(user_input: UserInput) -> str:
+def format_use_cases(use_cases: Optional[str]) -> str:
     return (
         "The final data model should address the following use cases:\n"
-        + f"{user_input.pretty_use_cases}"
+        + f"{use_cases}"
         + "\n\n"
-        if user_input.use_cases is not None
+        if use_cases is not None
         else ""
     )
 

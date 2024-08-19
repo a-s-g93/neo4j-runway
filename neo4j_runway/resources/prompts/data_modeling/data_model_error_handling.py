@@ -59,11 +59,11 @@ Initial Data Model Suggestions:
 def create_data_model_errors_cot_prompt(
     data_model_as_dictionary: Dict[str, Any],
     errors: List[Optional[str]],
-    allowed_columns: List[str],
+    allowed_columns: Dict[str, List[str]],
 ) -> str:
     """
     Generate a prompt to be sent to the LLM to perform a chain of thought response.
-    Prmopts the LLM to provide recommendations to solve the given problems.
+    Prompts the LLM to provide recommendations to solve the given problems.
     No data model should be returned.
 
     Returns

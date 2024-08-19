@@ -1,13 +1,12 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
-from ....inputs import UserInput
 from .constants import (
     DATA_MODEL_FORMAT,
     DATA_MODEL_GENERATION_RULES,
     DATA_MODEL_GENERATION_RULES_ADVANCED,
 )
 from .formatters import (
-    format_column_descriptions,
+    format_data_dictionary,
     format_discovery_text,
     format_general_description,
     format_use_cases,
@@ -15,7 +14,10 @@ from .formatters import (
 
 
 def create_initial_data_model_cot_prompt(
-    discovery_text: str, allowed_features: List[str], user_input: UserInput
+    discovery_text: str,
+    multifile: bool,
+    use_cases: str,
+    data_dictionary: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Generate a prompt to find nodes, relationships and properties to include in a data model.
@@ -27,11 +29,13 @@ def create_initial_data_model_cot_prompt(
         The prompt.
     """
     discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
+    data_dictionary_text = format_data_dictionary(
+        data_dictionary=data_dictionary, multifile=multifile
+    )
+    use_cases = format_use_cases(use_cases=use_cases)
 
     prompt = f"""{discovery}
-{feature_descriptions}
+{data_dictionary_text}
 {use_cases}
 Based upon the above information and of high-quality graph data models,
 return the following:
@@ -42,7 +46,9 @@ return the following:
 * All possible relationships for nodes
 
 Remember
-* All properties must be found in this list: {allowed_features}
+* All properties must be found in the data dictionary above!
+* A node may not have properties from multiple files!
+* A relationship may not have properties from multiple files!
 * Do not return an actual data model!
 """
 
@@ -52,26 +58,39 @@ Remember
 def create_initial_data_model_prompt(
     discovery_text: str,
     data_model_recommendations: Dict[str, Any],
-    user_input: UserInput,
+    multifile: bool,
+    data_dictionary: Optional[Dict[str, Any]] = None,
+    use_cases: Optional[str] = None,
+    general_description: Optional[str] = None,
+    advanced_rules: bool = True,
 ) -> str:
     """
     Generate the initial data model request prompt.
     """
 
     discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
-    general_description = format_general_description(user_input=user_input)
+    data_dictionary_text = format_data_dictionary(
+        data_dictionary=data_dictionary,
+        multifile=multifile,
+    )
+    use_cases = format_use_cases(use_cases=use_cases)
+    general_description = format_general_description(
+        general_description=general_description
+    )
 
     prompt = f"""{general_description}
 {discovery}
-{feature_descriptions}
+{data_dictionary_text}
+
+Here are recommendations to base your graph data model on:
+{data_model_recommendations}
+
 Based upon the above information and of high-quality Neo4j graph data models,
-I would like you to translate the data in my .csv into a Neo4j graph data model.
+I would like you to translate this information into a Neo4j graph data model.
 
 {use_cases}
 {DATA_MODEL_GENERATION_RULES}
-{DATA_MODEL_GENERATION_RULES_ADVANCED}
+{DATA_MODEL_GENERATION_RULES_ADVANCED if advanced_rules else ""}
 
 {DATA_MODEL_FORMAT}
 """

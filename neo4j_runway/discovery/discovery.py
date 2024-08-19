@@ -87,7 +87,7 @@ class Discovery:
                 file_path="",
                 data=data[self.user_input.allowed_columns],
                 general_description=self.user_input.general_description,
-                data_dictionary=self.user_input.column_descriptions,
+                data_dictionary=self.user_input.data_dictionary,
                 use_cases=self.user_input.use_cases,
             )
             self.data = TableCollection(

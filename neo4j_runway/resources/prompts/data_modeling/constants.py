@@ -29,29 +29,37 @@ Properties
 General
 * Do NOT return a single-node data model
 * If a cycle exists, consider removing a relationship while maintaining the meaning captured by the cycle
-* Do NOT generate csv_name values on Properties
 """
+
+DATA_MODEL_GENERATION_RULES_SINGLE = (
+    DATA_MODEL_GENERATION_RULES
+    + "* Do NOT generate source_name values on Nodes and Relationships"
+)
+DATA_MODEL_GENERATION_RULES_MULTI = (
+    DATA_MODEL_GENERATION_RULES
+    + "* Generate source_name values on Nodes and Relationships\n* Ensure all properties are contained within the identified source."
+)
 
 DATA_MODEL_GENERATION_RULES_ADVANCED = """
 These are advanced data modeling best practices.
-* Duplication of properties: 
+* Duplication of properties:
     Instead of having a repeated property on every node, you can
     have all of those nodes connected to a shared node with that property. This can make
     data updates massively easier.
-* Decoration properties: 
+* Decoration properties:
     If a property can't be used to answer a question, it is usually a waste of storage
-* Intermediate / Event nodes: 
+* Intermediate / Event nodes:
     If you must implement a hyperedge, consider an Event node that has relationships with the desired source and target.
     This allows different nodes to share the same context.
-* Super nodes: 
+* Super nodes:
     Stay away from super nodes, if possible. super nodes can be identified by low-cardinality unique properties
-* Same label node relationships: 
-    csv_mapping_other indicates a unique feature on a target node that the source node has a relationship with. 
+* Same label node relationships:
+    csv_mapping_other indicates a unique feature on a target node that the source node has a relationship with.
     Both csv_mapping and csv_mapping_other refer to the same node property name in the graph.
 """
 
 DATA_MODEL_FORMAT = """
-Return your data model in JSON format. 
+Return your data model in JSON format.
 Format properties as:
 {
     "name": <property name>,

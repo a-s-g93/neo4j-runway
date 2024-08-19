@@ -3,7 +3,7 @@ This file contains the base LLM class that all other LLM classes must inherit fr
 """
 
 from abc import ABC
-from typing import Any, Awaitable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from instructor import Instructor
 
@@ -18,6 +18,7 @@ from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
+    create_data_model_iteration_prompt,
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
     create_retry_data_model_generation_prompt,
@@ -133,7 +134,12 @@ class BaseDataModelingLLM(ABC):
     def _get_initial_data_model_response(
         self,
         discovery_text: str,
-        user_input: UserInput,
+        valid_columns: Dict[str, List[str]],
+        use_cases: str,
+        multifile: bool,
+        general_description: str,
+        use_advanced_data_model_generation_rules: bool,
+        data_dictionary: Optional[Dict[str, Any]] = None,
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
     ) -> Union[DataModel, Dict[str, Any]]:
@@ -155,8 +161,9 @@ class BaseDataModelingLLM(ABC):
         while not validation["valid"] and part_one_retries < 2:
             formatted_prompt = create_initial_data_model_cot_prompt(
                 discovery_text=discovery_text,
-                user_input=user_input,
-                allowed_features=user_input.allowed_columns,
+                multifile=multifile,
+                data_dictionary=data_dictionary,
+                use_cases=use_cases,
             )
             entity_pool: DataModelEntityPool = self.client.chat.completions.create(
                 model=self.model_name,
@@ -170,9 +177,7 @@ class BaseDataModelingLLM(ABC):
                 ],
                 **self.model_params,
             )
-            validation = entity_pool.validate_pool(
-                allowed_features=user_input.allowed_columns
-            )
+            validation = entity_pool.validate_pool(valid_columns=valid_columns)
             part_one_retries += 1
 
         # part 2
@@ -180,12 +185,16 @@ class BaseDataModelingLLM(ABC):
             formatted_prompt = create_initial_data_model_prompt(
                 discovery_text=discovery_text,
                 data_model_recommendations=entity_pool.model_dump(),
-                user_input=user_input,
+                multifile=multifile,
+                data_dictionary=data_dictionary,
+                use_cases=use_cases,
+                general_description=general_description,
+                advanced_rules=use_advanced_data_model_generation_rules,
             )
 
             initial_data_model: DataModel = self._get_data_model_response(
                 formatted_prompt=formatted_prompt,
-                csv_columns=user_input.allowed_columns,
+                valid_columns=valid_columns,
                 max_retries=max_retries,
                 use_yaml_data_model=use_yaml_data_model,
             )
@@ -198,7 +207,7 @@ class BaseDataModelingLLM(ABC):
     def _get_data_model_response(
         self,
         formatted_prompt: str,
-        csv_columns: List[str],
+        valid_columns: dict[str, list[str]],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
     ) -> DataModel:
@@ -208,6 +217,7 @@ class BaseDataModelingLLM(ABC):
 
         retries = 0
         valid_response = False
+
         while retries < max_retries and not valid_response:
             retries += 1  # increment retries each pass
 
@@ -221,7 +231,7 @@ class BaseDataModelingLLM(ABC):
                 **self.model_params,
             )
 
-            validation = response.validate_model(csv_columns=csv_columns)
+            validation = response.validate_model(valid_columns=valid_columns)
             if not validation["valid"]:
                 print("validation failed")
                 cot = self._get_chain_of_thought_for_error_recommendations_response(

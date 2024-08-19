@@ -10,14 +10,14 @@ nodes = [
         properties=[
             Property(name="alpha", type="str", csv_mapping="au", is_unique=True)
         ],
-        csv_name="CSV_A",
+        source_name="CSV_A",
     ),
     Node(
         label="NodeB",
         properties=[
             Property(name="beta", type="str", csv_mapping="bu", is_unique=True)
         ],
-        csv_name="CSV_B",
+        source_name="CSV_B",
     ),
     Node(
         label="NodeC",
@@ -25,11 +25,11 @@ nodes = [
             Property(name="gamma", type="str", csv_mapping="cu", is_unique=True),
             Property(name="decorator", type="str", csv_mapping="dec", is_unique=False),
         ],
-        csv_name="CSV_A",
+        source_name="CSV_A",
     ),
 ]
 rel = Relationship(
-    type="REL_AC", source="NodeA", target="NodeC", properties=[], csv_name="CSV_A"
+    type="REL_AC", source="NodeA", target="NodeC", properties=[], source_name="CSV_A"
 )
 
 data_model = DataModel(nodes=nodes, relationships=[rel])

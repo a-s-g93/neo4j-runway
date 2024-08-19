@@ -137,11 +137,11 @@ class TestDataModel(unittest.TestCase):
 
         self.assertEqual(list(test_dict.keys()), ["nodes", "relationships", "metadata"])
         self.assertEqual(
-            list(test_dict["nodes"][0].keys()), ["label", "properties", "csv_name"]
+            list(test_dict["nodes"][0].keys()), ["label", "properties", "source_name"]
         )
         self.assertEqual(
             list(test_dict["relationships"][0].keys()),
-            ["type", "properties", "source", "target", "csv_name"],
+            ["type", "properties", "source", "target", "source_name"],
         )
 
     def test_neo4j_naming_conventions(self) -> None:
@@ -236,17 +236,18 @@ class TestDataModel(unittest.TestCase):
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
         )
+
         self.maxDiff = None
-        self.assertEqual(data_model.to_yaml(write_file=False), data_model_yaml)
+        self.assertEqual(data_model.to_yaml(write_file=True), data_model_yaml)
 
     def test_data_model_with_multi_csv_from_arrows(self) -> None:
         data_model = DataModel.from_arrows(
             "tests/resources/data_models/people-pets-arrows-multi-csv.json"
         )
 
-        self.assertEqual(data_model.relationships[-1].csv_name, "shelters.csv")
-        self.assertEqual(data_model.relationships[0].csv_name, "pets-arrows.csv")
-        self.assertEqual(data_model.nodes[0].csv_name, "pets-arrows.csv")
+        self.assertEqual(data_model.relationships[-1].source_name, "shelters.csv")
+        self.assertEqual(data_model.relationships[0].source_name, "pets-arrows.csv")
+        self.assertEqual(data_model.nodes[0].source_name, "pets-arrows.csv")
 
     def test_data_model_with_multi_csv_from_solutions_workbench(self) -> None:
         pass

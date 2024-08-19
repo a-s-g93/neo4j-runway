@@ -51,6 +51,7 @@ class GraphDataModeler:
         numeric_data_description: Optional[str] = None,
         categorical_data_description: Optional[str] = None,
         feature_descriptions: Optional[Dict[str, str]] = None,
+        data_dictionary: Optional[Dict[str, Any]] = None,
         allowed_columns: List[str] = list(),
     ) -> None:
         """
@@ -72,9 +73,13 @@ class GraphDataModeler:
             A numeric data description provided by Pandas, by default None
         categorical_data_description : str, optional
             A categorical data description provided by Pandas, by default None
-        feature_descriptions : Dict[str, str], optional
-            Feature (column) descriptions provided by Discovery, by default None
-        columns_of_interest : List[str]
+        data_dictionary : Dict[str, Any], optional
+            A data dictionary. If single-file input, then the keys will be column names and the values are descriptions.
+            If multi-file input, the keys are file names and each contain a nested dictionary of column name keys and description values.
+            This argument will take precedence over any data dictionary provided via the Discovery object.
+            This argument will take precedence over the allowed_columns argument. By default None
+        allowed_columns : List[str], optional
+            A list of allowed columns for modeling. Can be used only for single-file inputs. By default = []
         """
 
         self.llm = llm
@@ -88,30 +93,39 @@ class GraphDataModeler:
             # self.general_info = discovery.df_info
             # self.description_numeric = discovery.numeric_data_description
             # self.description_categorical = discovery.categorical_data_description
-            self.feature_descriptions = discovery.user_input.column_descriptions
+            # self.feature_descriptions = discovery.user_input.data_dictionary
 
         else:
-            if not allowed_columns and not user_input:
+            if not allowed_columns and not user_input and not data_dictionary:
                 raise ValueError(
-                    "Not enough information provided. Please provide a Discovery object to the discovery arg, user_input or allowed_columns."
+                    "Not enough information provided. Please provide a Discovery object, user_input, allowed_columns or a data_dictionary respectively to the constructor."
                 )
             # we convert all user_input to a UserInput object
-            if not isinstance(user_input, UserInput):
+            elif not isinstance(user_input, UserInput):
                 self.user_input = user_input_safe_construct(
-                    unsafe_user_input=user_input, allowed_columns=allowed_columns
+                    unsafe_user_input=user_input,
+                    allowed_columns=allowed_columns,
+                    data_dictionary=data_dictionary,
                 )
             else:
                 self.user_input = user_input
 
-            self.columns_of_interest = (
-                allowed_columns or self.user_input.allowed_columns
-            )
-
             self.discovery = discovery
-            self.general_info = general_data_description or ""
-            self.description_numeric = numeric_data_description or ""
-            self.description_categorical = categorical_data_description or ""
-            self.feature_descriptions = feature_descriptions or dict()
+
+        # set the data dictionary
+        # we take the data_dictionary arg first in cases where
+        # a user may want to slightly modify the features available for modeling,
+        # but still use the generated discovery information
+        if data_dictionary is not None:
+            self._data_dictionary = data_dictionary
+        elif isinstance(
+            discovery, Discovery
+        ):  # data dictionary should have been constructed before / during the discovery phase
+            self._data_dictionary = discovery.data.data_dictionary
+        else:
+            # this is a data dictionary derived from the allowed_columns arg
+            # or the original user_input
+            self._data_dictionary = self.user_input.data_dictionary
 
         if self.discovery == "":
             warnings.warn(
@@ -121,6 +135,48 @@ class GraphDataModeler:
         self._initial_model_created: bool = False
         self.model_iterations: int = 0
         self.model_history: List[DataModel] = list()
+
+    @property
+    def is_multifile(self) -> bool:
+        """
+        Whether data is multi-file or not.
+
+        Returns
+        -------
+        bool
+            True if multi-file detected, else False
+        """
+        if isinstance(self.discovery, Discovery):
+            return self.discovery.data.size > 1
+
+        return self.user_input.is_multifile
+
+    @property
+    def allowed_columns(self) -> Dict[str, List[str]]:
+        """
+        The allowed columns for model generation.
+        If multi-file, then a dictionary with file name keys and list of columns for values.
+        If single-file, then a list of columns.
+
+        Returns
+        -------
+        Dict[str, List[str]]
+            The allowd columns for data model generation.
+
+        Raises
+        ------
+        AssertionError
+            When no _data_dictionary attribute is initialized in the GraphDataModeler class.
+        """
+
+        assert (
+            self._data_dictionary is not None
+        ), "No data dictionary present in GraphDataModeler class."
+
+        if self.is_multifile:
+            return {k: list(v.keys()) for k, v in self._data_dictionary.items()}
+        else:
+            return {"file": list(self._data_dictionary.keys())}
 
     @property
     def current_model(self) -> DataModel:
@@ -216,7 +272,10 @@ class GraphDataModeler:
         )
 
     def create_initial_model(
-        self, max_retries: int = 3, use_yaml_data_model: bool = False
+        self,
+        max_retries: int = 3,
+        use_yaml_data_model: bool = False,
+        use_advanced_data_model_generation_rules: bool = True,
     ) -> Union[DataModel, Dict[str, Any]]:
         """
         Generate the initial model. This must be ran before a model can be interated on.
@@ -231,7 +290,12 @@ class GraphDataModeler:
 
         response = self.llm._get_initial_data_model_response(
             discovery_text=self.discovery,
-            user_input=self.user_input,
+            valid_columns=self.allowed_columns,
+            data_dictionary=self._data_dictionary,
+            use_cases=self.user_input.pretty_use_cases,
+            multifile=self.is_multifile,
+            general_description=self.user_input.general_description,
+            use_advanced_data_model_generation_rules=use_advanced_data_model_generation_rules,
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
         )
@@ -248,7 +312,9 @@ class GraphDataModeler:
         self,
         iterations: int = 1,
         user_corrections: Optional[str] = None,
+        use_advanced_data_model_generation_rules: bool = True,
         use_yaml_data_model: bool = False,
+        max_retries: int = 3,
     ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.
@@ -275,15 +341,21 @@ class GraphDataModeler:
 
         def iterate() -> DataModel:
             for _ in range(0, iterations):
+                formatted_prompt = create_data_model_iteration_prompt(
+                    discovery_text=self.discovery,
+                    data_model_to_modify=self.current_model,
+                    multifile=self.is_multifile,
+                    user_corrections=user_corrections,
+                    data_dictionary=self._data_dictionary,
+                    use_cases=self.user_input.pretty_use_cases,
+                    general_description=self.user_input.general_description,
+                    use_yaml_data_model=use_yaml_data_model,
+                    advanced_rules=use_advanced_data_model_generation_rules,
+                )
                 response = self.llm._get_data_model_response(
-                    formatted_prompt=create_data_model_iteration_prompt(
-                        discovery_text=self.discovery,
-                        user_input=self.user_input,
-                        data_model_to_modify=self.current_model,
-                        user_corrections=user_corrections,
-                        use_yaml_data_model=use_yaml_data_model,
-                    ),
-                    csv_columns=self.columns_of_interest,
+                    formatted_prompt=formatted_prompt,
+                    max_retries=max_retries,
+                    valid_columns=self.allowed_columns,
                     use_yaml_data_model=use_yaml_data_model,
                 )
 

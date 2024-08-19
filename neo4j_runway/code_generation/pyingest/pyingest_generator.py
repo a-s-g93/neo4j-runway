@@ -24,9 +24,9 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         Where the files are located.
     file_output_directory : str, optional
         The location that generated files should be saved to.
-    csv_name : str, optional
-        The name of the CSV file. If more than one CSV is used, this arg should not be provided.
-        CSV file names should be included within the data model.
+    source_name : str, optional
+        The name of the data file. If more than one file is used, this arg should not be provided.
+        File names should be included within the data model.
     strict_typing : bool, optional
         Whether to use the types declared in the data model (True), or infer types during ingestion (False).
     username : Union[str, None], optional
@@ -55,7 +55,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         data_model: DataModel,
         file_directory: str = "./",
         file_output_directory: str = "./",
-        csv_name: str = "",
+        source_name: str = "",
         strict_typing: bool = True,
         username: Optional[str] = None,
         password: Optional[str] = None,
@@ -79,7 +79,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
             Where the files are located. By default = "./"
         file_output_directory : str, optional
             The location that generated files should be saved to, by default "./"
-        csv_name : str, optional
+        source_name : str, optional
             The name of the CSV file. If more than one CSV is used, this arg should not be provided.
             CSV file names should be included within the data model. By default = ""
         strict_typing : bool, optional
@@ -113,7 +113,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
             data_model=data_model,
             file_directory=file_directory,
             file_output_directory=file_output_directory,
-            csv_name=csv_name,
+            source_name=source_name,
             strict_typing=strict_typing,
         )
         self.username: Union[str, None] = username

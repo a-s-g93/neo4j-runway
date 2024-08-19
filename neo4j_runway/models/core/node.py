@@ -17,18 +17,18 @@ class Node(BaseModel):
         The node label.
     properties : List[Property]
         A list of the properties within the node.
-    csv_name : str, optional
-        The name of the CSV containing the node's information.
+    source_name : str, optional
+        The name of the file containing the node's information.
     """
 
     label: str
     properties: List[Property]
-    csv_name: str = ""
+    source_name: str = ""
 
     def __init__(
-        self, label: str, properties: List[Property] = [], csv_name: str = ""
+        self, label: str, properties: List[Property] = [], source_name: str = ""
     ) -> None:
-        super().__init__(label=label, properties=properties, csv_name=csv_name)
+        super().__init__(label=label, properties=properties, source_name=source_name)
         """
         Standard Node representation.
 
@@ -38,12 +38,12 @@ class Node(BaseModel):
             The node label.
         properties : List[Property]
             A list of the properties within the node.
-        csv_name : str, optional
+        source_name : str, optional
             The name of the CSV containing the node's information, by default = ""
         """
 
-    @field_validator("csv_name")
-    def validate_csv_name(cls, v: str) -> str:
+    @field_validator("source_name")
+    def validate_source_name(cls, v: str) -> str:
         """
         Validate the CSV name provided.
         """
@@ -201,11 +201,13 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
+    def validate_properties(
+        self, valid_columns: Dict[str, List[str]]
+    ) -> List[Optional[str]]:
         errors: List[Optional[str]] = []
 
         for prop in self.properties:
-            if prop.csv_mapping not in csv_columns:
+            if prop.csv_mapping not in valid_columns:
                 errors.append(
                     f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
                 )
@@ -240,7 +242,7 @@ class Node(BaseModel):
 
         return ArrowsNode(
             id=self.label,
-            caption=self.csv_name,
+            caption=self.source_name,
             position=pos,
             labels=[self.label],
             properties=props,
@@ -258,14 +260,16 @@ class Node(BaseModel):
             if k != "csv" and not v.lower().rstrip().endswith("ignore")
         ]
 
-        csv_name = (
+        source_name = (
             arrows_node.properties["csv"]
             if "csv" in arrows_node.properties.keys()
             else arrows_node.caption
         )
 
         # support only single labels for now, take first label
-        return cls(label=arrows_node.labels[0], properties=props, csv_name=csv_name)
+        return cls(
+            label=arrows_node.labels[0], properties=props, source_name=source_name
+        )
 
     def to_solutions_workbench(
         self, key: str, x: int, y: int
@@ -282,7 +286,7 @@ class Node(BaseModel):
             properties=props,
             x=x,
             y=y,
-            description=self.csv_name,
+            description=self.source_name,
         )
 
     @classmethod
@@ -298,9 +302,11 @@ class Node(BaseModel):
             for prop in solutions_workbench_node.properties.values()
         ]
 
-        csv_name = solutions_workbench_node.description
+        source_name = solutions_workbench_node.description
 
         # support only single labels for now, take first label
         return cls(
-            label=solutions_workbench_node.label, properties=props, csv_name=csv_name
+            label=solutions_workbench_node.label,
+            properties=props,
+            source_name=source_name,
         )

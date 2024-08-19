@@ -132,13 +132,13 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    def validate_model(self, csv_columns: List[str]) -> Dict[str, Any]:
+    def validate_model(self, valid_columns: Dict[str, List[str]]) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
 
         Parameters
         ----------
-        csv_columns : List[str]
+        valid_columns : List[str]
             The CSV columns that are allowed in the data model.
 
         Returns
@@ -149,10 +149,10 @@ class DataModel(BaseModel):
         errors = list()
 
         for node in self.nodes:
-            errors += node.validate_properties(csv_columns=csv_columns)
+            errors += node.validate_properties(valid_columns=valid_columns)
 
         for rel in self.relationships:
-            errors += rel.validate_properties(csv_columns=csv_columns)
+            errors += rel.validate_properties(valid_columns=valid_columns)
 
         errors += self._validate_relationship_sources_and_targets()
         errors += self._validate_csv_features_used_only_once()
@@ -161,7 +161,7 @@ class DataModel(BaseModel):
             message = create_data_model_errors_cot_prompt(
                 data_model_as_dictionary=self.model_dump(),
                 errors=errors,
-                allowed_columns=csv_columns,
+                allowed_columns=valid_columns,
             )
 
             return {"valid": False, "message": message, "errors": errors}

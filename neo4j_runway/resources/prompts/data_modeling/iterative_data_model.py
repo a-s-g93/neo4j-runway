@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
-from ....inputs import UserInput
 from .constants import DATA_MODEL_GENERATION_RULES, DATA_MODEL_GENERATION_RULES_ADVANCED
 from .formatters import (
-    format_column_descriptions,
+    format_data_dictionary,
     format_discovery_text,
     format_general_description,
     format_use_cases,
@@ -13,23 +12,32 @@ from .formatters import (
 
 def create_data_model_iteration_prompt(
     discovery_text: str,
-    user_input: UserInput,
     data_model_to_modify: "DataModel",  # type: ignore
+    multifile: bool,
     user_corrections: Optional[str] = None,
+    data_dictionary: Optional[Dict[str, Any]] = None,
+    use_cases: Optional[str] = None,
+    general_description: Optional[str] = None,
     use_yaml_data_model: bool = False,
+    advanced_rules: bool = True,
 ) -> str:
     """
     Generate the prompt to iterate on the previous data model.
     """
     discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
+    data_dictionary_text = format_data_dictionary(
+        data_dictionary=data_dictionary,
+        multifile=multifile,
+    )
+    use_cases = format_use_cases(use_cases=use_cases)
+    general_description = format_general_description(
+        general_description=general_description
+    )
     user_corrections = format_user_corrections(user_corrections=user_corrections)
-    general_description = format_general_description(user_input=user_input)
 
     prompt = f"""{general_description}
 {discovery}
-{feature_descriptions}
+{data_dictionary_text}
 Based on your experience building high-quality graph data
 models, please improve this graph data model according to the feedback below.
 
@@ -38,7 +46,7 @@ models, please improve this graph data model according to the feedback below.
 
 {use_cases}
 {DATA_MODEL_GENERATION_RULES}
-{DATA_MODEL_GENERATION_RULES_ADVANCED}
+{DATA_MODEL_GENERATION_RULES_ADVANCED if advanced_rules else ""}
 """
 
     return prompt
