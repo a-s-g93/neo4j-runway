@@ -149,9 +149,11 @@ class DataModel(BaseModel):
         errors = list()
 
         for node in self.nodes:
+            errors += node.validate_source_name(valid_columns=valid_columns)
             errors += node.validate_properties(valid_columns=valid_columns)
 
         for rel in self.relationships:
+            errors += rel.validate_source_name(valid_columns=valid_columns)
             errors += rel.validate_properties(valid_columns=valid_columns)
 
         errors += self._validate_relationship_sources_and_targets()

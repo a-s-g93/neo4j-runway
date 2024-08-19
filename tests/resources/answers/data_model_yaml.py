@@ -85,7 +85,7 @@ data_model_yaml = """nodes:
     name: prop3
     part_of_key: false
     type: float
-  source_name: ''
+  source_name: file
 - label: NodeB
   properties:
   - csv_mapping: prop_4
@@ -106,7 +106,7 @@ data_model_yaml = """nodes:
     name: prop6
     part_of_key: false
     type: float
-  source_name: ''
+  source_name: file
 relationships:
 - properties:
   - csv_mapping: prop_7
@@ -116,7 +116,7 @@ relationships:
     part_of_key: false
     type: float
   source: NodeA
-  source_name: ''
+  source_name: file
   target: NodeB
   type: RELATIONSHIP_AB
 """

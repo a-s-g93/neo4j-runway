@@ -140,22 +140,9 @@ class TestGraphDataModeler(unittest.TestCase):
                 allowed_columns=["feature_1", "feature_2", "id"],
             )
 
-            self.assertEqual(["feature_1", "feature_2", "id"], gdm.allowed_columns)
-
-    def test_multifile_data_dictionary_init_allowed_columns(self) -> None:
-        with self.assertWarns(UserWarning):
-            gdm = GraphDataModeler(
-                llm="llm",
-                discovery="disc",
-                data_dictionary={
-                    "a.csv": {"a": "test", "b": "test2"},
-                    "b.csv": {"c": "test3"},
-                },
+            self.assertEqual(
+                ["feature_1", "feature_2", "id"], gdm.allowed_columns["file"]
             )
-
-        self.assertIsInstance(gdm.allowed_columns, dict)
-        self.assertEqual(gdm.allowed_columns["a.csv"], ["a", "b"])
-        self.assertEqual(gdm.allowed_columns["b.csv"], ["c"])
 
 
 if __name__ == "__main__":

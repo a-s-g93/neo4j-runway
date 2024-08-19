@@ -23,10 +23,10 @@ class Node(BaseModel):
 
     label: str
     properties: List[Property]
-    source_name: str = ""
+    source_name: str = "file"
 
     def __init__(
-        self, label: str, properties: List[Property] = [], source_name: str = ""
+        self, label: str, properties: List[Property] = list(), source_name: str = "file"
     ) -> None:
         super().__init__(label=label, properties=properties, source_name=source_name)
         """
@@ -39,21 +39,21 @@ class Node(BaseModel):
         properties : List[Property]
             A list of the properties within the node.
         source_name : str, optional
-            The name of the CSV containing the node's information, by default = ""
+            The name of the file containing the node's information, by default = "file"
         """
 
-    @field_validator("source_name")
-    def validate_source_name(cls, v: str) -> str:
-        """
-        Validate the CSV name provided.
-        """
+    # @field_validator("source_name")
+    # def validate_source_name(cls, v: str) -> str:
+    #     """
+    #     Validate the CSV name provided.
+    #     """
 
-        if v == "":
-            return v
-        else:
-            if not v.endswith(".csv"):
-                return v + ".csv"
-        return v
+    #     if v == "file":
+    #         return v
+    #     else:
+    #         if not v.endswith(".csv"):
+    #             return v + ".csv"
+    #     return v
 
     @property
     def property_names(self) -> List[str]:
@@ -201,15 +201,27 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
+    def validate_source_name(
+        self, valid_columns: Dict[str, List[str]]
+    ) -> List[Optional[str]]:
+        # skip for single file input
+        if len(valid_columns.keys()) == 1 or self.source_name in valid_columns.keys():
+            return []
+
+        else:
+            return [
+                f"Node {self.label} has source_name {self.source_name} which is not in the provided file list: {list(valid_columns.keys())}."
+            ]
+
     def validate_properties(
         self, valid_columns: Dict[str, List[str]]
     ) -> List[Optional[str]]:
         errors: List[Optional[str]] = []
 
         for prop in self.properties:
-            if prop.csv_mapping not in valid_columns:
+            if prop.csv_mapping not in valid_columns.get(self.source_name, list()):
                 errors.append(
-                    f"The node {self.label} has the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from node {self.label}."
+                    f"The node {self.label} has the property {prop.name} mapped to column {prop.csv_mapping} which does not exist in {self.source_name}. {prop} should be edited or removed from node {self.label}."
                 )
             if prop.is_unique and prop.part_of_key:
                 errors.append(

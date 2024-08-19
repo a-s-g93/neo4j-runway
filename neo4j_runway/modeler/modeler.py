@@ -149,6 +149,9 @@ class GraphDataModeler:
         if isinstance(self.discovery, Discovery):
             return self.discovery.data.size > 1
 
+        if len(list(self._data_dictionary.keys())) == 1:
+            return False
+
         return self.user_input.is_multifile
 
     @property
@@ -299,7 +302,8 @@ class GraphDataModeler:
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
         )
-        if not isinstance(response, DataModel):
+
+        if isinstance(response, dict):
             return response
 
         self.model_history.append(response)
