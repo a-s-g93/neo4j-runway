@@ -14,7 +14,7 @@ _site
 images/presentation
 /data/
 notebooks/
-# *.ipynb
+/*.ipynb
 .ruff_cache
 prepare_minor_release.sh
 prepare_patch_release.sh
@@ -177,4 +177,3 @@ images/runway-model-generation-flow-V2.png
 neo4j_runway/examples/data/failedBank.csv
 failedBanks.yaml
 chicago-failed-banks.png
-
