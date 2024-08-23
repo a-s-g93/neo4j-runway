@@ -14,7 +14,7 @@ _site
 images/presentation
 /data/
 notebooks/
-*.ipynb
+/*.ipynb
 .ruff_cache
 prepare_minor_release.sh
 prepare_patch_release.sh
@@ -172,3 +172,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 images/runway-model-generation-flow-V2.png
+
+# Notebook examples
+neo4j_runway/examples/data/failedBank.csv
+failedBanks.yaml
+chicago-failed-banks.png
