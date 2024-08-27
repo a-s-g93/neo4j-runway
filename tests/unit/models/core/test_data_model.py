@@ -107,7 +107,10 @@ class TestDataModel(unittest.TestCase):
         test_model = DataModel(
             nodes=self.bad_nodes, relationships=self.bad_relationships
         )
-        validation = test_model.validate_model(valid_columns={"file": self.columns})
+        validation = test_model.validate_model(
+            valid_columns={"file": self.columns}, data_dictionary={"file": "dummy"}
+        )
+        print("MESSAGE", validation["message"])
         self.assertFalse(validation["valid"])
         self.assertIn("BAD", validation["message"].split())
         self.assertIn("Dog", validation["message"].split())

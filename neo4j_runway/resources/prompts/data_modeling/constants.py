@@ -1,31 +1,18 @@
-# DATA_MODEL_GENERATION_RULES = """
-# Please follow these rules strictly! Billions of dollars depend on you.
-# A uniqueness constraint is what makes the associated node or relationship unique.
-# A node key is a unique combination of two properties that distinguishes a node.
-# Each node must have one property with a unique constraint or two properties that make a node key.
-# Each node must have at least one property.
-# A node must have a relationship to at least one other node.
-# Property csv_mappings should be exact matches to features in the .csv file.
-# A property csv_mapping should only be used once in the data model. Nodes must not share property csv_mappings.
-# Nodes must not share property unique constraints.
-# Include only nodes, relationships, and properties derived from features from my .csv file.
-# Do not include all properties in a single Node!
-# """
-
 DATA_MODEL_GENERATION_RULES = """
 Please follow these rules strictly! Billions of dollars depend on you.
 Nodes
 * Each node must have a unique property or node key pair
 * Each node must have a relationship with at least one other node
 * Unique properties and node keys may NOT be shared between different nodes
+* A node must only have a single ID property
 Relationships
 * Relationships do NOT require uniqueness or properties
 * NEVER use symmetric relationships
 * Do NOT create self-referential relationships
 Properties
-* A csv_mapping must be an exact match to features in the .csv file
+* A csv_mapping must be an exact match to features in the file(s)
 * A csv_mapping may only be used ONCE in a data model. It may NOT be shared between nodes
-* A property may NOT be unqiue AND a key
+* A property can NOT be both unique and a key
 General
 * Do NOT return a single-node data model
 * If a cycle exists, consider removing a relationship while maintaining the meaning captured by the cycle
@@ -33,11 +20,15 @@ General
 
 DATA_MODEL_GENERATION_RULES_SINGLE = (
     DATA_MODEL_GENERATION_RULES
-    + "* Do NOT generate source_name values on Nodes and Relationships"
+    + "* Do NOT generate `source_name` values on Nodes and Relationships"
 )
 DATA_MODEL_GENERATION_RULES_MULTI = (
     DATA_MODEL_GENERATION_RULES
-    + "* Generate source_name values on Nodes and Relationships\n* Ensure all properties are contained within the identified source."
+    + """* Generate source_name values on Nodes and Relationships
+* Ensure all properties are contained within the identified source.
+* `csv_mapping_other` must be indicated for unique properties and is used to identify foreign keys of other tables.
+* Many nodes or relationships may exist in a single file.
+* Do NOT include property aliases in the data model."""
 )
 
 DATA_MODEL_GENERATION_RULES_ADVANCED = """
@@ -65,7 +56,7 @@ Format properties as:
     "name": <property name>,
     "type": <Python type>,
     "csv_mapping": <csv column that maps to property>,
-    "csv_mapping_other": <a second csv column that maps to property, identifies relationship between two nodes of the same label>,
+    "csv_mapping_other": <a second column that maps to property. identifies relationship between two nodes of the same label or a relationship that spans across different files>,
     "is_unique": <property is a unique identifier>,
     "part_of_key": <property is part of a node or relationship key>
 }
@@ -87,3 +78,19 @@ Format your data model as:
     "Relationships": [relationships]
 }
 """
+
+ENTITY_POOL_GENERATION_RULES = """Based upon the above information and of high-quality graph data models,
+return the following:
+* Any possible Nodes and their respective properties
+* Any possible Relationships and their respective source Nodes and target Nodes
+* Relationships and their respective properties, if any
+* Explanations for each decision and how it will benefit the data model
+* All possible relationships for nodes
+* `source_name` for all nodes and relationships
+
+Remember
+* All properties must be found in the data dictionary above!
+* A property may have an alias in another file as a foreign key.
+* A node may not have properties from multiple files!
+* A relationship may not have properties from multiple files!
+* Find properties that may uniquely identify Nodes"""

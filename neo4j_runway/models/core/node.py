@@ -221,11 +221,11 @@ class Node(BaseModel):
         for prop in self.properties:
             if prop.csv_mapping not in valid_columns.get(self.source_name, list()):
                 errors.append(
-                    f"The node {self.label} has the property {prop.name} mapped to column {prop.csv_mapping} which does not exist in {self.source_name}. {prop} should be edited or removed from node {self.label}."
+                    f"The node {self.label} has the property {prop.name} mapped to column {prop.csv_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from node {self.label}."
                 )
             if prop.is_unique and prop.part_of_key:
                 errors.append(
-                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Assume uniqueness and set part_of_key to False."
+                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Remove the node key identifier."
                 )
 
         if len(self.node_keys) == 1:

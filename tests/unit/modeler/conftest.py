@@ -19,7 +19,9 @@ def mock_llm() -> MagicMock:
 
 @pytest.fixture(scope="function")
 def mock_discovery() -> MagicMock:
-    return MagicMock(spec=Discovery)
+    d = MagicMock(spec=Discovery)
+    d.user_input = mock_user_input
+    return d
 
 
 @pytest.fixture(scope="function")

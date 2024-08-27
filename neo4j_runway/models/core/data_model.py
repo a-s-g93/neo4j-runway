@@ -132,7 +132,11 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    def validate_model(self, valid_columns: Dict[str, List[str]]) -> Dict[str, Any]:
+    def validate_model(
+        self,
+        valid_columns: Dict[str, List[str]],
+        data_dictionary: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
 
@@ -156,21 +160,27 @@ class DataModel(BaseModel):
             errors += rel.validate_source_name(valid_columns=valid_columns)
             errors += rel.validate_properties(valid_columns=valid_columns)
 
-        errors += self._validate_relationship_sources_and_targets()
+        errors += self._validate_relationship_sources_and_targets(
+            valid_columns=valid_columns, data_dictionary=data_dictionary
+        )
         errors += self._validate_csv_features_used_only_once()
 
         if len(errors) > 0:
             message = create_data_model_errors_cot_prompt(
-                data_model_as_dictionary=self.model_dump(),
-                errors=errors,
-                allowed_columns=valid_columns,
+                data_model=self,
+                errors=errors,  # type: ignore[arg-type]
+                valid_columns=valid_columns,
+                multifile=len(valid_columns.keys()) > 1,
+                data_dictionary=data_dictionary,
             )
 
             return {"valid": False, "message": message, "errors": errors}
 
         return {"valid": True, "message": "", "errors": list()}
 
-    def _validate_relationship_sources_and_targets(self) -> List[str]:
+    def _validate_relationship_sources_and_targets(
+        self, valid_columns: Dict[str, List[str]], data_dictionary: Dict[str, Any]
+    ) -> List[str]:
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
@@ -200,6 +210,33 @@ class DataModel(BaseModel):
                         f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared csv_mapping_other attribute."
                     )
 
+            # validate rels that span across files
+            # use data dictionary here since aliases shouldn't be used in the data model
+            source_node = self.node_dict.get(rel.source)
+            target_node = self.node_dict.get(rel.target)
+
+            if source_node is not None and rel.source_name != source_node.source_name:
+                for prop in source_node.unique_properties:
+                    if prop.csv_mapping_other is None:
+                        errors.append(
+                            f"The source node {source_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on source node `{source_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `csv_mapping_other`."
+                        )
+                    elif prop.csv_mapping_other not in data_dictionary[rel.source_name]:
+                        errors.append(
+                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.csv_mapping_other}`. Find an alias for unique property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `csv_mapping_other`. Reference the data dictionary for possible alias."
+                        )
+
+            if target_node is not None and rel.source_name != target_node.source_name:
+                for prop in target_node.unique_properties:
+                    if prop.csv_mapping_other is None:
+                        errors.append(
+                            f"The target node {target_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on target node `{target_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `csv_mapping_other`."
+                        )
+                    elif prop.csv_mapping_other not in data_dictionary[rel.source_name]:
+                        errors.append(
+                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.csv_mapping_other}`. Find an alias for unique property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `csv_mapping_other`. Reference the data dictionary for possible alias."
+                        )
+
         return errors
 
     def _validate_csv_features_used_only_once(self) -> List[str]:
@@ -207,35 +244,51 @@ class DataModel(BaseModel):
         Validate that each property is used no more than one time in the data model.
         """
 
-        used_features: Dict[str, List[str]] = dict()
+        used_features: Dict[str, Dict[str, List[str]]] = dict()
+        # --- used_features example ---
+        # file to feature to labels
+        # {
+        # "a.csv": {"feature_a": ["LabelA", "LabelB"]},
+        # "b.csv": {"feature_b": ["LabelA", "LabelB"],
+        #           "feature_c": ["LabelD"]},
+        # "c.csv": {}
+        # }
+        # -----------------------------
         errors: List[str] = list()
 
         for node in self.nodes:
+            # init the file dictionary
+            if node.source_name not in used_features.keys():
+                used_features[node.source_name] = dict()
             for prop in node.properties:
-                if isinstance(prop.csv_mapping, list):
-                    for csv_map in prop.csv_mapping:
-                        if csv_map not in list(used_features.keys()):
-                            used_features[csv_map] = [node.label]
-                        else:
-                            used_features[csv_map].append(node.label)
+                # if isinstance(prop.csv_mapping, list):
+                #     for csv_map in prop.csv_mapping:
+                #         if csv_map not in list(used_features.keys()):
+                #             used_features[node.source_name][csv_map] = [node.label]
+                #         else:
+                #             used_features[csv_map].append(node.label)
+                # else:
+                if prop.csv_mapping not in list(used_features[node.source_name].keys()):
+                    used_features[node.source_name][prop.csv_mapping] = [node.label]
                 else:
-                    if prop.csv_mapping not in list(used_features.keys()):
-                        used_features[prop.csv_mapping] = [node.label]
-                    else:
-                        used_features[prop.csv_mapping].append(node.label)
+                    used_features[node.source_name][prop.csv_mapping].append(node.label)
 
         for rel in self.relationships:
+            # init the file dictionary
+            if rel.source_name not in used_features.keys():
+                used_features[rel.source_name] = dict()
             for prop in rel.properties:
-                if prop.csv_mapping not in used_features:
-                    used_features[prop.csv_mapping] = [rel.type]
+                if prop.csv_mapping not in list(used_features[rel.source_name].keys()):
+                    used_features[rel.source_name][prop.csv_mapping] = [rel.type]
                 else:
-                    used_features[prop.csv_mapping].append(rel.type)
+                    used_features[rel.source_name][prop.csv_mapping].append(rel.type)
 
-        for prop_mapping, labels_or_types in used_features.items():
-            if len(labels_or_types) > 1:
-                errors.append(
-                    f"The property csv_mapping {prop_mapping} is used for {labels_or_types} in the data model. Each of these must use a different csv column as a property csv_mapping instead. Find alternative property csv_mappings from the column options or remove."
-                )
+        for source_name, feature_dict in used_features.items():
+            for prop_mapping, labels_or_types in feature_dict.items():
+                if len(labels_or_types) > 1:
+                    errors.append(
+                        f"The Property `csv_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each of these must use a different column as a Property attribute `csv_mapping` instead. Find alternative Property `csv_mapping` from the column options in the `source_name` file or remove."
+                    )
 
         return errors
 

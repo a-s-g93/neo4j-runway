@@ -157,7 +157,9 @@ class Relationship(BaseModel):
         self, valid_columns: Dict[str, List[str]]
     ) -> List[Optional[str]]:
         # skip for single file input
-        if len(valid_columns.keys()) == 1 or self.source_name in valid_columns.keys():
+        if len(valid_columns.keys()) == 1 or self.source_name in list(
+            valid_columns.keys()
+        ):
             return []
         else:
             return [
@@ -172,11 +174,11 @@ class Relationship(BaseModel):
             for prop in self.properties:
                 if prop.csv_mapping not in valid_columns.get(self.source_name, list()):
                     errors.append(
-                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.csv_mapping} which does not exist in {self.source_name}. {prop} should be edited or removed from relationship {self.type}."
+                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.csv_mapping} which is not allowed for source file {self.source_name}. {prop.name} Remove {prop.name} from relationship {self.type}."
                     )
                 if prop.is_unique and prop.part_of_key:
                     errors.append(
-                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Assume uniqueness and set part_of_key to False."
+                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Remove the relationship key identifier."
                     )
 
         if len(self.relationship_keys) == 1:

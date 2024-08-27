@@ -1,22 +1,16 @@
 from typing import Any, Dict, Optional
 
-from .constants import (
-    DATA_MODEL_FORMAT,
-    DATA_MODEL_GENERATION_RULES,
-    DATA_MODEL_GENERATION_RULES_ADVANCED,
-)
-from .formatters import (
-    format_data_dictionary,
-    format_discovery_text,
-    format_general_description,
-    format_use_cases,
-)
+from ...llm_response_types.initial_model_pool import DataModelEntityPool
+from .constants import DATA_MODEL_FORMAT, ENTITY_POOL_GENERATION_RULES
+from .formatters import get_rules
+from .template import create_data_modeling_prompt
 
 
 def create_initial_data_model_cot_prompt(
     discovery_text: str,
     multifile: bool,
-    use_cases: str,
+    use_cases: Optional[str],
+    valid_columns: Dict[str, Any],
     data_dictionary: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
@@ -28,37 +22,24 @@ def create_initial_data_model_cot_prompt(
     str
         The prompt.
     """
-    discovery = format_discovery_text(discovery_text)
-    data_dictionary_text = format_data_dictionary(
-        data_dictionary=data_dictionary, multifile=multifile
+    prefix = "Please generate a pool of entities that will be used to construct a graph data model."
+
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        multifile=multifile,
+        use_cases=use_cases,
+        valid_columns=valid_columns,
+        data_dictionary=data_dictionary,
+        rules=ENTITY_POOL_GENERATION_RULES,
     )
-    use_cases = format_use_cases(use_cases=use_cases)
-
-    prompt = f"""{discovery}
-{data_dictionary_text}
-{use_cases}
-Based upon the above information and of high-quality graph data models,
-return the following:
-* Nodes and their respective properties
-* Relationships and their respective possible source Nodes and target Nodes
-* Relationships and their respective properties, if any
-* Explanations for each decision and how it will benefit the data model
-* All possible relationships for nodes
-
-Remember
-* All properties must be found in the data dictionary above!
-* A node may not have properties from multiple files!
-* A relationship may not have properties from multiple files!
-* Do not return an actual data model!
-"""
-
-    return prompt
 
 
 def create_initial_data_model_prompt(
     discovery_text: str,
-    data_model_recommendations: Dict[str, Any],
+    data_model_recommendations: DataModelEntityPool,
     multifile: bool,
+    valid_columns: Dict[str, Any],
     data_dictionary: Optional[Dict[str, Any]] = None,
     use_cases: Optional[str] = None,
     general_description: Optional[str] = None,
@@ -68,30 +49,17 @@ def create_initial_data_model_prompt(
     Generate the initial data model request prompt.
     """
 
-    discovery = format_discovery_text(discovery_text)
-    data_dictionary_text = format_data_dictionary(
+    prefix = "I would like you to generate a graph data model based on this provided information."
+    rules = get_rules(multifile=multifile, advanced_rules=advanced_rules)
+
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        entity_pool=data_model_recommendations,
+        valid_columns=valid_columns,
         data_dictionary=data_dictionary,
+        use_cases=use_cases,
+        rules=rules,
+        data_model_format=DATA_MODEL_FORMAT,
         multifile=multifile,
     )
-    use_cases = format_use_cases(use_cases=use_cases)
-    general_description = format_general_description(
-        general_description=general_description
-    )
-
-    prompt = f"""{general_description}
-{discovery}
-{data_dictionary_text}
-
-Here are recommendations to base your graph data model on:
-{data_model_recommendations}
-
-Based upon the above information and of high-quality Neo4j graph data models,
-I would like you to translate this information into a Neo4j graph data model.
-
-{use_cases}
-{DATA_MODEL_GENERATION_RULES}
-{DATA_MODEL_GENERATION_RULES_ADVANCED if advanced_rules else ""}
-
-{DATA_MODEL_FORMAT}
-"""
-    return prompt

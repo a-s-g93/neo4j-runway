@@ -11,10 +11,7 @@ data_dictionary = {
 
 
 def test_multifile_data_dictionary_init_allowed_columns() -> None:
-    with pytest.warns(UserWarning):
-        gdm = GraphDataModeler(
-            llm="llm", discovery="disc", data_dictionary=data_dictionary
-        )
+    gdm = GraphDataModeler(llm="llm", discovery="disc", data_dictionary=data_dictionary)
 
     assert isinstance(gdm.allowed_columns, dict)
     assert gdm.allowed_columns["a.csv"] == ["a", "b"]

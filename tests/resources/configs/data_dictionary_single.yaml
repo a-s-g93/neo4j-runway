@@ -3,7 +3,10 @@ files:
   columns:
   - name: col_a
     desc: The column of the letter being a
+    alias: feature_a
   - name: col_b
     desc: The column of naming b
+    ignore: false
   - name: col_c
     desc: c is for column for which it has been named
+    ignore: true

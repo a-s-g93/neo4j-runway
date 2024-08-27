@@ -77,7 +77,8 @@ class UserInput(BaseModel):
         """
 
         possible_cols = list(self.data_dictionary.values())
-
+        if len(possible_cols) == 0:
+            return False
         return isinstance(possible_cols[0], dict)
 
     @property
@@ -153,6 +154,18 @@ def user_input_safe_construct(
         Contains input data in UserInput format.
     """
 
+    # check if multifile
+    def _is_multifile() -> bool:
+        if data_dictionary is not None:
+            possible_cols = list(data_dictionary.values())
+            if len(possible_cols) == 0:
+                return False
+            return isinstance(possible_cols[0], dict)
+        else:
+            return False
+
+    is_multifile = _is_multifile()
+
     # handle general description
     general_description = (
         unsafe_user_input["general_description"]
@@ -161,20 +174,21 @@ def user_input_safe_construct(
     )
     if "general_description" in unsafe_user_input.keys():
         del unsafe_user_input["general_description"]
-    else:
+    elif not data_dictionary:
         warnings.warn(
             "user_input should include key:value pair {general_description: ...} for best results."
         )
 
-    # find unmatched columns
-    # assume remaining keys indicate columns
-    # only check if allowed_columns and unsafe_user_input > 0
-    if len(allowed_columns) > 0 and len(unsafe_user_input) > 0:
-        diff = set(unsafe_user_input.keys()).difference(set(allowed_columns))
-        if len(diff) > 0:
-            raise ValueError(
-                f"Column(s) {diff} is/are declared in the provided column descriptions, but is/are not found in the provided allowed_columns arg: {allowed_columns}."
-            )
+    if not is_multifile:
+        # find unmatched columns
+        # assume remaining keys indicate columns
+        # only check if allowed_columns and unsafe_user_input > 0
+        if len(allowed_columns) > 0 and len(unsafe_user_input) > 0:
+            diff = set(unsafe_user_input.keys()).difference(set(allowed_columns))
+            if len(diff) > 0:
+                raise ValueError(
+                    f"Column(s) {diff} is/are declared in the provided data_dictionary, but is/are not found in the provided allowed_columns arg: {allowed_columns}."
+                )
 
     # handle column descriptions
     if not unsafe_user_input and not data_dictionary:

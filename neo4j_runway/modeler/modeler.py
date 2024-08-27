@@ -86,14 +86,10 @@ class GraphDataModeler:
 
         if isinstance(discovery, Discovery):
             self.user_input = discovery.user_input
-
-            # self.columns_of_interest = discovery.columns_of_interest
+            # data dictionary should have been constructed before / during the discovery phase
+            self._data_dictionary = discovery.data.data_dictionary
 
             self.discovery = discovery.discovery
-            # self.general_info = discovery.df_info
-            # self.description_numeric = discovery.numeric_data_description
-            # self.description_categorical = discovery.categorical_data_description
-            # self.feature_descriptions = discovery.user_input.data_dictionary
 
         else:
             if not allowed_columns and not user_input and not data_dictionary:
@@ -118,10 +114,7 @@ class GraphDataModeler:
         # but still use the generated discovery information
         if data_dictionary is not None:
             self._data_dictionary = data_dictionary
-        elif isinstance(
-            discovery, Discovery
-        ):  # data dictionary should have been constructed before / during the discovery phase
-            self._data_dictionary = discovery.data.data_dictionary
+
         else:
             # this is a data dictionary derived from the allowed_columns arg
             # or the original user_input
@@ -149,7 +142,9 @@ class GraphDataModeler:
         if isinstance(self.discovery, Discovery):
             return self.discovery.data.size > 1
 
-        if len(list(self._data_dictionary.keys())) == 1:
+        if (
+            len(list(self._data_dictionary.keys())) == 1
+        ):  # assumes always more than 1 column for modeling
             return False
 
         return self.user_input.is_multifile
@@ -177,9 +172,18 @@ class GraphDataModeler:
         ), "No data dictionary present in GraphDataModeler class."
 
         if self.is_multifile:
-            return {k: list(v.keys()) for k, v in self._data_dictionary.items()}
+            return {
+                k: [col for col, desc in v.items() if not desc.endswith("ignore")]
+                for k, v in self._data_dictionary.items()
+            }
         else:
-            return {"file": list(self._data_dictionary.keys())}
+            return {
+                "file": [
+                    col
+                    for col, desc in self._data_dictionary.items()
+                    if not desc.endswith("ignore")
+                ]
+            }
 
     @property
     def current_model(self) -> DataModel:
@@ -315,7 +319,7 @@ class GraphDataModeler:
     def iterate_model(
         self,
         iterations: int = 1,
-        user_corrections: Optional[str] = None,
+        corrections: Optional[str] = None,
         use_advanced_data_model_generation_rules: bool = True,
         use_yaml_data_model: bool = False,
         max_retries: int = 3,
@@ -329,7 +333,7 @@ class GraphDataModeler:
             How many times to perform model generation. Each successful iteration will be appended to the GraphDataModeler model_history.
             For example if a value of 2 is provided, then two successful models will be appended to the model_history. Model generation will use the same
             prompt for each generation attempt. By default 1
-        user_corrections : Union[str, None], optional
+        corrections : Union[str, None], optional
             What changes the user would like the LLM to address in the next model, by default None
         use_yaml_data_model : bool, optional
             Whether to pass the data model in yaml format to the generation prompt.
@@ -349,18 +353,19 @@ class GraphDataModeler:
                     discovery_text=self.discovery,
                     data_model_to_modify=self.current_model,
                     multifile=self.is_multifile,
-                    user_corrections=user_corrections,
+                    corrections=corrections,
                     data_dictionary=self._data_dictionary,
                     use_cases=self.user_input.pretty_use_cases,
-                    general_description=self.user_input.general_description,
                     use_yaml_data_model=use_yaml_data_model,
                     advanced_rules=use_advanced_data_model_generation_rules,
+                    valid_columns=self.allowed_columns,
                 )
                 response = self.llm._get_data_model_response(
                     formatted_prompt=formatted_prompt,
                     max_retries=max_retries,
                     valid_columns=self.allowed_columns,
                     use_yaml_data_model=use_yaml_data_model,
+                    data_dictionary=self._data_dictionary,
                 )
 
                 self.model_history.append(response)

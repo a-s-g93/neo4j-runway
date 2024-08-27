@@ -139,7 +139,7 @@ class BaseDataModelingLLM(ABC):
         multifile: bool,
         general_description: str,
         use_advanced_data_model_generation_rules: bool,
-        data_dictionary: Optional[Dict[str, Any]] = None,
+        data_dictionary: Dict[str, Any],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
     ) -> Union[DataModel, Dict[str, Any]]:
@@ -159,11 +159,13 @@ class BaseDataModelingLLM(ABC):
         part_one_retries = 0
         # part 1
         while not validation["valid"] and part_one_retries < 2:
+            print(f"Entity Pool Generation Attempt: {part_one_retries+1}")
             formatted_prompt = create_initial_data_model_cot_prompt(
                 discovery_text=discovery_text,
                 multifile=multifile,
                 data_dictionary=data_dictionary,
                 use_cases=use_cases,
+                valid_columns=valid_columns,
             )
             entity_pool: DataModelEntityPool = self.client.chat.completions.create(
                 model=self.model_name,
@@ -177,19 +179,25 @@ class BaseDataModelingLLM(ABC):
                 ],
                 **self.model_params,
             )
-            validation = entity_pool.validate_pool(valid_columns=valid_columns)
+            validation = entity_pool.validate_pool(
+                valid_columns=valid_columns, data_dictionary=data_dictionary
+            )
             part_one_retries += 1
-
+            print(entity_pool)
         # part 2
         if validation["valid"]:
+            print("Received Valid Entity Pool.")
+
             formatted_prompt = create_initial_data_model_prompt(
                 discovery_text=discovery_text,
-                data_model_recommendations=entity_pool.model_dump(),
+                data_model_recommendations=entity_pool,
+                # data_model_recommendations={"a": []},
                 multifile=multifile,
                 data_dictionary=data_dictionary,
                 use_cases=use_cases,
                 general_description=general_description,
                 advanced_rules=use_advanced_data_model_generation_rules,
+                valid_columns=valid_columns,
             )
 
             initial_data_model: DataModel = self._get_data_model_response(
@@ -197,6 +205,7 @@ class BaseDataModelingLLM(ABC):
                 valid_columns=valid_columns,
                 max_retries=max_retries,
                 use_yaml_data_model=use_yaml_data_model,
+                data_dictionary=data_dictionary,
             )
 
             return initial_data_model
@@ -208,6 +217,7 @@ class BaseDataModelingLLM(ABC):
         self,
         formatted_prompt: str,
         valid_columns: dict[str, list[str]],
+        data_dictionary: Dict[str, Any],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
     ) -> DataModel:
@@ -231,9 +241,16 @@ class BaseDataModelingLLM(ABC):
                 **self.model_params,
             )
 
-            validation = response.validate_model(valid_columns=valid_columns)
+            validation = response.validate_model(
+                valid_columns=valid_columns, data_dictionary=data_dictionary
+            )
             if not validation["valid"]:
-                print("validation failed")
+                print(
+                    "validation failed\nNumber of Errors: ",
+                    len(validation["errors"]),
+                    "\n",
+                )
+                print(validation["message"])
                 cot = self._get_chain_of_thought_for_error_recommendations_response(
                     formatted_prompt=validation["message"]
                 )
@@ -241,11 +258,11 @@ class BaseDataModelingLLM(ABC):
                 formatted_prompt = create_retry_data_model_generation_prompt(
                     chain_of_thought_response=cot,
                     errors_to_fix=validation["errors"],
-                    model_to_fix=(
-                        response.to_yaml(write_file=False)
-                        if use_yaml_data_model
-                        else response
-                    ),
+                    model_to_fix=response,
+                    multifile=len(valid_columns.keys()) > 1,
+                    data_dictionary=data_dictionary,
+                    valid_columns=valid_columns,
+                    use_yaml_data_model=use_yaml_data_model,
                 )
             elif validation["valid"]:
                 print("recieved a valid response")
