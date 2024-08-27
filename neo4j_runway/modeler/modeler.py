@@ -23,23 +23,14 @@ class GraphDataModeler:
         The LLM used to generate data models.
     discovery : Union[str, Discovery], optional
         Either a string containing the LLM generated discovery or a Discovery object that has been run.
-        If a Discovery object is provided then the remaining discovery attributes don't need to be provided.
     user_input : Union[Dict[str, str], UserInput], optional
         Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
-    general_data_description : str, optional
-        A general data description provided by Pandas.
-    numeric_data_description : str, optional
-        A numeric data description provided by Pandas.
-    categorical_data_description : str, optional
-        A categorical data description provided by Pandas.
-    feature_descriptions : Dict[str, str], optional
-        Feature (column) descriptions provided by Discovery.
-    columns_of_interest : List[str], optional
-        The columns that may be used in the data model.
-    model_iterations: int
+    model_iterations : int
         The number of times a valid model has been returned.
-    model_history: List[DataModel]
+    model_history : List[DataModel]
         A list of all valid models generated.
+    current_model : DataModel
+        The most recently generated or loaded data model.
     """
 
     def __init__(
@@ -47,10 +38,6 @@ class GraphDataModeler:
         llm: BaseDataModelingLLM,
         discovery: Union[str, Discovery] = "",
         user_input: Union[Dict[str, str], UserInput] = dict(),
-        general_data_description: Optional[str] = None,
-        numeric_data_description: Optional[str] = None,
-        categorical_data_description: Optional[str] = None,
-        feature_descriptions: Optional[Dict[str, str]] = None,
         data_dictionary: Optional[Dict[str, Any]] = None,
         allowed_columns: List[str] = list(),
     ) -> None:
@@ -66,20 +53,14 @@ class GraphDataModeler:
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
             If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
         user_input : Union[Dict[str, str], UserInput], optional
-            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default {}
-        general_data_description : str, optional
-            A general data description provided by Pandas, by default None
-        numeric_data_description : str, optional
-            A numeric data description provided by Pandas, by default None
-        categorical_data_description : str, optional
-            A categorical data description provided by Pandas, by default None
+            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default dict()
         data_dictionary : Dict[str, Any], optional
             A data dictionary. If single-file input, then the keys will be column names and the values are descriptions.
             If multi-file input, the keys are file names and each contain a nested dictionary of column name keys and description values.
             This argument will take precedence over any data dictionary provided via the Discovery object.
             This argument will take precedence over the allowed_columns argument. By default None
         allowed_columns : List[str], optional
-            A list of allowed columns for modeling. Can be used only for single-file inputs. By default = []
+            A list of allowed columns for modeling. Can be used only for single-file inputs. By default = list()
         """
 
         self.llm = llm
@@ -285,13 +266,22 @@ class GraphDataModeler:
         use_advanced_data_model_generation_rules: bool = True,
     ) -> Union[DataModel, Dict[str, Any]]:
         """
-        Generate the initial model. This must be ran before a model can be interated on.
+        Generate the initial model.
         You may access this model with the `get_model` method and providing `version=1`.
+
+        Parameters
+        ----------
+        max_retries : int, optional
+            The max number of retries for generating the initial model, by default 3
+        use_yaml_data_model : bool, optional
+            Whether to pass the data model in YAML format while making corrections, by default False
+        use_advanced_data_model_generation_rules, optional
+            Whether to include advanced data modeling rules, by default True
 
         Returns
         -------
         Union[DataModel, str]
-            The generated data model if a valid model is generated.
+            The generated data model if a valid model is generated, or
             A dictionary containing information about the failed generation attempt.
         """
 
@@ -301,7 +291,6 @@ class GraphDataModeler:
             data_dictionary=self._data_dictionary,
             use_cases=self.user_input.pretty_use_cases,
             multifile=self.is_multifile,
-            general_description=self.user_input.general_description,
             use_advanced_data_model_generation_rules=use_advanced_data_model_generation_rules,
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
@@ -335,9 +324,12 @@ class GraphDataModeler:
             prompt for each generation attempt. By default 1
         corrections : Union[str, None], optional
             What changes the user would like the LLM to address in the next model, by default None
+        max_retries : int, optional
+            The max number of retries for generating the initial model, by default 3
         use_yaml_data_model : bool, optional
-            Whether to pass the data model in yaml format to the generation prompt.
-            This takes less tokens, but differs from the output format of json. By default False
+            Whether to pass the data model in YAML format while making corrections, by default False
+        use_advanced_data_model_generation_rules, optional
+            Whether to include advanced data modeling rules, by default True
 
         Returns
         -------

@@ -42,7 +42,6 @@ def create_initial_data_model_prompt(
     valid_columns: Dict[str, Any],
     data_dictionary: Optional[Dict[str, Any]] = None,
     use_cases: Optional[str] = None,
-    general_description: Optional[str] = None,
     advanced_rules: bool = True,
 ) -> str:
     """

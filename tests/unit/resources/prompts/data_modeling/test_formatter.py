@@ -50,6 +50,8 @@ def test_error_formatter() -> None:
     answer = """Errors:
 * bad
 * worse
+
+
 """
     assert format_errors(errors=errors) == answer
 

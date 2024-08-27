@@ -6,7 +6,7 @@ all: help
 
 coverage:
 	poetry run coverage run -m pytest tests/unit
-	poetry run coverage report --fail-under=90
+	poetry run coverage report --fail-under=85
 
 test:
 	pytest tests

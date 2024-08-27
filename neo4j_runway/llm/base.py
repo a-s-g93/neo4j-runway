@@ -137,7 +137,6 @@ class BaseDataModelingLLM(ABC):
         valid_columns: Dict[str, List[str]],
         use_cases: str,
         multifile: bool,
-        general_description: str,
         use_advanced_data_model_generation_rules: bool,
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
@@ -191,11 +190,9 @@ class BaseDataModelingLLM(ABC):
             formatted_prompt = create_initial_data_model_prompt(
                 discovery_text=discovery_text,
                 data_model_recommendations=entity_pool,
-                # data_model_recommendations={"a": []},
                 multifile=multifile,
                 data_dictionary=data_dictionary,
                 use_cases=use_cases,
-                general_description=general_description,
                 advanced_rules=use_advanced_data_model_generation_rules,
                 valid_columns=valid_columns,
             )

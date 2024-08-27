@@ -106,10 +106,10 @@ class TestGraphDataModeler(unittest.TestCase):
                 llm="llm",
                 user_input=USER_GENERATED_INPUT,
                 # discovery="discovery",
-                general_data_description="desc",
-                categorical_data_description="desc",
-                numeric_data_description="desc",
-                feature_descriptions="desc",
+                # general_data_description="desc",
+                # categorical_data_description="desc",
+                # numeric_data_description="desc",
+                # feature_descriptions="desc",
             )
 
     def test_no_general_info_in_user_input(self) -> None:
@@ -122,10 +122,10 @@ class TestGraphDataModeler(unittest.TestCase):
                 llm="llm",
                 user_input=USER_GENERATED_INPUT_BAD,
                 discovery="discovery",
-                general_data_description="desc",
-                categorical_data_description="desc",
-                numeric_data_description="desc",
-                feature_descriptions="desc",
+                # general_data_description="desc",
+                # categorical_data_description="desc",
+                # numeric_data_description="desc",
+                # feature_descriptions="desc",
             )
 
     def test_no_discovery_no_user_input_with_allowed_columns(self) -> None:
@@ -133,10 +133,10 @@ class TestGraphDataModeler(unittest.TestCase):
             gdm = GraphDataModeler(
                 llm="llm",
                 discovery="discovery",
-                general_data_description="desc",
-                categorical_data_description="desc",
-                numeric_data_description="desc",
-                feature_descriptions="desc",
+                # general_data_description="desc",
+                # categorical_data_description="desc",
+                # numeric_data_description="desc",
+                # feature_descriptions="desc",
                 allowed_columns=["feature_1", "feature_2", "id"],
             )
 
