@@ -4,6 +4,7 @@ The Discovery module that handles summarization and discovery generation via an 
 
 import asyncio
 import io
+import warnings
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
@@ -72,8 +73,20 @@ class Discovery:
             self.user_input = user_input_safe_construct(
                 unsafe_user_input=user_input, allowed_columns=data.columns
             )
+        elif not isinstance(user_input, UserInput) and isinstance(data, Table):
+            self.user_input = user_input_safe_construct(
+                unsafe_user_input=user_input, data_dictionary=data.data_dictionary
+            )
+        elif not isinstance(user_input, UserInput) and isinstance(
+            data, TableCollection
+        ):
+            self.user_input = user_input_safe_construct(
+                unsafe_user_input=user_input, data_dictionary=data.data_dictionary
+            )
         elif isinstance(user_input, UserInput):
             self.user_input = user_input
+        else:
+            raise ValueError("Unable to parse user_input.")
 
         self.llm = llm
 
@@ -87,7 +100,7 @@ class Discovery:
                 file_path="",
                 data=data[self.user_input.allowed_columns],
                 general_description=self.user_input.general_description,
-                data_dictionary=self.user_input.column_descriptions,
+                data_dictionary=self.user_input.data_dictionary,
                 use_cases=self.user_input.use_cases,
             )
             self.data = TableCollection(

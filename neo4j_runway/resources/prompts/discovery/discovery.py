@@ -1,8 +1,9 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pandas as pd
 
 from ....utils.data import Table
+from .constants import DISCOVERY_SUMMARY_GENERATION_RULES
 
 
 def create_discovery_prompt_single_file(
@@ -127,6 +128,12 @@ Ensure that your findings are grounded in the provided summaries and address the
 
 Keep these use cases in mind as you summarize the above content.
 use cases:
-{use_cases}"""
+{use_cases}
+
+General data modeling rules to keep in mind:
+{DISCOVERY_SUMMARY_GENERATION_RULES}
+
+Assume that all mentioned data is present in the dataset!
+"""
 
     return prefix + str([d + "\n\n-------\n" for d in sub_discoveries]) + suffix

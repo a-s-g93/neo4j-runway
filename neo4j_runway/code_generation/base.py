@@ -42,7 +42,7 @@ class BaseCodeGenerator(ABC):
         data_model: DataModel,
         file_directory: str = "./",
         file_output_directory: str = "./",
-        csv_name: str = "",
+        source_name: str = "",
         strict_typing: bool = True,
     ):
         """
@@ -56,9 +56,9 @@ class BaseCodeGenerator(ABC):
             Where the files are located. By default = "./"
         file_output_directory : str, optional
             The location that generated files should be saved to, by default "./"
-        csv_name : str, optional
-            The name of the CSV file. If more than one CSV is used, this arg should not be provided.
-            CSV file names should be included within the data model. By default = ""
+        source_name : str, optional
+            The name of the data file. If more than one file is used, this arg should not be provided.
+            File names should be included within the data model. By default = ""
         strict_typing : bool, optional
             Whether to use the types declared in the data model (True), or infer types during ingestion (False). By default True
         """
@@ -66,7 +66,7 @@ class BaseCodeGenerator(ABC):
         self.data_model: DataModel = data_model
         self.file_dir = file_directory
         self.file_output_dir = file_output_directory
-        self.csv_name = csv_name
+        self.source_name = source_name
         self.strict_typing = strict_typing
 
         self._constraints: Dict[str, str] = dict()
@@ -106,7 +106,7 @@ class BaseCodeGenerator(ABC):
                         node=node, strict_typing=strict_typing
                     )
                 ),
-                "csv": f"$BASE/{self.file_dir}{node.csv_name if self.csv_name == '' else self.csv_name}",
+                "csv": f"$BASE/{self.file_dir}{node.source_name if self.source_name == '' else self.source_name}",
             }
 
         ## get relationships
@@ -143,7 +143,7 @@ class BaseCodeGenerator(ABC):
                         strict_typing=strict_typing,
                     )
                 ),
-                "csv": f"$BASE/{self.file_dir}{rel.csv_name if self.csv_name == '' else self.csv_name}",
+                "csv": f"$BASE/{self.file_dir}{rel.source_name if self.source_name == '' else self.source_name}",
             }
 
     def generate_cypher_file(self, file_name: str = "ingest_code.cypher") -> None:

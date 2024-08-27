@@ -1,0 +1,38 @@
+files:
+- name: countries.csv
+  columns:
+  - name: id
+    desc: The unique country id.
+    alias: country_id
+  - name: name
+    desc: The country name.
+  - name: capital
+    desc: The capital of the country.
+  - name: currency
+    desc: The currency used by the country.
+  - name: region
+    desc: The region that contains the country.
+  - name: subregion
+    desc: The subregion that contains the country.
+- name: states.csv
+  columns:
+  - name: id
+    desc: The unique state id.
+    alias: state_id
+  - name: name
+    desc: The state name.
+  - name: country_id
+    desc: The unique id of the country the state belongs to.
+    ignore: true
+- name: cities.csv
+  columns:
+  - name: id
+    desc: The unique city id.
+  - name: name
+    desc: The name of the city.
+  - name: state_id
+    desc: The unique id of the state that contains the city.
+    ignore: true
+  - name: country_id
+    desc: The unique id of the country that contains the city.
+    ignore: true

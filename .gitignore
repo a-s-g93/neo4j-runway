@@ -14,7 +14,7 @@ _site
 images/presentation
 /data/
 notebooks/
-*.ipynb
+# *.ipynb
 .ruff_cache
 prepare_minor_release.sh
 prepare_patch_release.sh
