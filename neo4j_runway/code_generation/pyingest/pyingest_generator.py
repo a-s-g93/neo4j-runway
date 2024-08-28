@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 import yaml
 
 from ...models.core import DataModel
+from ...utils.create_directory import create_directory
 from ..base import BaseCodeGenerator
 from ..cypher import format_pyingest_pre_or_post_ingest_code
 
@@ -203,10 +204,9 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
             Name of the file, by default "pyingest_config"
         """
 
-        if self.file_output_dir != "":
-            os.makedirs(self.file_output_dir, exist_ok=True)
+        create_directory(self.file_output_dir + file_name)
 
-        with open(f"./{self.file_output_dir}{file_name}", "w") as config_yaml:
+        with open(f"{self.file_output_dir}{file_name}", "w") as config_yaml:
             config_yaml.write(self.generate_config_string())
 
     def generate_config_string(

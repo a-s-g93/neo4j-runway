@@ -9,6 +9,7 @@ from typing import Any, Dict
 import yaml
 
 from ..models import DataModel
+from ..utils.create_directory import create_directory
 from .cypher import *
 
 
@@ -65,6 +66,8 @@ class BaseCodeGenerator(ABC):
 
         self.data_model: DataModel = data_model
         self.file_dir = file_directory
+        if not file_output_directory.endswith("/"):
+            file_output_directory += "/"
         self.file_output_dir = file_output_directory
         self.source_name = source_name
         self.strict_typing = strict_typing
@@ -156,10 +159,9 @@ class BaseCodeGenerator(ABC):
             Name of the file, by default "ingest_code.cypher"
         """
 
-        if self.file_output_dir != "":
-            os.makedirs(self.file_output_dir, exist_ok=True)
+        create_directory(self.file_output_dir + file_name)
 
-        with open(f"./{self.file_output_dir}{file_name}", "w") as cypher:
+        with open(f"{self.file_output_dir}{file_name}", "w") as cypher:
             cypher.write(self.generate_cypher_string())
 
     def generate_cypher_string(self) -> str:
@@ -189,10 +191,9 @@ class BaseCodeGenerator(ABC):
             Name of the file, by default "constraints.cypher"
         """
 
-        if self.file_output_dir != "":
-            os.makedirs(self.file_output_dir, exist_ok=True)
+        create_directory(self.file_output_dir + file_name)
 
-        with open(f"./{self.file_output_dir}{file_name}", "w") as constraints_cypher:
+        with open(f"{self.file_output_dir}{file_name}", "w") as constraints_cypher:
             constraints_cypher.write(self.generate_constraints_string())
 
     def generate_constraints_string(self) -> str:

@@ -191,5 +191,5 @@ class TableCollection:
         if file_dir != "./":
             os.makedirs(file_dir, exist_ok=True)
 
-        with open(f"./{file_dir}{file_name}", "w") as f:
+        with open(f"{file_dir}{file_name}", "w") as f:
             f.write(self.discovery)

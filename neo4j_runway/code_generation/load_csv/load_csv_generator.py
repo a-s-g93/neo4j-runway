@@ -5,6 +5,7 @@ This file contains the code to generate LOAD CSV code.
 import os
 
 from ...models import DataModel
+from ...utils.create_directory import create_directory
 from ..base import BaseCodeGenerator
 from ..cypher import (
     generate_merge_node_load_csv_clause,
@@ -87,10 +88,9 @@ class LoadCSVCodeGenerator(BaseCodeGenerator):
             The file name.
         """
 
-        if self.file_output_dir != "":
-            os.makedirs(self.file_output_dir, exist_ok=True)
-
-        with open(f"./{self.file_output_dir}{file_name}", "w") as load_csv_file:
+        create_directory(self.file_output_dir + file_name)
+        print("file dir: ", self.file_output_dir + file_name)
+        with open(f"{self.file_output_dir}{file_name}", "w") as load_csv_file:
             load_csv_file.write(self.generate_load_csv_cypher_string())
 
     def generate_load_csv_cypher_string(self) -> str:
