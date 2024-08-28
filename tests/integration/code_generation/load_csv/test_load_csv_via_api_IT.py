@@ -61,7 +61,7 @@ class TestLoadCSVViaAPI(unittest.TestCase):
 
         gen = LoadCSVCodeGenerator(
             data_model=data_model,
-            csv_name="pets-arrows.csv",
+            source_name="pets-arrows.csv",
             method="api",
             file_directory="",
         )

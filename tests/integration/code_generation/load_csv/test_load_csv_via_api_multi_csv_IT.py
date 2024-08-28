@@ -61,9 +61,10 @@ class TestLoadCSVViaAPIWithMultiCSV(unittest.TestCase):
             "tests/resources/data_models/people-pets-arrows-multi-csv.json"
         )
 
-        gen = LoadCSVCodeGenerator(data_model=data_model, csv_name="", method="api")
+        gen = LoadCSVCodeGenerator(data_model=data_model, source_name="", method="api")
 
         load_csv_cypher = gen.generate_load_csv_cypher_string()
+        print(load_csv_cypher)
 
         # skip last "query" since it is an empty string
         for query in load_csv_cypher.split(";")[:-1]:

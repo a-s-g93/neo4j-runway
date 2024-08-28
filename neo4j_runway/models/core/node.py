@@ -201,6 +201,40 @@ class Node(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
+    @property
+    def node_key_aliases(self) -> List[Property]:
+        """
+        List of node key aliases, if they exist.
+
+        Returns
+        -------
+        List[Property]
+            The aliases.
+        """
+
+        return [
+            p
+            for p in self.properties
+            if p.part_of_key and p.csv_mapping_other is not None
+        ]
+
+    @property
+    def unique_property_aliases(self) -> List[Property]:
+        """
+        List of unique property aliases, if they exist.
+
+        Returns
+        -------
+        List[Property]
+            The aliases.
+        """
+
+        return [
+            p
+            for p in self.properties
+            if p.is_unique and p.csv_mapping_other is not None
+        ]
+
     def validate_source_name(
         self, valid_columns: Dict[str, List[str]]
     ) -> List[Optional[str]]:

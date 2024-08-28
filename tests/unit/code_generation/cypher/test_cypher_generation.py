@@ -30,6 +30,7 @@ from tests.resources.answers.ingestion_generation_answers import (
     merge_node_standard_a,
     merge_relationship_load_csv,
     merge_relationship_standard,
+    merge_relationship_standard_different_files,
     merge_relationship_standard_same_node,
     node_key_constraint_answer,
     relationship_key_constraint_answer,
@@ -299,6 +300,50 @@ class TestIngestCodeGeneration(unittest.TestCase):
             merge_relationship_standard_same_node,
         )
 
+    def test_generate_relationship_with_nodes_different_source_files(self) -> None:
+        node_a = Node(
+            label="Person",
+            properties=[
+                Property(
+                    name="name",
+                    type="str",
+                    csv_mapping="name",
+                    csv_mapping_other="person_name",
+                    is_unique=True,
+                )
+            ],
+            source_name="owners.csv",
+        )
+        node_b = Node(
+            label="Pet",
+            properties=[
+                Property(
+                    name="name",
+                    type="str",
+                    csv_mapping="name",
+                    is_unique=True,
+                )
+            ],
+            source_name="pets.csv",
+        )
+        rel = Relationship(
+            type="LOVES",
+            source="Pet",
+            target="Person",
+            properties=[],
+            source_name="pets.csv",
+        )
+
+        self.assertEqual(
+            generate_merge_relationship_clause_standard(
+                relationship=rel,
+                source_node=node_b,
+                target_node=node_a,
+                strict_typing=True,
+            ),
+            merge_relationship_standard_different_files,
+        )
+
     def test_generate_node_key_constraint(self) -> None:
         nk1 = Property(name="nk1", type="str", csv_mapping="nk1", part_of_key=True)
         nk2 = Property(name="nk2", type="str", csv_mapping="nk2", part_of_key=True)
@@ -365,7 +410,6 @@ class TestIngestCodeGeneration(unittest.TestCase):
             csv_mapping="p1",
             csv_mapping_other="p1b",
         )
-        print(prop_point.type.lower())
         self.assertEqual(cast_value(prop_str), "row.p1")
         self.assertEqual(cast_value(prop_point), "point(row.p1)")
 

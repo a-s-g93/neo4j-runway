@@ -61,7 +61,7 @@ class TestLoadCSVViaAPIWithMultiCSVAndSameNodeRelationship(unittest.TestCase):
             "tests/resources/data_models/people-pets-arrows-multi-csv-and-same-node-rel.json"
         )
 
-        gen = LoadCSVCodeGenerator(data_model=data_model, csv_name="", method="api")
+        gen = LoadCSVCodeGenerator(data_model=data_model, source_name="", method="api")
 
         load_csv_cypher = gen.generate_load_csv_cypher_string()
 
