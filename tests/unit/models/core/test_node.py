@@ -8,10 +8,10 @@ class TestNode(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.person_name = Property(
-            name="name", type="str", csv_mapping="first_name", is_unique=True
+            name="name", type="str", column_mapping="first_name", is_unique=True
         )
         cls.person_age = Property(
-            name="age", type="str", csv_mapping="age", is_unique=False
+            name="age", type="str", column_mapping="age", is_unique=False
         )
 
     def test_init(self) -> None:
@@ -98,7 +98,7 @@ class TestNode(unittest.TestCase):
                 Property(
                     name="nkey",
                     type="str",
-                    csv_mapping="nkey",
+                    column_mapping="nkey",
                     is_unique=False,
                     part_of_key=True,
                 )
@@ -116,7 +116,7 @@ class TestNode(unittest.TestCase):
                 Property(
                     name="nkey",
                     type="str",
-                    csv_mapping="nkey",
+                    column_mapping="nkey",
                     is_unique=False,
                     part_of_key=True,
                 )
@@ -138,7 +138,7 @@ class TestNode(unittest.TestCase):
                 Property(
                     name="nkey",
                     type="str",
-                    csv_mapping="nkey",
+                    column_mapping="nkey",
                     is_unique=False,
                     part_of_key=True,
                 )

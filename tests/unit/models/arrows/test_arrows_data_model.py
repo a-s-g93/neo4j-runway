@@ -26,24 +26,28 @@ class TestDataModel(unittest.TestCase):
         ]
 
         person_name = Property(
-            name="name", type="str", csv_mapping="name", is_unique=True
+            name="name", type="str", column_mapping="name", is_unique=True
         )
         person_age = Property(
-            name="age", type="int", csv_mapping="age", is_unique=False
+            name="age", type="int", column_mapping="age", is_unique=False
         )
         address_street = Property(
-            name="street", type="str", csv_mapping="street", is_unique=False
+            name="street", type="str", column_mapping="street", is_unique=False
         )
         address_city = Property(
-            name="city", type="str", csv_mapping="city", is_unique=False
+            name="city", type="str", column_mapping="city", is_unique=False
         )
         pet_name = Property(
-            name="name", type="str", csv_mapping="pet_name", is_unique=False
+            name="name", type="str", column_mapping="pet_name", is_unique=False
         )
-        pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
-        toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
+        pet_kind = Property(
+            name="kind", type="str", column_mapping="pet", is_unique=False
+        )
+        toy_name = Property(
+            name="name", type="str", column_mapping="toy", is_unique=True
+        )
         toy_kind = Property(
-            name="kind", type="str", csv_mapping="toy_type", is_unique=False
+            name="kind", type="str", column_mapping="toy_type", is_unique=False
         )
 
         cls.good_nodes = [

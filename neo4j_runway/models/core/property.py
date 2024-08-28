@@ -21,10 +21,10 @@ class Property(BaseModel):
         The property name in Neo4j.
     type : str
         The Python type of the property.
-    csv_mapping : str
-        Which csv column the property is found under.
-    csv_mapping_other : Optional[str]
-        An optional second csv column that also indicates this property.
+    column_mapping : str
+        Which column the property is found under.
+    alias : Optional[str]
+        An optional second column that also indicates this property.
     is_unique : bool
         Whether the property is a unique identifier.
     part_of_key : bool
@@ -33,8 +33,8 @@ class Property(BaseModel):
 
     name: str
     type: str
-    csv_mapping: str
-    csv_mapping_other: Optional[str] = None
+    column_mapping: str
+    alias: Optional[str] = None
     is_unique: bool = False
     part_of_key: bool = False
     # is_indexed: bool
@@ -75,36 +75,34 @@ class Property(BaseModel):
     ) -> "Property":
         """
         Parse the arrows property representation into a standard Property model.
-        Arrow property values are formatted as <csv_mapping> | <python_type> | <unique, nodekey> | <ignore>.
+        Arrow property values are formatted as <column_mapping> | <python_type> | <unique, nodekey> | <ignore>.
         """
 
-        csv_mapping: str = ""
+        column_mapping: str = ""
         if "|" in list(arrows_property.values())[0]:
             prop_props = [
                 x.strip() for x in list(arrows_property.values())[0].split("|")
             ]
             if "," in prop_props[0]:
-                csv_mapping, csv_mapping_other = [
-                    x.strip() for x in prop_props[0].split(",")
-                ]
+                column_mapping, alias = [x.strip() for x in prop_props[0].split(",")]
             else:
-                csv_mapping = prop_props[0]
-                csv_mapping_other = None
+                column_mapping = prop_props[0]
+                alias = None
 
             python_type = prop_props[1]
             is_unique = "unique" in prop_props
             node_key = "nodekey" in prop_props
         else:
-            csv_mapping = list(arrows_property.values())[0]
+            column_mapping = list(arrows_property.values())[0]
             python_type = "unknown"
-            csv_mapping_other = None
+            alias = None
             is_unique = False
             node_key = False
 
         return cls(
             name=list(arrows_property.keys())[0],
-            csv_mapping=csv_mapping,
-            csv_mapping_other=csv_mapping_other,
+            column_mapping=column_mapping,
+            alias=alias,
             type=python_type,
             is_unique=is_unique,
             part_of_key=node_key,
@@ -119,19 +117,19 @@ class Property(BaseModel):
         """
 
         if "," in solutions_workbench_property.referenceData:
-            csv_mapping, csv_mapping_other = [
+            column_mapping, alias = [
                 x.strip() for x in solutions_workbench_property.referenceData.split(",")
             ]
         else:
-            csv_mapping, csv_mapping_other = (
+            column_mapping, alias = (
                 solutions_workbench_property.referenceData,
                 None,
             )
 
         return cls(
             name=solutions_workbench_property.name,
-            csv_mapping=csv_mapping,
-            csv_mapping_other=csv_mapping_other,
+            column_mapping=column_mapping,
+            alias=alias,
             type=TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[
                 solutions_workbench_property.datatype
             ],
@@ -143,10 +141,10 @@ class Property(BaseModel):
         """
         Parse into a Solutions Workbench property representation.
         """
-        if self.csv_mapping_other:
-            reference_data = f"{self.csv_mapping}, {self.csv_mapping_other}"
+        if self.alias:
+            reference_data = f"{self.column_mapping}, {self.alias}"
         else:
-            reference_data = self.csv_mapping
+            reference_data = self.column_mapping
 
         return SolutionsWorkbenchProperty(
             key=self.name,

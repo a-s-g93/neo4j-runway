@@ -26,38 +26,42 @@ class TestSolutionsWorkbenchDataModel(unittest.TestCase):
 
         person_name = Property(
             name="name",
-            csv_mapping_other="knows",
+            alias="knows",
             type="str",
-            csv_mapping="name",
+            column_mapping="name",
             is_unique=True,
         )
         person_age = Property(
-            name="age", type="int", csv_mapping="age", is_unique=False
+            name="age", type="int", column_mapping="age", is_unique=False
         )
         address_street = Property(
             name="street",
             type="str",
-            csv_mapping="street",
+            column_mapping="street",
             is_unique=True,
             part_of_key=True,
         )
         address_city = Property(
             name="city",
             type="str",
-            csv_mapping="city",
+            column_mapping="city",
             is_unique=True,
             part_of_key=True,
         )
         pet_name = Property(
-            name="name", type="str", csv_mapping="pet_name", is_unique=True
+            name="name", type="str", column_mapping="pet_name", is_unique=True
         )
-        pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
-        toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
+        pet_kind = Property(
+            name="kind", type="str", column_mapping="pet", is_unique=False
+        )
+        toy_name = Property(
+            name="name", type="str", column_mapping="toy", is_unique=True
+        )
         toy_kind = Property(
-            name="kind", type="str", csv_mapping="toy_type", is_unique=False
+            name="kind", type="str", column_mapping="toy_type", is_unique=False
         )
         shelter_name = Property(
-            name="name", csv_mapping="shelter_name", type="str", is_unique=True
+            name="name", column_mapping="shelter_name", type="str", is_unique=True
         )
 
         cls.good_nodes = [

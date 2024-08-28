@@ -33,11 +33,11 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
     """
     from_unique, to_unique = [
         [
-            "{" + f"{prop.name}: row.{prop.csv_mapping}" + "}",
-            "{" + f"{prop.name}: row.{prop.csv_mapping_other}" + "}",
+            "{" + f"{prop.name}: row.{prop.column_mapping}" + "}",
+            "{" + f"{prop.name}: row.{prop.alias}" + "}",
         ]
         for prop in node.unique_properties
-        if prop.csv_mapping_other is not None
+        if prop.alias is not None
     ][0]
 
     return f"""MATCH (source:{node.label} {from_unique})
@@ -229,23 +229,23 @@ def cast_value(
     """
 
     # take the first val as this is the identifying column
-    # csv_mapping = (
-    #     prop.csv_mapping[0] if isinstance(prop.csv_mapping, list) else prop.csv_mapping
+    # column_mapping = (
+    #     prop.column_mapping[0] if isinstance(prop.column_mapping, list) else prop.column_mapping
     # )
 
-    csv_mapping = prop.csv_mapping if not use_alias else prop.csv_mapping_other
+    column_mapping = prop.column_mapping if not use_alias else prop.alias
 
     assert (
-        csv_mapping is not None
-    ), f"`csv_mapping` can not be None. Found on Property {prop}"
+        column_mapping is not None
+    ), f"`column_mapping` can not be None. Found on Property {prop}"
     # escape bad chars
-    csv_mapping = (
-        f"`{csv_mapping}`"
-        if not csv_mapping[0].isalnum() or " " in csv_mapping
-        else csv_mapping
+    column_mapping = (
+        f"`{column_mapping}`"
+        if not column_mapping[0].isalnum() or " " in column_mapping
+        else column_mapping
     )
 
-    base = f"row.{csv_mapping}"
+    base = f"row.{column_mapping}"
 
     if not strict_typing:
         return base

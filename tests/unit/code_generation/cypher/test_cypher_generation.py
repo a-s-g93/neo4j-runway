@@ -45,25 +45,34 @@ class TestIngestCodeGeneration(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         prop_a_1 = Property(
-            name="uniqueProp1", csv_mapping="unique_prop_1", type="str", is_unique=True
+            name="uniqueProp1",
+            column_mapping="unique_prop_1",
+            type="str",
+            is_unique=True,
         )
         prop_a_2 = Property(
-            name="prop1", csv_mapping="prop_1", type="str", is_unique=False
+            name="prop1", column_mapping="prop_1", type="str", is_unique=False
         )
         prop_a_3 = Property(
-            name="uniqueProp3", csv_mapping="unique_prop_3", type="str", is_unique=True
+            name="uniqueProp3",
+            column_mapping="unique_prop_3",
+            type="str",
+            is_unique=True,
         )
         prop_b_1 = Property(
-            name="uniqueProp2", csv_mapping="unique_prop_2", type="str", is_unique=True
+            name="uniqueProp2",
+            column_mapping="unique_prop_2",
+            type="str",
+            is_unique=True,
         )
         prop_b_2 = Property(
-            name="prop2", csv_mapping="prop_2", type="str", is_unique=False
+            name="prop2", column_mapping="prop_2", type="str", is_unique=False
         )
         prop_b_3 = Property(
-            name="prop3", csv_mapping="prop_3", type="str", is_unique=False
+            name="prop3", column_mapping="prop_3", type="str", is_unique=False
         )
         prop_rel_1 = Property(
-            name="relProp", csv_mapping="rel_prop", type="int", is_unique=False
+            name="relProp", column_mapping="rel_prop", type="int", is_unique=False
         )
 
         cls.node_a = Node(label="NodeA", properties=[prop_a_1, prop_a_2, prop_a_3])
@@ -263,8 +272,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name",
-                    csv_mapping_other="knows_person",
+                    column_mapping="name",
+                    alias="knows_person",
                     is_unique=True,
                 )
             ],
@@ -280,8 +289,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name",
-                    csv_mapping_other="knows_person",
+                    column_mapping="name",
+                    alias="knows_person",
                     is_unique=True,
                 )
             ],
@@ -307,8 +316,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name",
-                    csv_mapping_other="person_name",
+                    column_mapping="name",
+                    alias="person_name",
                     is_unique=True,
                 )
             ],
@@ -320,7 +329,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 Property(
                     name="name",
                     type="str",
-                    csv_mapping="name",
+                    column_mapping="name",
                     is_unique=True,
                 )
             ],
@@ -345,8 +354,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
         )
 
     def test_generate_node_key_constraint(self) -> None:
-        nk1 = Property(name="nk1", type="str", csv_mapping="nk1", part_of_key=True)
-        nk2 = Property(name="nk2", type="str", csv_mapping="nk2", part_of_key=True)
+        nk1 = Property(name="nk1", type="str", column_mapping="nk1", part_of_key=True)
+        nk2 = Property(name="nk2", type="str", column_mapping="nk2", part_of_key=True)
 
         self.assertEqual(
             generate_node_key_constraint(label="NodeA", unique_properties=[nk1, nk2]),
@@ -354,8 +363,8 @@ class TestIngestCodeGeneration(unittest.TestCase):
         )
 
     def test_generate_relationship_key_constraint(self) -> None:
-        nk1 = Property(name="nk1", type="str", csv_mapping="nk1", part_of_key=True)
-        nk2 = Property(name="nk2", type="str", csv_mapping="nk2", part_of_key=True)
+        nk1 = Property(name="nk1", type="str", column_mapping="nk1", part_of_key=True)
+        nk2 = Property(name="nk2", type="str", column_mapping="nk2", part_of_key=True)
 
         self.assertEqual(
             generate_relationship_key_constraint(
@@ -365,62 +374,60 @@ class TestIngestCodeGeneration(unittest.TestCase):
         )
 
     def test_cast_no_type(self) -> None:
-        prop_str = Property(name="p1", type="str", csv_mapping="p1")
+        prop_str = Property(name="p1", type="str", column_mapping="p1")
         self.assertEqual(cast_value(prop_str), "row.p1")
 
     def test_cast_date(self) -> None:
-        prop_date = Property(name="p3", type="neo4j.time.Date", csv_mapping="p3")
+        prop_date = Property(name="p3", type="neo4j.time.Date", column_mapping="p3")
         self.assertEqual(cast_value(prop_date), "date(row.p3)")
 
     def test_cast_time(self) -> None:
-        prop_time = Property(name="p4", type="neo4j.time.Time", csv_mapping="p4")
+        prop_time = Property(name="p4", type="neo4j.time.Time", column_mapping="p4")
         self.assertEqual(cast_value(prop_time), "time(row.p4)")
 
     def test_cast_datetime(self) -> None:
         prop_datetime = Property(
-            name="p5", type="neo4j.time.DateTime", csv_mapping="p5"
+            name="p5", type="neo4j.time.DateTime", column_mapping="p5"
         )
         self.assertEqual(cast_value(prop_datetime), "datetime(row.p5)")
 
     def test_cast_point(self) -> None:
         prop_point = Property(
-            name="p6", type="neo4j.spatial.CartesianPoint", csv_mapping="p6"
+            name="p6", type="neo4j.spatial.CartesianPoint", column_mapping="p6"
         )
         self.assertEqual(cast_value(prop_point), "point(row.p6)")
 
     def test_cast_integer(self) -> None:
-        prop_int = Property(name="p2", type="int", csv_mapping="p2")
+        prop_int = Property(name="p2", type="int", column_mapping="p2")
         self.assertEqual(cast_value(prop_int), "toIntegerOrNull(row.p2)")
 
     def test_cast_float(self) -> None:
-        prop_float = Property(name="p2", type="float", csv_mapping="p2")
+        prop_float = Property(name="p2", type="float", column_mapping="p2")
         self.assertEqual(cast_value(prop_float), "toFloatOrNull(row.p2)")
 
     def test_cast_bool(self) -> None:
-        prop_bool = Property(name="p2", type="bool", csv_mapping="p2")
+        prop_bool = Property(name="p2", type="bool", column_mapping="p2")
         self.assertEqual(cast_value(prop_bool), "toBooleanOrNull(row.p2)")
 
     def test_cast_value_multi_column_mapping(self) -> None:
-        prop_str = Property(
-            name="p1", type="str", csv_mapping="p1", csv_mapping_other="p1b"
-        )
+        prop_str = Property(name="p1", type="str", column_mapping="p1", alias="p1b")
         prop_point = Property(
             name="p1",
             type="neo4j.spatial.WGS84Point",
-            csv_mapping="p1",
-            csv_mapping_other="p1b",
+            column_mapping="p1",
+            alias="p1b",
         )
         self.assertEqual(cast_value(prop_str), "row.p1")
         self.assertEqual(cast_value(prop_point), "point(row.p1)")
 
     def test_space_in_column_name(self) -> None:
-        prop1 = Property(name="p1", type="str", csv_mapping="p 1")
+        prop1 = Property(name="p1", type="str", column_mapping="p 1")
 
         self.assertEqual(cast_value(prop1), "row.`p 1`")
 
     def test_odd_characters_in_column_name(self) -> None:
-        prop1 = Property(name="p#", type="str", csv_mapping="#p")
-        prop2 = Property(name="g", type="str", csv_mapping="$g")
+        prop1 = Property(name="p#", type="str", column_mapping="#p")
+        prop2 = Property(name="g", type="str", column_mapping="$g")
 
         self.assertEqual(cast_value(prop1), "row.`#p`")
         self.assertEqual(cast_value(prop2), "row.`$g`")

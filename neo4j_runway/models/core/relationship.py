@@ -66,7 +66,7 @@ class Relationship(BaseModel):
         Map of properties to their respective csv columns.
         """
 
-        return {prop.name: prop.csv_mapping for prop in self.properties}
+        return {prop.name: prop.column_mapping for prop in self.properties}
 
     @property
     def unique_properties(self) -> List[Property]:
@@ -83,7 +83,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+            prop.name: prop.column_mapping for prop in self.properties if prop.is_unique
         }
 
     @property
@@ -101,7 +101,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique
         }
@@ -121,7 +121,9 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.part_of_key
+            prop.name: prop.column_mapping
+            for prop in self.properties
+            if prop.part_of_key
         }
 
     @property
@@ -131,7 +133,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
@@ -172,9 +174,11 @@ class Relationship(BaseModel):
         errors: List[Optional[str]] = []
         if self.properties is not None:
             for prop in self.properties:
-                if prop.csv_mapping not in valid_columns.get(self.source_name, list()):
+                if prop.column_mapping not in valid_columns.get(
+                    self.source_name, list()
+                ):
                     errors.append(
-                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.csv_mapping} which is not allowed for source file {self.source_name}. {prop.name} Remove {prop.name} from relationship {self.type}."
+                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. {prop.name} Remove {prop.name} from relationship {self.type}."
                     )
                 if prop.is_unique and prop.part_of_key:
                     errors.append(
@@ -198,7 +202,7 @@ class Relationship(BaseModel):
 
         props = {
             x.name: (
-                x.csv_mapping + " | " + x.type + " | unique"
+                x.column_mapping + " | " + x.type + " | unique"
                 if x.is_unique
                 else "" + " | nodekey"
                 if x.is_unique

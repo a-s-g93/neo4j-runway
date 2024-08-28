@@ -203,11 +203,11 @@ class DataModel(BaseModel):
                 valid_props = [
                     prop
                     for prop in self.node_dict[rel.source].properties
-                    if prop.csv_mapping_other is not None
+                    if prop.alias is not None
                 ]
                 if len(valid_props) < 1:
                     errors.append(
-                        f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared csv_mapping_other attribute."
+                        f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared alias attribute."
                     )
 
             # validate rels that span across files
@@ -217,24 +217,24 @@ class DataModel(BaseModel):
 
             if source_node is not None and rel.source_name != source_node.source_name:
                 for prop in source_node.unique_properties:
-                    if prop.csv_mapping_other is None:
+                    if prop.alias is None:
                         errors.append(
-                            f"The source node {source_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on source node `{source_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `csv_mapping_other`."
+                            f"The source node {source_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on source node `{source_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `alias`."
                         )
-                    elif prop.csv_mapping_other not in data_dictionary[rel.source_name]:
+                    elif prop.alias not in data_dictionary[rel.source_name]:
                         errors.append(
-                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.csv_mapping_other}`. Find an alias for unique property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `csv_mapping_other`. Reference the data dictionary for possible alias."
+                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for unique property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary for possible alias."
                         )
 
             if target_node is not None and rel.source_name != target_node.source_name:
                 for prop in target_node.unique_properties:
-                    if prop.csv_mapping_other is None:
+                    if prop.alias is None:
                         errors.append(
-                            f"The target node {target_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on target node `{target_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `csv_mapping_other`."
+                            f"The target node {target_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on target node `{target_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `alias`."
                         )
-                    elif prop.csv_mapping_other not in data_dictionary[rel.source_name]:
+                    elif prop.alias not in data_dictionary[rel.source_name]:
                         errors.append(
-                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.csv_mapping_other}`. Find an alias for unique property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `csv_mapping_other`. Reference the data dictionary for possible alias."
+                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for unique property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary for possible alias."
                         )
 
         return errors
@@ -261,33 +261,39 @@ class DataModel(BaseModel):
             if node.source_name not in used_features.keys():
                 used_features[node.source_name] = dict()
             for prop in node.properties:
-                # if isinstance(prop.csv_mapping, list):
-                #     for csv_map in prop.csv_mapping:
+                # if isinstance(prop.column_mapping, list):
+                #     for csv_map in prop.column_mapping:
                 #         if csv_map not in list(used_features.keys()):
                 #             used_features[node.source_name][csv_map] = [node.label]
                 #         else:
                 #             used_features[csv_map].append(node.label)
                 # else:
-                if prop.csv_mapping not in list(used_features[node.source_name].keys()):
-                    used_features[node.source_name][prop.csv_mapping] = [node.label]
+                if prop.column_mapping not in list(
+                    used_features[node.source_name].keys()
+                ):
+                    used_features[node.source_name][prop.column_mapping] = [node.label]
                 else:
-                    used_features[node.source_name][prop.csv_mapping].append(node.label)
+                    used_features[node.source_name][prop.column_mapping].append(
+                        node.label
+                    )
 
         for rel in self.relationships:
             # init the file dictionary
             if rel.source_name not in used_features.keys():
                 used_features[rel.source_name] = dict()
             for prop in rel.properties:
-                if prop.csv_mapping not in list(used_features[rel.source_name].keys()):
-                    used_features[rel.source_name][prop.csv_mapping] = [rel.type]
+                if prop.column_mapping not in list(
+                    used_features[rel.source_name].keys()
+                ):
+                    used_features[rel.source_name][prop.column_mapping] = [rel.type]
                 else:
-                    used_features[rel.source_name][prop.csv_mapping].append(rel.type)
+                    used_features[rel.source_name][prop.column_mapping].append(rel.type)
 
         for source_name, feature_dict in used_features.items():
             for prop_mapping, labels_or_types in feature_dict.items():
                 if len(labels_or_types) > 1:
                     errors.append(
-                        f"The Property `csv_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each of these must use a different column as a Property attribute `csv_mapping` instead. Find alternative Property `csv_mapping` from the column options in the `source_name` file or remove."
+                        f"The Property `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each of these must use a different column as a Property attribute `column_mapping` instead. Find alternative Property `column_mapping` from the column options in the `source_name` file or remove."
                     )
 
         return errors
@@ -329,7 +335,7 @@ class DataModel(BaseModel):
             result = (
                 result
                 + prop.name
-                + f": {prop.csv_mapping}"
+                + f": {prop.column_mapping}"
                 + (" *unique*" if prop.is_unique else "")
                 + (" *key*" if prop.part_of_key else "")
                 + "\n"
@@ -350,7 +356,7 @@ class DataModel(BaseModel):
             result = (
                 result
                 + prop.name
-                + f": {prop.csv_mapping}"
+                + f": {prop.column_mapping}"
                 + (" *unique*" if prop.is_unique else "")
                 + (" *key*" if prop.part_of_key else "")
                 + "\n"

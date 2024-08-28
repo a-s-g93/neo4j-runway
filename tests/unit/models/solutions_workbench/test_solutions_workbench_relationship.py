@@ -70,7 +70,7 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
         city = Property(
             name="city",
             type="str",
-            csv_mapping="city",
+            column_mapping="city",
             is_unique=True,
             part_of_key=True,
         )

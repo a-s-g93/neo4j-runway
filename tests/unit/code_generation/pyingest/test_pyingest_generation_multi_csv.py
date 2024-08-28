@@ -8,22 +8,24 @@ nodes = [
     Node(
         label="NodeA",
         properties=[
-            Property(name="alpha", type="str", csv_mapping="au", is_unique=True)
+            Property(name="alpha", type="str", column_mapping="au", is_unique=True)
         ],
         source_name="CSV_A.csv",
     ),
     Node(
         label="NodeB",
         properties=[
-            Property(name="beta", type="str", csv_mapping="bu", is_unique=True)
+            Property(name="beta", type="str", column_mapping="bu", is_unique=True)
         ],
         source_name="CSV_B.csv",
     ),
     Node(
         label="NodeC",
         properties=[
-            Property(name="gamma", type="str", csv_mapping="cu", is_unique=True),
-            Property(name="decorator", type="str", csv_mapping="dec", is_unique=False),
+            Property(name="gamma", type="str", column_mapping="cu", is_unique=True),
+            Property(
+                name="decorator", type="str", column_mapping="dec", is_unique=False
+            ),
         ],
         source_name="CSV_A.csv",
     ),

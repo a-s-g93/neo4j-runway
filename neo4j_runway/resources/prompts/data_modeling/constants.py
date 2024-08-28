@@ -10,8 +10,8 @@ Relationships
 * NEVER use symmetric relationships
 * Do NOT create self-referential relationships
 Properties
-* A csv_mapping must be an exact match to features in the file(s)
-* A csv_mapping may only be used ONCE in a data model. It may NOT be shared between nodes
+* A column_mapping must be an exact match to features in the file(s)
+* A column_mapping may only be used ONCE in a data model. It may NOT be shared between nodes
 * A property can NOT be both unique and a key
 General
 * Do NOT return a single-node data model
@@ -26,7 +26,7 @@ DATA_MODEL_GENERATION_RULES_MULTI = (
     DATA_MODEL_GENERATION_RULES
     + """* Generate source_name values on Nodes and Relationships
 * Ensure all properties are contained within the identified source.
-* `csv_mapping_other` must be indicated for unique properties and is used to identify foreign keys of other tables.
+* `alias` must be indicated for unique properties and is used to identify foreign keys of other tables.
 * Many nodes or relationships may exist in a single file.
 * Do NOT include property aliases in the data model."""
 )
@@ -45,8 +45,8 @@ These are advanced data modeling best practices.
 * Super nodes:
     Stay away from super nodes, if possible. super nodes can be identified by low-cardinality unique properties
 * Same label node relationships:
-    csv_mapping_other indicates a unique feature on a target node that the source node has a relationship with.
-    Both csv_mapping and csv_mapping_other refer to the same node property name in the graph.
+    alias indicates a unique feature on a target node that the source node has a relationship with.
+    Both column_mapping and alias refer to the same node property name in the graph.
 """
 
 DATA_MODEL_FORMAT = """
@@ -55,8 +55,8 @@ Format properties as:
 {
     "name": <property name>,
     "type": <Python type>,
-    "csv_mapping": <csv column that maps to property>,
-    "csv_mapping_other": <a second column that maps to property. identifies relationship between two nodes of the same label or a relationship that spans across different files>,
+    "column_mapping": <csv column that maps to property>,
+    "alias": <a second column that maps to property. identifies relationship between two nodes of the same label or a relationship that spans across different files>,
     "is_unique": <property is a unique identifier>,
     "part_of_key": <property is part of a node or relationship key>
 }

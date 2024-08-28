@@ -8,10 +8,13 @@ class TestRelationship(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.prop1 = Property(
-            name="score", type="float", csv_mapping="similarity_score", is_unique=False
+            name="score",
+            type="float",
+            column_mapping="similarity_score",
+            is_unique=False,
         )
         cls.prop2 = Property(
-            name="current", type="bool", csv_mapping="current", is_unique=True
+            name="current", type="bool", column_mapping="current", is_unique=True
         )
         cls.source = "NodeA"
         cls.target = "NodeB"
@@ -119,7 +122,7 @@ class TestRelationship(unittest.TestCase):
                 Property(
                     name="rkey",
                     type="str",
-                    csv_mapping="rkey",
+                    column_mapping="rkey",
                     is_unique=False,
                     part_of_key=True,
                 )
@@ -139,7 +142,7 @@ class TestRelationship(unittest.TestCase):
                 Property(
                     name="rkey",
                     type="str",
-                    csv_mapping="rkey",
+                    column_mapping="rkey",
                     is_unique=False,
                     part_of_key=True,
                 )
@@ -163,7 +166,7 @@ class TestRelationship(unittest.TestCase):
                 Property(
                     name="rkey",
                     type="str",
-                    csv_mapping="rkey",
+                    column_mapping="rkey",
                     is_unique=False,
                     part_of_key=True,
                 )

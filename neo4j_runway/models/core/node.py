@@ -79,7 +79,7 @@ class Node(BaseModel):
             A dictionary with property name keys and CSV column values.
         """
 
-        return {prop.name: prop.csv_mapping for prop in self.properties}
+        return {prop.name: prop.column_mapping for prop in self.properties}
 
     @property
     def unique_properties(self) -> List[Property]:
@@ -106,7 +106,7 @@ class Node(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+            prop.name: prop.column_mapping for prop in self.properties if prop.is_unique
         }
 
     @property
@@ -134,7 +134,7 @@ class Node(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique
         }
@@ -164,7 +164,9 @@ class Node(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.part_of_key
+            prop.name: prop.column_mapping
+            for prop in self.properties
+            if prop.part_of_key
         }
 
     @property
@@ -179,7 +181,7 @@ class Node(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
@@ -212,11 +214,7 @@ class Node(BaseModel):
             The aliases.
         """
 
-        return [
-            p
-            for p in self.properties
-            if p.part_of_key and p.csv_mapping_other is not None
-        ]
+        return [p for p in self.properties if p.part_of_key and p.alias is not None]
 
     @property
     def unique_property_aliases(self) -> List[Property]:
@@ -229,11 +227,7 @@ class Node(BaseModel):
             The aliases.
         """
 
-        return [
-            p
-            for p in self.properties
-            if p.is_unique and p.csv_mapping_other is not None
-        ]
+        return [p for p in self.properties if p.is_unique and p.alias is not None]
 
     def validate_source_name(
         self, valid_columns: Dict[str, List[str]]
@@ -253,9 +247,9 @@ class Node(BaseModel):
         errors: List[Optional[str]] = []
 
         for prop in self.properties:
-            if prop.csv_mapping not in valid_columns.get(self.source_name, list()):
+            if prop.column_mapping not in valid_columns.get(self.source_name, list()):
                 errors.append(
-                    f"The node {self.label} has the property {prop.name} mapped to column {prop.csv_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from node {self.label}."
+                    f"The node {self.label} has the property {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from node {self.label}."
                 )
             if prop.is_unique and prop.part_of_key:
                 errors.append(
@@ -278,7 +272,7 @@ class Node(BaseModel):
         """
         pos = {"x": x_position, "y": y_position}
         props = {
-            x.name: x.csv_mapping
+            x.name: x.column_mapping
             + " | "
             + x.type
             + (" | unique" if x.is_unique else "")

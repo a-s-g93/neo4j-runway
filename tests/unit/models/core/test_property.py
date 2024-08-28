@@ -15,32 +15,36 @@ class TestProperty(unittest.TestCase):
         """
 
         self.assertIsInstance(
-            Property(name="name", type="str", csv_mapping="name", is_unique=True),
+            Property(name="name", type="str", column_mapping="name", is_unique=True),
             Property,
         )
         self.assertIsInstance(
-            Property(name="street", type="str", csv_mapping="street", is_unique=False),
+            Property(
+                name="street", type="str", column_mapping="street", is_unique=False
+            ),
             Property,
         )
 
     def test_init_with_neo4j_type(self) -> None:
         p = Property(
-            name="street", type="STRING", csv_mapping="street", is_unique=False
+            name="street", type="STRING", column_mapping="street", is_unique=False
         )
         self.assertEqual(p.type, "str")
 
     def test_float64_type(self) -> None:
         p = Property(
-            name="street", type="float64", csv_mapping="street", is_unique=False
+            name="street", type="float64", column_mapping="street", is_unique=False
         )
         self.assertEqual(p.type, "float")
 
     def test_bad_type(self) -> None:
         with self.assertRaises(ValueError):
-            Property(name="name", type="hashmap", csv_mapping="name", is_unique=True)
+            Property(name="name", type="hashmap", column_mapping="name", is_unique=True)
 
         with self.assertRaises(ValueError):
-            Property(name="name", type="dictionary", csv_mapping="name", is_unique=True)
+            Property(
+                name="name", type="dictionary", column_mapping="name", is_unique=True
+            )
 
     def test_to_dict(self) -> None:
         """
@@ -48,7 +52,7 @@ class TestProperty(unittest.TestCase):
         """
 
         prop = Property(
-            name="name", type="str", csv_mapping="name", is_unique=True
+            name="name", type="str", column_mapping="name", is_unique=True
         ).model_dump()
 
         self.assertEqual(
@@ -56,13 +60,13 @@ class TestProperty(unittest.TestCase):
             [
                 "name",
                 "type",
-                "csv_mapping",
-                "csv_mapping_other",
+                "column_mapping",
+                "alias",
                 "is_unique",
                 "part_of_key",
             ],
         )
-        self.assertEqual(prop["csv_mapping"], "name")
+        self.assertEqual(prop["column_mapping"], "name")
 
     def test_neo4j_properties(self) -> None:
         """
@@ -72,7 +76,7 @@ class TestProperty(unittest.TestCase):
         for k, v in TYPES_MAP_PYTHON_TO_NEO4J.items():
             self.assertEqual(
                 Property(
-                    name="city", type=k, csv_mapping="city", is_unique=False
+                    name="city", type=k, column_mapping="city", is_unique=False
                 ).neo4j_type,
                 v,
             )
@@ -95,13 +99,13 @@ class TestProperty(unittest.TestCase):
         parsed_prop3 = Property.from_arrows(to_parse3)
 
         prop1 = Property(
-            name="name", type="str", csv_mapping="name_col", is_unique=True
+            name="name", type="str", column_mapping="name_col", is_unique=True
         )
         prop2 = Property(
-            name="notUnique", type="str", csv_mapping="nu_col", is_unique=False
+            name="notUnique", type="str", column_mapping="nu_col", is_unique=False
         )
         prop3 = Property(
-            name="other", type="str", csv_mapping="other_col", is_unique=True
+            name="other", type="str", column_mapping="other_col", is_unique=True
         )
 
         self.assertEqual(parsed_prop1, prop1)
@@ -110,7 +114,7 @@ class TestProperty(unittest.TestCase):
 
         to_parse4 = {"name": "name_col"}
         prop4 = Property(
-            name="name", type="unknown", csv_mapping="name_col", is_unique=False
+            name="name", type="unknown", column_mapping="name_col", is_unique=False
         )
 
         self.assertEqual(Property.from_arrows(to_parse4, ""), prop4)

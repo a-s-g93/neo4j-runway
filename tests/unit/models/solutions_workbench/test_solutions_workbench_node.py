@@ -90,14 +90,14 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
         name = Property(
             name="name",
             type="str",
-            csv_mapping="pet_name",
+            column_mapping="pet_name",
             is_unique=True,
             part_of_key=False,
         )
         kind = Property(
             name="kind",
             type="str",
-            csv_mapping="pet",
+            column_mapping="pet",
             is_unique=False,
             part_of_key=False,
         )

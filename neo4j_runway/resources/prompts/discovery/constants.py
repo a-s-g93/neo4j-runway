@@ -8,7 +8,7 @@ Nodes
 Relationships
 * Relationships do NOT require uniqueness or properties
 Properties
-* A csv_mapping must be an exact match to features in the source file
+* A `column_mapping` must be an exact match to features in the source file
 * A file column may be used only once in the whole data model
 
 Please include
