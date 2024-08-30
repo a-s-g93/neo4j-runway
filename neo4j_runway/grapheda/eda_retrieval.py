@@ -15,9 +15,7 @@ It is not recommended to use this module on massive Neo4j databases
 (i.e., nodes and relationships in the hundreds of millions) 
 """
 
-import pandas as pd
-import os
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any
 
 
 from ..neo4j_graph import Neo4jGraph
@@ -89,8 +87,7 @@ class Queries:
         try:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
-                response_list = [record.data() for record in response]
-                self.result_cache["database_indexes"] = response_list
+                self.result_cache["database_indexes"] = [record.data() for record in response]
             
         except Exception:
             self.neo4j_graph.driver.close()
@@ -115,8 +112,7 @@ class Queries:
         try:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
-                response_list = [record.data() for record in response]
-                self.result_cache["database_constraints"] = response_list
+                self.result_cache["database_constraints"] = [record.data() for record in response]
             
         except Exception:
             self.neo4j_graph.driver.close()
@@ -125,7 +121,7 @@ class Queries:
     # graph node count
     def node_count(self) -> int:
         """
-        Count the number of nodes in the graph.
+        Count the total number of nodes in the graph.
 
         Parameters:
             None
@@ -144,20 +140,24 @@ class Queries:
                 response_list = [record.data() for record in response]
                 self.result_cache["node_count"] = response_list[0]["nodeCount"]
 
-            
         except Exception:
             self.neo4j_graph.driver.close()
     
-    
-    # count nodes by label
+
     def node_label_counts(self) -> List[Dict[str, Any]]:
         """
-        Count the number of nodes for each unique label in the graph.
+        Count the number of nodes associated with each 
+        unique label in the graph.
+        
         Parameters:
             None
+        
         Returns:
-            list: A list of dictionaries, where each dictionary contains the unique node label 
-            in the database as "label" along with the corresponding node count as "count".
+            None
+            The method adds the query results to the result_cache dictionary.
+            The results are a list of dictionaries, where each dictionary contains 
+            the unique node label in the database as "label" along with the 
+            corresponding node count as "count".
         """
 
         query = """MATCH (n) 
@@ -169,22 +169,24 @@ class Queries:
         try:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
-                response_list = [record.data() for record in response]
-                self.result_cache["node_label_counts"] = response_list
-                return response_list
+                self.result_cache["node_label_counts"] = [record.data() for record in response]
             
         except Exception:
             self.neo4j_graph.driver.close()
 
-    # identify multi-label nodes
+
     def multi_label_nodes(self) -> List[Dict[str, Any]]:
         """
-        Identify nodes that have multiple labels in the graph.
+        Identify nodes in the graph that have multiple labels.
+
         Parameters:
             None
+        
         Returns:
-            list: A list of dictionaries, where each dictionary contains the node id as "node_id" 
-            and the list of labels for that node as "labels".
+            None
+            The method adds the query results to the result_cache dictionary.
+            The results are a list of dictionaries, where each dictionary contains 
+            the node id as "node_id" and the list of labels for that node as "labels".
         """
 
         query = """MATCH (n) 
@@ -197,22 +199,25 @@ class Queries:
         try:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
-                response_list = [record.data() for record in response]
-                self.result_cache["multi_label_nodes"] = response_list
-                return response_list
+                self.result_cache["multi_label_nodes"] = [record.data() for record in response]
             
         except Exception:
             self.neo4j_graph.driver.close()
 
-    # get properties for each node label type
+
     def node_properties(self) -> List[Dict[str, Any]]:
         """
         Get the properties for each unique node label in the graph.
+
         Parameters:
             None
+        
         Returns:
-            list: A list of dictionaries, where each dictionary contains the unique node label 
-            in the database as "label" along with the list of properties for that label as "properties".
+            None
+            The method adds the query results to the result_cache dictionary.
+            The results are a list of dictionaries, where each dictionary contains 
+            the unique node label in the database as "label" along with the list of 
+            properties for that label as "properties".
         """
 
         query = """CALL db.schema.nodeTypeProperties()"""
@@ -221,28 +226,27 @@ class Queries:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
                 response_list = [record.data() for record in response]
-
-                # remove the "nodeType" key from each dictionary
+                
+                # remove the "nodeType" key from each dictionary and append to cache 
                 response_list = [{k: v for k, v in record.items() if k != "nodeType"} for record in response_list]
-
                 self.result_cache["node_properties"] = response_list
-                return response_list
             
         except Exception:
             self.neo4j_graph.driver.close()
 
-    ############################
-    # RELATIONSHIP DETAILS
-    ############################
 
     def relationship_count(self) -> int:
         """
-        Count the number of relationships in the graph.
+        Count the total number of relationships in the graph.
+
         Parameters:
             None
+        
         Returns:
-            int: The number of relationships in the graph. Also  
-            appends the result to the result_cache dictionary.
+            None
+            The method adds the query result to the result_cache dictionary.
+            This result is an integer representing the number of relationships 
+            in the graph. 
         """
 
         query = """MATCH ()-[r]->() RETURN COUNT(r) AS relCount"""
@@ -252,20 +256,25 @@ class Queries:
                 response = session.run(query)
                 response_list = [record.data() for record in response]
                 self.result_cache["relationship_count"] = response_list[0]["relCount"]
-                return response_list[0]["relationship_count"]
             
         except Exception:
             self.neo4j_graph.driver.close()
 
-    # count relationships by type
+    
     def relationship_type_counts(self) -> List[Dict[str, Any]]:
         """
-        Count the number of relationships for each unique type in the graph.
+        Count the number of relationships in the graph by 
+        each unique relationship type.
+
         Parameters:
             None
+        
         Returns:
-            list: A list of dictionaries, where each dictionary contains the unique relationship type 
-            in the database as "label" along with the corresponding count as "count".
+            None
+            The method adds the query results to the result_cache dictionary.
+            The results are a list of dictionaries, where each dictionary contains 
+            the unique relationship type in the database as "label" along with the 
+            corresponding count as "count".
         """
 
         query = """MATCH ()-[r]->()
@@ -276,22 +285,25 @@ class Queries:
         try:
             with self.neo4j_graph.driver.session() as session:
                 response = session.run(query)
-                response_list = [record.data() for record in response]
-                self.result_cache["relationship_type_counts"] = response_list
-                return response_list
+                self.result_cache["relationship_type_counts"] = [record.data() for record in response]
             
         except Exception:
             self.neo4j_graph.driver.close()
 
-    # get properties for each relationship type
+
     def relationship_properties(self) -> List[Dict[str, Any]]:
         """
         Get the properties for each unique relationship type in the graph.
+
         Parameters:
             None
+
         Returns:
-            list: A list of dictionaries, where each dictionary contains the unique relationship property 
-            name, property data type, and whether or not the relationship property is required by the schema.
+            None
+            The method adds the query results to the result_cache dictionary.
+            The results are a of dictionaries, where each dictionary contains 
+            the unique relationship property name, property data type, and whether 
+            or not the relationship property is required by the schema.
         """
 
         query = """CALL db.schema.relTypeProperties()"""
@@ -305,24 +317,22 @@ class Queries:
                 response_list = [{k: v for k, v in record.items() if k != "relType"} for record in response_list]
 
                 self.result_cache["relationship_properties"] = response_list
-                return response_list
-            
+
         except Exception:
             self.neo4j_graph.driver.close()
     
 
-    ############################
-    # DATA QUALITY FUNCTIONS
-    ############################
-
-    # count unlabeled nodes
     def unlabeled_node_count(self) -> int:
         """
-        Count the number of nodes in the graph that are not labeled.
+        Count the number of nodes in the graph that do not have labels.
+
         Parameters:
             None
+        
         Returns:
-            list: The count of unlabeled nodes in the graph
+            None
+            
+                The count of unlabeled nodes in the graph
         """ 
 
         query = """MATCH (n)
@@ -334,7 +344,6 @@ class Queries:
                 response = session.run(query)
                 response_list = [record.data() for record in response]
                 self.result_cache["unlabeled_node_count"] = response_list[0]["unlabeled_ct"]
-                return response_list[0]["unlabeled_node_count"]
             
         except Exception:
             self.neo4j_graph.driver.close()
@@ -347,9 +356,14 @@ class Queries:
     def count_disconnected_nodes(self) -> List[Dict[str, Any]]:
         """
         Count the number of disconnected nodes in the graph.
+        
         Parameters:
-        - None
+            None
+        
         Returns:
+            None
+
+
         - the results as a list of dictionaries, where each dictionary 
         includes a node label and the count of disconnected nodes for that label
         - ex: [{'nodeLabel': 'Customer', 'count': 2}]
