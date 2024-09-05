@@ -28,7 +28,8 @@ def create_discovery_prompt_single_file(
         feature_descriptions += f"""{col}: {data_dictionary.get(col, "")}\nIt has the following distribution: {pandas_categorical_feature_descriptions[col]}\n\n"""
 
     use_cases_text = (
-        "Focus on information that will help answer these use cases: " + str(use_cases)
+        "Focus on information that will help answer these use cases: "
+        + ("\n" + str(use_cases))
         if use_cases is not None
         else ""
     )

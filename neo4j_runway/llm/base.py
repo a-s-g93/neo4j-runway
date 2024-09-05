@@ -182,7 +182,7 @@ class BaseDataModelingLLM(ABC):
                 valid_columns=valid_columns, data_dictionary=data_dictionary
             )
             part_one_retries += 1
-            print(entity_pool)
+            # print(entity_pool)
         # part 2
         if validation["valid"]:
             print("Received Valid Entity Pool.")
@@ -247,7 +247,7 @@ class BaseDataModelingLLM(ABC):
                     len(validation["errors"]),
                     "\n",
                 )
-                print(validation["message"])
+                # print(validation["message"])
                 cot = self._get_chain_of_thought_for_error_recommendations_response(
                     formatted_prompt=validation["message"]
                 )
@@ -273,7 +273,7 @@ class BaseDataModelingLLM(ABC):
         """
         Generate fixes for the previous data model.
         """
-        print("performing chain of thought process for error fix recommendations...")
+        print("Analyzing errors...")
         response: ErrorRecommendations = self.client.chat.completions.create(
             model=self.model_name,
             messages=[

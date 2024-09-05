@@ -256,6 +256,7 @@ class Discovery:
                             0
                         ].discovery_content.pandas_numerical_description,
                         data_dictionary=self.data.data_dictionary,
+                        use_cases=self.data.pretty_use_cases,
                     )
                 )
 
