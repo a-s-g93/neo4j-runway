@@ -5,7 +5,7 @@ import pandas as pd
 import dotenv 
 
 from ..neo4j_graph import Neo4jGraph
-from .grapheda import GraphEDA
+from .grapheda import Queries
 from ..utils.read_env import read_environment
 # from neo4j_runway.database.neo4j.neo4j_graph import Neo4jGraph
 # from neo4j_runway.grapheda.grapheda import GraphEDA
@@ -29,15 +29,17 @@ class RunGraphEDA:
             )
 
         # instantiate GraphEDA class
-        self.graph_eda = GraphEDA(neo4j_graph=self.neo4j_graph)
+        self.graph_eda = Queries(neo4j_graph=self.neo4j_graph)
 
 
     # print database version 
     def print_database_version(self) -> str:
         """
         Prints the version of the Neo4j database from the Neo4j graph object.
+
         Parameters:
             None
+
         Returns:
             None
         """
