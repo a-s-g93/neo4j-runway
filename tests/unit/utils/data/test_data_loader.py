@@ -31,7 +31,9 @@ def test_load_csv_local() -> None:
         use_cases=use_cases,
     )
 
-    assert len(set(table.data.columns).difference(set(data_dictionary.keys()))) == 0
+    assert (
+        len(set(table.dataframe.columns).difference(set(data_dictionary.keys()))) == 0
+    )
     assert table.general_description == general_description
     assert table.use_cases == use_cases
     assert (
@@ -48,7 +50,9 @@ def test_load_json_local() -> None:
         use_cases=use_cases,
     )
 
-    assert len(set(table.data.columns).difference(set(data_dictionary.keys()))) == 0
+    assert (
+        len(set(table.dataframe.columns).difference(set(data_dictionary.keys()))) == 0
+    )
     assert table.general_description == general_description
     assert table.use_cases == use_cases
     assert (
@@ -65,7 +69,9 @@ def test_load_jsonl_local() -> None:
         use_cases=use_cases,
     )
 
-    assert len(set(table.data.columns).difference(set(data_dictionary.keys()))) == 0
+    assert (
+        len(set(table.dataframe.columns).difference(set(data_dictionary.keys()))) == 0
+    )
     assert table.general_description == general_description
     assert table.use_cases == use_cases
     assert (
@@ -84,7 +90,7 @@ def test_load_csv_with_config() -> None:
         config=config,
     )
 
-    assert len(table.data.columns) == 2
+    assert len(table.dataframe.columns) == 2
     assert table.general_description == general_description
     assert table.use_cases == use_cases
     assert (
@@ -130,7 +136,7 @@ def test_load_local_files(mocker) -> None:
     return_value = Table(
         name="test.csv",
         file_path="./",
-        data=pd.DataFrame({"a": [1, 2, 3], "b": [1, 2, 3], "c": [1, 2, 3]}),
+        dataframe=pd.DataFrame({"a": [1, 2, 3], "b": [1, 2, 3], "c": [1, 2, 3]}),
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,
@@ -148,4 +154,4 @@ def test_load_local_files(mocker) -> None:
         ignored_files=["c.csv"],
     )
 
-    assert len(tables.data) == 2
+    assert len(tables.tables) == 2

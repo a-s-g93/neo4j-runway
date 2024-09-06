@@ -98,14 +98,14 @@ class Discovery:
             t = Table(
                 name="dataframe",
                 file_path="",
-                data=data[self.user_input.allowed_columns],
+                dataframe=data[self.user_input.allowed_columns],
                 general_description=self.user_input.general_description,
                 data_dictionary=self.user_input.data_dictionary,
                 use_cases=self.user_input.use_cases,
             )
             self.data = TableCollection(
                 data_directory="",
-                data=[t],
+                tables=[t],
                 general_description=t.general_description,
                 data_dictionary=t.data_dictionary,
                 use_cases=t.use_cases,
@@ -114,7 +114,7 @@ class Discovery:
             data_dir = "".join(data.file_path.split("/")[:-1])
             self.data = TableCollection(
                 data_directory=data_dir,
-                data=[data],
+                tables=[data],
                 general_description=data.general_description,
                 data_dictionary=data.data_dictionary,
                 use_cases=data.use_cases,
@@ -149,21 +149,21 @@ class Discovery:
         """
 
         for i in range(0, self.data.size):
-            if self.data.data[i].name not in ignore_files:
-                ref: Table = self.data.data[i]
+            if self.data.tables[i].name not in ignore_files:
+                ref: Table = self.data.tables[i]
                 buffer = io.StringIO()
-                ref.data.info(buf=buffer)
+                ref.dataframe.info(buf=buffer)
 
                 df_info = buffer.getvalue()
                 try:
-                    desc_numeric = ref.data.describe(
+                    desc_numeric = ref.dataframe.describe(
                         percentiles=[0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99],
                         include=[number],
                     )
                 except ValueError as e:
                     desc_numeric = pd.DataFrame()
                 try:
-                    desc_categorical = ref.data.describe(include="object")
+                    desc_categorical = ref.dataframe.describe(include="object")
                 except ValueError as e:
                     desc_categorical = pd.DataFrame()
 
@@ -236,23 +236,23 @@ class Discovery:
             response = self.data.get_pandas_summary(ignore_files=ignore_files)
 
             self.data.discovery = response
-            for t in self.data.data:
+            for t in self.data.tables:
                 if t.name not in ignore_files and t.discovery_content is not None:
                     t.discovery_content.discovery = t.discovery_content.pandas_response
         # single file input LLM call
         elif self.data.size == 1:
-            if self.data.data[0].discovery_content is not None:
+            if self.data.tables[0].discovery_content is not None:
                 response = self.llm._get_discovery_response(
                     formatted_prompt=create_discovery_prompt_single_file(
                         user_provided_general_data_description=self.data.general_description
                         or "",
-                        pandas_general_description=self.data.data[
+                        pandas_general_description=self.data.tables[
                             0
                         ].discovery_content.pandas_general_description,
-                        pandas_categorical_feature_descriptions=self.data.data[
+                        pandas_categorical_feature_descriptions=self.data.tables[
                             0
                         ].discovery_content.pandas_categorical_description,
-                        pandas_numeric_feature_descriptions=self.data.data[
+                        pandas_numeric_feature_descriptions=self.data.tables[
                             0
                         ].discovery_content.pandas_numerical_description,
                         data_dictionary=self.data.data_dictionary,
@@ -261,7 +261,7 @@ class Discovery:
                 )
 
                 self.data.discovery = response
-                self.data.data[0].discovery_content.discovery = response
+                self.data.tables[0].discovery_content.discovery = response
 
             else:
                 raise PandasDataSummariesNotGeneratedError(
@@ -502,7 +502,10 @@ class Discovery:
         file_name: str = "all",
         include_pandas: bool = True,
     ) -> None:
-        assert file_type in [".txt", ".md"], "Unsupported file type provided."
+        assert file_type in [
+            ".txt",
+            ".md",
+        ], f"Unsupported file type provided: {file_type}."
 
         if file_name == "final":
             self.data._export_to_file(
@@ -512,8 +515,10 @@ class Discovery:
             self.data._export_to_file(
                 file_dir=file_dir, file_name="final_discovery" + file_type
             )
-            for t in self.data.data:
-                assert t.discovery_content is not None
+            for t in self.data.tables:
+                assert (
+                    t.discovery_content is not None
+                ), f"`discovery_content` for table {t.name} can not be None."
 
                 if "." in t.name:
                     name = t.name.split(".")[0] + "_discovery" + file_type
@@ -527,7 +532,9 @@ class Discovery:
         elif file_name in self.data.table_dict:
             t = self.data.table_dict[file_name]
 
-            assert t.discovery_content is not None
+            assert (
+                t.discovery_content is not None
+            ), f"`discovery_content` for table {t.name} can not be None."
 
             if "." in t.name:
                 name = t.name.split(".")[0] + "_discovery" + file_type
@@ -579,7 +586,7 @@ def _create_discovery_prompts_for_multi_file(
     Dict[str, Any]
         A nested dictionary containing table_to_prompt_id and prompt_id_to_prompt.
     """
-    # prompts: List[str] = list()
+
     table_to_prompt_id: Dict[str, str] = dict()
     prompt_id_to_prompt: Dict[str, str] = dict()
     prompt_id: int = 0
@@ -602,13 +609,13 @@ def _create_discovery_prompts_for_multi_file(
 
     elif bulk_process:
         # call discovery with single prompt
-        tables = [t for t in data.data if t.name not in ignore_files]
+        tables = [t for t in data.tables if t.name not in ignore_files]
 
         table_to_prompt_id.update({t.name: str(prompt_id) for t in tables})
 
         prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
             user_provided_general_data_description=data.general_description,
-            data=data.data,
+            data=data.tables,
             use_cases=data.pretty_use_cases,
             total_files=data.size,
         )
@@ -624,19 +631,19 @@ def _create_discovery_prompts_for_multi_file(
             if i + batch_size < data.size:
                 tables = [
                     t
-                    for t in data.data[i : i + batch_size]
+                    for t in data.tables[i : i + batch_size]
                     if t.name not in ignore_files
                 ]
                 table_to_prompt_id.update(
                     {
                         t.name: str(prompt_id)
-                        for t in data.data[i : i + batch_size]
+                        for t in data.tables[i : i + batch_size]
                         if t.name not in ignore_files
                     }
                 )
 
             else:
-                tables = [t for t in data.data[i:] if t.name not in ignore_files]
+                tables = [t for t in data.tables[i:] if t.name not in ignore_files]
                 table_to_prompt_id.update({t.name: str(prompt_id) for t in tables})
 
             prompt_id_to_prompt[str(prompt_id)] = create_discovery_prompt_multi_file(
@@ -654,26 +661,26 @@ def _create_discovery_prompts_for_multi_file(
             if i + batch_size < data.size:
                 tables = [
                     data.table_dict[t.name]
-                    for t in data.data[i : i + batch_size]
+                    for t in data.tables[i : i + batch_size]
                     if t.name not in ignore_files
                 ]
                 table_to_prompt_id.update(
                     {
                         t.name: str(prompt_id)
-                        for t in data.data[i : i + batch_size]
+                        for t in data.tables[i : i + batch_size]
                         if t.name not in ignore_files
                     }
                 )
             else:
                 tables = [
                     data.table_dict[t.name]
-                    for t in data.data[i:]
+                    for t in data.tables[i:]
                     if t.name not in ignore_files
                 ]
                 table_to_prompt_id.update(
                     {
                         t.name: str(prompt_id)
-                        for t in data.data[i:]
+                        for t in data.tables[i:]
                         if t.name not in ignore_files
                     }
                 )

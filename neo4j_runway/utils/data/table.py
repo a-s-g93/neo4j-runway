@@ -16,7 +16,7 @@ class Table:
         The name of the data file.
     file_path : str
         The full file path to the file.
-    data : pd.DataFrame
+    dataframe : pd.DataFrame
         The data in Pandas DataFrame format.
     general_description : str
         A general description of the data.
@@ -32,7 +32,7 @@ class Table:
 
     name: str
     file_path: str
-    data: pd.DataFrame
+    dataframe: pd.DataFrame
     general_description: str = ""
     data_dictionary: Dict[str, str] = dict()
     use_cases: Optional[List[str]] = None
@@ -42,7 +42,7 @@ class Table:
         self,
         name: str,
         file_path: str,
-        data: pd.DataFrame,
+        dataframe: pd.DataFrame,
         general_description: str = "",
         data_dictionary: Dict[str, str] = dict(),
         use_cases: Optional[List[str]] = None,
@@ -57,7 +57,7 @@ class Table:
             The name of the data file.
         file_path : str
             The full file path to the file.
-        data : pd.DataFrame
+        dataframe : pd.DataFrame
             The data in Pandas DataFrame format.
         general_description : str
             A general description of the data, by default None
@@ -69,12 +69,12 @@ class Table:
         Any insights gathered about the data. This is contained within the DiscoveryContent class. By default None
         """
 
-        if not isinstance(data, pd.DataFrame):
+        if not isinstance(dataframe, pd.DataFrame):
             raise ValueError("table argument 'data' should be a Pandas DataFrame.")
 
         self.name = name
         self.file_path = file_path
-        self.data = data
+        self.dataframe = dataframe
         self.general_description = general_description
         self.data_dictionary = data_dictionary
         self.use_cases = use_cases

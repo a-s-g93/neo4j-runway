@@ -12,7 +12,7 @@ class TableCollection:
     ----------
     data_directory : str
         The directory where all data is found.
-    data : List[Table]
+    tables : List[Table]
         A list of all Tables to be used in graph data modeling.
     general_description : str
         A general description of the data.
@@ -25,7 +25,7 @@ class TableCollection:
     """
 
     data_directory: str
-    data: List[Table]
+    tables: List[Table]
     general_description: str = ""
     data_dictionary: Dict[str, Any] = dict()
     use_cases: Optional[List[str]] = None
@@ -34,7 +34,7 @@ class TableCollection:
     def __init__(
         self,
         data_directory: str,
-        data: List[Table],
+        tables: List[Table],
         general_description: str = "",
         data_dictionary: Dict[str, Any] = dict(),
         use_cases: Optional[List[str]] = None,
@@ -47,7 +47,7 @@ class TableCollection:
         ----------
         data_directory : str
             The directory where all data is found.
-        data : List[Table]
+        tables : List[Table]
             A list of all Tables to be used in graph data modeling.
         general_description : str
             A general description of the data, by default None
@@ -60,14 +60,14 @@ class TableCollection:
         Any insights gathered about the data as a whole. By default None
         """
         self.data_directory = data_directory
-        self.data = data
+        self.tables = tables
         self.general_description = general_description
         self.data_dictionary = data_dictionary
         self.use_cases = use_cases
         self.discovery = discovery
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.tables)
 
     @property
     def size(self) -> int:
@@ -92,7 +92,7 @@ class TableCollection:
         Dict[str, Table]
             The dictionary.
         """
-        return {t.name: t for t in self.data}
+        return {t.name: t for t in self.tables}
 
     @property
     def pretty_use_cases(self) -> str:
@@ -124,7 +124,7 @@ class TableCollection:
             The sub discoveries.
         """
 
-        return list({t.discovery for t in self.data})
+        return list({t.discovery for t in self.tables})
 
     def get_pandas_summary(self, ignore_files: List[str] = list()) -> str:
         """
@@ -143,7 +143,7 @@ class TableCollection:
         response = (
             "Here are Summary Statistics generated with the Pandas Python library"
         )
-        for t in self.data:
+        for t in self.tables:
             if t.name not in ignore_files and t.discovery_content is not None:
                 response += (
                     f"\n\n### {t.name}\n{t.discovery_content.pandas_response}\n\n-----"

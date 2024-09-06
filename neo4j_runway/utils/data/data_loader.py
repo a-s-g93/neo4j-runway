@@ -89,7 +89,7 @@ def load_local_files(
 
     return TableCollection(
         data_directory=data_directory,
-        data=loaded_files,
+        tables=loaded_files,
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,
@@ -125,7 +125,7 @@ def load_csv(
 
     return Table(
         name=name,
-        data=data,
+        dataframe=data,
         file_path=file_path,
         general_description=general_description,
         data_dictionary=data_dictionary,
@@ -162,7 +162,7 @@ def load_json(
     return Table(
         name=name,
         file_path=file_path,
-        data=data,
+        dataframe=data,
         general_description=general_description,
         data_dictionary=data_dictionary,
         use_cases=use_cases,

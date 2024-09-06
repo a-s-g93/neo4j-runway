@@ -26,7 +26,7 @@ data = {
 table = Table(
     name="test.csv",
     file_path="./test.csv",
-    data=pd.DataFrame(
+    dataframe=pd.DataFrame(
         {
             "id": [1, 2, 3, 4, 5],
             "feature_1": ["a", "b", "c", "d", "e"],
@@ -63,7 +63,8 @@ class TestDiscovery(unittest.TestCase):
 
         self.assertIsNone(self.disc.data.discovery)
         self.assertEqual(
-            set(self.disc.data.data[0].data.columns), {"id", "feature_1", "feature_2"}
+            set(self.disc.data.tables[0].dataframe.columns),
+            {"id", "feature_1", "feature_2"},
         )
 
     def test_init_with_UserInput_dataframe(self) -> None:
@@ -79,7 +80,8 @@ class TestDiscovery(unittest.TestCase):
         self.assertIsInstance(self.test_disc.data, TableCollection)
         self.assertIsNone(self.test_disc.data.discovery)
         self.assertEqual(
-            set(self.test_disc.data.data[0].data.columns), {"feature_1", "feature_2"}
+            set(self.test_disc.data.tables[0].dataframe.columns),
+            {"feature_1", "feature_2"},
         )
 
     def test_init_with_no_desired_columns_dataframe(self) -> None:
@@ -88,7 +90,7 @@ class TestDiscovery(unittest.TestCase):
 
             self.assertEqual(
                 {"id", "feature_1", "feature_2", "bad_feature"},
-                set(d.data.data[0].data.columns),
+                set(d.data.tables[0].dataframe.columns),
             )
 
     def test_view_discovery_no_notebook(self) -> None:
@@ -138,11 +140,11 @@ class TestDiscovery(unittest.TestCase):
             set(d.data.data_dictionary.keys()), set(table.data_dictionary.keys())
         )
         self.assertEqual(
-            set(d.data.data[0].data_dictionary.keys()),
+            set(d.data.tables[0].data_dictionary.keys()),
             set(table.data_dictionary.keys()),
         )
         self.assertEqual(d.data.size, 1)
-        self.assertEqual(len(d.data.data[0].data), 5)
+        self.assertEqual(len(d.data.tables[0].dataframe), 5)
         self.assertEqual(d.data.use_cases[0], "What do?")
 
     def test_init_with_no_desired_columns_table(self) -> None:
@@ -150,7 +152,7 @@ class TestDiscovery(unittest.TestCase):
 
         self.assertEqual(
             {"id", "feature_1", "feature_2"},
-            set(d.data.data[0].data.columns),
+            set(d.data.tables[0].dataframe.columns),
         )
 
 
