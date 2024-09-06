@@ -44,8 +44,7 @@ llm = OpenAIDiscoveryLLM(enable_async=False)
 
 
 def test_single_table_run() -> None:
-    with pytest.warns(ExperimentalFeatureWarning):
-        d = Discovery(data=t1, llm=llm)
+    d = Discovery(data=t1, llm=llm)
 
     d.run()
 

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from neo4j_runway.modeler import GraphDataModeler
+from neo4j_runway.warnings import ExperimentalFeatureWarning
 
 data_dictionary = {
     "a.csv": {"a": "test", "b": "test2"},
@@ -19,7 +20,7 @@ def test_multifile_data_dictionary_init_allowed_columns() -> None:
 
 
 def test_is_multifile_true(mock_llm: MagicMock) -> None:
-    with pytest.warns(UserWarning):
+    with pytest.warns((UserWarning, ExperimentalFeatureWarning)):
         gdm = GraphDataModeler(llm=mock_llm, data_dictionary=data_dictionary)
 
     assert gdm.is_multifile
@@ -42,7 +43,7 @@ def test_is_multifile_false_with_named_file(mock_llm: MagicMock) -> None:
 
 
 def test_allowed_columns(mock_llm: MagicMock) -> None:
-    with pytest.warns(UserWarning):
+    with pytest.warns((UserWarning, ExperimentalFeatureWarning)):
         gdm = GraphDataModeler(llm=mock_llm, data_dictionary=data_dictionary)
 
     assert "a.csv" in gdm.allowed_columns.keys()

@@ -41,7 +41,8 @@ table_collection = TableCollection(
 
 
 def test_single_dataframe_run_pandas_only() -> None:
-    d = Discovery(data=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}))
+    with pytest.warns(UserWarning):
+        d = Discovery(data=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}))
 
     d.run(pandas_only=True)
 

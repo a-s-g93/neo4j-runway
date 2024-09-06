@@ -15,9 +15,6 @@ data_dictionary = {
 )
 def test_create_initial_model(
     mock_llm: MagicMock,
-    mock_discovery: MagicMock,
-    mock_user_input: MagicMock,
-    mock_data_model: MagicMock,
 ) -> None:
     with pytest.warns(UserWarning):
         gdm = GraphDataModeler(llm=mock_llm, data_dictionary=data_dictionary)
@@ -29,8 +26,6 @@ def test_create_initial_model(
 
 def test_iterate_model(
     mock_llm: MagicMock,
-    mock_discovery: MagicMock,
-    mock_user_input: MagicMock,
     mock_data_model: MagicMock,
 ) -> None:
     with pytest.warns(UserWarning):
