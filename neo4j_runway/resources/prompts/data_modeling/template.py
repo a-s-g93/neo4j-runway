@@ -60,5 +60,4 @@ def create_data_modeling_prompt(
     if suffix is not None:
         res += "\n" + suffix
 
-    print("\n", res, "\n")
     return res

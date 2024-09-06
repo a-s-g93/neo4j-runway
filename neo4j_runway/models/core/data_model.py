@@ -136,6 +136,8 @@ class DataModel(BaseModel):
         self,
         valid_columns: Dict[str, List[str]],
         data_dictionary: Dict[str, Any],
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
     ) -> Dict[str, Any]:
         """
         Perform additional validation on the data model.
@@ -144,17 +146,27 @@ class DataModel(BaseModel):
         ----------
         valid_columns : List[str]
             The CSV columns that are allowed in the data model.
+        data_dictionary : Dict[str, Any]
+            A data dictionary to validate against.
+        allow_duplicate_properties : bool, optional
+            Whether to allow identical properties to exist on multiple node labels or relationship types, by default False
+        enforce_uniqueness : bool, optional
+            Whether to error if a node has no unique identifiers (unique or node key).
+            Setting this to false may be detrimental during code generation and ingestion. By default True
 
         Returns
         -------
         Dict[str, Any]
             A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
         """
+
         errors = list()
 
         for node in self.nodes:
             errors += node.validate_source_name(valid_columns=valid_columns)
             errors += node.validate_properties(valid_columns=valid_columns)
+            if enforce_uniqueness:
+                errors += node.enforce_uniqueness()
 
         for rel in self.relationships:
             errors += rel.validate_source_name(valid_columns=valid_columns)
@@ -163,7 +175,9 @@ class DataModel(BaseModel):
         errors += self._validate_relationship_sources_and_targets(
             valid_columns=valid_columns, data_dictionary=data_dictionary
         )
-        errors += self._validate_csv_features_used_only_once()
+
+        if not allow_duplicate_properties:
+            errors += self._validate_csv_features_used_only_once()
 
         if len(errors) > 0:
             message = create_data_model_errors_cot_prompt(

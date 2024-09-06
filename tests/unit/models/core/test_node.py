@@ -149,6 +149,39 @@ class TestNode(unittest.TestCase):
         errors = node.validate_source_name(valid_columns={"a.csv": ["nkey"]})
         self.assertEqual(len(errors), 0)
 
+    def test_enforce_uniqueness_pass(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=True,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        self.assertEqual(len(node.enforce_uniqueness()), 0)
+
+    def test_enforce_uniqueness_fail(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=False,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        self.assertIsInstance(node.enforce_uniqueness(), list)
+        self.assertEqual(len(node.enforce_uniqueness()), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

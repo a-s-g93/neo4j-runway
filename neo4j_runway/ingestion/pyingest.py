@@ -37,7 +37,7 @@ class LocalServer(object):
     def close(self) -> None:
         self._driver.close()
 
-    def get_params(self, file: Dict[str, Any]) -> Dict[str, Any]:
+    def get_params(self, file: Dict[str, Any], verbose: bool = False) -> Dict[str, Any]:
         params = dict()
         params["skip_records"] = file.get("skip_records") or 0
         params["compression"] = file.get("compression") or "none"
@@ -46,7 +46,8 @@ class LocalServer(object):
         if self.basepath and file_url.startswith("$BASE"):
             file_url = file_url.replace("$BASE", self.basepath, 1)
         params["url"] = file_url
-        print("File {}", params["url"])
+        if verbose:
+            print("File {}", params["url"])
         params["cql"] = file["cql"]
         params["chunk_size"] = file.get("chunk_size") or 1000
         params["field_sep"] = file.get("field_separator") or ","
@@ -59,7 +60,7 @@ class LocalServer(object):
         Load a Pandas DataFrame directly using a PyIngest yaml global_config file.
         """
         with self._driver.session(**self.db_config) as session:
-            params = self.get_params(file)
+            params = self.get_params(file, verbose=verbose)
 
             partition = max(1, int(len(dataframe) / params["chunk_size"]))
 
@@ -77,7 +78,7 @@ class LocalServer(object):
 
     def load_csv(self, file: Dict[str, Any], verbose: bool = False) -> None:
         with self._driver.session(**self.db_config) as session:
-            params = self.get_params(file)
+            params = self.get_params(file, verbose=verbose)
 
             # check if we load this file...
             skip = params["skip_file"] if "skip_file" in params else False

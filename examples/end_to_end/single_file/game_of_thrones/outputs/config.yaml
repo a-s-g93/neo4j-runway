@@ -5,7 +5,6 @@ database: gameofthrones
 basepath: ./
 
 pre_ingest:
-  - CREATE CONSTRAINT battle_name IF NOT EXISTS FOR (n:Battle) REQUIRE n.name IS UNIQUE;
   - CREATE CONSTRAINT battle_battlenumber IF NOT EXISTS FOR (n:Battle) REQUIRE n.battleNumber IS UNIQUE;
   - CREATE CONSTRAINT king_king IF NOT EXISTS FOR (n:King) REQUIRE n.king IS UNIQUE;
   - CREATE CONSTRAINT family_family IF NOT EXISTS FOR (n:Family) REQUIRE n.family IS UNIQUE;
@@ -17,8 +16,8 @@ files:
   cql: |-
     WITH $dict.rows AS rows
     UNWIND rows AS row
-    MERGE (n:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
-    SET n.year = toIntegerOrNull(row.year), n.outcome = row.outcome, n.size = toFloatOrNull(row.size), n.summer = toBooleanOrNull(row.summer)
+    MERGE (n:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    SET n.name = row.name, n.year = toIntegerOrNull(row.year), n.outcome = row.outcome, n.size = toIntegerOrNull(row.size), n.summer = toBooleanOrNull(row.summer)
   url: $BASE/../../../data/got/game_of_thrones_battles.csv
 - chunk_size: 100
   cql: |
@@ -51,34 +50,37 @@ files:
     MERGE (n:Region {region: row.region})
   url: $BASE/../../../data/got/game_of_thrones_battles.csv
 - chunk_size: 100
-  cql: |
+  cql: |-
     WITH $dict.rows AS rows
     UNWIND rows as row
     MATCH (source:King {king: row.king})
-    MATCH (target:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
     MERGE (source)-[n:PARTICIPATED_IN]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
   url: $BASE/../../../data/got/game_of_thrones_battles.csv
 - chunk_size: 100
-  cql: |
+  cql: |-
     WITH $dict.rows AS rows
     UNWIND rows as row
     MATCH (source:Family {family: row.family})
-    MATCH (target:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
     MERGE (source)-[n:INVOLVED_IN]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
   url: $BASE/../../../data/got/game_of_thrones_battles.csv
 - chunk_size: 100
-  cql: |
+  cql: |-
     WITH $dict.rows AS rows
     UNWIND rows as row
-    MATCH (source:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (source:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
     MATCH (target:Commander {commander: row.commander})
     MERGE (source)-[n:LED_BY]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
   url: $BASE/../../../data/got/game_of_thrones_battles.csv
 - chunk_size: 100
   cql: |
     WITH $dict.rows AS rows
     UNWIND rows as row
-    MATCH (source:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (source:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
     MATCH (target:Location {location: row.location})
     MERGE (source)-[n:LOCATED_AT]->(target)
   url: $BASE/../../../data/got/game_of_thrones_battles.csv

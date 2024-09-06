@@ -264,6 +264,8 @@ class GraphDataModeler:
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
         use_advanced_data_model_generation_rules: bool = True,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
     ) -> Union[DataModel, Dict[str, Any]]:
         """
         Generate the initial model.
@@ -277,6 +279,11 @@ class GraphDataModeler:
             Whether to pass the data model in YAML format while making corrections, by default False
         use_advanced_data_model_generation_rules, optional
             Whether to include advanced data modeling rules, by default True
+        allow_duplicate_properties : bool, optional
+            Whether to allow a property to exist on multiple node labels or relationship types, by default False
+        enforce_uniqueness : bool, optional
+            Whether to error if a node has no unique identifiers (unique or node key).
+            Setting this to false may be detrimental during code generation and ingestion. By default True
 
         Returns
         -------
@@ -294,6 +301,8 @@ class GraphDataModeler:
             use_advanced_data_model_generation_rules=use_advanced_data_model_generation_rules,
             max_retries=max_retries,
             use_yaml_data_model=use_yaml_data_model,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
         )
 
         if isinstance(response, dict):
@@ -312,6 +321,8 @@ class GraphDataModeler:
         use_advanced_data_model_generation_rules: bool = True,
         use_yaml_data_model: bool = False,
         max_retries: int = 3,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
     ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.
@@ -330,6 +341,11 @@ class GraphDataModeler:
             Whether to pass the data model in YAML format while making corrections, by default False
         use_advanced_data_model_generation_rules, optional
             Whether to include advanced data modeling rules, by default True
+        allow_duplicate_properties : bool, optional
+            Whether to allow a property to exist on multiple node labels or relationship types, by default False
+        enforce_uniqueness : bool, optional
+            Whether to error if a node has no unique identifiers (unique or node key).
+            Setting this to false may be detrimental during code generation and ingestion. By default True
 
         Returns
         -------
@@ -358,6 +374,8 @@ class GraphDataModeler:
                     valid_columns=self.allowed_columns,
                     use_yaml_data_model=use_yaml_data_model,
                     data_dictionary=self._data_dictionary,
+                    allow_duplicate_properties=allow_duplicate_properties,
+                    enforce_uniqueness=enforce_uniqueness,
                 )
 
                 self.model_history.append(response)

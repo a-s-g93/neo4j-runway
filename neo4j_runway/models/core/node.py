@@ -244,7 +244,7 @@ class Node(BaseModel):
     def validate_properties(
         self, valid_columns: Dict[str, List[str]]
     ) -> List[Optional[str]]:
-        errors: List[Optional[str]] = []
+        errors: List[Optional[str]] = list()
 
         for prop in self.properties:
             if prop.column_mapping not in valid_columns.get(self.source_name, list()):
@@ -265,6 +265,12 @@ class Node(BaseModel):
                     f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
                 )
         return errors
+
+    def enforce_uniqueness(self) -> List[Optional[str]]:
+        if len(self.unique_properties) == 0 and len(self.node_keys) < 2:
+            # keep it simple by asking only for a unique property, not to create a node key combo
+            return [f"The node {self.label} must contain a unique property."]
+        return list()
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:
         """

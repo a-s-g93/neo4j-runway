@@ -141,6 +141,8 @@ class BaseDataModelingLLM(ABC):
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
     ) -> Union[DataModel, Dict[str, Any]]:
         """
         Performs at least 2 LLM calls:
@@ -203,6 +205,8 @@ class BaseDataModelingLLM(ABC):
                 max_retries=max_retries,
                 use_yaml_data_model=use_yaml_data_model,
                 data_dictionary=data_dictionary,
+                allow_duplicate_properties=allow_duplicate_properties,
+                enforce_uniqueness=enforce_uniqueness,
             )
 
             return initial_data_model
@@ -217,6 +221,8 @@ class BaseDataModelingLLM(ABC):
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
         use_yaml_data_model: bool = False,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
@@ -239,7 +245,10 @@ class BaseDataModelingLLM(ABC):
             )
 
             validation = response.validate_model(
-                valid_columns=valid_columns, data_dictionary=data_dictionary
+                valid_columns=valid_columns,
+                data_dictionary=data_dictionary,
+                allow_duplicate_properties=allow_duplicate_properties,
+                enforce_uniqueness=enforce_uniqueness,
             )
             if not validation["valid"]:
                 print(
