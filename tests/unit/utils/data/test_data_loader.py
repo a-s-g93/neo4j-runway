@@ -132,7 +132,7 @@ def test_check_files_bad_input() -> None:
         _check_files({"a.csv", "b.badext"})
 
 
-def test_load_local_files(mocker) -> None:
+def test_load_local_files_with_ignored(mocker) -> None:
     return_value = Table(
         name="test.csv",
         file_path="./",
@@ -155,3 +155,54 @@ def test_load_local_files(mocker) -> None:
     )
 
     assert len(tables.tables) == 2
+
+
+def test_load_local_files_with_included(mocker) -> None:
+    return_value = Table(
+        name="test.csv",
+        file_path="./",
+        dataframe=pd.DataFrame({"a": [1, 2, 3], "b": [1, 2, 3], "c": [1, 2, 3]}),
+        general_description=general_description,
+        data_dictionary=data_dictionary,
+        use_cases=use_cases,
+        discovery_content=None,
+    )
+    mocker.patch(
+        "neo4j_runway.utils.data.data_loader.load_csv", return_value=return_value
+    )
+
+    tables = load_local_files(
+        data_directory="tests/resources/data/test_dir/",
+        general_description=general_description,
+        data_dictionary={"c.csv": data_dictionary},
+        use_cases=use_cases,
+        include_files=["c.csv"],
+    )
+
+    assert len(tables.tables) == 1
+
+
+def test_load_local_files_with_included_and_ignored(mocker) -> None:
+    return_value = Table(
+        name="test.csv",
+        file_path="./",
+        dataframe=pd.DataFrame({"a": [1, 2, 3], "b": [1, 2, 3], "c": [1, 2, 3]}),
+        general_description=general_description,
+        data_dictionary=data_dictionary,
+        use_cases=use_cases,
+        discovery_content=None,
+    )
+    mocker.patch(
+        "neo4j_runway.utils.data.data_loader.load_csv", return_value=return_value
+    )
+
+    tables = load_local_files(
+        data_directory="tests/resources/data/test_dir/",
+        general_description=general_description,
+        data_dictionary={"c.csv": data_dictionary},
+        use_cases=use_cases,
+        include_files=["c.csv"],
+        ignored_files=["a.csv", "c.csv"],
+    )
+
+    assert len(tables.tables) == 1

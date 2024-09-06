@@ -13,6 +13,7 @@ def load_local_files(
     general_description: str = "",
     data_dictionary: Dict[str, Any] = dict(),
     use_cases: Optional[List[str]] = None,
+    include_files: List[str] = list(),
     ignored_files: List[str] = list(),
     config: Dict[str, Dict[str, Any]] = dict(),
 ) -> TableCollection:
@@ -30,8 +31,10 @@ def load_local_files(
         Only columns identified here will be considered for inclusion in the data model. By default dict()
     use_cases : Optional[List[str]], optional
         Any use cases that the graph data model should address, by default None
+    include_files: List[str], optional
+        Any filres in the directory that should be included. Overwrites `ignored_files` arg. By default list()
     ignored_files : List[str], optional
-        Any files in the directory that should be ignored, by default list()
+        Any files in the directory that should be ignored. Will be overwritten if `include_files` arg is provided. By default list()
     config : Dict[str, Dict[str, Any]], optional
         A dictionary with file names as keys. Each key has a dictionary containing arguments to pass to the Pandas load_* function. By default dict()
 
@@ -46,9 +49,15 @@ def load_local_files(
         If an attempt is made to load an unsupported file.
     """
 
-    files_to_load: Set[str] = set(os.listdir(data_directory) or set()).difference(
-        set(ignored_files)
-    )
+    files_to_load: Set[str] = set()
+
+    if not include_files:
+        files_to_load = set(os.listdir(data_directory) or set()).difference(
+            set(ignored_files)
+        )
+    else:
+        files_to_load = set(include_files)
+
     loaded_files: List[Table] = list()
 
     _check_files(files=files_to_load)
