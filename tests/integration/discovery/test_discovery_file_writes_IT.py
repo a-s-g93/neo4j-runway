@@ -6,6 +6,7 @@ import pytest
 from neo4j_runway.discovery import Discovery
 from neo4j_runway.discovery.discovery_content import DiscoveryContent
 from neo4j_runway.utils.data import Table, TableCollection
+from neo4j_runway.warnings import ExperimentalFeatureWarning
 
 data_dict = {
     "a.csv": {"a": "numbers", "b": "more numbers"},
@@ -21,7 +22,7 @@ dc = DiscoveryContent(
 t1 = Table(
     name="a.csv",
     file_path="./a.csv",
-    data=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
+    dataframe=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
     data_dictionary=data_dict["a.csv"],
     use_cases=["test discovery"],
     discovery_content=dc,
@@ -29,7 +30,7 @@ t1 = Table(
 t2 = Table(
     name="b.csv",
     file_path="./b.csv",
-    data=pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]}),
+    dataframe=pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]}),
     data_dictionary=data_dict["b.csv"],
     use_cases=["test discovery"],
     discovery_content=dc,
@@ -37,7 +38,7 @@ t2 = Table(
 t3 = Table(
     name="c.csv",
     file_path="./c.csv",
-    data=pd.DataFrame({"e": ["a", "b", "c"], "f": ["d", "e", "f"]}),
+    dataframe=pd.DataFrame({"e": ["a", "b", "c"], "f": ["d", "e", "f"]}),
     data_dictionary=data_dict["c.csv"],
     use_cases=["test discovery"],
     discovery_content=dc,
@@ -45,13 +46,13 @@ t3 = Table(
 table_collection = TableCollection(
     data_directory="./",
     data_dictionary=data_dict,
-    data=[t1, t2, t3],
+    tables=[t1, t2, t3],
     general_description="contain data for testing discovery",
     use_cases=["test discovery"],
     discovery="final discovery",
 )
-
-d = Discovery(data=table_collection)
+with pytest.warns(ExperimentalFeatureWarning):
+    d = Discovery(data=table_collection)
 
 roots = ["a_discovery", "b_discovery", "c_discovery", "final_discovery"]
 

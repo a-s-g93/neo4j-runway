@@ -23,6 +23,7 @@ from ..resources.prompts.discovery import (
     create_discovery_summary_prompt,
 )
 from ..utils.data import Table, TableCollection
+from ..warnings import ExperimentalFeatureWarning
 from .discovery_content import DiscoveryContent
 
 
@@ -127,6 +128,30 @@ class Discovery:
             )
 
         self._discovery_ran = False
+
+        if self.is_multifile:
+            warnings.warn(
+                message="Multi file Discovery is an experimental feature and may not work as expected. Please use with caution and raise any issues encountered here: https://github.com/a-s-g93/neo4j-runway/issues",
+                category=ExperimentalFeatureWarning,
+            )
+
+    @property
+    def is_multifile(self) -> bool:
+        """
+        Whether data is multi-file or not.
+
+        Returns
+        -------
+        bool
+            True if multi-file detected, else False
+        """
+
+        if (
+            len(list(self.data.data_dictionary.keys())) == 1
+        ):  # assumes always more than 1 column for modeling
+            return False
+
+        return self.user_input.is_multifile
 
     @property
     def discovery(self) -> str:

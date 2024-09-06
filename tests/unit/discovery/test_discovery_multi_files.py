@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from neo4j_runway.discovery import Discovery
 from neo4j_runway.discovery.discovery import _create_discovery_prompts_for_multi_file
 from neo4j_runway.utils.data import Table, TableCollection
+from neo4j_runway.warnings import ExperimentalFeatureWarning
 
 data_dict = {
     "a.csv": {"a": "numbers", "b": "more numbers"},
@@ -44,7 +45,8 @@ table_collection = TableCollection(
 
 
 def test_multi_file_init_table_collection() -> None:
-    d = Discovery(data=table_collection)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection)
 
     assert isinstance(d.data, TableCollection)
     assert d.data.size == 3
@@ -207,7 +209,8 @@ def test_create_discovery_prompts_for_multi_file_num_calls_less_than_zero(
 
 
 def test_generate_data_summaries() -> None:
-    d = Discovery(data=table_collection)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection)
 
     d._generate_data_summaries()
 
@@ -216,7 +219,8 @@ def test_generate_data_summaries() -> None:
 
 
 def test_run_pandas_only() -> None:
-    d = Discovery(data=table_collection)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection)
 
     d.run(pandas_only=True, show_result=False)
 
@@ -231,8 +235,8 @@ def test_run_llm_call_custom(
     mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert not mock_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_llm)
 
     d.run(show_result=False, custom_batches=[["a.csv", "c.csv"], ["b.csv"]])
 
@@ -244,8 +248,8 @@ def test_run_llm_call_bulk(
     mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert not mock_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_llm)
 
     d.run(show_result=False, bulk_process=True)
 
@@ -257,8 +261,8 @@ def test_run_llm_call_num_calls(
     mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert not mock_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_llm)
 
     d.run(show_result=False, num_calls=3)
 
@@ -270,8 +274,8 @@ def test_run_llm_call_batch(
     mock_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert not mock_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_llm)
 
     d.run(show_result=False, batch_size=1)
 
@@ -283,8 +287,8 @@ def test_run_async_llm_call_custom(
     mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert mock_async_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_async_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_async_llm)
 
     d.run_async(show_result=False, custom_batches=[["a.csv", "c.csv"], ["b.csv"]])
 
@@ -296,8 +300,8 @@ def test_run_async_llm_call_bulk(
     mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert mock_async_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_async_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_async_llm)
 
     d.run_async(show_result=False, bulk_process=True)
 
@@ -309,8 +313,8 @@ def test_run_async_llm_call_num_calls(
     mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert mock_async_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_async_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_async_llm)
 
     d.run_async(show_result=False, num_calls=3)
 
@@ -322,8 +326,8 @@ def test_run_async_llm_call_batch(
     mock_async_llm: MagicMock, mock_create_discovery_prompt_multi_file: MockerFixture
 ) -> None:
     assert mock_async_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_async_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_async_llm)
 
     d.run_async(show_result=False, batch_size=1)
 
@@ -333,8 +337,8 @@ def test_run_async_llm_call_batch(
 
 def test_raise_error_with_non_async_llm_and_async_run(mock_llm: MagicMock) -> None:
     assert not mock_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_llm)
 
     with pytest.raises(RuntimeError) as e:
         d.run_async(show_result=False)
@@ -342,8 +346,8 @@ def test_raise_error_with_non_async_llm_and_async_run(mock_llm: MagicMock) -> No
 
 def test_raise_error_with_async_llm_and_run(mock_async_llm: MagicMock) -> None:
     assert mock_async_llm.is_async
-
-    d = Discovery(data=table_collection, llm=mock_async_llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=mock_async_llm)
 
     with pytest.raises(RuntimeError) as e:
         d.run(show_result=False)

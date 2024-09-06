@@ -4,6 +4,7 @@ import pytest
 from neo4j_runway.discovery import Discovery
 from neo4j_runway.llm.openai import OpenAIDiscoveryLLM
 from neo4j_runway.utils.data import Table, TableCollection
+from neo4j_runway.warnings import ExperimentalFeatureWarning
 
 data_dict = {
     "a.csv": {"a": "numbers", "b": "more numbers"},
@@ -43,21 +44,23 @@ llm = OpenAIDiscoveryLLM(enable_async=True)
 
 
 def test_single_table_run() -> None:
-    d = Discovery(data=t1, llm=llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=t1, llm=llm)
 
     d.run_async(show_result=False)
 
     assert d.data.discovery is not None
-    assert d.data.data[0].discovery_content is not None
-    assert d.data.data[0].discovery is not None
+    assert d.data.tables[0].discovery_content is not None
+    assert d.data.tables[0].discovery is not None
 
 
 def test_multi_file_run() -> None:
-    d = Discovery(data=table_collection, llm=llm)
+    with pytest.warns(ExperimentalFeatureWarning):
+        d = Discovery(data=table_collection, llm=llm)
 
     d.run_async(show_result=False)
 
     assert d.data.discovery is not None
-    for t in d.data.data:
+    for t in d.data.tables:
         assert t.discovery_content is not None
         assert t.discovery is not None
