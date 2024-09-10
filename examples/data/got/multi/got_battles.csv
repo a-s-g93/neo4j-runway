@@ -1,0 +1,39 @@
+,location,region,battle_number,name,summer,year
+0,Golden Tooth,The Westerlands,1,Battle of the Golden Tooth,True,298
+1,Mummer's Ford,The Riverlands,2,Battle at the Mummer's Ford,True,298
+2,Riverrun,The Riverlands,3,Battle of Riverrun,True,298
+4,Green Fork,The Riverlands,4,Battle of the Green Fork,True,298
+9,Whispering Wood,The Riverlands,5,Battle of the Whispering Wood,True,298
+11,Riverrun,The Riverlands,6,Battle of the Camps,True,298
+14,Darry,The Riverlands,7,Sack of Darry,True,298
+15,Moat Cailin,The North,8,Battle of Moat Cailin,True,299
+16,Deepwood Motte,The North,9,Battle of Deepwood Motte,True,299
+17,Stony Shore,The North,10,Battle of the Stony Shore,True,299
+18,Torrhen's Square,The North,11,Battle of Torrhen's Square,True,299
+20,Winterfell,The North,12,Battle of Winterfell,True,299
+21,Torrhen's Square,The North,13,Sack of Torrhen's Square,True,299
+22,Winterfell,The North,14,Sack of Winterfell,True,299
+24,Oxcross,The Westerlands,15,Battle of Oxcross,True,299
+26,Storm's End,The Stormlands,16,Siege of Storm's End,True,299
+28,Red Fork,The Riverlands,17,Battle of the Fords,True,299
+34,Harrenhal,The Riverlands,18,Sack of Harrenhal,True,299
+37,Crag,The Westerlands,19,Battle of the Crag,True,299
+40,King's Landing,The Crownlands,20,Battle of the Blackwater,True,299
+46,Darry,The Riverlands,21,Siege of Darry,True,299
+47,Duskendale,The Crownlands,22,Battle of Duskendale,True,299
+49,,The Riverlands,23,Battle of the Burning Septry,True,299
+50,Ruby Ford,The Riverlands,24,Battle of the Ruby Ford,,299
+51,Harrenhal,The Riverlands,25,Retaking of Harrenhal,True,299
+52,The Twins,The Riverlands,26,The Red Wedding,True,299
+55,Seagard,The Riverlands,27,Siege of Seagard,True,299
+56,Castle Black,Beyond the Wall,28,Battle of Castle Black,False,300
+61,Moat Cailin,The North,29,Fall of Moat Cailin,False,300
+62,Saltpans,The Riverlands,30,Sack of Saltpans,False,300
+63,Deepwood Motte,The North,31,Retaking of Deepwood Motte,False,300
+65,Shield Islands,The Reach,32,Battle of the Shield Islands,False,300
+67,"Ryamsport, Vinetown, Starfish Harbor",The Reach,33,"Invasion of Ryamsport, Vinetown, and Starfish Harbor",False,300
+69,Storm's End,The Stormlands,34,Second Seige of Storm's End,False,300
+71,Dragonstone,The Stormlands,35,Siege of Dragonstone,False,300
+73,Riverrun,The Riverlands,36,Siege of Riverrun,False,300
+76,Raventree,The Riverlands,37,Siege of Raventree,False,300
+78,Winterfell,The North,38,Siege of Winterfell,False,300

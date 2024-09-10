@@ -114,7 +114,7 @@ def load_csv(
     allowed_columns: Optional[List[str]] = None,
     config: Dict[str, Any] = dict(),
 ) -> Table:
-    if not config.get("usecols"):
+    if config.get("usecols") is None:
         config["usecols"] = (
             allowed_columns
             if allowed_columns is not None

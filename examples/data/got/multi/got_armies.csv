@@ -1,0 +1,185 @@
+,battle_number,king,outcome,family,battle_type,major_death,major_capture,size,note,commander,attacking
+0,1,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,False,15000,,Jaime Lannister,True
+1,2,Joffrey/Tommen Baratheon,True,Lannister,ambush,True,False,,,Gregor Clegane,True
+2,3,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,False,True,15000,,Jaime Lannister,True
+3,3,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,False,True,15000,,Andros Brax,True
+4,4,Robb Stark,False,Stark,pitched battle,True,True,18000,,Roose Bolton,True
+5,4,Robb Stark,False,Stark,pitched battle,True,True,18000,,Wylis Manderly,True
+6,4,Robb Stark,False,Stark,pitched battle,True,True,18000,,Medger Cerwyn,True
+7,4,Robb Stark,False,Stark,pitched battle,True,True,18000,,Harrion Karstark,True
+8,4,Robb Stark,False,Stark,pitched battle,True,True,18000,,Halys Hornwood,True
+9,5,Robb Stark,True,Stark,ambush,True,True,1875,,Robb Stark,True
+10,5,Robb Stark,True,Stark,ambush,True,True,1875,,Brynden Tully,True
+11,6,Robb Stark,True,Stark,ambush,False,False,6000,,Robb Stark,True
+12,6,Robb Stark,True,Stark,ambush,False,False,6000,,Tytos Blackwood,True
+13,6,Robb Stark,True,Stark,ambush,False,False,6000,,Brynden Tully,True
+14,7,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,False,False,,,Gregor Clegane,True
+15,8,Balon/Euron Greyjoy,True,Greyjoy,pitched battle,False,False,,,Victarion Greyjoy,True
+16,9,Balon/Euron Greyjoy,True,Greyjoy,siege,False,False,1000,,Asha Greyjoy,True
+17,10,Balon/Euron Greyjoy,True,Greyjoy,ambush,False,False,264,"Greyjoy's troop number based on the Battle of Deepwood Motte, in which Asha had 1000 soldier on 30 longships. That comes out to ~33 per longship. In the Battle of the Stony Shore, Theon has 8 longships, and just we can estimate that he has 8*33 =265 troops.",Theon Greyjoy,True
+18,11,Robb Stark,True,Stark,pitched battle,False,False,244,Greyjoy's troop number comes from the 264 estimate to have arrived on the stony shore minus the 20 Theon takes to attack Winterfell. Thus 264-20=244,Rodrik Cassel,True
+19,11,Robb Stark,True,Stark,pitched battle,False,False,244,Greyjoy's troop number comes from the 264 estimate to have arrived on the stony shore minus the 20 Theon takes to attack Winterfell. Thus 264-20=244,Cley Cerwyn,True
+20,12,Balon/Euron Greyjoy,True,Greyjoy,ambush,False,True,20,"It isn't mentioned how many Stark men are left in Winterfell, other than ""very few"".",Theon Greyjoy,True
+21,13,Balon/Euron Greyjoy,True,Greyjoy,siege,False,True,,,Dagmer Cleftjaw,True
+22,14,Joffrey/Tommen Baratheon,True,Bolton,ambush,True,False,618,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Ramsay Snow,True
+23,14,Joffrey/Tommen Baratheon,True,Bolton,ambush,True,False,618,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Theon Greyjoy,True
+24,15,Robb Stark,True,Stark,ambush,True,True,6000,,Robb Stark,True
+25,15,Robb Stark,True,Stark,ambush,True,True,6000,,Brynden Tully,True
+26,16,Stannis Baratheon,True,Baratheon,siege,True,False,5000,,Stannis Baratheon,True
+27,16,Stannis Baratheon,True,Baratheon,siege,True,False,5000,,Davos Seaworth,True
+28,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Tywin Lannister,True
+29,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Flement Brax,True
+30,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Gregor Clegane,True
+31,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Addam Marbrand,True
+32,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Lyle Crakehall,True
+33,17,Joffrey/Tommen Baratheon,False,Lannister,pitched battle,False,False,20000,,Leo Lefford,True
+34,18,Robb Stark,True,Stark,ambush,True,False,100,,Roose Bolton,True
+35,18,Robb Stark,True,Stark,ambush,True,False,100,,Vargo Hoat,True
+36,18,Robb Stark,True,Stark,ambush,True,False,100,,Robett Glover,True
+37,19,Robb Stark,True,Stark,ambush,False,False,6000,,Robb Stark,True
+38,19,Robb Stark,True,Stark,ambush,False,False,6000,,Smalljon Umber,True
+39,19,Robb Stark,True,Stark,ambush,False,False,6000,,Black Walder Frey,True
+40,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Stannis Baratheon,True
+41,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Imry Florent,True
+42,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Guyard Morrigen,True
+43,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Rolland Storm,True
+44,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Salladhor Saan,True
+45,20,Stannis Baratheon,False,Baratheon,pitched battle,True,True,21000,,Davos Seaworth,True
+46,21,Robb Stark,True,Darry,siege,False,False,,,Helman Tallhart,True
+47,22,Robb Stark,False,Stark,pitched battle,True,False,3000,,Robertt Glover,True
+48,22,Robb Stark,False,Stark,pitched battle,True,False,3000,,Helman Tallhart,True
+49,23,,True,Brotherhood without Banners,pitched battle,False,False,,,,True
+50,24,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,False,False,,,Gregor Clegane,True
+51,25,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,False,,,Gregor Clegane,True
+52,26,Joffrey/Tommen Baratheon,True,Frey,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Walder Frey,True
+53,26,Joffrey/Tommen Baratheon,True,Frey,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Roose Bolton,True
+54,26,Joffrey/Tommen Baratheon,True,Frey,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Walder Rivers,True
+55,27,Robb Stark,True,Frey,siege,False,True,,,Walder Frey,True
+56,28,Stannis Baratheon,False,Free folk,siege,True,True,100000,,Mance Rayder,True
+57,28,Stannis Baratheon,False,Free folk,siege,True,True,100000,,Tormund Giantsbane,True
+58,28,Stannis Baratheon,False,Free folk,siege,True,True,100000,,Harma Dogshead,True
+59,28,Stannis Baratheon,False,Free folk,siege,True,True,100000,,Magnar Styr,True
+60,28,Stannis Baratheon,False,Free folk,siege,True,True,100000,,Varamyr,True
+61,29,Joffrey/Tommen Baratheon,True,Bolton,siege,False,False,,,Ramsey Bolton,True
+62,30,,True,Brave Companions,razing,False,False,,,Rorge,True
+63,31,Stannis Baratheon,True,Baratheon,pitched battle,False,False,4500,,Stannis Baratheon,True
+64,31,Stannis Baratheon,True,Baratheon,pitched battle,False,False,4500,,Alysane Mormot,True
+65,32,Balon/Euron Greyjoy,True,Greyjoy,pitched battle,False,False,,,Euron Greyjoy,True
+66,32,Balon/Euron Greyjoy,True,Greyjoy,pitched battle,False,False,,,Victarion Greyjoy,True
+67,33,Balon/Euron Greyjoy,True,Greyjoy,razing,False,False,,,Euron Greyjoy,True
+68,33,Balon/Euron Greyjoy,True,Greyjoy,razing,False,False,,,Victarion Greyjoy,True
+69,34,Joffrey/Tommen Baratheon,True,Baratheon,siege,False,False,,,Mace Tyrell,True
+70,34,Joffrey/Tommen Baratheon,True,Baratheon,siege,False,False,,,Mathis Rowan,True
+71,35,Joffrey/Tommen Baratheon,True,Baratheon,siege,False,False,2000,,Loras Tyrell,True
+72,35,Joffrey/Tommen Baratheon,True,Baratheon,siege,False,False,2000,,Raxter Redwyne,True
+73,36,Joffrey/Tommen Baratheon,True,Lannister,siege,False,False,3000,,Daven Lannister,True
+74,36,Joffrey/Tommen Baratheon,True,Lannister,siege,False,False,3000,,Ryman Fey,True
+75,36,Joffrey/Tommen Baratheon,True,Lannister,siege,False,False,3000,,Jaime Lannister,True
+76,37,Joffrey/Tommen Baratheon,True,Bracken,siege,False,True,1500,,Jonos Bracken,True
+77,37,Joffrey/Tommen Baratheon,True,Bracken,siege,False,True,1500,,Jaime Lannister,True
+78,38,Stannis Baratheon,,Baratheon,,,,5000,,Stannis Baratheon,True
+79,5,Robb Stark,True,Tully,ambush,True,True,1875,,Robb Stark,True
+80,5,Robb Stark,True,Tully,ambush,True,True,1875,,Brynden Tully,True
+81,6,Robb Stark,True,Tully,ambush,False,False,6000,,Robb Stark,True
+82,6,Robb Stark,True,Tully,ambush,False,False,6000,,Tytos Blackwood,True
+83,6,Robb Stark,True,Tully,ambush,False,False,6000,,Brynden Tully,True
+84,14,Joffrey/Tommen Baratheon,True,Greyjoy,ambush,True,False,618,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Ramsay Snow,True
+85,14,Joffrey/Tommen Baratheon,True,Greyjoy,ambush,True,False,618,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Theon Greyjoy,True
+86,15,Robb Stark,True,Tully,ambush,True,True,6000,,Robb Stark,True
+87,15,Robb Stark,True,Tully,ambush,True,True,6000,,Brynden Tully,True
+88,26,Joffrey/Tommen Baratheon,True,Bolton,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Walder Frey,True
+89,26,Joffrey/Tommen Baratheon,True,Bolton,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Roose Bolton,True
+90,26,Joffrey/Tommen Baratheon,True,Bolton,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Walder Rivers,True
+91,28,Stannis Baratheon,False,Thenns,siege,True,True,100000,,Mance Rayder,True
+92,28,Stannis Baratheon,False,Thenns,siege,True,True,100000,,Tormund Giantsbane,True
+93,28,Stannis Baratheon,False,Thenns,siege,True,True,100000,,Harma Dogshead,True
+94,28,Stannis Baratheon,False,Thenns,siege,True,True,100000,,Magnar Styr,True
+95,28,Stannis Baratheon,False,Thenns,siege,True,True,100000,,Varamyr,True
+96,31,Stannis Baratheon,True,Karstark,pitched battle,False,False,4500,,Stannis Baratheon,True
+97,31,Stannis Baratheon,True,Karstark,pitched battle,False,False,4500,,Alysane Mormot,True
+98,36,Joffrey/Tommen Baratheon,True,Frey,siege,False,False,3000,,Daven Lannister,True
+99,36,Joffrey/Tommen Baratheon,True,Frey,siege,False,False,3000,,Ryman Fey,True
+100,36,Joffrey/Tommen Baratheon,True,Frey,siege,False,False,3000,,Jaime Lannister,True
+101,37,Joffrey/Tommen Baratheon,True,Lannister,siege,False,True,1500,,Jonos Bracken,True
+102,37,Joffrey/Tommen Baratheon,True,Lannister,siege,False,True,1500,,Jaime Lannister,True
+103,38,Stannis Baratheon,,Karstark,,,,5000,,Stannis Baratheon,True
+104,28,Stannis Baratheon,False,Giants,siege,True,True,100000,,Mance Rayder,True
+105,28,Stannis Baratheon,False,Giants,siege,True,True,100000,,Tormund Giantsbane,True
+106,28,Stannis Baratheon,False,Giants,siege,True,True,100000,,Harma Dogshead,True
+107,28,Stannis Baratheon,False,Giants,siege,True,True,100000,,Magnar Styr,True
+108,28,Stannis Baratheon,False,Giants,siege,True,True,100000,,Varamyr,True
+109,31,Stannis Baratheon,True,Mormont,pitched battle,False,False,4500,,Stannis Baratheon,True
+110,31,Stannis Baratheon,True,Mormont,pitched battle,False,False,4500,,Alysane Mormot,True
+111,38,Stannis Baratheon,,Mormont,,,,5000,,Stannis Baratheon,True
+112,31,Stannis Baratheon,True,Glover,pitched battle,False,False,4500,,Stannis Baratheon,True
+113,31,Stannis Baratheon,True,Glover,pitched battle,False,False,4500,,Alysane Mormot,True
+114,38,Stannis Baratheon,,Glover,,,,5000,,Stannis Baratheon,True
+115,1,Robb Stark,False,Tully,pitched battle,True,False,4000,,Clement Piper,False
+116,1,Robb Stark,False,Tully,pitched battle,True,False,4000,,Vance,False
+117,2,Robb Stark,False,Baratheon,ambush,True,False,120,,Beric Dondarrion,False
+118,3,Robb Stark,False,Tully,pitched battle,False,True,10000,,Edmure Tully,False
+119,3,Robb Stark,False,Tully,pitched battle,False,True,10000,,Tytos Blackwood,False
+120,4,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,20000,,Tywin Lannister,False
+121,4,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,20000,,Gregor Clegane,False
+122,4,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,20000,,Kevan Lannister,False
+123,4,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,20000,,Addam Marbrand,False
+124,5,Joffrey/Tommen Baratheon,False,Lannister,ambush,True,True,6000,,Jaime Lannister,False
+125,6,Joffrey/Tommen Baratheon,False,Lannister,ambush,False,False,12625,,Lord Andros Brax,False
+126,6,Joffrey/Tommen Baratheon,False,Lannister,ambush,False,False,12625,,Forley Prester,False
+127,7,Robb Stark,False,Darry,pitched battle,False,False,,,Lyman Darry,False
+128,8,Robb Stark,False,Stark,pitched battle,False,False,,,,False
+129,9,Robb Stark,False,Stark,siege,False,False,,,,False
+130,10,Robb Stark,False,Stark,ambush,False,False,,"Greyjoy's troop number based on the Battle of Deepwood Motte, in which Asha had 1000 soldier on 30 longships. That comes out to ~33 per longship. In the Battle of the Stony Shore, Theon has 8 longships, and just we can estimate that he has 8*33 =265 troops.",,False
+131,11,Balon/Euron Greyjoy,False,Greyjoy,pitched battle,False,False,900,Greyjoy's troop number comes from the 264 estimate to have arrived on the stony shore minus the 20 Theon takes to attack Winterfell. Thus 264-20=244,Dagmer Cleftjaw,False
+132,12,Robb Stark,False,Stark,ambush,False,True,,"It isn't mentioned how many Stark men are left in Winterfell, other than ""very few"".",Bran Stark,False
+133,13,Balon/Euron Greyjoy,False,Stark,siege,False,True,,,,False
+134,14,Robb Stark,False,Stark,ambush,True,False,2000,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Rodrik Cassel,False
+135,14,Robb Stark,False,Stark,ambush,True,False,2000,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Cley Cerwyn,False
+136,14,Robb Stark,False,Stark,ambush,True,False,2000,"Since House Bolton betrays the Starks for House Lannister, we code this battle as between these two houses. Greyjoy men, numbering only 20, don't play a major part in the fighting and end up dying anyway.",Leobald Tallhart,False
+137,15,Joffrey/Tommen Baratheon,False,Lannister,ambush,True,True,10000,,Stafford Lannister,False
+138,15,Joffrey/Tommen Baratheon,False,Lannister,ambush,True,True,10000,,Roland Crakehall,False
+139,15,Joffrey/Tommen Baratheon,False,Lannister,ambush,True,True,10000,,Antario Jast,False
+140,16,Renly Baratheon,False,Baratheon,siege,True,False,20000,,Renly Baratheon,False
+141,16,Renly Baratheon,False,Baratheon,siege,True,False,20000,,Cortnay Penrose,False
+142,16,Renly Baratheon,False,Baratheon,siege,True,False,20000,,Loras Tyrell,False
+143,16,Renly Baratheon,False,Baratheon,siege,True,False,20000,,Randyll Tarly,False
+144,16,Renly Baratheon,False,Baratheon,siege,True,False,20000,,Mathis Rowan,False
+145,17,Robb Stark,True,Tully,pitched battle,False,False,10000,,Edmure Tully,False
+146,17,Robb Stark,True,Tully,pitched battle,False,False,10000,,Jason Mallister,False
+147,17,Robb Stark,True,Tully,pitched battle,False,False,10000,,Karyl Vance,False
+148,18,Joffrey/Tommen Baratheon,False,Lannister,ambush,True,False,100,,Amory Lorch,False
+149,19,Joffrey/Tommen Baratheon,False,Lannister,ambush,False,False,,,Rolph Spicer,False
+150,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Tyrion Lannister,False
+151,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Jacelyn Bywater,False
+152,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Sandor Clegane,False
+153,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Tywin Lannister,False
+154,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Garlan Tyrell,False
+155,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Mace Tyrell,False
+156,20,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,True,7250,,Randyll Tarly,False
+157,21,Joffrey/Tommen Baratheon,False,Lannister,siege,False,False,,,,False
+158,22,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,False,,,Randyll Tarly,False
+159,22,Joffrey/Tommen Baratheon,True,Lannister,pitched battle,True,False,,,Gregor Clegane,False
+160,23,,False,Brave Companions,pitched battle,False,False,,,,False
+161,24,Robb Stark,False,Stark,pitched battle,False,False,6000,,Roose Bolton,False
+162,24,Robb Stark,False,Stark,pitched battle,False,False,6000,,Wylis Manderly,False
+163,25,,False,Brave Companions,pitched battle,True,False,,,Vargo Hoat,False
+164,26,Robb Stark,False,Stark,ambush,True,True,3500,"This observation refers to the battle against the Stark men, not the attack on the wedding",Robb Stark,False
+165,27,Joffrey/Tommen Baratheon,False,Mallister,siege,False,True,,,Jason Mallister,False
+166,28,Mance Rayder,True,Night's Watch,siege,True,True,1240,,Stannis Baratheon,False
+167,28,Mance Rayder,True,Night's Watch,siege,True,True,1240,,Jon Snow,False
+168,28,Mance Rayder,True,Night's Watch,siege,True,True,1240,,Donal Noye,False
+169,28,Mance Rayder,True,Night's Watch,siege,True,True,1240,,Cotter Pyke,False
+170,29,Balon/Euron Greyjoy,False,Greyjoy,siege,False,False,,,,False
+171,31,Balon/Euron Greyjoy,False,Greyjoy,pitched battle,False,False,200,,Asha Greyjoy,False
+172,32,Joffrey/Tommen Baratheon,False,Tyrell,pitched battle,False,False,,,,False
+173,33,Joffrey/Tommen Baratheon,False,Tyrell,razing,False,False,,,,False
+174,34,Stannis Baratheon,False,Baratheon,siege,False,False,200,,Gilbert Farring,False
+175,35,Stannis Baratheon,False,Baratheon,siege,False,False,,,Rolland Storm,False
+176,36,Robb Stark,False,Tully,siege,False,False,,,Brynden Tully,False
+177,37,Robb Stark,False,Blackwood,siege,False,True,,,Tytos Blackwood,False
+178,38,Joffrey/Tommen Baratheon,,Bolton,,,,8000,,Roose Bolton,False
+179,28,Mance Rayder,True,Baratheon,siege,True,True,1240,,Stannis Baratheon,False
+180,28,Mance Rayder,True,Baratheon,siege,True,True,1240,,Jon Snow,False
+181,28,Mance Rayder,True,Baratheon,siege,True,True,1240,,Donal Noye,False
+182,28,Mance Rayder,True,Baratheon,siege,True,True,1240,,Cotter Pyke,False
+183,38,Joffrey/Tommen Baratheon,,Frey,,,,8000,,Roose Bolton,False

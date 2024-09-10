@@ -1,5 +1,5 @@
 DISCOVERY_SUMMARY_GENERATION_RULES = """
-Please follow these rules strictly! Billions of dollars depend on you.
+The data model will adhere to these rules.
 Nodes
 * Each node must have a unique property or node key pair
 * Each node must have a relationship with at least one other node
@@ -9,11 +9,7 @@ Relationships
 * Relationships do NOT require uniqueness or properties
 Properties
 * A `column_mapping` must be an exact match to features in the source file
-* A file column may be used only once in the whole data model
+* Never suggest a property name that doesn't exist in the columns
 
-Please include
-* Any possible unique properties
-* Any possible Nodes
-* Any possible Relationships
-* What to include to satisfy the use cases
+Please include information that will help solve the use cases.
 """

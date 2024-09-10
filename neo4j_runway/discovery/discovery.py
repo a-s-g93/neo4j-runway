@@ -87,7 +87,7 @@ class Discovery:
         elif isinstance(user_input, UserInput):
             self.user_input = user_input
         else:
-            raise ValueError("Unable to parse user_input.")
+            raise ValueError("Unable to parse `user_input` arg.")
 
         self.llm = llm
 
@@ -382,6 +382,18 @@ class Discovery:
             raise RuntimeError(
                 "Provided LLM class does not contain an async client. Please provide a different LLM or use the 'run' method instead."
             )
+
+        if notebook:
+            try:
+                import nest_asyncio
+
+                nest_asyncio.apply()
+            except ImportError as e:
+                raise ImportError(
+                    "Could not import nest_asyncio library."
+                    "This is required to run async methods in a Python Notebook."
+                    "Please install with `pip install nest_asyncio`."
+                )
 
         self._generate_data_summaries(ignore_files=ignore_files)
 

@@ -120,7 +120,7 @@ class DataModelEntityPool(BaseModel):
                         rel.source_name, list()
                     ):
                         errors.append(
-                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary."
+                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias` or remove this alias. Reference the data dictionary."
                         )
 
             if target_node is not None and rel.source_name != target_node.source_name:
@@ -129,7 +129,7 @@ class DataModelEntityPool(BaseModel):
                         rel.source_name, list()
                     ):
                         errors.append(
-                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary."
+                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias` or remove this alias. Reference the data dictionary."
                         )
 
         valid: bool = len(errors) < 1

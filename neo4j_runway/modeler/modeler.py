@@ -10,6 +10,7 @@ from ..models import DataModel
 from ..resources.prompts.data_modeling import (
     create_data_model_iteration_prompt,
 )
+from ..warnings import ExperimentalFeatureWarning
 
 
 class GraphDataModeler:
@@ -26,7 +27,7 @@ class GraphDataModeler:
     user_input : Union[Dict[str, str], UserInput], optional
         Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
     model_iterations : int
-        The number of times a valid model has been returned.
+        The number of times a data model has been returned.
     model_history : List[DataModel]
         A list of all valid models generated.
     current_model : DataModel
@@ -109,6 +110,12 @@ class GraphDataModeler:
         self._initial_model_created: bool = False
         self.model_iterations: int = 0
         self.model_history: List[DataModel] = list()
+
+        if self.is_multifile:
+            warnings.warn(
+                message="Multi file Data Modeling is an experimental feature and may not work as expected. Please use with caution and raise any issues encountered here: https://github.com/a-s-g93/neo4j-runway/issues",
+                category=ExperimentalFeatureWarning,
+            )
 
     @property
     def is_multifile(self) -> bool:
