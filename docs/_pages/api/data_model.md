@@ -8,7 +8,7 @@ toc_icon: "fa-solid fa-plane"
 
     from neo4j_runway import DataModel
 
-This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 
+This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format.
 
 
  The standard Graph Data Model representation in Neo4j
@@ -128,8 +128,19 @@ Perform additional validation on the data model.
 
     Parameters
     ----------
-    csv_columns : List[str]
+    valid_columns : List[str]
         The CSV columns that are allowed in the data model.
+    data_dictionary : Dict[str, Any]
+        A data dictionary to validate against.
+    allow_duplicate_properties : bool, optional
+        Whether to allow identical properties to exist on
+        multiple node labels or relationship types, by
+        default False
+    enforce_uniqueness : bool, optional
+        Whether to error if a node has no unique identifiers
+        (unique or node key).
+        Setting this to false may be detrimental during code
+        generation and ingestion. By default True
 
     Returns
     -------
@@ -189,4 +200,3 @@ Returns a list of relationship types.
     -------
     List[str]
         A list of relationship types.
-
