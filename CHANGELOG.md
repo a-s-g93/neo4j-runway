@@ -4,6 +4,14 @@
 
 ### Fixed
 
+### Changed
+
+### Added
+
+## 0.10.0
+
+### Fixed
+
 * Initial data modeling takes into account entity pool generation step
 * Fixed bug where some filepaths break saving content to file
 

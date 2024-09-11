@@ -9,6 +9,7 @@ toc_icon: "fa-solid fa-plane"
     from neo4j_runway.utils.data import TableCollection
 
 
+
  A container for all data to be used in graph data modeling.
         This class will handle data in Table objects.
 

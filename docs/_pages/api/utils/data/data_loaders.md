@@ -9,6 +9,7 @@ toc_icon: "fa-solid fa-plane"
 
     from neo4j_runway.utils.data import load_local_files
 
+
 A function to systematically load all files from a local
         directory. Currently supported file formats are:
         [csv, json, jsonl].
@@ -54,6 +55,7 @@ A function to systematically load all files from a local
 ## load_data_dictionary_from_yaml
 
     from neo4j_runway.utils.data import load_data_dictionary_from_yaml
+
 
 Load a data dictionary stored in a yaml file. Can either
         be a multi or single file data dictionary.
