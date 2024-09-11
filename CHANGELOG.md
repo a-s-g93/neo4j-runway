@@ -4,6 +4,9 @@
 
 ### Fixed
 
+* Initial data modeling takes into account entity pool generation step
+* Fixed bug where some filepaths break saving content to file
+
 ### Changed
 
 * All data input to Discovery is converted to TableCollection class
@@ -13,10 +16,11 @@
 
 ### Added
 
-* Multi file support for Discovery process
+* Add `verbose` arg to `PyIngest` to suppress progress printing
+* Multi file support for Discovery process (EXPERIMENTAL)
   * parameters in `discovery.run()` and `discovery.run_async()` to control process
   * async capability to improve response time for multi file
-* Multi file support for Data Modeling process
+* Multi file support for Data Modeling process (EXPERIMENTAL)
 * Cypher generation support for relationships spanning across different files
 
 ### Added

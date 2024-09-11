@@ -1,10 +1,11 @@
 ---
 permalink: /api/pyingest/
-title: PyIngest
+title: Pyingest
 toc: true
-toc_label: PyIngest
+toc_label: Pyingest
 toc_icon: "fa-solid fa-plane"
 ---
+## PyIngest
 
     from neo4j_runway import PyIngest
 
@@ -23,5 +24,7 @@ Function to ingest data according to a configuration
         The data to ingest in Pandas DataFrame format.
         If None, then will search for CSVs according to the
         urls in YAML config, by default None
+    verbose : bool, optional
+        Whether to print progress, by default False
     kwargs : Any
         Additional params

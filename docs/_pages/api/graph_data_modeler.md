@@ -21,26 +21,16 @@ toc_icon: "fa-solid fa-plane"
     discovery : Union[str, Discovery], optional
         Either a string containing the LLM generated
         discovery or a Discovery object that has been run.
-        If a Discovery object is provided then the remaining
-        discovery attributes don't need to be provided.
     user_input : Union[Dict[str, str], UserInput], optional
         Either a dictionary with keys general_description
         and column names with descriptions or a UserInput
         object.
-    general_data_description : str, optional
-        A general data description provided by Pandas.
-    numeric_data_description : str, optional
-        A numeric data description provided by Pandas.
-    categorical_data_description : str, optional
-        A categorical data description provided by Pandas.
-    feature_descriptions : Dict[str, str], optional
-        Feature (column) descriptions provided by Discovery.
-    columns_of_interest : List[str], optional
-        The columns that may be used in the data model.
-    model_iterations: int
-        The number of times a valid model has been returned.
-    model_history: List[DataModel]
+    model_iterations : int
+        The number of times a data model has been returned.
+    model_history : List[DataModel]
         A list of all valid models generated.
+    current_model : DataModel
+        The most recently generated or loaded data model.
 
 
 
@@ -65,33 +55,53 @@ Takes an LLM instance and Discovery information.
     user_input : Union[Dict[str, str], UserInput], optional
         Either a dictionary with keys general_description
         and column names with descriptions or a UserInput
-        object, by default {}
-    general_data_description : str, optional
-        A general data description provided by Pandas, by
-        default None
-    numeric_data_description : str, optional
-        A numeric data description provided by Pandas, by
-        default None
-    categorical_data_description : str, optional
-        A categorical data description provided by Pandas,
-        by default None
-    feature_descriptions : Dict[str, str], optional
-        Feature (column) descriptions provided by Discovery,
-        by default None
-    columns_of_interest : List[str]
+        object, by default dict()
+    data_dictionary : Dict[str, Any], optional
+        A data dictionary. If single-file input, then the
+        keys will be column names and the values are
+        descriptions.
+        If multi-file input, the keys are file names and
+        each contain a nested dictionary of column name keys
+        and description values.
+        This argument will take precedence over any data
+        dictionary provided via the Discovery object.
+        This argument will take precedence over the
+        allowed_columns argument. By default None
+    allowed_columns : List[str], optional
+        A list of allowed columns for modeling. Can be used
+        only for single-file inputs. By default = list()
 
 
 ### create_initial_model
-Generate the initial model. This must be ran before a
-        model can be interated on.
+Generate the initial model.
     You may access this model with the `get_model` method
         and providing `version=1`.
+
+    Parameters
+    ----------
+    max_retries : int, optional
+        The max number of retries for generating the initial
+        model, by default 3
+    use_yaml_data_model : bool, optional
+        Whether to pass the data model in YAML format while
+        making corrections, by default False
+    use_advanced_data_model_generation_rules, optional
+        Whether to include advanced data modeling rules, by
+        default True
+    allow_duplicate_properties : bool, optional
+        Whether to allow a property to exist on multiple
+        node labels or relationship types, by default False
+    enforce_uniqueness : bool, optional
+        Whether to error if a node has no unique identifiers
+        (unique or node key).
+        Setting this to false may be detrimental during code
+        generation and ingestion. By default True
 
     Returns
     -------
     Union[DataModel, str]
         The generated data model if a valid model is
-        generated.
+        generated, or
         A dictionary containing information about the failed
         generation attempt.
 
@@ -135,14 +145,26 @@ Iterate on the current model. A data model must exist in
         successful models will be appended to the
         model_history. Model generation will use the same
         prompt for each generation attempt. By default 1
-    user_corrections : Union[str, None], optional
+    corrections : Union[str, None], optional
         What changes the user would like the LLM to address
         in the next model, by default None
+    max_retries : int, optional
+        The max number of retries for generating the initial
+        model, by default 3
     use_yaml_data_model : bool, optional
-        Whether to pass the data model in yaml format to the
-        generation prompt.
-        This takes less tokens, but differs from the output
-        format of json. By default False
+        Whether to pass the data model in YAML format while
+        making corrections, by default False
+    use_advanced_data_model_generation_rules, optional
+        Whether to include advanced data modeling rules, by
+        default True
+    allow_duplicate_properties : bool, optional
+        Whether to allow a property to exist on multiple
+        node labels or relationship types, by default False
+    enforce_uniqueness : bool, optional
+        Whether to error if a node has no unique identifiers
+        (unique or node key).
+        Setting this to false may be detrimental during code
+        generation and ingestion. By default True
 
     Returns
     -------
@@ -170,6 +192,24 @@ Append a new data model to the end of the
 ## Class Properties
 
 
+### allowed_columns
+The allowed columns for model generation.
+    If multi-file, then a dictionary with file name keys and
+        list of columns for values.
+    If single-file, then a list of columns.
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        The allowd columns for data model generation.
+
+    Raises
+    ------
+    AssertionError
+        When no _data_dictionary attribute is initialized in
+        the GraphDataModeler class.
+
+
 ### current_model
 Get the most recently created or loaded data model.
 
@@ -187,3 +227,11 @@ Visualize the most recent model with Graphviz.
     Digraph
         The object to visualize.
 
+
+### is_multifile
+Whether data is multi-file or not.
+
+    Returns
+    -------
+    bool
+        True if multi-file detected, else False

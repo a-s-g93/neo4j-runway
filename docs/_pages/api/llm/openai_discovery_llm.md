@@ -21,10 +21,8 @@ toc_icon: "fa-solid fa-plane"
     open_ai_key: Union[str, None], optional
         Your OpenAI API key if it is not declared in an
         environment variable.
-    enable_async : bool
-        Whether to allow asynchronous LLM calls. This may be
-        utilized in multi-csv input to improve response
-        speed.
+    is_async : bool
+        Whether the client supports asynchronous API calls.
     kwargs : Any
         Parameters to pass to the model during
         initialization.
@@ -54,4 +52,3 @@ Interface for interacting with OpenAI LLMs for data
     kwargs : Any
         Parameters to pass to the model during
         initialization.
-

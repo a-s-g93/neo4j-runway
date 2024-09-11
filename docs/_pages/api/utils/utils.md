@@ -1,10 +1,11 @@
 ---
-permalink: /api/utils/
-title: test_database_connection
+permalink: /api/utils/utils/
+title: Utils
 toc: true
-toc_label: test_database_connection
+toc_label: Utils
 toc_icon: "fa-solid fa-plane"
 ---
+## test_database_connection
 
     from neo4j_runway.utils import test_database_connection
 
