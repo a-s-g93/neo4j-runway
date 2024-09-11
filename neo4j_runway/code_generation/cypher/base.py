@@ -8,18 +8,21 @@ from ...exceptions import LoadCSVCypherGenerationError
 from ...models import Node, Property, Relationship
 
 
-def generate_match_node_clause(node: Node) -> str:
+def generate_match_node_clause(node: Node, use_alias: bool = False) -> str:
     """
     Generate a MATCH node clause.
     """
 
-    return (
-        "MATCH (n:"
-        + node.label
-        + " {"
-        + f"{generate_set_unique_property(node.node_keys or node.unique_properties)}"
-        + "})"
-    )
+    if use_alias and (node.node_key_aliases or node.unique_property_aliases):
+        set_clause = generate_set_unique_property_aliases(
+            node.node_key_aliases or node.unique_property_aliases
+        )
+    else:
+        set_clause = generate_set_unique_property(
+            node.node_keys or node.unique_properties
+        )
+
+    return "MATCH (n:" + node.label + " {" + f"{set_clause}" + "})"
 
 
 def generate_match_same_node_labels_clause(node: Node) -> str:
@@ -30,11 +33,11 @@ def generate_match_same_node_labels_clause(node: Node) -> str:
     """
     from_unique, to_unique = [
         [
-            "{" + f"{prop.name}: row.{prop.csv_mapping}" + "}",
-            "{" + f"{prop.name}: row.{prop.csv_mapping_other}" + "}",
+            "{" + f"{prop.name}: row.{prop.column_mapping}" + "}",
+            "{" + f"{prop.name}: row.{prop.alias}" + "}",
         ]
         for prop in node.unique_properties
-        if prop.csv_mapping_other is not None
+        if prop.alias is not None
     ][0]
 
     return f"""MATCH (source:{node.label} {from_unique})
@@ -75,6 +78,22 @@ def generate_set_unique_property(
     return ", ".join(res)
 
 
+def generate_set_unique_property_aliases(
+    unique_properties: List[Property], strict_typing: bool = True
+) -> str:
+    """
+    Generate the unique properties to match a node on within a MERGE statement.
+    Will use alias names from files.
+    Returns: unique_property_match_component
+    """
+
+    res = [
+        f"{prop.name}: {cast_value(prop, strict_typing, use_alias=True)}"
+        for prop in unique_properties
+    ]
+    return ", ".join(res)
+
+
 def generate_merge_node_clause_standard(node: Node, strict_typing: bool = True) -> str:
     """
     Generate a MERGE node clause.
@@ -87,7 +106,7 @@ MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.uni
 
 
 def generate_merge_node_load_csv_clause(
-    csv_name: str,
+    source_name: str,
     method: str = "api",
     batch_size: int = 10000,
     node: Optional[Node] = None,
@@ -115,7 +134,7 @@ def generate_merge_node_load_csv_clause(
             "Unable to construct MERGE node clause for LOAD CSV from provided arguments."
         )
 
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{source_name}' as row
 CALL {{
     WITH row
     {standard_clause.strip()}
@@ -132,6 +151,14 @@ def generate_merge_relationship_clause_standard(
     """
     Generate a MERGE relationship clause.
     """
+
+    use_source_alias: bool = bool(
+        relationship.source_name and relationship.source_name != source_node.source_name
+    )
+    use_target_alias: bool = bool(
+        relationship.source_name and relationship.source_name != target_node.source_name
+    )
+
     if source_node.label == target_node.label:
         return f"""WITH $dict.rows AS rows
 UNWIND rows as row
@@ -141,14 +168,14 @@ MERGE (source)-[n:{relationship.type}]->(target)
     else:
         return f"""WITH $dict.rows AS rows
 UNWIND rows as row
-{generate_match_node_clause(source_node).replace('(n:', '(source:')}
-{generate_match_node_clause(target_node).replace('(n:', '(target:')}
+{generate_match_node_clause(source_node, use_alias=use_source_alias).replace('(n:', '(source:')}
+{generate_match_node_clause(target_node, use_alias=use_target_alias).replace('(n:', '(target:')}
 MERGE (source)-[n:{relationship.type}]->(target)
 {generate_set_property(relationship.nonidentifying_properties, strict_typing)}"""
 
 
 def generate_merge_relationship_load_csv_clause(
-    csv_name: str,
+    source_name: str,
     method: str = "api",
     batch_size: int = 10000,
     relationship: Optional[Relationship] = None,
@@ -186,7 +213,7 @@ def generate_merge_relationship_load_csv_clause(
         raise LoadCSVCypherGenerationError(
             "Unable to construct MERGE relationship clause for LOAD CSV from provided arguments."
         )
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{csv_name}' as row
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{source_name}' as row
 CALL {{
     WITH row
     {standard_clause.strip()}
@@ -194,24 +221,31 @@ CALL {{
 """
 
 
-def cast_value(prop: Property, strict_typing: bool = True) -> str:
+def cast_value(
+    prop: Property, strict_typing: bool = True, use_alias: bool = False
+) -> str:
     """
     format property to be cast to correct type during ingestion.
     """
 
     # take the first val as this is the identifying column
-    csv_mapping = (
-        prop.csv_mapping[0] if isinstance(prop.csv_mapping, list) else prop.csv_mapping
-    )
+    # column_mapping = (
+    #     prop.column_mapping[0] if isinstance(prop.column_mapping, list) else prop.column_mapping
+    # )
 
+    column_mapping = prop.column_mapping if not use_alias else prop.alias
+
+    assert (
+        column_mapping is not None
+    ), f"`column_mapping` can not be None. Found on Property {prop}"
     # escape bad chars
-    csv_mapping = (
-        f"`{csv_mapping}`"
-        if not csv_mapping[0].isalnum() or " " in csv_mapping
-        else csv_mapping
+    column_mapping = (
+        f"`{column_mapping}`"
+        if not column_mapping[0].isalnum() or " " in column_mapping
+        else column_mapping
     )
 
-    base = f"row.{csv_mapping}"
+    base = f"row.{column_mapping}"
 
     if not strict_typing:
         return base

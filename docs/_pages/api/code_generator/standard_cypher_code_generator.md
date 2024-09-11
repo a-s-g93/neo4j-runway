@@ -20,11 +20,11 @@ toc_icon: "fa-solid fa-plane"
     file_output_directory : str, optional
         The location that generated files should be saved
         to.
-    csv_name : str, optional
-        The name of the CSV file. If more than one CSV is
+    source_name : str, optional
+        The name of the data file. If more than one file is
         used, this arg should not be provided.
-        CSV file names should be included within the data
-        model.
+        File names should be included within the data model.
+        By default = ""
     strict_typing : bool, optional
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False).
@@ -47,11 +47,11 @@ This is the base class for code generation. All code
     file_output_directory : str, optional
         The location that generated files should be saved
         to, by default "./"
-    csv_name : str, optional
-        The name of the CSV file. If more than one CSV is
+    source_name : str, optional
+        The name of the data file. If more than one file is
         used, this arg should not be provided.
-        CSV file names should be included within the data
-        model. By default = ""
+        File names should be included within the data model.
+        By default = ""
     strict_typing : bool, optional
         Whether to use the types declared in the data model
         (True), or infer types during ingestion (False). By
@@ -96,4 +96,3 @@ Generate a single String representation of all ingestion
     -------
     str
         The Cypher in String format.
-

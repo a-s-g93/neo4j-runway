@@ -1,0 +1,31 @@
+files:
+- name: got_armies.csv
+  columns:
+  - name: battle_number
+    desc: A unique ID for the battle.
+  - name: king
+    desc: A king participating in the battle.
+  - name: outcome
+    desc: Whether the battle was won or lost.
+  - name: family
+    desc: A significant family in the battle.
+  - name: size
+    desc: The size of the army.
+  - name: commander
+    desc: The commander leading an army in the battle.
+  - name: attacking
+    desc: Whether the army is attacking or not.
+- name: got_battles.csv
+  columns:
+  - name: name
+    desc: The name of the battle.
+  - name: year
+    desc: The year the battle took place.
+  - name: battle_number
+    desc: A unique ID for the battle.
+  - name: summer
+    desc: Whether the battle took place during Summer.
+  - name: location
+    desc: The location of the battle.
+  - name: region
+    desc: The larger region a battle took place in.

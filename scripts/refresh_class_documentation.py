@@ -18,6 +18,7 @@ from neo4j_runway.code_generation import (
 )
 from neo4j_runway.database import Neo4jGraph
 from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
+from neo4j_runway.utils.data import Table, TableCollection
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features
@@ -77,6 +78,16 @@ CLASS_DIR = [
         "class": StandardCypherCodeGenerator,
         "file_path": "api/code_generator/standard_cypher_code_generator.md",
         "summary_file_path": "standard_cypher_code_generator.md",
+    },
+    {
+        "class": Table,
+        "file_path": "api/utils/data/table.md",
+        "summary_file_path": "table.md",
+    },
+    {
+        "class": TableCollection,
+        "file_path": "api/utils/data/table_collection.md",
+        "summary_file_path": "table_collection.md",
     },
 ]
 

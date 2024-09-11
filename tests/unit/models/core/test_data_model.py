@@ -19,24 +19,28 @@ class TestDataModel(unittest.TestCase):
         ]
 
         person_name = Property(
-            name="name", type="str", csv_mapping="name", is_unique=True
+            name="name", type="str", column_mapping="name", is_unique=True
         )
         person_age = Property(
-            name="age", type="str", csv_mapping="age", is_unique=False
+            name="age", type="str", column_mapping="age", is_unique=False
         )
         address_street = Property(
-            name="street", type="str", csv_mapping="street", is_unique=False
+            name="street", type="str", column_mapping="street", is_unique=False
         )
         address_city = Property(
-            name="city", type="str", csv_mapping="city", is_unique=False
+            name="city", type="str", column_mapping="city", is_unique=False
         )
         pet_name = Property(
-            name="name", type="str", csv_mapping="pet_name", is_unique=False
+            name="name", type="str", column_mapping="pet_name", is_unique=False
         )
-        pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
-        toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
+        pet_kind = Property(
+            name="kind", type="str", column_mapping="pet", is_unique=False
+        )
+        toy_name = Property(
+            name="name", type="str", column_mapping="toy", is_unique=True
+        )
         toy_kind = Property(
-            name="kind", type="str", csv_mapping="toy_type", is_unique=False
+            name="kind", type="str", column_mapping="toy_type", is_unique=False
         )
 
         cls.good_nodes = [
@@ -107,7 +111,10 @@ class TestDataModel(unittest.TestCase):
         test_model = DataModel(
             nodes=self.bad_nodes, relationships=self.bad_relationships
         )
-        validation = test_model.validate_model(csv_columns=self.columns)
+        validation = test_model.validate_model(
+            valid_columns={"file": self.columns}, data_dictionary={"file": "dummy"}
+        )
+        print("MESSAGE", validation["message"])
         self.assertFalse(validation["valid"])
         self.assertIn("BAD", validation["message"].split())
         self.assertIn("Dog", validation["message"].split())
@@ -137,11 +144,11 @@ class TestDataModel(unittest.TestCase):
 
         self.assertEqual(list(test_dict.keys()), ["nodes", "relationships", "metadata"])
         self.assertEqual(
-            list(test_dict["nodes"][0].keys()), ["label", "properties", "csv_name"]
+            list(test_dict["nodes"][0].keys()), ["label", "properties", "source_name"]
         )
         self.assertEqual(
             list(test_dict["relationships"][0].keys()),
-            ["type", "properties", "source", "target", "csv_name"],
+            ["type", "properties", "source", "target", "source_name"],
         )
 
     def test_neo4j_naming_conventions(self) -> None:
@@ -152,18 +159,21 @@ class TestDataModel(unittest.TestCase):
         prop1 = Property(
             name="Name",
             type="str",
-            csv_mapping="name",
-            csv_mapping_other="knows_person",
+            column_mapping="name",
+            alias="knows_person",
             is_unique=True,
         )
         prop2 = Property(
-            name="person_age", type="int", csv_mapping="age", is_unique=False
+            name="person_age", type="int", column_mapping="age", is_unique=False
         )
         prop3 = Property(
-            name="CurrentStreet", type="str", csv_mapping="street", is_unique=True
+            name="CurrentStreet", type="str", column_mapping="street", is_unique=True
         )
         prop4 = Property(
-            name="favorite_score", type="int", csv_mapping="favorite", is_unique=False
+            name="favorite_score",
+            type="int",
+            column_mapping="favorite",
+            is_unique=False,
         )
 
         name_conv_nodes = [
@@ -236,17 +246,18 @@ class TestDataModel(unittest.TestCase):
             nodes=data_model_dict["nodes"],
             relationships=data_model_dict["relationships"],
         )
+
         self.maxDiff = None
-        self.assertEqual(data_model.to_yaml(write_file=False), data_model_yaml)
+        self.assertEqual(data_model.to_yaml(write_file=True), data_model_yaml)
 
     def test_data_model_with_multi_csv_from_arrows(self) -> None:
         data_model = DataModel.from_arrows(
             "tests/resources/data_models/people-pets-arrows-multi-csv.json"
         )
 
-        self.assertEqual(data_model.relationships[-1].csv_name, "shelters.csv")
-        self.assertEqual(data_model.relationships[0].csv_name, "pets-arrows.csv")
-        self.assertEqual(data_model.nodes[0].csv_name, "pets-arrows.csv")
+        self.assertEqual(data_model.relationships[-1].source_name, "shelters.csv")
+        self.assertEqual(data_model.relationships[0].source_name, "pets-arrows.csv")
+        self.assertEqual(data_model.nodes[0].source_name, "pets-arrows.csv")
 
     def test_data_model_with_multi_csv_from_solutions_workbench(self) -> None:
         pass

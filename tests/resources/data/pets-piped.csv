@@ -1,0 +1,10 @@
+name|age|pet_name|pet|city|street|toy|toy_type|knows
+Bob|25|Benny|dog|Chicago|Michigan Ave|chuck-it|ball|Ben
+Bob|25|Benny|dog|Chicago|Michigan Ave|chuck-it|ball|Chelsea
+Ben|54|Spike|cat|Milwaukee|1st st|barry|stuffed animal|Bob
+Ben|54|Spike|cat|Milwaukee|1st st|barry|stuffed animal|Chelsea
+Chelsea|30|Mia|dog|Chicago|Clark st|bone|bone|Ben
+Chelsea|30|Mia|dog|Chicago|Clark st|bone|bone|Bob
+Amy|77|Donald|cat|Naperville|Main st|scratch pole|scratch pole|Ben
+Dom|23|Gerald|dog|Chicago|Clark st|duck|stuffed animal|Bob
+Dom|23|Gerald|dog|Chicago|Clark st|duck|stuffed animal|Chelsea

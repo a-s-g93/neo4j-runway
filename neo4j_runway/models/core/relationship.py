@@ -15,10 +15,10 @@ class Relationship(BaseModel):
     """
 
     type: str
-    properties: List[Property] = []
+    properties: List[Property] = list()
     source: str
     target: str
-    csv_name: str = ""
+    source_name: str = "file"
 
     def __init__(
         self,
@@ -26,31 +26,31 @@ class Relationship(BaseModel):
         source: str,
         target: str,
         properties: List[Property] = [],
-        csv_name: str = "",
+        source_name: str = "file",
     ) -> None:
         super().__init__(
             type=type,
             source=source,
             target=target,
             properties=properties,
-            csv_name=csv_name,
+            source_name=source_name,
         )
 
         if self.properties is None:
             self.properties = []
 
-    @field_validator("csv_name")
-    def validate_csv_name(cls, v: str) -> str:
-        """
-        Validate the CSV name provided.
-        """
+    # @field_validator("source_name")
+    # def validate_source_name(cls, v: str) -> str:
+    #     """
+    #     Validate the CSV name provided.
+    #     """
 
-        if v == "":
-            return v
-        else:
-            if not v.endswith(".csv"):
-                return v + ".csv"
-        return v
+    #     if v == "":
+    #         return v
+    #     else:
+    #         if not v.endswith(".csv"):
+    #             return v + ".csv"
+    #     return v
 
     @property
     def property_names(self) -> List[str]:
@@ -66,7 +66,7 @@ class Relationship(BaseModel):
         Map of properties to their respective csv columns.
         """
 
-        return {prop.name: prop.csv_mapping for prop in self.properties}
+        return {prop.name: prop.column_mapping for prop in self.properties}
 
     @property
     def unique_properties(self) -> List[Property]:
@@ -83,7 +83,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.is_unique
+            prop.name: prop.column_mapping for prop in self.properties if prop.is_unique
         }
 
     @property
@@ -101,7 +101,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique
         }
@@ -121,7 +121,9 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping for prop in self.properties if prop.part_of_key
+            prop.name: prop.column_mapping
+            for prop in self.properties
+            if prop.part_of_key
         }
 
     @property
@@ -131,7 +133,7 @@ class Relationship(BaseModel):
         """
 
         return {
-            prop.name: prop.csv_mapping
+            prop.name: prop.column_mapping
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         }
@@ -153,17 +155,34 @@ class Relationship(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_properties(self, csv_columns: List[str]) -> List[Optional[str]]:
+    def validate_source_name(
+        self, valid_columns: Dict[str, List[str]]
+    ) -> List[Optional[str]]:
+        # skip for single file input
+        if len(valid_columns.keys()) == 1 or self.source_name in list(
+            valid_columns.keys()
+        ):
+            return []
+        else:
+            return [
+                f"Relationship {self.type} has source_name {self.source_name} which is not in the provided file list: {list(valid_columns.keys())}."
+            ]
+
+    def validate_properties(
+        self, valid_columns: Dict[str, List[str]]
+    ) -> List[Optional[str]]:
         errors: List[Optional[str]] = []
         if self.properties is not None:
             for prop in self.properties:
-                if prop.csv_mapping not in csv_columns:
+                if prop.column_mapping not in valid_columns.get(
+                    self.source_name, list()
+                ):
                     errors.append(
-                        f"The relationship {self.type} the property {prop.name} mapped to csv column {prop.csv_mapping} which does not exist. {prop} should be edited or removed from relationship {self.type}."
+                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. {prop.name} Remove {prop.name} from relationship {self.type}."
                     )
                 if prop.is_unique and prop.part_of_key:
                     errors.append(
-                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Assume uniqueness and set part_of_key to False."
+                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Remove the relationship key identifier."
                     )
 
         if len(self.relationship_keys) == 1:
@@ -183,7 +202,7 @@ class Relationship(BaseModel):
 
         props = {
             x.name: (
-                x.csv_mapping + " | " + x.type + " | unique"
+                x.column_mapping + " | " + x.type + " | unique"
                 if x.is_unique
                 else "" + " | nodekey"
                 if x.is_unique
@@ -217,7 +236,7 @@ class Relationship(BaseModel):
             if k != "csv"
         ]
 
-        csv_name = (
+        source_name = (
             arrows_relationship.properties["csv"]
             if "csv" in arrows_relationship.properties.keys()
             else ""
@@ -228,7 +247,7 @@ class Relationship(BaseModel):
             source=node_id_to_label_map[arrows_relationship.fromId],
             target=node_id_to_label_map[arrows_relationship.toId],
             properties=props,
-            csv_name=csv_name,
+            source_name=source_name,
         )
 
     def to_solutions_workbench(self, key: str) -> "SolutionsWorkbenchRelationship":
@@ -242,7 +261,7 @@ class Relationship(BaseModel):
             key=key,
             type=self.type,
             properties=props,
-            description=self.csv_name,
+            description=self.source_name,
             startNodeLabelKey=self.source,
             endNodeLabelKey=self.target,
         )
@@ -269,7 +288,7 @@ class Relationship(BaseModel):
         return cls(
             type=solutions_workbench_relationship.type,
             properties=props,
-            csv_name=solutions_workbench_relationship.description,
+            source_name=solutions_workbench_relationship.description,
             source=node_id_to_label_map[
                 solutions_workbench_relationship.startNodeLabelKey
             ],

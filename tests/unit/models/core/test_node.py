@@ -8,10 +8,10 @@ class TestNode(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.person_name = Property(
-            name="name", type="str", csv_mapping="first_name", is_unique=True
+            name="name", type="str", column_mapping="first_name", is_unique=True
         )
         cls.person_age = Property(
-            name="age", type="str", csv_mapping="age", is_unique=False
+            name="age", type="str", column_mapping="age", is_unique=False
         )
 
     def test_init(self) -> None:
@@ -98,16 +98,89 @@ class TestNode(unittest.TestCase):
                 Property(
                     name="nkey",
                     type="str",
-                    csv_mapping="nkey",
+                    column_mapping="nkey",
                     is_unique=False,
                     part_of_key=True,
                 )
             ],
         )
 
-        errors = node.validate_properties(csv_columns=["nkey"])
+        errors = node.validate_properties(valid_columns={"file": ["nkey"]})
         message = "The node nodeA has a node key on only one property nkey. Node keys must exist on two or more properties."
         self.assertIn(message, errors)
+
+    def test_validate_wrong_source_file_name_multifile(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=False,
+                    part_of_key=True,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        errors = node.validate_source_name(
+            valid_columns={"a.csv": ["nkey"], "b.csv": ["col"]}
+        )
+        message = "Node nodeA has source_name source.csv which is not in the provided file list: ['a.csv', 'b.csv']."
+        self.assertEqual(len(errors), 1)
+        self.assertIn(message, errors)
+
+    def test_validate_wrong_source_file_name_singlefile(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=False,
+                    part_of_key=True,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        errors = node.validate_source_name(valid_columns={"a.csv": ["nkey"]})
+        self.assertEqual(len(errors), 0)
+
+    def test_enforce_uniqueness_pass(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=True,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        self.assertEqual(len(node.enforce_uniqueness()), 0)
+
+    def test_enforce_uniqueness_fail(self) -> None:
+        node = Node(
+            label="nodeA",
+            properties=[
+                Property(
+                    name="nkey",
+                    type="str",
+                    column_mapping="nkey",
+                    is_unique=False,
+                )
+            ],
+            source_name="source.csv",
+        )
+
+        self.assertIsInstance(node.enforce_uniqueness(), list)
+        self.assertEqual(len(node.enforce_uniqueness()), 1)
 
 
 if __name__ == "__main__":
