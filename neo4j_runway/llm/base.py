@@ -36,7 +36,6 @@ class BaseDiscoveryLLM(ABC):
         client: Instructor,
         is_async: bool = False,
         model_params: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
     ) -> None:
         """
         The base DiscoveryLLM class.
@@ -51,8 +50,6 @@ class BaseDiscoveryLLM(ABC):
             An LLM client patched with Instructor.
         is_async : bool
             Whether async calls may be made, by default False
-        kwargs : Any
-            Parameters to pass to the model during initialization.
         """
 
         self.model_name = model_name
@@ -108,7 +105,6 @@ class BaseDataModelingLLM(ABC):
         model_name: str,
         client: Instructor,
         model_params: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
     ) -> None:
         """
         The base DataModelingLLM class.
@@ -121,8 +117,6 @@ class BaseDataModelingLLM(ABC):
             Any parameters to pass to the model, by default None
         client : Instructor
             An LLM client patched with Instructor.
-        kwargs : Any
-             Parameters to pass to the model during initialization.
         """
 
         self.model_name = model_name

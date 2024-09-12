@@ -248,7 +248,7 @@ class TestDataModel(unittest.TestCase):
         )
 
         self.maxDiff = None
-        self.assertEqual(data_model.to_yaml(write_file=True), data_model_yaml)
+        self.assertEqual(data_model.to_yaml(write_file=False), data_model_yaml)
 
     def test_data_model_with_multi_csv_from_arrows(self) -> None:
         data_model = DataModel.from_arrows(

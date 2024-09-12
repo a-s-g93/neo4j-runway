@@ -4,7 +4,7 @@ This file contains the LLM module that interfaces with an OpenAI LLM for data mo
 """
 
 import os
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 try:
     import openai
@@ -26,10 +26,8 @@ class OpenAIDataModelingLLM(BaseDataModelingLLM):
         The name of the model.
     model_params : Optional[dict[str, Any]], optional
         Any parameters to pass to the model.
-    open_ai_key : Optional[str], optional
-        Your OpenAI API key if it is not declared in an environment variable.
-    kwargs : Any
-        Parameters to pass to the model during initialization.
+    client : Instructor
+            An LLM client patched with Instructor.
     """
 
     def __init__(
@@ -37,7 +35,7 @@ class OpenAIDataModelingLLM(BaseDataModelingLLM):
         model_name: str = "gpt-4o-2024-05-13",
         model_params: Optional[dict[str, Any]] = None,
         open_ai_key: Optional[str] = None,
-        **kwargs: Any,
+        llm_init_params: Dict[str, Any] = dict(),
     ) -> None:
         """
         Interface for interacting with OpenAI LLMs for data modeling services.
@@ -47,11 +45,11 @@ class OpenAIDataModelingLLM(BaseDataModelingLLM):
         model_name : str
             The name of the model. By default gpt-4o-2024-05-13
         model_params : Optional[dict[str, Any]], optional
-            Any parameters to pass to the model, by default None
+            Any parameters to pass to the model for a request, by default None
         open_ai_key : Optional[str], optional
             Your OpenAI API key if it is not declared in an environment variable. By default None
-        kwargs : Any
-            Parameters to pass to the model during initialization.
+        llm_init_params : Dict[str, Any], optional
+            Parameters to pass to the model during initialization, by default dict()
         """
 
         if openai is None:
@@ -67,7 +65,7 @@ class OpenAIDataModelingLLM(BaseDataModelingLLM):
                     if open_ai_key is not None
                     else os.environ.get("OPENAI_API_KEY")
                 ),
-                **kwargs,
+                **llm_init_params,
             )
         )
 
