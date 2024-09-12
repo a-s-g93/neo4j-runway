@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from neo4j_runway.modeler import GraphDataModeler
+from neo4j_runway.warnings import ExperimentalFeatureWarning
 
 data_dictionary = {
     "a.csv": {"a": "test", "b": "test2"},
@@ -16,7 +17,7 @@ data_dictionary = {
 def test_create_initial_model(
     mock_llm: MagicMock,
 ) -> None:
-    with pytest.warns(UserWarning):
+    with pytest.warns((UserWarning, ExperimentalFeatureWarning)):
         gdm = GraphDataModeler(llm=mock_llm, data_dictionary=data_dictionary)
 
     gdm.create_initial_model()
@@ -28,7 +29,7 @@ def test_iterate_model(
     mock_llm: MagicMock,
     mock_data_model: MagicMock,
 ) -> None:
-    with pytest.warns(UserWarning):
+    with pytest.warns((UserWarning, ExperimentalFeatureWarning)):
         gdm = GraphDataModeler(llm=mock_llm, data_dictionary=data_dictionary)
 
     gdm._initial_model_created = True

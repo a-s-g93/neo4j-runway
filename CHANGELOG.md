@@ -6,7 +6,12 @@
 
 ### Changed
 
+* Removed `kwargs` from LLM classes and replaced with `llm_init_params` to provide parameters that should be passed to the LLM constructor.
+
 ### Added
+
+* Azure OpenAI integrations for Discovery and Data Modeling: `AzureOpenAIDiscoveryLLM` and `AzureOpenAIDataModelingLLM`
+* Added example that used Azure OpenAI models
 
 ## 0.10.0
 

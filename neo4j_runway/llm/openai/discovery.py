@@ -3,7 +3,7 @@ This file contains the LLM module that interfaces with an OpenAI LLM for data di
 """
 
 import os
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import instructor
 
@@ -25,12 +25,10 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         The name of the model.
     model_params : Optional[dict[str, Any]], optional
         Any parameters to pass to the model.
-    open_ai_key: Union[str, None], optional
-        Your OpenAI API key if it is not declared in an environment variable.
     is_async : bool
         Whether the client supports asynchronous API calls.
-    kwargs : Any
-        Parameters to pass to the model during initialization.
+    client : Instructor
+            An LLM client patched with Instructor.
     """
 
     def __init__(
@@ -39,7 +37,7 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         model_params: Optional[dict[str, Any]] = None,
         open_ai_key: Optional[str] = None,
         enable_async: bool = False,
-        **kwargs: Any,
+        llm_init_params: Dict[str, Any] = dict(),
     ) -> None:
         """
         Interface for interacting with OpenAI LLMs for data discovery.
@@ -49,13 +47,13 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
         model_name : str
             The name of the model. By default gpt-4o-2024-05-13
         model_params : Optional[dict[str, Any]], optional
-            Any parameters to pass to the model, by default None
+            Any parameters to pass to the model for a request, by default None
         open_ai_key: Union[str, None], optional
             Your OpenAI API key if it is not declared in an environment variable. By default None
         enable_async : bool
             Whether to allow asynchronous LLM calls. This may be utilized in multi-csv input to improve response speed. By default False
-        kwargs : Any
-            Parameters to pass to the model during initialization.
+        llm_init_params : Dict[str, Any], optional
+            Parameters to pass to the model during initialization, by default dict()
         """
 
         if openai is None:
@@ -74,7 +72,7 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
                         if open_ai_key is not None
                         else os.environ.get("OPENAI_API_KEY")
                     ),
-                    **kwargs,
+                    **llm_init_params,
                 )
             )
         else:
@@ -85,7 +83,7 @@ class OpenAIDiscoveryLLM(BaseDiscoveryLLM):
                         if open_ai_key is not None
                         else os.environ.get("OPENAI_API_KEY")
                     ),
-                    **kwargs,
+                    **llm_init_params,
                 )
             )
 
