@@ -34,3 +34,25 @@ def format_pyingest_pre_or_post_ingest_code(data: Union[str, List[str], None]) -
         return res
     else:
         raise ValueError(f"Unable to parse ingest code. data: {data}")
+
+
+def format_pyneoinstance_pre_or_post_ingest_code(
+    data: Union[str, List[str], None],
+) -> List[str]:
+    """
+    Format the given post ingest code into a String to be injected into the
+    PyNeoInstance yaml file.
+    """
+
+    if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
+        return data.split(";")[:-1]
+
+    elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
+        with open(data, "r") as f:
+            cql_file = f.read()
+        return cql_file.split(";")[:-1]
+
+    elif isinstance(data, list):
+        return data
+    else:
+        raise ValueError(f"Unable to parse ingest code. data: {data}")

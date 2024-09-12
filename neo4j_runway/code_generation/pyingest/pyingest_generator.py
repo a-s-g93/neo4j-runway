@@ -201,7 +201,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
         Parameters
         ----------
         file_name : str, optional
-            Name of the file, by default "pyingest_config"
+            Name of the file, by default "pyingest_config.yaml"
         """
 
         create_directory(self.file_output_dir + file_name)
@@ -233,6 +233,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
             + "basepath: ./\n\n"
             + "pre_ingest:\n"
         )
+
         if self.pre_ingest_code:
             pre_ingest_code_string = format_pyingest_pre_or_post_ingest_code(
                 data=self.pre_ingest_code
@@ -241,6 +242,7 @@ class PyIngestConfigGenerator(BaseCodeGenerator):
 
         for constraint in self._constraints:
             to_return += f"  - {self._constraints[constraint]}"
+
         to_return += config_dump
 
         if self.post_ingest_code:

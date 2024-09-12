@@ -74,6 +74,8 @@ class BaseCodeGenerator(ABC):
 
         self._constraints: Dict[str, str] = dict()
         self._cypher: Dict[str, Dict[str, Any]] = dict()
+        self._nodes: Dict[str, Dict[str, Any]] = dict()
+        self._relationships: Dict[str, Dict[str, Any]] = dict()
 
         self._generate_base_cypher(strict_typing=self.strict_typing)
 
@@ -103,7 +105,7 @@ class BaseCodeGenerator(ABC):
                 )
 
             # add to cypher map
-            self._cypher[node.label] = {
+            self._cypher[node.label] = self._nodes[node.label] = {
                 "cypher": literal_unicode(
                     generate_merge_node_clause_standard(
                         node=node, strict_typing=strict_typing
@@ -137,7 +139,9 @@ class BaseCodeGenerator(ABC):
 
             source = self.data_model.node_dict[rel.source]
             target = self.data_model.node_dict[rel.target]
-            self._cypher[f"{rel.type}_{rel.source}_{rel.target}"] = {
+            self._cypher[f"{rel.type}_{rel.source}_{rel.target}"] = self._relationships[
+                f"{rel.type}_{rel.source}_{rel.target}"
+            ] = {
                 "cypher": literal_unicode(
                     generate_merge_relationship_clause_standard(
                         relationship=rel,
