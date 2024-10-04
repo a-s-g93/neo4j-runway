@@ -45,7 +45,9 @@ def format_pyneoinstance_pre_or_post_ingest_code(
     """
 
     if isinstance(data, str) and ".cypher" not in data and ".cql" not in data:
-        return data.split(";")[:-1]
+        # print([x.lstrip().replace("\n", "\n    ") for x in data.split(";")[:-1]])
+        return [x.strip() for x in data.split(";")[:-1]]
+        # return data.split(";")[:-1]
 
     elif isinstance(data, str) and (".cypher" in data or ".cql" in data):
         with open(data, "r") as f:

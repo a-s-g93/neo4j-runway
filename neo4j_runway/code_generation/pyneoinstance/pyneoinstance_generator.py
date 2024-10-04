@@ -110,7 +110,7 @@ class PyNeoInstanceConfigGenerator(BaseCodeGenerator):
         self,
     ) -> str:
         """
-        Generate the PyIngest yaml in string format.
+        Generate the PyNeoInstance yaml in string format.
 
         Returns
         -------
@@ -157,4 +157,4 @@ class PyNeoInstanceConfigGenerator(BaseCodeGenerator):
             "queries": queries,
         }
 
-        return yaml.dump(file_dict, sort_keys=False)
+        return yaml.dump(file_dict, sort_keys=False, default_style="|")
