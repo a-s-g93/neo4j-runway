@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from ...resources.mappings import (
     TYPES_MAP_NEO4J_TO_PYTHON,
@@ -61,6 +61,12 @@ class Property(BaseModel):
             return v
         else:
             raise ValueError(f"Invalid Property type given: {v}")
+
+    @model_validator(mode="after")
+    def validate_is_unique_and_part_of_key(self) -> "Property":
+        if self.is_unique and self.part_of_key:
+            self.part_of_key = False
+        return self
 
     @property
     def neo4j_type(self) -> str:

@@ -115,69 +115,6 @@ class TestRelationship(unittest.TestCase):
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
 
-    def test_validate_relationship_keys(self) -> None:
-        rel = Relationship(
-            type="relA",
-            properties=[
-                Property(
-                    name="rkey",
-                    type="str",
-                    column_mapping="rkey",
-                    is_unique=False,
-                    part_of_key=True,
-                )
-            ],
-            source="A",
-            target="B",
-        )
-
-        errors = rel.validate_properties(valid_columns={"file": ["rkey"]})
-        message = "The relationship relA has a relationship key on only one property rkey. Relationship keys must exist on two or more properties."
-        self.assertIn(message, errors)
-
-    def test_validate_wrong_source_file_name_multifile(self) -> None:
-        rel = Relationship(
-            type="relA",
-            properties=[
-                Property(
-                    name="rkey",
-                    type="str",
-                    column_mapping="rkey",
-                    is_unique=False,
-                    part_of_key=True,
-                )
-            ],
-            source="A",
-            target="B",
-            source_name="source.csv",
-        )
-
-        errors = rel.validate_source_name(
-            valid_columns={"a.csv": ["nkey"], "b.csv": ["col"]}
-        )
-        message = "Relationship relA has source_name source.csv which is not in the provided file list: ['a.csv', 'b.csv']."
-        self.assertEqual(len(errors), 1)
-        self.assertIn(message, errors)
-
-    def test_validate_wrong_source_file_name_singlefile(self) -> None:
-        rel = Relationship(
-            type="relA",
-            properties=[
-                Property(
-                    name="rkey",
-                    type="str",
-                    column_mapping="rkey",
-                    is_unique=False,
-                    part_of_key=True,
-                )
-            ],
-            source="A",
-            target="B",
-        )
-
-        errors = rel.validate_source_name(valid_columns={"a.csv": ["nkey"]})
-        self.assertEqual(len(errors), 0)
-
 
 if __name__ == "__main__":
     unittest.main()

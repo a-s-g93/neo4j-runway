@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 from graphviz import Digraph
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationInfo, model_validator
 
 from ...exceptions import (
     InvalidArrowsDataModelError,
@@ -132,73 +132,80 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    def validate_model(
-        self,
-        valid_columns: Dict[str, List[str]],
-        data_dictionary: Dict[str, Any],
-        allow_duplicate_properties: bool = False,
-        enforce_uniqueness: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Perform additional validation on the data model.
+    # def validate_model(
+    #     self,
+    #     valid_columns: Dict[str, List[str]],
+    #     data_dictionary: Dict[str, Any],
+    #     allow_duplicate_properties: bool = False,
+    #     enforce_uniqueness: bool = True,
+    # ) -> Dict[str, Any]:
+    #     """
+    #     Perform additional validation on the data model.
 
-        Parameters
-        ----------
-        valid_columns : List[str]
-            The CSV columns that are allowed in the data model.
-        data_dictionary : Dict[str, Any]
-            A data dictionary to validate against.
-        allow_duplicate_properties : bool, optional
-            Whether to allow identical properties to exist on multiple node labels or relationship types, by default False
-        enforce_uniqueness : bool, optional
-            Whether to error if a node has no unique identifiers (unique or node key).
-            Setting this to false may be detrimental during code generation and ingestion. By default True
+    #     Parameters
+    #     ----------
+    #     valid_columns : List[str]
+    #         The CSV columns that are allowed in the data model.
+    #     data_dictionary : Dict[str, Any]
+    #         A data dictionary to validate against.
+    #     allow_duplicate_properties : bool, optional
+    #         Whether to allow identical properties to exist on multiple node labels or relationship types, by default False
+    #     enforce_uniqueness : bool, optional
+    #         Whether to error if a node has no unique identifiers (unique or node key).
+    #         Setting this to false may be detrimental during code generation and ingestion. By default True
 
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
-        """
+    #     Returns
+    #     -------
+    #     Dict[str, Any]
+    #         A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
+    #     """
 
-        errors = list()
+    # errors = list()
 
-        for node in self.nodes:
-            errors += node.validate_source_name(valid_columns=valid_columns)
-            errors += node.validate_properties(valid_columns=valid_columns)
-            if enforce_uniqueness:
-                errors += node.enforce_uniqueness()
+    # for node in self.nodes:
+    #     errors += node.validate_source_name(valid_columns=valid_columns)
+    #     errors += node.validate_properties(valid_columns=valid_columns)
+    #     if enforce_uniqueness:
+    #         errors += node.enforce_uniqueness()
 
-        for rel in self.relationships:
-            errors += rel.validate_source_name(valid_columns=valid_columns)
-            errors += rel.validate_properties(valid_columns=valid_columns)
+    # for rel in self.relationships:
+    #     errors += rel.validate_source_name(valid_columns=valid_columns)
+    #     errors += rel.validate_properties(valid_columns=valid_columns)
 
-        errors += self._validate_relationship_sources_and_targets(
-            valid_columns=valid_columns, data_dictionary=data_dictionary
-        )
+    # errors += self._validate_relationship_sources_and_targets(
+    #     valid_columns=valid_columns, data_dictionary=data_dictionary
+    # )
 
-        if not allow_duplicate_properties:
-            errors += self._validate_csv_features_used_only_once()
+    # if not allow_duplicate_properties:
+    #     errors += self._validate_csv_features_used_only_once()
 
-        if len(errors) > 0:
-            message = create_data_model_errors_cot_prompt(
-                data_model=self,
-                errors=errors,  # type: ignore[arg-type]
-                valid_columns=valid_columns,
-                multifile=len(valid_columns.keys()) > 1,
-                data_dictionary=data_dictionary,
-            )
+    # if len(errors) > 0:
+    #     message = create_data_model_errors_cot_prompt(
+    #         data_model=self,
+    #         errors=errors,  # type: ignore[arg-type]
+    #         valid_columns=valid_columns,
+    #         multifile=len(valid_columns.keys()) > 1,
+    #         data_dictionary=data_dictionary,
+    #     )
 
-            return {"valid": False, "message": message, "errors": errors}
+    #     return {"valid": False, "message": message, "errors": errors}
 
-        return {"valid": True, "message": "", "errors": list()}
+    # return {"valid": True, "message": "", "errors": list()}
 
-    def _validate_relationship_sources_and_targets(
-        self, valid_columns: Dict[str, List[str]], data_dictionary: Dict[str, Any]
-    ) -> List[str]:
+    @model_validator(mode="after")
+    def validate_relationship_sources_and_targets(
+        self, info: ValidationInfo
+    ) -> "DataModel":
         """
         Validate the source and target of a relationship exist in the model nodes.
         """
 
+        valid_columns: Dict[str, List[str]] = (
+            info.context.get("valid_columns") if info.context is not None else dict()
+        )
+        data_dictionary: Dict[str, Any] = (
+            info.context.get("data_dictionary") if info.context is not None else dict()
+        )
         errors = list()
 
         for rel in self.relationships:
@@ -251,7 +258,7 @@ class DataModel(BaseModel):
                             f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for unique property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary for possible alias."
                         )
 
-        return errors
+        return self
 
     def _validate_csv_features_used_only_once(self) -> List[str]:
         """

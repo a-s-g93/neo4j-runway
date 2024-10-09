@@ -1,7 +1,15 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from pydantic import BaseModel, field_validator
+from pydantic import (
+    BaseModel,
+    ValidationError,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
+from pydantic_core import InitErrorDetails, PydanticCustomError
 
+from ...exceptions import InvalidSourceNameError
 from ..arrows import ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
@@ -19,38 +27,6 @@ class Relationship(BaseModel):
     source: str
     target: str
     source_name: str = "file"
-
-    def __init__(
-        self,
-        type: str,
-        source: str,
-        target: str,
-        properties: List[Property] = [],
-        source_name: str = "file",
-    ) -> None:
-        super().__init__(
-            type=type,
-            source=source,
-            target=target,
-            properties=properties,
-            source_name=source_name,
-        )
-
-        if self.properties is None:
-            self.properties = []
-
-    # @field_validator("source_name")
-    # def validate_source_name(cls, v: str) -> str:
-    #     """
-    #     Validate the CSV name provided.
-    #     """
-
-    #     if v == "":
-    #         return v
-    #     else:
-    #         if not v.endswith(".csv"):
-    #             return v + ".csv"
-    #     return v
 
     @property
     def property_names(self) -> List[str]:
@@ -155,45 +131,52 @@ class Relationship(BaseModel):
             if not prop.is_unique and not prop.part_of_key
         ]
 
-    def validate_source_name(
-        self, valid_columns: Dict[str, List[str]]
-    ) -> List[Optional[str]]:
+    @field_validator("source_name")
+    @classmethod
+    def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
+        sources: List[str] = (
+            list(info.context.get("valid_columns", dict()).keys())
+            if info.context is not None
+            else list()
+        )
+
         # skip for single file input
-        if len(valid_columns.keys()) == 1 or self.source_name in list(
-            valid_columns.keys()
-        ):
-            return []
+        if len(sources) == 1:
+            return sources[0]
+        elif source_name in sources:
+            return source_name
         else:
-            return [
-                f"Relationship {self.type} has source_name {self.source_name} which is not in the provided file list: {list(valid_columns.keys())}."
-            ]
+            raise InvalidSourceNameError(
+                f"{source_name} is not in the provided file list: {sources}."
+            )
 
-    def validate_properties(
-        self, valid_columns: Dict[str, List[str]]
-    ) -> List[Optional[str]]:
-        errors: List[Optional[str]] = []
-        if self.properties is not None:
-            for prop in self.properties:
-                if prop.column_mapping not in valid_columns.get(
-                    self.source_name, list()
-                ):
-                    errors.append(
-                        f"The relationship {self.type} the property {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. {prop.name} Remove {prop.name} from relationship {self.type}."
-                    )
-                if prop.is_unique and prop.part_of_key:
-                    errors.append(
-                        f"The relationship {self.type} has the property {prop.name} identified as unique and a relationship key. Remove the relationship key identifier."
-                    )
-
-        if len(self.relationship_keys) == 1:
-            # only write error if this node is NOT also labeled as unique
-            if self.relationship_keys[0].name not in [
-                prop.name for prop in self.unique_properties
-            ]:
+    @model_validator(mode="after")
+    def validate_property_mappings(self, info: ValidationInfo) -> "Relationship":
+        valid_columns: Dict[str, List[str]] = (
+            info.context.get("valid_columns") if info.context is not None else dict()
+        )
+        errors: List[InitErrorDetails] = list()
+        for prop in self.properties:
+            if prop.column_mapping not in valid_columns.get(self.source_name, list()):
                 errors.append(
-                    f"The relationship {self.type} has a relationship key on only one property {self.relationship_keys[0].name}. Relationship keys must exist on two or more properties."
+                    InitErrorDetails(
+                        type=PydanticCustomError(
+                            "invalid_column_mapping_error",
+                            f"The `Relationship` {self.type} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Relationship` {self.type}.",
+                        ),
+                        loc=("properties",),
+                        input=self.properties,
+                        ctx={},
+                    )
                 )
-        return errors
+
+        if errors:
+            raise ValidationError.from_exception_data(
+                title=self.__class__.__name__,
+                line_errors=errors,
+            )
+
+        return self
 
     def to_arrows(self) -> ArrowsRelationship:
         """

@@ -238,12 +238,13 @@ class BaseDataModelingLLM(ABC):
                 **self.model_params,
             )
 
-            validation = response.validate_model(
-                valid_columns=valid_columns,
-                data_dictionary=data_dictionary,
-                allow_duplicate_properties=allow_duplicate_properties,
-                enforce_uniqueness=enforce_uniqueness,
-            )
+            # validation = response.validate_model(
+            #     valid_columns=valid_columns,
+            #     data_dictionary=data_dictionary,
+            #     allow_duplicate_properties=allow_duplicate_properties,
+            #     enforce_uniqueness=enforce_uniqueness,
+            # )
+            validation: Dict[str, Any] = dict()
             if not validation["valid"]:
                 print(
                     "validation failed\nNumber of Errors: ",

@@ -1,7 +1,19 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, field_validator
+from pydantic import (
+    BaseModel,
+    ValidationError,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
+from pydantic_core import InitErrorDetails, PydanticCustomError
 
+from ...exceptions import (
+    InvalidColumnMappingError,
+    InvalidSourceNameError,
+    NonuniqueNodeError,
+)
 from ..arrows import ArrowsNode
 from ..solutions_workbench import SolutionsWorkbenchNode
 from .property import Property
@@ -25,22 +37,22 @@ class Node(BaseModel):
     properties: List[Property]
     source_name: str = "file"
 
-    def __init__(
-        self, label: str, properties: List[Property] = list(), source_name: str = "file"
-    ) -> None:
-        super().__init__(label=label, properties=properties, source_name=source_name)
-        """
-        Standard Node representation.
+    # def __init__(
+    #     self, label: str, properties: List[Property] = list(), source_name: str = "file"
+    # ) -> None:
+    #     super().__init__(label=label, properties=properties, source_name=source_name)
+    #     """
+    #     Standard Node representation.
 
-        Parameters
-        ----------
-        label : str
-            The node label.
-        properties : List[Property]
-            A list of the properties within the node.
-        source_name : str, optional
-            The name of the file containing the node's information, by default = "file"
-        """
+    #     Parameters
+    #     ----------
+    #     label : str
+    #         The node label.
+    #     properties : List[Property]
+    #         A list of the properties within the node.
+    #     source_name : str, optional
+    #         The name of the file containing the node's information, by default = "file"
+    #     """
 
     # @field_validator("source_name")
     # def validate_source_name(cls, v: str) -> str:
@@ -229,48 +241,65 @@ class Node(BaseModel):
 
         return [p for p in self.properties if p.is_unique and p.alias is not None]
 
-    def validate_source_name(
-        self, valid_columns: Dict[str, List[str]]
-    ) -> List[Optional[str]]:
+    @field_validator("source_name")
+    @classmethod
+    def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
+        sources: List[str] = (
+            list(info.context.get("valid_columns", dict()).keys())
+            if info.context is not None
+            else list()
+        )
+
         # skip for single file input
-        if len(valid_columns.keys()) == 1 or self.source_name in valid_columns.keys():
-            return []
-
+        if len(sources) == 1:
+            return sources[0]
+        elif source_name in sources:
+            return source_name
         else:
-            return [
-                f"Node {self.label} has source_name {self.source_name} which is not in the provided file list: {list(valid_columns.keys())}."
-            ]
+            raise InvalidSourceNameError(
+                f"{source_name} is not in the provided file list: {sources}."
+            )
 
-    def validate_properties(
-        self, valid_columns: Dict[str, List[str]]
-    ) -> List[Optional[str]]:
-        errors: List[Optional[str]] = list()
-
+    @model_validator(mode="after")
+    def validate_property_mappings(self, info: ValidationInfo) -> "Node":
+        valid_columns: Dict[str, List[str]] = (
+            info.context.get("valid_columns") if info.context is not None else dict()
+        )
+        errors: List[InitErrorDetails] = list()
         for prop in self.properties:
             if prop.column_mapping not in valid_columns.get(self.source_name, list()):
                 errors.append(
-                    f"The node {self.label} has the property {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from node {self.label}."
-                )
-            if prop.is_unique and prop.part_of_key:
-                errors.append(
-                    f"The node {self.label} has the property {prop.name} identified as unique and a node key. Remove the node key identifier."
+                    InitErrorDetails(
+                        type=PydanticCustomError(
+                            "invalid_column_mapping_error",
+                            f"The `Node` {self.label} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Node` {self.label}.",
+                        ),
+                        loc=("properties",),
+                        input=self.properties,
+                        ctx={},
+                    )
                 )
 
-        if len(self.node_keys) == 1:
-            # only write error if this node is NOT also labeled as unique
-            if self.node_keys[0].name not in [
-                prop.name for prop in self.unique_properties
-            ]:
-                errors.append(
-                    f"The node {self.label} has a node key on only one property {self.node_keys[0].name}. Node keys must exist on two or more properties."
-                )
-        return errors
+        if errors:
+            raise ValidationError.from_exception_data(
+                title=self.__class__.__name__,
+                line_errors=errors,
+            )
 
-    def enforce_uniqueness(self) -> List[Optional[str]]:
-        if len(self.unique_properties) == 0 and len(self.node_keys) < 2:
-            # keep it simple by asking only for a unique property, not to create a node key combo
-            return [f"The node {self.label} must contain a unique property."]
-        return list()
+        return self
+
+    @model_validator(mode="after")
+    def enforce_uniqueness(self, info: ValidationInfo) -> "Node":
+        enforce_uniqueness: bool = (
+            info.context.get("enforce_uniqueness") if info.context is not None else True
+        )
+        if enforce_uniqueness:
+            if len(self.unique_properties) == 0 and len(self.node_keys) < 2:
+                # keep it simple by asking only for a unique property, not to create a node key combo
+                raise NonuniqueNodeError(
+                    f"The node {self.label} must contain a unique `Property` in `properties`."
+                )
+        return self
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:
         """
