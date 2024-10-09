@@ -217,9 +217,11 @@ class DataModel(BaseModel):
         ) -> Union[List[Property], Property, Node, str]:
             """
             Retrieve:
-                The unique Property on a node that is missing an alias
+                The unique Property or Properties on a node that is missing an alias
                 OR
                 The Node of interest, if no Properties are unique
+                OR
+                An empty String if search fails
             """
             node = self.node_dict.get(node_label)
             if node is not None:
