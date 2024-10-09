@@ -76,5 +76,5 @@ def test_validate_property_mappings_two_props(
     ]
     with pytest.raises(ValidationError) as e:
         Node.model_validate(node_data, context=node_context)
-        assert "wrong1" in str(e)
-        assert "wrong2" in str(e)
+    assert "wrong1" in str(e.value)
+    assert "wrong2" in str(e.value)

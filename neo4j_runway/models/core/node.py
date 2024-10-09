@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from pydantic import (
     BaseModel,
@@ -10,7 +10,6 @@ from pydantic import (
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
 from ...exceptions import (
-    InvalidColumnMappingError,
     InvalidSourceNameError,
     NonuniqueNodeError,
 )
@@ -218,7 +217,7 @@ class Node(BaseModel):
     @property
     def node_key_aliases(self) -> List[Property]:
         """
-        List of node key aliases, if they exist.
+        List of node key properties with aliases, if they exist.
 
         Returns
         -------
@@ -231,7 +230,7 @@ class Node(BaseModel):
     @property
     def unique_property_aliases(self) -> List[Property]:
         """
-        List of unique property aliases, if they exist.
+        List of unique properties with aliases, if they exist.
 
         Returns
         -------

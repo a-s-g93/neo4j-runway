@@ -4,11 +4,12 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from graphviz import Digraph
-from pydantic import BaseModel, ValidationInfo, model_validator
+from pydantic import BaseModel, ValidationError, ValidationInfo, model_validator
+from pydantic_core import InitErrorDetails, PydanticCustomError
 
 from ...exceptions import (
     InvalidArrowsDataModelError,
@@ -27,6 +28,7 @@ from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
 )
 from .node import Node
+from .property import Property
 from .relationship import Relationship
 
 
@@ -48,37 +50,37 @@ class DataModel(BaseModel):
     relationships: List[Relationship]
     metadata: Optional[Dict[str, Any]] = None
 
-    def __init__(
-        self,
-        nodes: List[Node],
-        relationships: List[Relationship],
-        metadata: Optional[Dict[str, Any]] = None,
-        use_neo4j_naming_conventions: bool = True,
-    ) -> None:
-        """
-        The standard Graph Data Model representation in Neo4j Runway.
+    # def __init__(
+    #     self,
+    #     nodes: List[Node],
+    #     relationships: List[Relationship],
+    #     metadata: Optional[Dict[str, Any]] = None,
+    #     use_neo4j_naming_conventions: bool = True,
+    # ) -> None:
+    #     """
+    #     The standard Graph Data Model representation in Neo4j Runway.
 
-        Parameters
-        ----------
-        nodes : List[Node]
-            A list of the nodes in the data model.
-        relationships : List[Relationship]
-            A list of the relationships in the data model.
-        metadata: Optional[Dict[str, Any]]
-            Metadata from an import source such as Solutions Workbench, by default None
-        use_neo4j_naming_conventions : bool, optional
-            Whether to convert labels, relationships and properties to Neo4j naming conventions, by default True
-        """
-        super().__init__(
-            nodes=nodes,
-            relationships=relationships,
-            metadata=metadata,
-            use_neo4j_naming_conventions=True,
-        )
+    #     Parameters
+    #     ----------
+    #     nodes : List[Node]
+    #         A list of the nodes in the data model.
+    #     relationships : List[Relationship]
+    #         A list of the relationships in the data model.
+    #     metadata: Optional[Dict[str, Any]]
+    #         Metadata from an import source such as Solutions Workbench, by default None
+    #     use_neo4j_naming_conventions : bool, optional
+    #         Whether to convert labels, relationships and properties to Neo4j naming conventions, by default True
+    #     """
+    #     super().__init__(
+    #         nodes=nodes,
+    #         relationships=relationships,
+    #         metadata=metadata,
+    #         use_neo4j_naming_conventions=True,
+    #     )
 
-        # default apply Neo4j naming conventions.
-        if use_neo4j_naming_conventions:
-            self.apply_neo4j_naming_conventions()
+    #     # default apply Neo4j naming conventions.
+    #     if use_neo4j_naming_conventions:
+    #         self.apply_neo4j_naming_conventions()
 
     @property
     def node_labels(self) -> List[str]:
@@ -177,7 +179,7 @@ class DataModel(BaseModel):
     # )
 
     # if not allow_duplicate_properties:
-    #     errors += self._validate_csv_features_used_only_once()
+    #     errors += self._validate_column_mappings_used_only_once()
 
     # if len(errors) > 0:
     #     message = create_data_model_errors_cot_prompt(
@@ -197,26 +199,61 @@ class DataModel(BaseModel):
         self, info: ValidationInfo
     ) -> "DataModel":
         """
-        Validate the source and target of a relationship exist in the model nodes.
+        * Validate the source and target of a relationship exist in the model nodes.
+        * Validate same-node rels Node has named alias.
+        * Validate file-spanning rels have source / target with appropriate named aliases.
         """
 
-        valid_columns: Dict[str, List[str]] = (
-            info.context.get("valid_columns") if info.context is not None else dict()
-        )
+        # valid_columns: Dict[str, List[str]] = (
+        #     info.context.get("valid_columns") if info.context is not None else dict()
+        # )
         data_dictionary: Dict[str, Any] = (
             info.context.get("data_dictionary") if info.context is not None else dict()
         )
-        errors = list()
+        errors: List[InitErrorDetails] = list()
+
+        def _retrieve_unique_property_with_missing_alias_or_node(
+            node_label: str,
+        ) -> Union[List[Property], Property, Node, str]:
+            """
+            Retrieve:
+                The unique Property on a node that is missing an alias
+                OR
+                The Node of interest, if no Properties are unique
+            """
+            node = self.node_dict.get(node_label)
+            if node is not None:
+                props: List[Property] = node.unique_properties
+                if len(props) > 1:
+                    return props[0]
+
+            return props or node or ""
 
         for rel in self.relationships:
             # validate exists
             if rel.source not in self.node_labels:
                 errors.append(
-                    f"The relationship {rel.type} has the source {rel.source} which does not exist in generated Node labels."
+                    InitErrorDetails(
+                        type=PydanticCustomError(
+                            "missing_source_node_error",
+                            f"The `Relationship` {rel.type} has the source {rel.source} which does not exist in generated `Node` labels.",
+                        ),
+                        loc=("relationships",),
+                        input=rel,
+                        ctx={},
+                    )
                 )
             if rel.target not in self.node_labels:
                 errors.append(
-                    f"The relationship {rel.type} has the target {rel.target} which does not exist in generated Node labels."
+                    InitErrorDetails(
+                        type=PydanticCustomError(
+                            "missing_target_node_error",
+                            f"The `Relationship` {rel.type} has the target {rel.target} which does not exist in generated `Node` labels.",
+                        ),
+                        loc=("relationships",),
+                        input=rel,
+                        ctx={},
+                    )
                 )
 
             # validate same node label rels
@@ -228,7 +265,17 @@ class DataModel(BaseModel):
                 ]
                 if len(valid_props) < 1:
                     errors.append(
-                        f"The relationship {rel.type} has source and target of the same node label {rel.source}. This is invalid because node {rel.source} has no property with a declared alias attribute."
+                        InitErrorDetails(
+                            type=PydanticCustomError(
+                                "node_missing_property_with_alias_error",
+                                f"The `Relationship` {rel.type} has source and target of the same `Node` label {rel.source}. `Node` {rel.source} must have a `Property` with a declared `alias` attribute.",
+                            ),
+                            loc=("nodes",),
+                            input=_retrieve_unique_property_with_missing_alias_or_node(
+                                node_label=rel.source
+                            ),
+                            ctx={},
+                        )
                     )
 
             # validate rels that span across files
@@ -240,84 +287,169 @@ class DataModel(BaseModel):
                 for prop in source_node.unique_properties:
                     if prop.alias is None:
                         errors.append(
-                            f"The source node {source_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on source node `{source_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `alias`."
+                            InitErrorDetails(
+                                type=PydanticCustomError(
+                                    "relationship_source_node_unique_property_missing_alias_error",
+                                    f"The source `Node` {source_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on source `Node` {source_node.label} must have an `alias` attribute found in file {rel.source_name}.",
+                                ),
+                                loc=("nodes",),
+                                input=prop,
+                                ctx={},
+                            )
                         )
                     elif prop.alias not in data_dictionary[rel.source_name]:
                         errors.append(
-                            f"Node `{source_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for unique property `{prop.name}` on source node `{source_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary for possible alias."
+                            InitErrorDetails(
+                                type=PydanticCustomError(
+                                    "relationship_source_file_missing_source_node_unique_property_alias_error",
+                                    f"`Node` {source_node.label} `Property` {prop.name} is not found in the file {rel.source_name} by the alias {prop.alias}. `Property` `{prop.name}` on source `Node` {source_node.label} must has an `alias` in file {rel.source_name}. Reference the data dictionary for possible alias.",
+                                ),
+                                loc=("nodes",),
+                                input=prop,
+                                ctx={},
+                            )
                         )
 
             if target_node is not None and rel.source_name != target_node.source_name:
                 for prop in target_node.unique_properties:
                     if prop.alias is None:
                         errors.append(
-                            f"The target node {target_node.label} and relationship `{rel.type}` are from different files. The alias of unique property `{prop.name}` on target node `{target_node.label}` must be found in file `{rel.source_name}` and is identified by the attribute `alias`."
+                            InitErrorDetails(
+                                type=PydanticCustomError(
+                                    "relationship_target_node_unique_property_missing_alias_error",
+                                    f"The target `Node` {target_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on target `Node` {target_node.label} must have an `alias` attribute found in file {rel.source_name}.",
+                                ),
+                                loc=("nodes",),
+                                input=prop,
+                                ctx={},
+                            )
                         )
                     elif prop.alias not in data_dictionary[rel.source_name]:
                         errors.append(
-                            f"Node `{target_node.label}` Property `{prop.name}` is not found in the file `{rel.source_name}` by the name `{prop.alias}`. Find an alias for unique property `{prop.name}` on target node `{target_node.label}` in file `{rel.source_name}` and identify it on the Property attribute `alias`. Reference the data dictionary for possible alias."
+                            InitErrorDetails(
+                                type=PydanticCustomError(
+                                    "relationship_source_file_missing_target_node_unique_property_alias_error",
+                                    f"`Node` {target_node.label} `Property` {prop.name} is not found in the file {rel.source_name} by the alias {prop.alias}. `Property` `{prop.name}` on target `Node` {target_node.label} must has an `alias` in file {rel.source_name}. Reference the data dictionary for possible alias.",
+                                ),
+                                loc=("nodes",),
+                                input=prop,
+                                ctx={},
+                            )
                         )
+
+        if errors:
+            raise ValidationError.from_exception_data(
+                title=self.__class__.__name__,
+                line_errors=errors,
+            )
 
         return self
 
-    def _validate_csv_features_used_only_once(self) -> List[str]:
+    @model_validator(mode="after")
+    def validate_column_mappings_used_only_once(
+        self, info: ValidationInfo
+    ) -> "DataModel":
         """
-        Validate that each property is used no more than one time in the data model.
+        Validate that each column mapping is used no more than one time in the data model.
+        This check may be skipped by providing `allow_duplicate_column_mappings` = True in the validation context.
         """
 
-        used_features: Dict[str, Dict[str, List[str]]] = dict()
-        # --- used_features example ---
-        # file to feature to labels
-        # {
-        # "a.csv": {"feature_a": ["LabelA", "LabelB"]},
-        # "b.csv": {"feature_b": ["LabelA", "LabelB"],
-        #           "feature_c": ["LabelD"]},
-        # "c.csv": {}
-        # }
-        # -----------------------------
-        errors: List[str] = list()
+        allow_duplicate_column_mappings: bool = (
+            info.context.get("allow_duplicate_column_mappings")
+            if info.context is not None
+            else False
+        )
 
-        for node in self.nodes:
-            # init the file dictionary
-            if node.source_name not in used_features.keys():
-                used_features[node.source_name] = dict()
-            for prop in node.properties:
-                # if isinstance(prop.column_mapping, list):
-                #     for csv_map in prop.column_mapping:
-                #         if csv_map not in list(used_features.keys()):
-                #             used_features[node.source_name][csv_map] = [node.label]
-                #         else:
-                #             used_features[csv_map].append(node.label)
-                # else:
-                if prop.column_mapping not in list(
-                    used_features[node.source_name].keys()
-                ):
-                    used_features[node.source_name][prop.column_mapping] = [node.label]
-                else:
-                    used_features[node.source_name][prop.column_mapping].append(
-                        node.label
-                    )
+        def _retrieve_invalid_node_and_relationship_properties(
+            labels_or_types: List[str], prop_mapping: str
+        ) -> List[Property]:
+            """Retrieve a list of properties in the data model that share the same `column_mapping` attribute."""
+            nodes_rels = [self.node_dict.get(label) for label in labels_or_types] + [
+                self.relationship_dict.get(t) for t in labels_or_types
+            ]
+            props: List[Property] = list()
+            for nr in nodes_rels:
+                if nr:
+                    props += [
+                        p for p in nr.properties if p.column_mapping == prop_mapping
+                    ]
+            return props
 
-        for rel in self.relationships:
-            # init the file dictionary
-            if rel.source_name not in used_features.keys():
-                used_features[rel.source_name] = dict()
-            for prop in rel.properties:
-                if prop.column_mapping not in list(
-                    used_features[rel.source_name].keys()
-                ):
-                    used_features[rel.source_name][prop.column_mapping] = [rel.type]
-                else:
-                    used_features[rel.source_name][prop.column_mapping].append(rel.type)
+        if not allow_duplicate_column_mappings:
+            used_features: Dict[str, Dict[str, List[str]]] = dict()
+            # --- used_features example ---
+            # file to column to labels or types
+            # {
+            # "a.csv": {"feature_a": ["LabelA", "LabelB"]},
+            # "b.csv": {"feature_b": ["LabelA", "LabelB"],
+            #           "feature_c": ["LabelD"]},
+            # "c.csv": {}
+            # }
+            # -----------------------------
+            errors: List[InitErrorDetails] = list()
 
-        for source_name, feature_dict in used_features.items():
-            for prop_mapping, labels_or_types in feature_dict.items():
-                if len(labels_or_types) > 1:
-                    errors.append(
-                        f"The Property `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each of these must use a different column as a Property attribute `column_mapping` instead. Find alternative Property `column_mapping` from the column options in the `source_name` file or remove."
-                    )
+            for node in self.nodes:
+                # init the file dictionary
+                if node.source_name not in used_features.keys():
+                    used_features[node.source_name] = dict()
+                for prop in node.properties:
+                    # if isinstance(prop.column_mapping, list):
+                    #     for csv_map in prop.column_mapping:
+                    #         if csv_map not in list(used_features.keys()):
+                    #             used_features[node.source_name][csv_map] = [node.label]
+                    #         else:
+                    #             used_features[csv_map].append(node.label)
+                    # else:
+                    if prop.column_mapping not in list(
+                        used_features[node.source_name].keys()
+                    ):
+                        used_features[node.source_name][prop.column_mapping] = [
+                            node.label
+                        ]
+                    else:
+                        used_features[node.source_name][prop.column_mapping].append(
+                            node.label
+                        )
 
-        return errors
+            for rel in self.relationships:
+                # init the file dictionary
+                if rel.source_name not in used_features.keys():
+                    used_features[rel.source_name] = dict()
+                for prop in rel.properties:
+                    if prop.column_mapping not in list(
+                        used_features[rel.source_name].keys()
+                    ):
+                        used_features[rel.source_name][prop.column_mapping] = [rel.type]
+                    else:
+                        used_features[rel.source_name][prop.column_mapping].append(
+                            rel.type
+                        )
+
+            for source_name, feature_dict in used_features.items():
+                for prop_mapping, labels_or_types in feature_dict.items():
+                    if len(labels_or_types) > 1:
+                        errors.append(
+                            InitErrorDetails(
+                                type=PydanticCustomError(
+                                    "duplicate_property_in_data_model_error",
+                                    f"The `Property` `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each must use a different column as a `Property` attribute `column_mapping` instead. Find alternative `Property` `column_mapping` from the column options in the `source_name` file or remove.",
+                                ),
+                                loc=("nodes", "relationships"),
+                                input=_retrieve_invalid_node_and_relationship_properties(
+                                    labels_or_types=labels_or_types,
+                                    prop_mapping=prop_mapping,
+                                ),
+                                ctx={},
+                            )
+                        )
+
+            if errors:
+                raise ValidationError.from_exception_data(
+                    title=self.__class__.__name__,
+                    line_errors=errors,
+                )
+
+        return self
 
     def visualize(self) -> Digraph:
         """

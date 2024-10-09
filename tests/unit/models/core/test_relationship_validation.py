@@ -78,5 +78,5 @@ def test_validate_property_mappings_two_props(
     ]
     with pytest.raises(ValidationError) as e:
         Relationship.model_validate(relationship_data, context=relationship_context)
-        assert "wrong1" in str(e)
-        assert "wrong2" in str(e)
+    assert "wrong1" in str(e.value)
+    assert "wrong2" in str(e.value)
