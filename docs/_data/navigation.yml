@@ -28,6 +28,12 @@ docs:
       - title: "OpenAIDataModelingLLM"
         url: /api/llm/openai-data-modeling-llm/
 
+      - title: "AzureOpenAIDiscoveryLLM"
+        url: /api/llm/azure-openai-discovery-llm/
+
+      - title: "AzureOpenAIDataModelingLLM"
+        url: /api/llm/azure-openai-data-modeling-llm/
+
       - title: "Neo4jGraph"
         url: /api/database/neo4j-graph/
 

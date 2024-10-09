@@ -6,6 +6,14 @@
 
 ### Changed
 
+### Added
+
+## 0.11.0
+
+### Fixed
+
+### Changed
+
 * Removed `kwargs` from LLM classes and replaced with `llm_init_params` to provide parameters that should be passed to the LLM constructor.
 
 ### Added
