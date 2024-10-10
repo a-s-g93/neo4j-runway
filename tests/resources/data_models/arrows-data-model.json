@@ -64,7 +64,7 @@
         "Person"
       ],
       "properties": {
-        "name": "name | str | unique",
+        "name": "name, knows | str | unique",
         "age": "age | int"
       },
       "style": {}
@@ -80,8 +80,8 @@
         "Address"
       ],
       "properties": {
-        "street": "street | str",
-        "city": "city | str"
+        "street": "street | str | nodekey",
+        "city": "city | str | nodekey"
       },
       "style": {}
     },
@@ -96,7 +96,7 @@
         "Pet"
       ],
       "properties": {
-        "name": "pet_name | str",
+        "name": "pet_name | str | unique",
         "kind": "pet | str"
       },
       "style": {}

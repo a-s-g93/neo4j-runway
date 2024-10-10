@@ -80,3 +80,18 @@ def test_validate_property_mappings_two_props(
         Relationship.model_validate(relationship_data, context=relationship_context)
     assert "wrong1" in str(e.value)
     assert "wrong2" in str(e.value)
+
+
+def test_missing_valid_columns_context(
+    relationship_data: Dict[str, Any], relationship_context: Dict[str, Any]
+) -> None:
+    del relationship_context["valid_columns"]
+    Relationship.model_validate(relationship_data, context=relationship_context)
+
+
+def test_no_context(relationship_data: Dict[str, Any]) -> None:
+    Relationship.model_validate(relationship_data)
+
+
+def test_no_context_standard_init(relationship_data: Dict[str, Any]) -> None:
+    Relationship(**relationship_data)

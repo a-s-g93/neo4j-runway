@@ -241,7 +241,6 @@ class Node(BaseModel):
         return [p for p in self.properties if p.is_unique and p.alias is not None]
 
     @field_validator("source_name")
-    @classmethod
     def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
         sources: List[str] = (
             list(info.context.get("valid_columns", dict()).keys())
@@ -252,32 +251,56 @@ class Node(BaseModel):
         # skip for single file input
         if len(sources) == 1:
             return sources[0]
-        elif source_name in sources:
+        elif source_name in sources or not sources:
             return source_name
         else:
             raise InvalidSourceNameError(
                 f"{source_name} is not in the provided file list: {sources}."
             )
 
+    @field_validator("properties")
+    def enforce_uniqueness(
+        cls, properties: List[Property], info: ValidationInfo
+    ) -> List[Property]:
+        enforce_uniqueness: bool = (
+            info.context.get("enforce_uniqueness") if info.context is not None else True
+        )
+        if enforce_uniqueness:
+            unique_properties = [prop for prop in properties if prop.is_unique]
+            node_keys = [prop for prop in properties if prop.part_of_key]
+
+            if len(unique_properties) == 0 and len(node_keys) < 2:
+                # keep it simple by asking only for a unique property, not to create a node key combo
+                raise NonuniqueNodeError(
+                    f"`Node` must contain a unique `Property` in `properties`."
+                )
+
+        return properties
+
     @model_validator(mode="after")
     def validate_property_mappings(self, info: ValidationInfo) -> "Node":
         valid_columns: Dict[str, List[str]] = (
-            info.context.get("valid_columns") if info.context is not None else dict()
+            info.context.get("valid_columns") if info.context is not None else None
         )
+
         errors: List[InitErrorDetails] = list()
-        for prop in self.properties:
-            if prop.column_mapping not in valid_columns.get(self.source_name, list()):
-                errors.append(
-                    InitErrorDetails(
-                        type=PydanticCustomError(
-                            "invalid_column_mapping_error",
-                            f"The `Node` {self.label} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Node` {self.label}.",
-                        ),
-                        loc=("properties",),
-                        input=self.properties,
-                        ctx={},
+
+        if valid_columns is not None:
+            for prop in self.properties:
+                if prop.column_mapping not in valid_columns.get(
+                    self.source_name, list()
+                ):
+                    errors.append(
+                        InitErrorDetails(
+                            type=PydanticCustomError(
+                                "invalid_column_mapping_error",
+                                f"The `Node` {self.label} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Node` {self.label}.",
+                            ),
+                            loc=("properties",),
+                            input=self.properties,
+                            ctx={},
+                        )
                     )
-                )
 
         if errors:
             raise ValidationError.from_exception_data(
@@ -285,19 +308,6 @@ class Node(BaseModel):
                 line_errors=errors,
             )
 
-        return self
-
-    @model_validator(mode="after")
-    def enforce_uniqueness(self, info: ValidationInfo) -> "Node":
-        enforce_uniqueness: bool = (
-            info.context.get("enforce_uniqueness") if info.context is not None else True
-        )
-        if enforce_uniqueness:
-            if len(self.unique_properties) == 0 and len(self.node_keys) < 2:
-                # keep it simple by asking only for a unique property, not to create a node key combo
-                raise NonuniqueNodeError(
-                    f"The node {self.label} must contain a unique `Property` in `properties`."
-                )
         return self
 
     def to_arrows(self, x_position: float, y_position: float) -> ArrowsNode:

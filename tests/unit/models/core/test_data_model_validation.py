@@ -54,3 +54,83 @@ def test_allow_duplicate_properties_false(
         DataModel.model_validate(data_model_dupe_prop_data, context=data_model_context)
 
     assert "duplicate_property_in_data_model_error" in str(e.value)
+
+
+def test_node_field_validator_error(
+    data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
+) -> None:
+    data_model_data["nodes"][0]["source_name"] = "wrongfile.csv"
+
+    with pytest.raises(ValueError) as e:
+        DataModel.model_validate(data_model_data, context=data_model_context)
+
+    assert "wrongfile.csv is not in the provided file list: ['a.csv', 'b.csv']." in str(
+        e.value
+    )
+
+
+def test_node_model_validator_error(
+    data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
+) -> None:
+    data_model_data["nodes"][0]["properties"] = [
+        {
+            "name": "nkey",
+            "type": "str",
+            "column_mapping": "wrong_mapping",
+            "is_unique": True,
+            "part_of_key": False,
+        }
+    ]
+    with pytest.raises(ValueError) as e:
+        DataModel.model_validate(data_model_data, context=data_model_context)
+
+    assert "invalid_column_mapping_error" in str(e.value)
+
+
+def test_relationship_field_validator_error(
+    data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
+) -> None:
+    data_model_data["relationships"][0]["source_name"] = "wrongfile.csv"
+
+    with pytest.raises(ValueError) as e:
+        DataModel.model_validate(data_model_data, context=data_model_context)
+
+    assert "wrongfile.csv is not in the provided file list: ['a.csv', 'b.csv']." in str(
+        e.value
+    )
+
+
+def test_relationship_model_validator_error(
+    data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
+) -> None:
+    data_model_data["relationships"][0]["properties"] = [
+        {
+            "name": "nkey",
+            "type": "str",
+            "column_mapping": "wrong_mapping",
+            "is_unique": False,
+            "part_of_key": False,
+        }
+    ]
+    with pytest.raises(ValueError) as e:
+        DataModel.model_validate(data_model_data, context=data_model_context)
+
+    assert "invalid_column_mapping_error" in str(e.value)
+
+
+def test_node_property_field_validator_error(
+    data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
+) -> None:
+    data_model_data["relationships"][0]["properties"] = [
+        {
+            "name": "nkey",
+            "type": "wrong_type",
+            "column_mapping": "nkey",
+            "is_unique": False,
+            "part_of_key": False,
+        }
+    ]
+    with pytest.raises(ValueError) as e:
+        DataModel.model_validate(data_model_data, context=data_model_context)
+
+    assert "Invalid Property type given: wrong_type" in str(e.value)

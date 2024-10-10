@@ -143,7 +143,7 @@ class Relationship(BaseModel):
         # skip for single file input
         if len(sources) == 1:
             return sources[0]
-        elif source_name in sources:
+        elif source_name in sources or not sources:
             return source_name
         else:
             raise InvalidSourceNameError(
@@ -153,22 +153,26 @@ class Relationship(BaseModel):
     @model_validator(mode="after")
     def validate_property_mappings(self, info: ValidationInfo) -> "Relationship":
         valid_columns: Dict[str, List[str]] = (
-            info.context.get("valid_columns") if info.context is not None else dict()
+            info.context.get("valid_columns") if info.context is not None else None
         )
         errors: List[InitErrorDetails] = list()
-        for prop in self.properties:
-            if prop.column_mapping not in valid_columns.get(self.source_name, list()):
-                errors.append(
-                    InitErrorDetails(
-                        type=PydanticCustomError(
-                            "invalid_column_mapping_error",
-                            f"The `Relationship` {self.type} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Relationship` {self.type}.",
-                        ),
-                        loc=("properties",),
-                        input=self.properties,
-                        ctx={},
+
+        if valid_columns is not None:
+            for prop in self.properties:
+                if prop.column_mapping not in valid_columns.get(
+                    self.source_name, list()
+                ):
+                    errors.append(
+                        InitErrorDetails(
+                            type=PydanticCustomError(
+                                "invalid_column_mapping_error",
+                                f"The `Relationship` {self.type} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Relationship` {self.type}.",
+                            ),
+                            loc=("properties",),
+                            input=self.properties,
+                            ctx={},
+                        )
                     )
-                )
 
         if errors:
             raise ValidationError.from_exception_data(

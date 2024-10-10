@@ -78,3 +78,48 @@ def test_validate_property_mappings_two_props(
         Node.model_validate(node_data, context=node_context)
     assert "wrong1" in str(e.value)
     assert "wrong2" in str(e.value)
+
+
+def test_wrong_source_file_and_wrong_attr_type(
+    node_context: Dict[str, Any], node_data: Dict[str, Any]
+) -> None:
+    node_data["source_name"] = "wrong.csv"
+    node_data["properties"] = [
+        {
+            "name": "nkey",
+            "type": "str",
+            "column_mapping": "nkey",
+            "is_unique": "3",
+            "part_of_key": False,
+        }
+    ]
+
+    with pytest.raises(ValidationError) as e:
+        Node.model_validate(node_data, context=node_context)
+
+    assert "Input should be a valid boolean" in str(e.value)
+    assert "wrong.csv is not in the provided file list: ['a.csv', 'b.csv']." in str(
+        e.value
+    )
+
+
+def test_missing_enforce_uniqueness_context(
+    node_context: Dict[str, Any], node_data: Dict[str, Any]
+) -> None:
+    del node_context["enforce_uniqueness"]
+    Node.model_validate(node_data, context=node_context)
+
+
+def test_missing_valid_columns_context(
+    node_context: Dict[str, Any], node_data: Dict[str, Any]
+) -> None:
+    del node_context["valid_columns"]
+    Node.model_validate(node_data, context=node_context)
+
+
+def test_no_context(node_data: Dict[str, Any]) -> None:
+    Node.model_validate(node_data)
+
+
+def test_no_context_standard_init(node_data: Dict[str, Any]) -> None:
+    Node(**node_data)
