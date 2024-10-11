@@ -222,6 +222,7 @@ class BaseDataModelingLLM(ABC):
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         apply_neo4j_naming_conventions: bool = True,
+        allow_parallel_relationships: bool = False,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
@@ -233,6 +234,7 @@ class BaseDataModelingLLM(ABC):
             allow_duplicate_column_mappings=allow_duplicate_properties,
             enforce_uniqueness=enforce_uniqueness,
             apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+            allow_parallel_relationships=allow_parallel_relationships,
         )
 
         retry_logic = Retrying(
