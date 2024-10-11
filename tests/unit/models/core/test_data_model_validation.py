@@ -134,3 +134,41 @@ def test_node_property_field_validator_error(
         DataModel.model_validate(data_model_data, context=data_model_context)
 
     assert "Invalid Property type given: wrong_type" in str(e.value)
+
+
+def test_allow_parallel_relationships_same_direction(
+    data_model_parallel_data: Dict[str, Any],
+    data_model_parallel_context: Dict[str, Any],
+) -> None:
+    with pytest.raises(ValidationError) as e:
+        DataModel.model_validate(
+            data_model_parallel_data, context=data_model_parallel_context
+        )
+
+    assert "parallel_relationship_error" in str(e.value)
+
+
+def test_allow_parallel_relationships_opposite_direction(
+    data_model_parallel_data: Dict[str, Any],
+    data_model_parallel_context: Dict[str, Any],
+) -> None:
+    data_model_parallel_data["relationships"][0]["source"] = "LabelB"
+    data_model_parallel_data["relationships"][0]["target"] = "LabelA"
+
+    with pytest.raises(ValidationError) as e:
+        DataModel.model_validate(
+            data_model_parallel_data, context=data_model_parallel_context
+        )
+
+    assert "parallel_relationship_error" in str(e.value)
+
+
+def test_ignore_parallel_relationships(
+    data_model_parallel_data: Dict[str, Any],
+    data_model_parallel_context: Dict[str, Any],
+) -> None:
+    data_model_parallel_context["allow_parallel_relationships"] = True
+
+    DataModel.model_validate(
+        data_model_parallel_data, context=data_model_parallel_context
+    )

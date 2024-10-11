@@ -10,6 +10,7 @@ from pydantic import (
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
 from ...exceptions import InvalidSourceNameError
+from ...utils.naming_conventions import fix_node_label, fix_relationship_type
 from ..arrows import ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchRelationship,
@@ -130,6 +131,45 @@ class Relationship(BaseModel):
             for prop in self.properties
             if not prop.is_unique and not prop.part_of_key
         ]
+
+    @field_validator("type")
+    def validate_type_naming(cls, t: str, info: ValidationInfo) -> str:
+        apply_neo4j_naming_conventions: bool = (
+            info.context.get("apply_neo4j_naming_conventions", True)
+            if info.context is not None
+            else True
+        )
+
+        if apply_neo4j_naming_conventions:
+            return fix_relationship_type(t)
+
+        return t
+
+    @field_validator("source")
+    def validate_source_naming(cls, source: str, info: ValidationInfo) -> str:
+        apply_neo4j_naming_conventions: bool = (
+            info.context.get("apply_neo4j_naming_conventions", True)
+            if info.context is not None
+            else True
+        )
+
+        if apply_neo4j_naming_conventions:
+            return fix_node_label(source)
+
+        return source
+
+    @field_validator("target")
+    def validate_type(cls, target: str, info: ValidationInfo) -> str:
+        apply_neo4j_naming_conventions: bool = (
+            info.context.get("apply_neo4j_naming_conventions", True)
+            if info.context is not None
+            else True
+        )
+
+        if apply_neo4j_naming_conventions:
+            return fix_node_label(target)
+
+        return target
 
     @field_validator("source_name")
     @classmethod

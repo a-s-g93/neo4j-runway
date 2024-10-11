@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
 
 from ...resources.mappings import (
     TYPES_MAP_NEO4J_TO_PYTHON,
@@ -8,6 +8,7 @@ from ...resources.mappings import (
     TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
     TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
 )
+from ...utils.naming_conventions import fix_property
 from ..solutions_workbench import SolutionsWorkbenchProperty
 
 
@@ -37,8 +38,21 @@ class Property(BaseModel):
     alias: Optional[str] = None
     is_unique: bool = False
     part_of_key: bool = False
+
     # is_indexed: bool
     # must_exist: bool
+    @field_validator("name")
+    def validate_name(cls, name: str, info: ValidationInfo) -> str:
+        apply_neo4j_naming_conventions: bool = (
+            info.context.get("apply_neo4j_naming_conventions", True)
+            if info.context is not None
+            else True
+        )
+
+        if apply_neo4j_naming_conventions:
+            return fix_property(name)
+
+        return name
 
     @field_validator("type")
     def validate_type(cls, v: str) -> str:

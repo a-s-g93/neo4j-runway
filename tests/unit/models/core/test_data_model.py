@@ -141,59 +141,65 @@ def test_neo4j_naming_conventions_used() -> None:
     Test renaming labels, types and properties to Neo4j naming conventions.
     """
 
-    prop1 = Property(
-        name="Name",
-        type="str",
-        column_mapping="name",
-        alias="knows_person",
-        is_unique=True,
-    )
-    prop2 = Property(
-        name="person_age", type="int", column_mapping="age", is_unique=False
-    )
-    prop3 = Property(
-        name="CurrentStreet", type="str", column_mapping="street", is_unique=True
-    )
-    prop4 = Property(
-        name="favorite_score",
-        type="int",
-        column_mapping="favorite",
-        is_unique=False,
-    )
+    prop1 = {
+        "name": "Name",
+        "type": "str",
+        "column_mapping": "name",
+        "alias": "knows_person",
+        "is_unique": True,
+    }
+    prop2 = {
+        "name": "person_age",
+        "type": "int",
+        "column_mapping": "age",
+        "is_unique": False,
+    }
+    prop3 = {
+        "name": "CurrentStreet",
+        "type": "str",
+        "column_mapping": "street",
+        "is_unique": True,
+    }
+    prop4 = {
+        "name": "favorite_score",
+        "type": "int",
+        "column_mapping": "favorite",
+        "is_unique": False,
+    }
 
     name_conv_nodes = [
-        Node(
-            label="person",
-            properties=[prop1, prop2],
-        ),
-        Node(
-            label="current_Address",
-            properties=[prop3],
-        ),
+        {
+            "label": "person",
+            "properties": [prop1, prop2],
+        },
+        {
+            "label": "current_Address",
+            "properties": [prop3],
+        },
     ]
 
     name_conv_relationships = [
-        Relationship(
-            type="has_address",
-            properties=[prop4],
-            source="Person",
-            target="current_address",
-        ),
-        Relationship(
-            type="HasSecondAddress",
-            source="person",
-            target="current_Address",
-        ),
-        Relationship(
-            type="hasAddress_Three",
-            source="Person",
-            target="CURRENT_ADDRESS",
-        ),
+        {
+            "type": "has_address",
+            "properties": [prop4],
+            "source": "Person",
+            "target": "current_address",
+        },
+        {
+            "type": "HasSecondAddress",
+            "source": "person",
+            "target": "current_Address",
+        },
+        {
+            "type": "hasAddress_Three",
+            "source": "Person",
+            "target": "CURRENT_ADDRESS",
+        },
     ]
 
-    dm = DataModel(
-        nodes=name_conv_nodes,
-        relationships=name_conv_relationships,
+    dm = DataModel.model_validate(
+        {"nodes": name_conv_nodes, "relationships": name_conv_relationships},
+        context={"allow_parallel_relationships": True},
     )
 
     assert set(dm.node_labels) == {"Person", "CurrentAddress"}

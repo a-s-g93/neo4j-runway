@@ -4,7 +4,7 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import yaml
 from graphviz import Digraph
@@ -22,11 +22,6 @@ from ...exceptions import (
     InvalidSolutionsWorkbenchDataModelError,
 )
 from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
-from ...utils.naming_conventions import (
-    fix_node_label,
-    fix_property,
-    fix_relationship_type,
-)
 from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -140,104 +135,6 @@ class DataModel(BaseModel):
 
         return {r.type: r for r in self.relationships}
 
-    # def validate_model(
-    #     self,
-    #     valid_columns: Dict[str, List[str]],
-    #     data_dictionary: Dict[str, Any],
-    #     allow_duplicate_properties: bool = False,
-    #     enforce_uniqueness: bool = True,
-    # ) -> Dict[str, Any]:
-    #     """
-    #     Perform additional validation on the data model.
-
-    #     Parameters
-    #     ----------
-    #     valid_columns : List[str]
-    #         The CSV columns that are allowed in the data model.
-    #     data_dictionary : Dict[str, Any]
-    #         A data dictionary to validate against.
-    #     allow_duplicate_properties : bool, optional
-    #         Whether to allow identical properties to exist on multiple node labels or relationship types, by default False
-    #     enforce_uniqueness : bool, optional
-    #         Whether to error if a node has no unique identifiers (unique or node key).
-    #         Setting this to false may be detrimental during code generation and ingestion. By default True
-
-    #     Returns
-    #     -------
-    #     Dict[str, Any]
-    #         A dictionary containing keys 'valid' indicating whether the data model is valid and 'message' containing a list of errors.
-    #     """
-
-    # errors = list()
-
-    # for node in self.nodes:
-    #     errors += node.validate_source_name(valid_columns=valid_columns)
-    #     errors += node.validate_properties(valid_columns=valid_columns)
-    #     if enforce_uniqueness:
-    #         errors += node.enforce_uniqueness()
-
-    # for rel in self.relationships:
-    #     errors += rel.validate_source_name(valid_columns=valid_columns)
-    #     errors += rel.validate_properties(valid_columns=valid_columns)
-
-    # errors += self._validate_relationship_sources_and_targets(
-    #     valid_columns=valid_columns, data_dictionary=data_dictionary
-    # )
-
-    # if not allow_duplicate_properties:
-    #     errors += self._validate_column_mappings_used_only_once()
-
-    # if len(errors) > 0:
-    #     message = create_data_model_errors_cot_prompt(
-    #         data_model=self,
-    #         errors=errors,  # type: ignore[arg-type]
-    #         valid_columns=valid_columns,
-    #         multifile=len(valid_columns.keys()) > 1,
-    #         data_dictionary=data_dictionary,
-    #     )
-
-    #     return {"valid": False, "message": message, "errors": errors}
-
-    # return {"valid": True, "message": "", "errors": list()}
-
-    @field_validator("nodes", mode="after")
-    def validate_nodes(cls, nodes: List[Node], info: ValidationInfo) -> List[Node]:
-        apply_neo4j_naming_conventions: bool = (
-            info.context.get("apply_neo4j_naming_conventions")
-            if info.context is not None
-            else True
-        )
-
-        if apply_neo4j_naming_conventions:
-            # fix node labels and properties
-            for node in nodes:
-                node.label = fix_node_label(node.label)
-                for prop in node.properties:
-                    prop.name = fix_property(prop.name)
-
-        return nodes
-
-    @field_validator("relationships", mode="after")
-    def validate_relationships(
-        cls, relationships: List[Relationship], info: ValidationInfo
-    ) -> List[Relationship]:
-        apply_neo4j_naming_conventions: bool = (
-            info.context.get("apply_neo4j_naming_conventions")
-            if info.context is not None
-            else True
-        )
-
-        if apply_neo4j_naming_conventions:
-            # fix relationship types and properties
-            for rel in relationships:
-                rel.type = fix_relationship_type(rel.type)
-                rel.source = fix_node_label(rel.source)
-                rel.target = fix_node_label(rel.target)
-                for prop in rel.properties:
-                    prop.name = fix_property(prop.name)
-
-        return relationships
-
     @model_validator(mode="after")
     def advanced_validation(self, info: ValidationInfo) -> "DataModel":
         errors: List[InitErrorDetails] = list()
@@ -261,20 +158,22 @@ class DataModel(BaseModel):
 
             return props or node or ""
 
-        def _retrieve_invalid_node_and_relationship_properties(
-            labels_or_types: List[str], prop_mapping: str
-        ) -> List[Property]:
-            """Retrieve a list of properties in the data model that share the same `column_mapping` attribute."""
-            nodes_rels = [self.node_dict.get(label) for label in labels_or_types] + [
-                self.relationship_dict.get(t) for t in labels_or_types
+        def _retrieve_duplicated_property(
+            context: Tuple[str, str, int, str, int, str],
+        ) -> Property:
+            """Retrieve a `Property` in the data model that shares a `column_mapping` attribute."""
+
+            prop: Property = self.__getattribute__(context[1])[context[2]].properties[
+                context[4]
             ]
-            props: List[Property] = list()
-            for nr in nodes_rels:
-                if nr:
-                    props += [
-                        p for p in nr.properties if p.column_mapping == prop_mapping
-                    ]
-            return props
+            return prop
+
+        def _parse_duplicated_property_location(
+            context: Tuple[str, str, int, str, int, str],
+        ) -> Tuple[str, int, str, int]:
+            """Parse the location of a duplicated property in the data model and return the location formatted for Pydantic Error reporting."""
+            #            n or r     n or r idx   properties   prop idx
+            return (context[1], context[2], context[3], context[4])
 
         def _validate_relationship_sources_and_targets() -> List[InitErrorDetails]:
             """
@@ -300,7 +199,7 @@ class DataModel(BaseModel):
                         InitErrorDetails(
                             type=PydanticCustomError(
                                 "missing_source_node_error",
-                                f"The `Relationship` {rel.type} has the source {rel.source} which does not exist in generated `Node` labels.",
+                                f"The `Relationship` {rel.type} has the source {rel.source} which does not exist in generated `Node` labels {self.node_labels}.",
                             ),
                             loc=("relationships",),
                             input=rel,
@@ -444,14 +343,16 @@ class DataModel(BaseModel):
             """
 
             allow_duplicate_column_mappings: bool = (
-                info.context.get("allow_duplicate_column_mappings")
+                info.context.get("allow_duplicate_column_mappings", False)
                 if info.context is not None
                 else False
             )
             errors: List[InitErrorDetails] = list()
 
             if not allow_duplicate_column_mappings:
-                used_features: Dict[str, Dict[str, List[str]]] = dict()
+                used_features: Dict[
+                    str, Dict[str, List[Tuple[str, str, int, str, int, str]]]
+                ] = dict()
                 # --- used_features example ---
                 # file to column to labels or types
                 # {
@@ -462,66 +363,149 @@ class DataModel(BaseModel):
                 # }
                 # -----------------------------
 
-                for node in self.nodes:
+                for node_idx, node in enumerate(self.nodes):
                     # init the file dictionary
                     if node.source_name not in used_features.keys():
                         used_features[node.source_name] = dict()
-                    for prop in node.properties:
+                    for prop_idx, prop in enumerate(node.properties):
                         if prop.column_mapping not in list(
                             used_features[node.source_name].keys()
                         ):
                             used_features[node.source_name][prop.column_mapping] = [
-                                node.label
+                                (
+                                    node.label,
+                                    "nodes",
+                                    node_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
                             ]
                         else:
                             used_features[node.source_name][prop.column_mapping].append(
-                                node.label
+                                (
+                                    node.label,
+                                    "nodes",
+                                    node_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
                             )
 
-                for rel in self.relationships:
+                for rel_idx, rel in enumerate(self.relationships):
                     # init the file dictionary
                     if rel.source_name not in used_features.keys():
                         used_features[rel.source_name] = dict()
-                    for prop in rel.properties:
+                    for prop_idx, prop in enumerate(rel.properties):
                         if prop.column_mapping not in list(
                             used_features[rel.source_name].keys()
                         ):
                             used_features[rel.source_name][prop.column_mapping] = [
-                                rel.type
+                                (
+                                    rel.type,
+                                    "relationships",
+                                    rel_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
                             ]
                         else:
                             used_features[rel.source_name][prop.column_mapping].append(
-                                rel.type
+                                (
+                                    rel.type,
+                                    "relationships",
+                                    rel_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
                             )
 
                 for source_name, feature_dict in used_features.items():
                     for prop_mapping, labels_or_types in feature_dict.items():
                         if len(labels_or_types) > 1:
-                            errors.append(
-                                InitErrorDetails(
-                                    type=PydanticCustomError(
-                                        "duplicate_property_in_data_model_error",
-                                        f"The `Property` `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each must use a different column as a `Property` attribute `column_mapping` instead. Find alternative `Property` `column_mapping` from the column options in the `source_name` file or remove.",
-                                    ),
-                                    loc=("nodes", "relationships"),
-                                    input=_retrieve_invalid_node_and_relationship_properties(
-                                        labels_or_types=labels_or_types,
-                                        prop_mapping=prop_mapping,
-                                    ),
-                                    ctx={},
+                            for l_or_t in labels_or_types:
+                                errors.append(
+                                    InitErrorDetails(
+                                        type=PydanticCustomError(
+                                            "duplicate_property_in_data_model_error",
+                                            f"The `Property` `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each must use a different column as a `Property` attribute `column_mapping` instead. Find alternative `Property` `column_mapping` from the column options in the `source_name` file or remove.",
+                                        ),
+                                        loc=_parse_duplicated_property_location(
+                                            context=l_or_t
+                                        ),
+                                        input=_retrieve_duplicated_property(
+                                            context=l_or_t
+                                        ),
+                                        ctx={},
+                                    )
                                 )
-                            )
 
-                # if errors:
-                #     raise ValidationError.from_exception_data(
-                #         title=self.__class__.__name__,
-                #         line_errors=errors,
-                #     )
+            return errors
+
+        def _validate_parallel_relationships() -> List[InitErrorDetails]:
+            """Validate that there are no parallel relationships in the data model"""
+
+            # if rel.source in other rel.targets
+            # get other rel
+            # if other rel.source == rel.target AND rel.source != rel.target
+            # # then this is cyclic
+            errors: List[InitErrorDetails] = list()
+
+            allow_parallel_relationships: bool = (
+                info.context.get("allow_parallel_relationships", False)
+                if info.context is not None
+                else False
+            )
+
+            if not allow_parallel_relationships:
+                # n^2
+                for i in range(0, len(self.relationships)):
+                    if i < len(self.relationships) - 1:
+                        for j in range(i + 1, len(self.relationships)):
+                            # check parallel
+                            if (
+                                self.relationships[i].source
+                                == self.relationships[j].source
+                                and self.relationships[i].target
+                                == self.relationships[j].target
+                            ):
+                                errors.append(
+                                    InitErrorDetails(
+                                        type=PydanticCustomError(
+                                            "parallel_relationship_error",
+                                            f"The `Relationship` {self.relationships[i].type} is in parallel with `Relationship` {self.relationships[j].type}. Remove one of these Relationships from `relationships`.",
+                                        ),
+                                        loc=("relationships", i),
+                                        input=self.relationships[i],
+                                        ctx={},
+                                    )
+                                )
+                            elif (
+                                self.relationships[i].source
+                                == self.relationships[j].target
+                                and self.relationships[i].target
+                                == self.relationships[j].source
+                            ):
+                                errors.append(
+                                    InitErrorDetails(
+                                        type=PydanticCustomError(
+                                            "parallel_relationship_error",
+                                            f"The `Relationship` {self.relationships[i].type} is in parallel with `Relationship` {self.relationships[j].type}. Remove one of these Relationships from `relationships`.",
+                                        ),
+                                        loc=("relationships", i),
+                                        input=self.relationships[i],
+                                        ctx={},
+                                    )
+                                )
 
             return errors
 
         errors.extend(_validate_relationship_sources_and_targets())
         errors.extend(_validate_column_mappings_used_only_once())
+        errors.extend(_validate_parallel_relationships())
 
         if errors:
             raise ValidationError.from_exception_data(

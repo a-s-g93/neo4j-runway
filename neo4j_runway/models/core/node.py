@@ -13,6 +13,7 @@ from ...exceptions import (
     InvalidSourceNameError,
     NonuniqueNodeError,
 )
+from ...utils.naming_conventions import fix_node_label
 from ..arrows import ArrowsNode
 from ..solutions_workbench import SolutionsWorkbenchNode
 from .property import Property
@@ -240,6 +241,19 @@ class Node(BaseModel):
 
         return [p for p in self.properties if p.is_unique and p.alias is not None]
 
+    @field_validator("label")
+    def validate_source_naming(cls, label: str, info: ValidationInfo) -> str:
+        apply_neo4j_naming_conventions: bool = (
+            info.context.get("apply_neo4j_naming_conventions", True)
+            if info.context is not None
+            else True
+        )
+
+        if apply_neo4j_naming_conventions:
+            return fix_node_label(label)
+
+        return label
+
     @field_validator("source_name")
     def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
         sources: List[str] = (
@@ -263,7 +277,9 @@ class Node(BaseModel):
         cls, properties: List[Property], info: ValidationInfo
     ) -> List[Property]:
         enforce_uniqueness: bool = (
-            info.context.get("enforce_uniqueness") if info.context is not None else True
+            info.context.get("enforce_uniqueness", True)
+            if info.context is not None
+            else True
         )
         if enforce_uniqueness:
             unique_properties = [prop for prop in properties if prop.is_unique]

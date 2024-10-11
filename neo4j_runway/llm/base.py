@@ -2,10 +2,13 @@
 This file contains the base LLM class that all other LLM classes must inherit from.
 """
 
+import json
 from abc import ABC
 from typing import Any, Dict, List, Optional, Union
 
 from instructor import Instructor
+from instructor.exceptions import InstructorRetryException
+from tenacity import Retrying, stop_after_attempt
 
 from ..inputs import UserInput
 from ..models import DataModel
@@ -23,6 +26,7 @@ from ..resources.prompts.data_modeling import (
     create_initial_data_model_prompt,
     create_retry_data_model_generation_prompt,
 )
+from .context import create_context
 
 
 class BaseDiscoveryLLM(ABC):
@@ -217,17 +221,26 @@ class BaseDataModelingLLM(ABC):
         use_yaml_data_model: bool = False,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
+        apply_neo4j_naming_conventions: bool = True,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
         """
 
-        retries = 0
-        valid_response = False
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+        )
 
-        while retries < max_retries and not valid_response:
-            retries += 1  # increment retries each pass
+        retry_logic = Retrying(
+            stop=stop_after_attempt(max_retries),
+            before=lambda _: print("New Data Model Generation Attempt..."),
+        )
 
+        try:
             response: DataModel = self.client.chat.completions.create(
                 model=self.model_name,
                 response_model=DataModel,
@@ -235,39 +248,20 @@ class BaseDataModelingLLM(ABC):
                     {"role": "system", "content": SYSTEM_PROMPTS["data_model"]},
                     {"role": "user", "content": formatted_prompt},
                 ],
+                validation_context=context,
+                max_retries=retry_logic,
                 **self.model_params,
             )
-
-            # validation = response.validate_model(
-            #     valid_columns=valid_columns,
-            #     data_dictionary=data_dictionary,
-            #     allow_duplicate_properties=allow_duplicate_properties,
-            #     enforce_uniqueness=enforce_uniqueness,
-            # )
-            validation: Dict[str, Any] = dict()
-            if not validation["valid"]:
-                print(
-                    "validation failed\nNumber of Errors: ",
-                    len(validation["errors"]),
-                    "\n",
+        except InstructorRetryException as e:
+            print("Invalid `DataModel` returned.")
+            # return model without validation
+            return DataModel.model_construct(
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
                 )
-                # print(validation["message"])
-                cot = self._get_chain_of_thought_for_error_recommendations_response(
-                    formatted_prompt=validation["message"]
-                )
-
-                formatted_prompt = create_retry_data_model_generation_prompt(
-                    chain_of_thought_response=cot,
-                    errors_to_fix=validation["errors"],
-                    model_to_fix=response,
-                    multifile=len(valid_columns.keys()) > 1,
-                    data_dictionary=data_dictionary,
-                    valid_columns=valid_columns,
-                    use_yaml_data_model=use_yaml_data_model,
-                )
-            elif validation["valid"]:
-                print("recieved a valid response")
-                valid_response = True
+            )
 
         return response
 
