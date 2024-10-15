@@ -135,10 +135,10 @@ class BaseDataModelingLLM(ABC):
         use_advanced_data_model_generation_rules: bool,
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
-    ) -> Union[DataModel, Dict[str, Any]]:
+        allow_parallel_relationships: bool = False,
+    ) -> DataModel:
         """
         Performs at least 2 LLM calls:
             1. Request the LLM to find nodes, relationships and properties that should be in the data model.
@@ -157,6 +157,7 @@ class BaseDataModelingLLM(ABC):
             valid_columns=valid_columns,
             allow_duplicate_column_mappings=allow_duplicate_properties,
             enforce_uniqueness=enforce_uniqueness,
+            allow_parallel_relationships=allow_parallel_relationships,
         )
         formatted_prompt = create_initial_nodes_prompt(
             discovery_text=discovery_text,
@@ -209,10 +210,10 @@ class BaseDataModelingLLM(ABC):
             formatted_prompt=formatted_prompt,
             valid_columns=valid_columns,
             max_retries=max_retries,
-            use_yaml_data_model=use_yaml_data_model,
             data_dictionary=data_dictionary,
             allow_duplicate_properties=allow_duplicate_properties,
             enforce_uniqueness=enforce_uniqueness,
+            allow_parallel_relationships=allow_parallel_relationships,
         )
 
         return initial_data_model
@@ -223,7 +224,6 @@ class BaseDataModelingLLM(ABC):
         valid_columns: dict[str, list[str]],
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         apply_neo4j_naming_conventions: bool = True,
