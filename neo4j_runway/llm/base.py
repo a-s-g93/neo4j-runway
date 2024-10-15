@@ -10,11 +10,9 @@ from instructor import Instructor
 from instructor.exceptions import InstructorRetryException
 from tenacity import Retrying, stop_after_attempt
 
-from ..inputs import UserInput
 from ..models import DataModel
 from ..models.core.node import Nodes
 from ..resources.llm_response_types import (
-    DataModelEntityPool,
     DiscoveryResponse,
     ErrorRecommendations,
 )
@@ -22,11 +20,8 @@ from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
-    create_data_model_iteration_prompt,
-    create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
     create_initial_nodes_prompt,
-    create_retry_data_model_generation_prompt,
 )
 from .context import create_context
 
@@ -276,21 +271,3 @@ class BaseDataModelingLLM(ABC):
             )
 
         return response
-
-    def _get_chain_of_thought_for_error_recommendations_response(
-        self, formatted_prompt: str
-    ) -> str:
-        """
-        Generate fixes for the previous data model.
-        """
-        print("Analyzing errors...")
-        response: ErrorRecommendations = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
-                {"role": "user", "content": formatted_prompt},
-            ],
-            response_model=ErrorRecommendations,
-            **self.model_params,
-        )
-        return response.recommendations

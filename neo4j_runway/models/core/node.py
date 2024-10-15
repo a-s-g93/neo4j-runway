@@ -428,16 +428,6 @@ class Nodes(BaseModel):
     def advanced_validation(self, info: ValidationInfo) -> "Nodes":
         errors: List[InitErrorDetails] = list()
 
-        def _retrieve_duplicated_property_column_mapping(
-            context: Tuple[str, str, int, str, int, str],
-        ) -> str:
-            """Retrieve a `Property` in the data model that shares a `column_mapping` attribute."""
-
-            prop: Property = self.__getattribute__(context[1])[context[2]].properties[
-                context[4]
-            ]
-            return prop.column_mapping
-
         def _parse_duplicated_property_location(
             context: Tuple[str, str, int, str, int, str],
         ) -> Tuple[str, int, str, int, str]:

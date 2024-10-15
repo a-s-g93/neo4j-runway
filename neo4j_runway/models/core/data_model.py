@@ -4,7 +4,7 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import yaml
 from graphviz import Digraph
@@ -12,7 +12,6 @@ from pydantic import (
     BaseModel,
     ValidationError,
     ValidationInfo,
-    field_validator,
     model_validator,
 )
 from pydantic_core import InitErrorDetails, PydanticCustomError
@@ -21,7 +20,6 @@ from ...exceptions import (
     InvalidArrowsDataModelError,
     InvalidSolutionsWorkbenchDataModelError,
 )
-from ...resources.prompts.data_modeling import create_data_model_errors_cot_prompt
 from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -50,38 +48,6 @@ class DataModel(BaseModel):
     nodes: List[Node]
     relationships: List[Relationship]
     metadata: Optional[Dict[str, Any]] = None
-
-    # def __init__(
-    #     self,
-    #     nodes: List[Node],
-    #     relationships: List[Relationship],
-    #     metadata: Optional[Dict[str, Any]] = None,
-    #     use_neo4j_naming_conventions: bool = True,
-    # ) -> None:
-    #     """
-    #     The standard Graph Data Model representation in Neo4j Runway.
-
-    #     Parameters
-    #     ----------
-    #     nodes : List[Node]
-    #         A list of the nodes in the data model.
-    #     relationships : List[Relationship]
-    #         A list of the relationships in the data model.
-    #     metadata: Optional[Dict[str, Any]]
-    #         Metadata from an import source such as Solutions Workbench, by default None
-    #     use_neo4j_naming_conventions : bool, optional
-    #         Whether to convert labels, relationships and properties to Neo4j naming conventions, by default True
-    #     """
-    #     super().__init__(
-    #         nodes=nodes,
-    #         relationships=relationships,
-    #         metadata=metadata,
-    #         use_neo4j_naming_conventions=True,
-    #     )
-
-    #     # default apply Neo4j naming conventions.
-    #     if use_neo4j_naming_conventions:
-    #         self.apply_neo4j_naming_conventions()
 
     @property
     def node_labels(self) -> List[str]:

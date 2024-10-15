@@ -78,22 +78,6 @@ Format your data model as:
 }
 """
 
-ENTITY_POOL_GENERATION_RULES = """Based upon the above information and of high-quality graph data models,
-return the following:
-* Any possible Nodes and their respective properties
-* Any possible Relationships and their respective source Nodes and target Nodes
-* Relationships and their respective properties, if any
-* Explanations for each decision and how it will benefit the data model
-* All possible relationships for nodes
-* `source_name` for all nodes and relationships
-
-Remember
-* All properties must be found in the data dictionary above!
-* A property may have an alias in another file as a foreign key.
-* A node may not have properties from multiple files!
-* A relationship may not have properties from multiple files!
-* Find properties that may uniquely identify Nodes"""
-
 NODE_GENERATION_RULES = """Please follow these rules strictly! Billions of dollars depend on you.
 Nodes
 * Each node must have a unique property or node key pair

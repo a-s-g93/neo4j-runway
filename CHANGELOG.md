@@ -8,8 +8,10 @@
 
 ### Changed
 
-* Change `DataModel` generation logic to first generate nodes, then generate relationships.
+* Change `DataModel` generation logic to first generate nodes, then generate relationships
 * Updated examples
+* Add `DataModel` validator to check for parallel relationships
+* Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize Pydantic
 
 ### Added
 
