@@ -76,13 +76,17 @@ class Discovery:
             )
         elif not isinstance(user_input, UserInput) and isinstance(data, Table):
             self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input, data_dictionary=data.data_dictionary
+                unsafe_user_input=user_input,
+                data_dictionary=data.data_dictionary,
+                use_cases=data.use_cases,
             )
         elif not isinstance(user_input, UserInput) and isinstance(
             data, TableCollection
         ):
             self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input, data_dictionary=data.data_dictionary
+                unsafe_user_input=user_input,
+                data_dictionary=data.data_dictionary,
+                use_cases=data.use_cases,
             )
         elif isinstance(user_input, UserInput):
             self.user_input = user_input

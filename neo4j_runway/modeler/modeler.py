@@ -70,8 +70,8 @@ class GraphDataModeler:
             self.user_input = discovery.user_input
             # data dictionary should have been constructed before / during the discovery phase
             self._data_dictionary = discovery.data.data_dictionary
-
             self.discovery = discovery.discovery
+            self.user_input = discovery.user_input
 
         else:
             if not allowed_columns and not user_input and not data_dictionary:
