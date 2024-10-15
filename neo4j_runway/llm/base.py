@@ -14,7 +14,6 @@ from ..models import DataModel
 from ..models.core.node import Nodes
 from ..resources.llm_response_types import (
     DiscoveryResponse,
-    ErrorRecommendations,
 )
 from ..resources.prompts import (
     SYSTEM_PROMPTS,

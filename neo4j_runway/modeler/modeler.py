@@ -273,6 +273,7 @@ class GraphDataModeler:
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         allow_parallel_relationships: bool = False,
+        **kwargs: Any,
     ) -> DataModel:
         """
         Generate the initial model.
@@ -326,6 +327,7 @@ class GraphDataModeler:
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         allow_parallel_relationships: bool = False,
+        **kwargs: Any,
     ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.

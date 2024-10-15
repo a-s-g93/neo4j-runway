@@ -10,12 +10,14 @@
 
 * Change initial `DataModel` generation logic to first generate nodes, then generate relationships
 * Updated examples
-* Add `DataModel` validator to check for parallel relationships
-* Add `allow_parallel_relationships` arg to `DataModel` generating methods
 * remove `use_yaml_data_model` arg from `DataModel` generation methods, as it is no longer relevant
 * Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize Pydantic
+* Update `Instructor` dependency to v1.5.2
 
 ### Added
+
+* Add `DataModel` validator to check for parallel relationships
+* Add `allow_parallel_relationships` arg to `DataModel` generating methods
 
 ## 0.11.0
 
