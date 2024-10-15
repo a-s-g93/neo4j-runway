@@ -199,5 +199,5 @@ def user_input_safe_construct(
         data_dictionary=data_dictionary
         or unsafe_user_input
         or {k: "" for k in allowed_columns},
-        use_cases=use_cases,
+        use_cases=use_cases or unsafe_user_input.get("use_cases"),
     )

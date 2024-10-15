@@ -17,7 +17,12 @@ from neo4j_runway.code_generation import (
     StandardCypherCodeGenerator,
 )
 from neo4j_runway.database import Neo4jGraph
-from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
+from neo4j_runway.llm.openai import (
+    AzureOpenAIDataModelingLLM,
+    AzureOpenAIDiscoveryLLM,
+    OpenAIDataModelingLLM,
+    OpenAIDiscoveryLLM,
+)
 from neo4j_runway.utils.data import Table, TableCollection
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
@@ -53,6 +58,16 @@ CLASS_DIR = [
         "class": OpenAIDataModelingLLM,
         "file_path": "api/llm/openai_data_modeling_llm.md",
         "summary_file_path": "openai_data_modeling_llm.md",
+    },
+    {
+        "class": AzureOpenAIDiscoveryLLM,
+        "file_path": "api/llm/azure_openai_discovery_llm.md",
+        "summary_file_path": "azure_openai_discovery_llm.md",
+    },
+    {
+        "class": AzureOpenAIDataModelingLLM,
+        "file_path": "api/llm/azure_openai_data_modeling_llm.md",
+        "summary_file_path": "azure_openai_data_modeling_llm.md",
     },
     {
         "class": Neo4jGraph,

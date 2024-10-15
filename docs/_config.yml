@@ -5,7 +5,7 @@ plugins:
 locale: en-US
 title: Runway
 title_separator: '-'
-subtitle: A Python package for Neo4j | v0.10.0
+subtitle: A Python package for Neo4j | v0.11.0
 name: Alex Gilmore
 description: An end to end solution for exploring relational data as a graph.
 url: https://a-s-g93.github.io

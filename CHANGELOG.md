@@ -4,6 +4,14 @@
 
 ### Fixed
 
+* Fix bug where `use_cases` arg in `UserInput` not accounted for.
+
+### Changed
+
+### Added
+
+## 0.11.0
+
 ### Changed
 
 * Removed `kwargs` from LLM classes and replaced with `llm_init_params` to provide parameters that should be passed to the LLM constructor.
@@ -36,15 +44,11 @@
 * Multi file support for Data Modeling process (EXPERIMENTAL)
 * Cypher generation support for relationships spanning across different files
 
-### Added
-
 ## 0.9.1
 
 ### Fixed
 
 * Fix bug in LoadCSVCodeGenerator
-
-### Changed
 
 ### Added
 
