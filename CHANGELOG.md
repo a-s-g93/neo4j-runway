@@ -8,6 +8,9 @@
 
 ### Changed
 
+* Change `DataModel` generation logic to first generate nodes, then generate relationships.
+* Updated examples
+
 ### Added
 
 ## 0.11.0
