@@ -2,6 +2,7 @@ from typing import Dict, List, Union
 
 from pydantic import (
     BaseModel,
+    Field,
     ValidationError,
     ValidationInfo,
     field_validator,
@@ -410,3 +411,15 @@ class Node(BaseModel):
             properties=props,
             source_name=source_name,
         )
+
+
+class Nodes(BaseModel):
+    nodes: List[Node] = Field(
+        description="A list of nodes to be used in a graph data model."
+    )
+
+    @field_validator("nodes")
+    def validate_nodes(cls, nodes: List[Node]) -> List[Node]:
+        assert len(nodes) > 1, "`nodes` must contain more than 1 `Node`."
+
+        return nodes

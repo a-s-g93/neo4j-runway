@@ -1,7 +1,12 @@
 from typing import Any, Dict, Optional
 
 from ...llm_response_types.initial_model_pool import DataModelEntityPool
-from .constants import DATA_MODEL_FORMAT, ENTITY_POOL_GENERATION_RULES
+from .constants import (
+    DATA_MODEL_FORMAT,
+    ENTITY_POOL_GENERATION_RULES,
+    NODE_GENERATION_RULES,
+    NODES_FORMAT,
+)
 from .formatters import get_rules
 from .template import create_data_modeling_prompt
 
@@ -35,9 +40,38 @@ def create_initial_data_model_cot_prompt(
     )
 
 
+def create_initial_nodes_prompt(
+    discovery_text: str,
+    multifile: bool,
+    use_cases: Optional[str],
+    valid_columns: Dict[str, Any],
+    data_dictionary: Optional[Dict[str, Any]] = None,
+) -> str:
+    """
+    Generate a prompt to find nodes and properties to include in a data model.
+
+    Returns
+    -------
+    str
+        The prompt.
+    """
+    prefix = "Please generate a list of Nodes that will be used to construct a graph data model."
+
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        multifile=multifile,
+        use_cases=use_cases,
+        valid_columns=valid_columns,
+        data_dictionary=data_dictionary,
+        rules=NODE_GENERATION_RULES,
+        data_model_format=NODES_FORMAT,
+    )
+
+
 def create_initial_data_model_prompt(
     discovery_text: str,
-    data_model_recommendations: DataModelEntityPool,
+    data_model_recommendations: "Nodes",  # type: ignore
     multifile: bool,
     valid_columns: Dict[str, Any],
     data_dictionary: Optional[Dict[str, Any]] = None,

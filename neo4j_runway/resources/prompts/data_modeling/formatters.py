@@ -113,6 +113,18 @@ def format_entity_pool(
     {entity_pool.model_dump_json()}\n\n"""
 
 
+def format_nodes(
+    nodes: "Nodes",  # type: ignore
+    retry_prompt: bool = False,
+) -> str:
+    if not retry_prompt:
+        return f"""Here are Nodes to include in the data model. Do NOT change their content. Create Relationships connecting them.
+    {nodes.model_dump_json()}\n\n"""
+    else:
+        return f"""Here are the current entity suggestions:
+    {nodes.model_dump_json()}\n\n"""
+
+
 def get_rules(multifile: bool, advanced_rules: bool) -> str:
     base = "Rules that must be followed:\n" + (
         DATA_MODEL_GENERATION_RULES_MULTI

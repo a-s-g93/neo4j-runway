@@ -15,7 +15,6 @@ Properties
 * A property can NOT be both unique and a key
 General
 * Do NOT return a single-node data model
-* If a cycle exists, consider removing a relationship while maintaining the meaning captured by the cycle
 """
 
 DATA_MODEL_GENERATION_RULES_SINGLE = (
@@ -94,3 +93,27 @@ Remember
 * A node may not have properties from multiple files!
 * A relationship may not have properties from multiple files!
 * Find properties that may uniquely identify Nodes"""
+
+NODE_GENERATION_RULES = """Please follow these rules strictly! Billions of dollars depend on you.
+Nodes
+* Each node must have a unique property or node key pair
+* Each node must have a relationship with at least one other node
+* Unique properties and node keys may NOT be shared between different nodes
+* A node must only have a single ID property"""
+
+NODES_FORMAT = """Return your `Nodes` in JSON format.
+Property Format:
+{
+    "name": <`Property` name>,
+    "type": <Python type>,
+    "column_mapping": <csv column that maps to `Property`>,
+    "alias": <a second column that maps to `Property`. identifies relationship between two nodes of the same label or a relationship that spans across different files>,
+    "is_unique": <`Property` is a unique identifier>,
+    "part_of_key": <`Property` that with at least 1 other `Property`, makes a unique combination>
+}
+Node Format:
+{
+    "label": <node label>,
+    "properties": <list of Property>,
+    "source_name": <source file name>
+}"""

@@ -12,6 +12,7 @@ from tenacity import Retrying, stop_after_attempt
 
 from ..inputs import UserInput
 from ..models import DataModel
+from ..models.core.node import Nodes
 from ..resources.llm_response_types import (
     DataModelEntityPool,
     DiscoveryResponse,
@@ -24,6 +25,7 @@ from ..resources.prompts.data_modeling import (
     create_data_model_iteration_prompt,
     create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
+    create_initial_nodes_prompt,
     create_retry_data_model_generation_prompt,
 )
 from .context import create_context
@@ -154,63 +156,60 @@ class BaseDataModelingLLM(ABC):
         DataModel
             The final data model.
         """
-        validation = {"valid": False}
-        part_one_retries = 0
-        # part 1
-        while not validation["valid"] and part_one_retries < 2:
-            print(f"Entity Pool Generation Attempt: {part_one_retries+1}")
-            formatted_prompt = create_initial_data_model_cot_prompt(
-                discovery_text=discovery_text,
-                multifile=multifile,
-                data_dictionary=data_dictionary,
-                use_cases=use_cases,
-                valid_columns=valid_columns,
-            )
-            entity_pool: DataModelEntityPool = self.client.chat.completions.create(
-                model=self.model_name,
-                response_model=DataModelEntityPool,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_PROMPTS["initial_data_model"],
-                    },
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            validation = entity_pool.validate_pool(
-                valid_columns=valid_columns, data_dictionary=data_dictionary
-            )
-            part_one_retries += 1
-            # print(entity_pool)
-        # part 2
-        if validation["valid"]:
-            print("Received Valid Entity Pool.")
 
-            formatted_prompt = create_initial_data_model_prompt(
-                discovery_text=discovery_text,
-                data_model_recommendations=entity_pool,
-                multifile=multifile,
-                data_dictionary=data_dictionary,
-                use_cases=use_cases,
-                advanced_rules=use_advanced_data_model_generation_rules,
-                valid_columns=valid_columns,
-            )
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+        )
+        formatted_prompt = create_initial_nodes_prompt(
+            discovery_text=discovery_text,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            valid_columns=valid_columns,
+        )
 
-            initial_data_model: DataModel = self._get_data_model_response(
-                formatted_prompt=formatted_prompt,
-                valid_columns=valid_columns,
-                max_retries=max_retries,
-                use_yaml_data_model=use_yaml_data_model,
-                data_dictionary=data_dictionary,
-                allow_duplicate_properties=allow_duplicate_properties,
-                enforce_uniqueness=enforce_uniqueness,
-            )
+        nodes: Nodes = self.client.chat.completions.create(
+            model=self.model_name,
+            response_model=Nodes,
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPTS["initial_nodes"],
+                },
+                {"role": "user", "content": formatted_prompt},
+            ],
+            validation_context=context,
+            max_retries=max_retries,
+            **self.model_params,
+        )
 
-            return initial_data_model
+        print("Received Valid Initial Nodes.")
+        print(nodes)
 
-        else:
-            return validation
+        formatted_prompt = create_initial_data_model_prompt(
+            discovery_text=discovery_text,
+            data_model_recommendations=nodes,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            advanced_rules=use_advanced_data_model_generation_rules,
+            valid_columns=valid_columns,
+        )
+
+        initial_data_model: DataModel = self._get_data_model_response(
+            formatted_prompt=formatted_prompt,
+            valid_columns=valid_columns,
+            max_retries=max_retries,
+            use_yaml_data_model=use_yaml_data_model,
+            data_dictionary=data_dictionary,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+        )
+
+        return initial_data_model
 
     def _get_data_model_response(
         self,

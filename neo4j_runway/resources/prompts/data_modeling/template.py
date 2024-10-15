@@ -14,6 +14,7 @@ from .formatters import (
     format_discovery,
     format_entity_pool,
     format_errors,
+    format_nodes,
     format_use_cases,
     format_valid_columns,
 )
@@ -31,6 +32,7 @@ def create_data_modeling_prompt(
     corrections: Optional[str] = None,
     data_model: Optional["DataModel"] = None,  # type: ignore
     entity_pool: Optional["DataModelEntityPool"] = None,  # type: ignore
+    nodes: Optional["Nodes"] = None,  # type: ignore
     use_cases: Optional[str] = None,
     data_model_format: Optional[str] = None,
     retry_prompt: bool = False,
@@ -52,6 +54,8 @@ def create_data_modeling_prompt(
         res += format_data_model(data_model=data_model, yaml_format=data_model_as_yaml)
     if entity_pool is not None:
         res += format_entity_pool(entity_pool=entity_pool, retry_prompt=retry_prompt)
+    if nodes is not None:
+        res += format_nodes(nodes=nodes, retry_prompt=retry_prompt)
     if use_cases is not None:
         res += format_use_cases(use_cases=use_cases)
     res += rules
