@@ -55,7 +55,7 @@ def create_initial_nodes_prompt(
     str
         The prompt.
     """
-    prefix = "Please generate a list of Nodes that will be used to construct a graph data model."
+    prefix = "Please generate a list of Nodes that will be used to construct a graph data model. Each node should represent an entity found in the data."
 
     return create_data_modeling_prompt(
         prefix=prefix,

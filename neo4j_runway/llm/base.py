@@ -171,22 +171,33 @@ class BaseDataModelingLLM(ABC):
             valid_columns=valid_columns,
         )
 
-        nodes: Nodes = self.client.chat.completions.create(
-            model=self.model_name,
-            response_model=Nodes,
-            messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPTS["initial_nodes"],
-                },
-                {"role": "user", "content": formatted_prompt},
-            ],
-            validation_context=context,
-            max_retries=max_retries,
-            **self.model_params,
-        )
+        try:
+            nodes: Nodes = self.client.chat.completions.create(
+                model=self.model_name,
+                response_model=Nodes,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPTS["initial_nodes"],
+                    },
+                    {"role": "user", "content": formatted_prompt},
+                ],
+                validation_context=context,
+                max_retries=max_retries,
+                **self.model_params,
+            )
 
-        print("Received Valid Initial Nodes.")
+            print("Received Valid Initial Nodes.")
+        except InstructorRetryException as e:
+            print("Invalid `Nodes` returned.")
+            # return model without validation
+            nodes: Nodes = Nodes.model_construct(  # type: ignore
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
+                )
+            )
         print(nodes)
 
         formatted_prompt = create_initial_data_model_prompt(

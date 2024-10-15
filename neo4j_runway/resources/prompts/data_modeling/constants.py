@@ -97,9 +97,8 @@ Remember
 NODE_GENERATION_RULES = """Please follow these rules strictly! Billions of dollars depend on you.
 Nodes
 * Each node must have a unique property or node key pair
-* Each node must have a relationship with at least one other node
 * Unique properties and node keys may NOT be shared between different nodes
-* A node must only have a single ID property"""
+* Consider creating separate Nodes for each unique identifier"""
 
 NODES_FORMAT = """Return your `Nodes` in JSON format.
 Property Format:

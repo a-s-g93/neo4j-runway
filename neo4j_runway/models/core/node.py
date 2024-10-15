@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from pydantic import (
     BaseModel,
@@ -423,3 +423,111 @@ class Nodes(BaseModel):
         assert len(nodes) > 1, "`nodes` must contain more than 1 `Node`."
 
         return nodes
+
+    @model_validator(mode="after")
+    def advanced_validation(self, info: ValidationInfo) -> "Nodes":
+        errors: List[InitErrorDetails] = list()
+
+        def _retrieve_duplicated_property_column_mapping(
+            context: Tuple[str, str, int, str, int, str],
+        ) -> str:
+            """Retrieve a `Property` in the data model that shares a `column_mapping` attribute."""
+
+            prop: Property = self.__getattribute__(context[1])[context[2]].properties[
+                context[4]
+            ]
+            return prop.column_mapping
+
+        def _parse_duplicated_property_location(
+            context: Tuple[str, str, int, str, int, str],
+        ) -> Tuple[str, int, str, int, str]:
+            """Parse the location of a duplicated property in the data model and return the location formatted for Pydantic Error reporting."""
+            #         n or r     n or r idx   properties   prop idx
+            return (context[1], context[2], context[3], context[4], "column_mapping")
+
+        def _validate_column_mappings_used_only_once() -> List[InitErrorDetails]:
+            """
+            Validate that each column mapping is used no more than one time in the data model.
+            This check may be skipped by providing `allow_duplicate_column_mappings` = True in the validation context.
+            """
+
+            allow_duplicate_column_mappings: bool = (
+                info.context.get("allow_duplicate_column_mappings", False)
+                if info.context is not None
+                else False
+            )
+            errors: List[InitErrorDetails] = list()
+
+            if not allow_duplicate_column_mappings:
+                used_features: Dict[
+                    str, Dict[str, List[Tuple[str, str, int, str, int, str]]]
+                ] = dict()
+                # --- used_features example ---
+                # file to column to labels or types
+                # {
+                # "a.csv": {"feature_a": ["LabelA", "LabelB"]},
+                # "b.csv": {"feature_b": ["LabelA", "LabelB"],
+                #           "feature_c": ["LabelD"]},
+                # "c.csv": {}
+                # }
+                # -----------------------------
+
+                for node_idx, node in enumerate(self.nodes):
+                    # init the file dictionary
+                    if node.source_name not in used_features.keys():
+                        used_features[node.source_name] = dict()
+                    for prop_idx, prop in enumerate(node.properties):
+                        if prop.column_mapping not in list(
+                            used_features[node.source_name].keys()
+                        ):
+                            used_features[node.source_name][prop.column_mapping] = [
+                                (
+                                    node.label,
+                                    "nodes",
+                                    node_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
+                            ]
+                        else:
+                            used_features[node.source_name][prop.column_mapping].append(
+                                (
+                                    node.label,
+                                    "nodes",
+                                    node_idx,
+                                    "properties",
+                                    prop_idx,
+                                    "column_mapping",
+                                )
+                            )
+
+                for source_name, feature_dict in used_features.items():
+                    for prop_mapping, labels_or_types in feature_dict.items():
+                        if len(labels_or_types) > 1:
+                            for l_or_t in labels_or_types:
+                                errors.append(
+                                    InitErrorDetails(
+                                        type=PydanticCustomError(
+                                            "duplicate_property_in_nodes_error",
+                                            f"{source_name} column {prop_mapping} may only be used once as a `Property.column_mapping` value.",
+                                        ),
+                                        loc=_parse_duplicated_property_location(
+                                            context=l_or_t
+                                        ),
+                                        input=prop_mapping,
+                                        ctx={},
+                                    )
+                                )
+
+            return errors
+
+        errors.extend(_validate_column_mappings_used_only_once())
+
+        if errors:
+            raise ValidationError.from_exception_data(
+                title=self.__class__.__name__,
+                line_errors=errors,
+            )
+
+        return self
