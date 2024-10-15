@@ -4,6 +4,8 @@
 
 ### Fixed
 
+* Fix bug where `use_cases` arg in `UserInput` not accounted for.
+
 ### Changed
 
 ### Added
