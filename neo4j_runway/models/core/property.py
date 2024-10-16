@@ -39,8 +39,6 @@ class Property(BaseModel):
     is_unique: bool = False
     part_of_key: bool = False
 
-    # is_indexed: bool
-    # must_exist: bool
     @field_validator("name")
     def validate_name(cls, name: str, info: ValidationInfo) -> str:
         apply_neo4j_naming_conventions: bool = (
