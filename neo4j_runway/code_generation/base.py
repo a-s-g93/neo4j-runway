@@ -9,7 +9,7 @@ from typing import Any, Dict
 import yaml
 
 from ..models import DataModel
-from ..utils.create_directory import create_directory
+from ..utils._utils.create_directory import create_directory
 from .cypher import *
 
 

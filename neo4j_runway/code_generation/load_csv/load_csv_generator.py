@@ -5,7 +5,7 @@ This file contains the code to generate LOAD CSV code.
 import os
 
 from ...models import DataModel
-from ...utils.create_directory import create_directory
+from ...utils._utils.create_directory import create_directory
 from ..base import BaseCodeGenerator
 from ..cypher import (
     generate_merge_node_load_csv_clause,

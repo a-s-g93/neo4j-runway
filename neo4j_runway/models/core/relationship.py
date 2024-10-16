@@ -29,6 +29,9 @@ class Relationship(BaseModel):
     target: str
     source_name: str = "file"
 
+    def __str__(self) -> str:
+        return f"(:{self.source})-[:{self.type}]->(:{self.target})"
+
     @property
     def property_names(self) -> List[str]:
         """

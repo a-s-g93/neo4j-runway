@@ -38,35 +38,8 @@ class Node(BaseModel):
     properties: List[Property]
     source_name: str = "file"
 
-    # def __init__(
-    #     self, label: str, properties: List[Property] = list(), source_name: str = "file"
-    # ) -> None:
-    #     super().__init__(label=label, properties=properties, source_name=source_name)
-    #     """
-    #     Standard Node representation.
-
-    #     Parameters
-    #     ----------
-    #     label : str
-    #         The node label.
-    #     properties : List[Property]
-    #         A list of the properties within the node.
-    #     source_name : str, optional
-    #         The name of the file containing the node's information, by default = "file"
-    #     """
-
-    # @field_validator("source_name")
-    # def validate_source_name(cls, v: str) -> str:
-    #     """
-    #     Validate the CSV name provided.
-    #     """
-
-    #     if v == "file":
-    #         return v
-    #     else:
-    #         if not v.endswith(".csv"):
-    #             return v + ".csv"
-    #     return v
+    def __str__(self) -> str:
+        return f"(:{self.label})"
 
     @property
     def property_names(self) -> List[str]:
@@ -415,7 +388,7 @@ class Node(BaseModel):
 
 class Nodes(BaseModel):
     nodes: List[Node] = Field(
-        description="A list of nodes to be used in a graph data model."
+        description="A list of nodes to be used in a graph data model.", default=list()
     )
 
     @field_validator("nodes")

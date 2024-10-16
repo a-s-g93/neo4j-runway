@@ -14,11 +14,13 @@
 * Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize `Pydantic` library
 * Update `Instructor` dependency to v1.5.2
 * Simplify LLM retry logic by better utilizing `Instructor` library
+* Update printed results and progress of `DataModel` generating methods to be prettier
 
 ### Added
 
 * Add `DataModel` validator to check for parallel relationships
 * Add `allow_parallel_relationships` arg to `DataModel` generating methods
+* Add `apply_neo4j_naming_conventions` arg to `DataModel` generating methods
 
 ## 0.11.0
 

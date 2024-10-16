@@ -273,6 +273,7 @@ class GraphDataModeler:
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
         **kwargs: Any,
     ) -> DataModel:
         """
@@ -292,6 +293,8 @@ class GraphDataModeler:
             Setting this to false may be detrimental during code generation and ingestion. By default True
         allow_parallel_relationships : bool, optional
             Whether to allow parallel relationships to exist in the data model, by default False
+        apply_neo4j_naming_conventions : bool, optional
+            Whether to apply Neo4j naming conventions to the generated Data Model, by default True
 
         Returns
         -------
@@ -310,6 +313,7 @@ class GraphDataModeler:
             allow_duplicate_properties=allow_duplicate_properties,
             enforce_uniqueness=enforce_uniqueness,
             allow_parallel_relationships=allow_parallel_relationships,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
         )
 
         self.model_history.append(response)
@@ -327,6 +331,7 @@ class GraphDataModeler:
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
         allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
         **kwargs: Any,
     ) -> DataModel:
         """
@@ -351,12 +356,17 @@ class GraphDataModeler:
             Setting this to false may be detrimental during code generation and ingestion. By default True
         allow_parallel_relationships : bool, optional
             Whether to allow parallel relationships to exist in the data model, by default False
+        apply_neo4j_naming_conventions : bool, optional
+            Whether to apply Neo4j naming conventions to the generated Data Model, by default True
 
         Returns
         -------
         DataModel
             The most recently generated data model.
         """
+
+        if "user_corrections" in kwargs:
+            corrections = kwargs["user_corrections"]
 
         assert self._initial_model_created, "No data model present to iterate on."
 
@@ -380,6 +390,7 @@ class GraphDataModeler:
                     allow_duplicate_properties=allow_duplicate_properties,
                     enforce_uniqueness=enforce_uniqueness,
                     allow_parallel_relationships=allow_parallel_relationships,
+                    apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
                 )
 
                 self.model_history.append(response)
