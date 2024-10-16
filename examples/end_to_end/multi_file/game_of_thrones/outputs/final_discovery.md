@@ -1,31 +1,31 @@
 ### Summary of Insights for Graph Data Model
 
 #### Unique Identifiers
-1. **battle_number**: Serves as a unique identifier for each battle, crucial for tracking battles over time.
-2. **family**: Represents unique families involved in the battles, essential for analyzing alliances and attack frequency.
-3. **king**: Identifies the king associated with each battle, which can indicate political dynamics and shifts in alliances.
-4. **commander**: Unique identifiers for commanders leading the armies, important for analyzing leadership effectiveness.
+- **Battle Number**: Serves as a unique identifier for each battle, ranging from 1 to 38.
+- **Family**: Each family can be treated as a unique identifier for nodes representing families.
+- **Commander**: Unique identifiers for commanders involved in battles.
 
 #### Significant Properties
-1. **year**: Indicates the year of the battle, useful for temporal analysis of army sizes and alliances.
-2. **size**: Represents the size of the army, critical for understanding changes in military strength over time.
-3. **outcome**: Indicates whether a battle was won or lost, providing insights into family effectiveness and strategies.
-4. **attacking**: A boolean indicating whether a family was attacking, essential for understanding aggression in battles.
-5. **location** and **region**: Provide geographical context for battles, which may help in analyzing regional conflict trends.
+- **Army Size**: Represents the size of the army involved in each battle, crucial for analyzing changes over time.
+- **Outcome**: Indicates whether the battle was won or lost, important for assessing family effectiveness.
+- **Year**: The year in which the battle occurred, essential for tracking changes over time.
+- **Location**: The specific location of the battle, providing geographical context.
+- **Region**: The broader region where the battle took place, useful for regional analysis.
+- **Attacking**: A boolean indicating whether the army was attacking, relevant for understanding aggressive strategies.
 
 #### Possible Node Labels
-1. **Battle**: Represents each battle, identified by `battle_number`.
-2. **Family**: Represents each unique family involved in the battles.
-3. **King**: Represents each unique king associated with the battles.
-4. **Commander**: Represents each unique commander leading the armies.
+- **Family**: Represents the different families involved in battles.
+- **Battle**: Represents each battle, identified by battle number.
+- **Commander**: Represents the commanders leading the armies.
+- **Year**: Represents the years in which battles occurred.
 
 #### Possible Relationships
-1. **PARTICIPATED_IN**: Between `Family` and `Battle`, indicating which families participated in which battles.
-2. **LED_BY**: Between `Battle` and `Commander`, indicating which commander led the battle.
-3. **SUPPORTS**: Between `Family` and `King`, indicating which families supported which kings during battles.
-4. **ATTACKED**: Between `Family` and `Battle`, indicating which families were attacking in each battle.
+- **ATTACKED**: Connects a Family node to a Battle node, indicating which family attacked in that battle.
+- **PARTICIPATED_IN**: Connects a Family node to a Battle node, indicating which families participated in the battle.
+- **LED_BY**: Connects a Battle node to a Commander node, indicating which commander led the army in that battle.
+- **OCCURRED_IN**: Connects a Battle node to a Year node, indicating when the battle took place.
 
-#### Addressing Use Cases
-1. **Families Changing Alliances**: By analyzing the `SUPPORTS` relationship between `Family` and `King`, we can track changes in family alliances over time based on which families supported which kings.
-2. **How Army Sizes Changed Over Time**: The `size` property of the `Battle` node can be analyzed in conjunction with the `year` property to observe trends in army sizes across different battles.
-3. **Which Families Attack Most Often**: The `ATTACKED` relationship can be used to determine which families were most frequently on the offensive, indicating their aggressiveness in conflicts.
+#### Use Case Insights
+1. **Families Changing Alliances**: By analyzing the relationships between Family nodes and Battle nodes, we can track which families frequently switch between attacking and defending roles, as well as their common opponents over time.
+2. **Army Size Changes Over Time**: By correlating the Year node with the Army Size property in the Battle node, we can analyze trends in army sizes across different battles and families.
+3. **Most Frequent Attackers**: By examining the ATTACKED relationship between Family nodes and Battle nodes, we can identify which families are more aggressive in their strategies and how often they attack.

@@ -192,6 +192,9 @@ class BaseDataModelingLLM(ABC):
             apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
         )
 
+        if not hasattr(initial_data_model, "nodes") and hasattr(nodes, "nodes"):
+            initial_data_model.nodes = nodes.nodes
+
         return initial_data_model
 
     def _get_data_model_response(
@@ -245,20 +248,23 @@ class BaseDataModelingLLM(ABC):
                 )
             )
 
-        print(
-            pretty_list(
-                header="Nodes",
-                content=[cyan(n.__str__()) for n in response.nodes],
-                cols=2,
-            ),
-            "\n",
-        )
-        print(
-            pretty_list(
-                header="Relationships",
-                content=[cyan(r.__str__()) for r in response.relationships],
+        if hasattr(response, "nodes"):
+            print(
+                pretty_list(
+                    header="Nodes",
+                    content=[cyan(n.__str__()) for n in response.nodes],
+                    cols=2,
+                ),
+                "\n",
             )
-        )
+
+        if hasattr(response, "relationships"):
+            print(
+                pretty_list(
+                    header="Relationships",
+                    content=[cyan(r.__str__()) for r in response.relationships],
+                )
+            )
 
         return response
 

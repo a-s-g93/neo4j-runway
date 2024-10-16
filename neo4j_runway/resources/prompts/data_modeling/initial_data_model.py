@@ -51,12 +51,13 @@ def create_initial_data_model_prompt(
     Generate the initial data model request prompt.
     """
 
-    prefix = "I would like you to generate a graph data model based on this provided information."
+    prefix = "I would like you to generate a graph data model based on this provided information. Ensure that the recommened nodes are implemented in the final data model."
     rules = get_rules(multifile=multifile, advanced_rules=advanced_rules)
 
     return create_data_modeling_prompt(
         prefix=prefix,
         discovery=discovery_text,
+        nodes=data_model_recommendations,
         valid_columns=valid_columns,
         data_dictionary=data_dictionary,
         use_cases=use_cases,

@@ -3,35 +3,29 @@
 #### Overall Data Characteristics:
 1. **Data Size**: The dataset contains 184 entries and 12 columns, indicating a moderate size for analysis.
 2. **Data Types**: The features include a mix of categorical (object), numerical (int64, float64), and boolean data types. This diversity allows for various types of analyses.
-3. **Missing Values**: There are several columns with missing values:
+3. **Missing Values**: Some columns have missing values:
    - `king`: 4 missing values
    - `outcome`: 6 missing values
    - `size`: 36 missing values
    - `summer`: 3 missing values
    - `location`: 2 missing values
    - `commander`: 10 missing values
-   This indicates that some battles lack complete information, particularly regarding army size and commanders.
+   This indicates that data cleaning may be necessary before analysis.
 
-#### Key Features for Use Cases:
-1. **Families Changing Alliances**:
-   - The `family` and `king` columns are crucial for analyzing alliances. The presence of multiple families and kings suggests potential shifts in alliances over battles. The `outcome` column can also provide insights into which families may have changed sides based on battle results.
-   - The `commander` column can further help identify which families are leading armies and if there are any overlaps or changes in leadership.
+#### Key Features:
+1. **Year**: The battles occurred predominantly in the years 298 to 300, with a very narrow range. This suggests a limited time frame for the battles analyzed.
+2. **Battle Number**: Each battle has a unique identifier, which is crucial for tracking individual battles.
+3. **Size**: The army size varies significantly, with a mean of approximately 16,831 and a maximum of 100,000. The large standard deviation indicates a wide range of army sizes, which could be important for understanding battle dynamics.
+4. **King**: The participation of kings shows a limited number of unique values (6), indicating that a few key figures are central to the battles.
+5. **Outcome**: The outcome of battles is binary (won/lost), with a slight majority of battles won (101 out of 178). This could be useful for analyzing the effectiveness of different families or commanders.
+6. **Family**: There are 21 unique families, with the Lannisters being the most frequently mentioned. This feature is critical for analyzing alliances and conflicts.
+7. **Location and Region**: The battles took place in various locations and regions, with some locations being more common than others (e.g., Castle Black). This can help in understanding geographical strategies.
+8. **Commander**: The dataset includes 81 unique commanders, with some commanding more frequently than others. This can provide insights into leadership effectiveness and strategies.
 
-2. **Changes in Army Sizes Over Time**:
-   - The `size` column is essential for understanding army sizes, while the `year` column allows for temporal analysis. Analyzing the distribution of army sizes across different years can reveal trends in military strength and resource allocation.
-   - The presence of missing values in the `size` column may affect the analysis, so it may be necessary to handle these appropriately (e.g., imputation or exclusion).
+#### Use Case Insights:
+1. **Families Changing Alliances**: The `family` and `king` features can be analyzed together to identify instances where families allied with different kings over time. This can be done by tracking the `king` associated with each `family` in different battles.
+2. **Army Size Changes Over Time**: The `size` feature can be analyzed against the `year` to observe trends in army sizes. Given the missing values in `size`, it may be necessary to handle these appropriately (e.g., imputation or exclusion).
+3. **Most Frequent Attackers**: The `family` feature can be aggregated to count the number of battles each family participated in, providing insights into which families were the most aggressive or involved in conflicts.
 
-3. **Families Attacking Most Often**:
-   - The `family` column can be used to count the number of battles each family has participated in. This can be complemented by the `attacking` boolean column to determine which families are on the offensive.
-   - The `location` and `region` columns can provide context on where these attacks are happening, potentially revealing strategic patterns.
-
-#### Important Features:
-- **`year`**: Essential for temporal analysis of battles and army sizes.
-- **`size`**: Key for understanding the scale of military engagements.
-- **`family`**: Crucial for analyzing alliances and participation in battles.
-- **`king`**: Important for understanding leadership and potential shifts in alliances.
-- **`outcome`**: Provides insights into the success or failure of battles, which can influence future alliances.
-- **`commander`**: Helps identify leadership patterns and changes over time.
-
-#### Summary:
-The dataset provides a rich source of information for analyzing battles in the Game of Thrones universe. Key features such as `family`, `size`, `year`, and `outcome` will be instrumental in addressing the use cases related to alliances, army size changes, and attack frequency. However, attention must be paid to the missing values, particularly in the `size` and `commander` columns, as they may impact the analysis.
+#### Conclusion:
+The dataset provides a rich source of information for analyzing battles in the Game of Thrones universe. Key features such as `family`, `size`, `king`, and `outcome` will be instrumental in addressing the use cases outlined. However, attention must be paid to missing values and potential data cleaning before deeper analysis.

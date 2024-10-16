@@ -42,41 +42,42 @@ LLM Generated Discovery
 ### Preliminary Analysis of the `got_armies.csv` Data
 
 #### Overview
-The dataset contains information about battles in the Game of Thrones universe, with a total of 184 entries and 7 features. The key features include battle identifiers, army sizes, and details about the families and commanders involved in the battles.
+The dataset contains information about battles in the Game of Thrones universe, with a total of 184 entries and 7 features. The key features include battle number, king, outcome, family, size, commander, and whether the army was attacking.
 
-#### Key Features and Their Importance
-1. **battle_number**:
-   - **Importance**: This feature serves as a unique identifier for each battle, allowing us to track battles over time. It can help analyze trends in battle occurrences and changes in alliances.
-   - **Analysis**: The battles are numbered from 1 to 38, with a mean of approximately 20. This suggests that battles are not uniformly distributed over time, which may indicate periods of intense conflict.
+#### Key Features and Insights
+1. **Battle Number**:
+   - Unique identifier for each battle, ranging from 1 to 38.
+   - The distribution shows that battles are relatively evenly spread, with a mean of approximately 20.47.
+   - This feature can help track the sequence of battles and analyze trends over time.
 
-2. **king**:
-   - **Importance**: The king associated with each battle can provide insights into political dynamics and alliances. Changes in the king may correlate with shifts in family alliances.
-   - **Analysis**: There are 6 unique kings, with Joffrey/Tommen Baratheon being the most frequent. This suggests a concentration of power and potential for alliance shifts among the families supporting these kings.
+2. **Army Size**:
+   - The size of the army varies significantly, with a mean of approximately 16,831 and a maximum of 100,000.
+   - The presence of many null values (36 entries) suggests that not all battles have recorded army sizes, which may affect analysis.
+   - This feature is crucial for understanding how army sizes have changed over time and can be correlated with outcomes.
 
-3. **outcome**:
-   - **Importance**: Understanding the outcome of battles (won/lost) is crucial for analyzing the effectiveness of different families and commanders. It can also indicate which families are more aggressive or successful in their military endeavors.
-   - **Analysis**: The majority of battles (101 out of 178) were won, indicating a possible trend of successful strategies or dominant families.
+3. **King**:
+   - There are 6 unique kings, with Joffrey/Tommen Baratheon being the most frequently mentioned (65 occurrences).
+   - This feature can help identify which kings are associated with specific families and their outcomes in battles.
 
-4. **family**:
-   - **Importance**: This feature identifies the significant families involved in the battles. It is essential for analyzing alliances, rivalries, and the frequency of attacks by different families.
-   - **Analysis**: There are 21 unique families, with the Lannisters being the most involved (40 occurrences). This suggests that the Lannisters may have been a central player in the conflicts.
+4. **Outcome**:
+   - The outcome is a binary feature indicating whether the battle was won or lost, with a slight majority of battles resulting in a win (101 wins out of 178 recorded outcomes).
+   - This feature is essential for analyzing the effectiveness of different families and commanders in battles.
 
-5. **size**:
-   - **Importance**: The size of the army can indicate the scale of battles and the resources available to different families. Analyzing army sizes over time can reveal trends in military strength and strategy.
-   - **Analysis**: The average army size is approximately 16,831, with a wide range (20 to 100,000). This variability suggests that some battles were fought with significantly larger forces, which may correlate with outcomes.
+5. **Family**:
+   - There are 21 unique families, with the Lannisters being the most frequently mentioned (40 occurrences).
+   - This feature is critical for analyzing alliances and rivalries among families, as well as understanding which families attack most often.
 
-6. **commander**:
-   - **Importance**: The commander leading an army can influence battle outcomes and strategies. Analyzing commanders can help identify effective leaders and their associated families.
-   - **Analysis**: There are 81 unique commanders, with Stannis Baratheon being the most frequent. This indicates a diverse set of leadership styles and strategies across battles.
+6. **Commander**:
+   - There are 81 unique commanders, with Stannis Baratheon being the most frequently mentioned (12 occurrences).
+   - This feature can help analyze the impact of different commanders on battle outcomes and army sizes.
 
-7. **attacking**:
-   - **Importance**: This boolean feature indicates whether a family was attacking or defending. It is crucial for understanding the dynamics of aggression and defense in battles.
-   - **Analysis**: All entries are present, allowing for a clear understanding of which families were on the offensive.
+7. **Attacking**:
+   - This boolean feature indicates whether the army was attacking, which can be used to analyze aggressive strategies of families.
 
 #### Use Case Insights
-- **Families Changing Alliances**: By analyzing the `king` and `family` features, we can identify shifts in alliances based on which families supported which kings over time.
-- **Army Size Changes Over Time**: The `size` feature can be analyzed in conjunction with `battle_number` to observe trends in army sizes across different battles.
-- **Families Attacking Most Often**: The `family` and `attacking` features can be used to determine which families were most frequently on the offensive, indicating their aggressiveness in the conflicts.
+- **Families Changing Alliances**: The family feature can be analyzed to see if certain families frequently switch between attacking and defending roles, or if they have common opponents over time.
+- **Army Size Changes Over Time**: By correlating the battle number with army size, we can analyze trends in army sizes across different battles and families.
+- **Most Frequent Attackers**: The family feature combined with the attacking boolean can help identify which families are more aggressive in their strategies.
 
-### Conclusion
-The most important features for the analysis of alliances, army sizes, and attack frequency are `family`, `king`, `size`, and `outcome`. These features will provide valuable insights into the dynamics of the battles and the relationships between the families involved.
+#### Conclusion
+The most important features for the analysis are `family`, `size`, `outcome`, and `battle_number`. These features will provide insights into family alliances, changes in army sizes, and the frequency of attacks by different families.
