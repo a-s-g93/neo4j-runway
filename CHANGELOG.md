@@ -11,8 +11,9 @@
 * Change initial `DataModel` generation logic to first generate nodes, then generate relationships
 * Updated examples
 * remove `use_yaml_data_model` arg from `DataModel` generation methods, as it is no longer relevant
-* Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize Pydantic
+* Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize `Pydantic` library
 * Update `Instructor` dependency to v1.5.2
+* Simplify LLM retry logic by better utilizing `Instructor` library
 
 ### Added
 
