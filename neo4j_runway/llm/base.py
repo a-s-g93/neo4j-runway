@@ -236,9 +236,9 @@ class BaseDataModelingLLM(ABC):
                 max_retries=retry_logic,
                 **self.model_params,
             )
-            print(f"\nRecieved {green('Valid')} Data Model")
+            print(f"\nReceived {green('Valid')} Data Model")
         except InstructorRetryException as e:
-            print(f"\nRecieved {red('Invalid')} Data Model")
+            print(f"\nReceived {red('Invalid')} Data Model")
             # return model without validation
             response: DataModel = DataModel.model_construct(  # type: ignore
                 json.loads(
