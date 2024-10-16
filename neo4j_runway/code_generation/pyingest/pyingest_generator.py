@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 import yaml
 
 from ...models.core import DataModel
-from ...utils.create_directory import create_directory
+from ...utils._utils.create_directory import create_directory
 from ..base import BaseCodeGenerator
 from ..cypher import format_pyingest_pre_or_post_ingest_code
 

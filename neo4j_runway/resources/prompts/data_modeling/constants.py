@@ -15,7 +15,6 @@ Properties
 * A property can NOT be both unique and a key
 General
 * Do NOT return a single-node data model
-* If a cycle exists, consider removing a relationship while maintaining the meaning captured by the cycle
 """
 
 DATA_MODEL_GENERATION_RULES_SINGLE = (
@@ -79,18 +78,25 @@ Format your data model as:
 }
 """
 
-ENTITY_POOL_GENERATION_RULES = """Based upon the above information and of high-quality graph data models,
-return the following:
-* Any possible Nodes and their respective properties
-* Any possible Relationships and their respective source Nodes and target Nodes
-* Relationships and their respective properties, if any
-* Explanations for each decision and how it will benefit the data model
-* All possible relationships for nodes
-* `source_name` for all nodes and relationships
+NODE_GENERATION_RULES = """Please follow these rules strictly! Billions of dollars depend on you.
+Nodes
+* Each node must have a unique property or node key pair
+* Unique properties and node keys may NOT be shared between different nodes
+* Consider creating separate Nodes for each unique identifier"""
 
-Remember
-* All properties must be found in the data dictionary above!
-* A property may have an alias in another file as a foreign key.
-* A node may not have properties from multiple files!
-* A relationship may not have properties from multiple files!
-* Find properties that may uniquely identify Nodes"""
+NODES_FORMAT = """Return your `Nodes` in JSON format.
+Property Format:
+{
+    "name": <`Property` name>,
+    "type": <Python type>,
+    "column_mapping": <csv column that maps to `Property`>,
+    "alias": <a second column that maps to `Property`. identifies relationship between two nodes of the same label or a relationship that spans across different files>,
+    "is_unique": <`Property` is a unique identifier>,
+    "part_of_key": <`Property` that with at least 1 other `Property`, makes a unique combination>
+}
+Node Format:
+{
+    "label": <node label>,
+    "properties": <list of Property>,
+    "source_name": <source file name>
+}"""

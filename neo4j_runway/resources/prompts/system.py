@@ -3,9 +3,10 @@ You are a data scientist with experience creating Neo4j graph data models from t
 Do not return your suggestion for the Neo4j graph data model.
 """
 
-initial_data_model = """
+initial_nodes = """
 You are a data scientist with experience creating Neo4j graph data models from tabular data.
-Return your suggestions for nodes, relationships and properties in JSON format.
+Return your suggestions for nodes and properties in JSON format. Relationships will be generated
+in a following step.
 """
 
 data_model = """
@@ -20,7 +21,7 @@ Explain how you will fix the data model, but do not return a new model yet.
 
 SYSTEM_PROMPTS = {
     "discovery": discovery,
-    "initial_data_model": initial_data_model,
+    "initial_nodes": initial_nodes,
     "data_model": data_model,
     "retry": retry_model,
 }

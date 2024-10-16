@@ -2,27 +2,28 @@
 This file contains the base LLM class that all other LLM classes must inherit from.
 """
 
+import json
 from abc import ABC
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from instructor import Instructor
+from instructor.exceptions import InstructorRetryException
 
-from ..inputs import UserInput
 from ..models import DataModel
+from ..models.core.node import Nodes
 from ..resources.llm_response_types import (
-    DataModelEntityPool,
     DiscoveryResponse,
-    ErrorRecommendations,
 )
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
-    create_data_model_iteration_prompt,
-    create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
-    create_retry_data_model_generation_prompt,
+    create_initial_nodes_prompt,
 )
+from ..utils._utils.print_formatters import bold, cyan, green, pretty_list, red
+from .context import create_context
+from .retry import create_retry_logic
 
 
 class BaseDiscoveryLLM(ABC):
@@ -134,14 +135,15 @@ class BaseDataModelingLLM(ABC):
         use_advanced_data_model_generation_rules: bool,
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
-    ) -> Union[DataModel, Dict[str, Any]]:
+        allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
+    ) -> DataModel:
         """
         Performs at least 2 LLM calls:
-            1. Request the LLM to find nodes, relationships and properties that should be in the data model.
-            2. Construct and return the data model based on previous recommendations.
+            1. Request the LLM to find nodes and properties that should be in the data model.
+            2. Create Relationships and return the data model based on previous recommendations.
 
         Step 2. may be repeated until max retries is reached or a valid data model is returned.
 
@@ -150,63 +152,50 @@ class BaseDataModelingLLM(ABC):
         DataModel
             The final data model.
         """
-        validation = {"valid": False}
-        part_one_retries = 0
-        # part 1
-        while not validation["valid"] and part_one_retries < 2:
-            print(f"Entity Pool Generation Attempt: {part_one_retries+1}")
-            formatted_prompt = create_initial_data_model_cot_prompt(
-                discovery_text=discovery_text,
-                multifile=multifile,
-                data_dictionary=data_dictionary,
-                use_cases=use_cases,
-                valid_columns=valid_columns,
-            )
-            entity_pool: DataModelEntityPool = self.client.chat.completions.create(
-                model=self.model_name,
-                response_model=DataModelEntityPool,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_PROMPTS["initial_data_model"],
-                    },
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            validation = entity_pool.validate_pool(
-                valid_columns=valid_columns, data_dictionary=data_dictionary
-            )
-            part_one_retries += 1
-            # print(entity_pool)
-        # part 2
-        if validation["valid"]:
-            print("Received Valid Entity Pool.")
 
-            formatted_prompt = create_initial_data_model_prompt(
-                discovery_text=discovery_text,
-                data_model_recommendations=entity_pool,
-                multifile=multifile,
-                data_dictionary=data_dictionary,
-                use_cases=use_cases,
-                advanced_rules=use_advanced_data_model_generation_rules,
-                valid_columns=valid_columns,
-            )
+        nodes_prompt = create_initial_nodes_prompt(
+            discovery_text=discovery_text,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            valid_columns=valid_columns,
+        )
 
-            initial_data_model: DataModel = self._get_data_model_response(
-                formatted_prompt=formatted_prompt,
-                valid_columns=valid_columns,
-                max_retries=max_retries,
-                use_yaml_data_model=use_yaml_data_model,
-                data_dictionary=data_dictionary,
-                allow_duplicate_properties=allow_duplicate_properties,
-                enforce_uniqueness=enforce_uniqueness,
-            )
+        nodes = self._get_nodes_response(
+            formatted_prompt=nodes_prompt,
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            max_retries=max_retries,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+        )
 
-            return initial_data_model
+        data_model_prompt = create_initial_data_model_prompt(
+            discovery_text=discovery_text,
+            data_model_recommendations=nodes,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            advanced_rules=use_advanced_data_model_generation_rules,
+            valid_columns=valid_columns,
+        )
 
-        else:
-            return validation
+        initial_data_model: DataModel = self._get_data_model_response(
+            formatted_prompt=data_model_prompt,
+            valid_columns=valid_columns,
+            max_retries=max_retries,
+            data_dictionary=data_dictionary,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            allow_parallel_relationships=allow_parallel_relationships,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+        )
+
+        if not hasattr(initial_data_model, "nodes") and hasattr(nodes, "nodes"):
+            initial_data_model.nodes = nodes.nodes
+
+        return initial_data_model
 
     def _get_data_model_response(
         self,
@@ -214,20 +203,28 @@ class BaseDataModelingLLM(ABC):
         valid_columns: dict[str, list[str]],
         data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
+        apply_neo4j_naming_conventions: bool = True,
+        allow_parallel_relationships: bool = False,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
         """
 
-        retries = 0
-        valid_response = False
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+            allow_parallel_relationships=allow_parallel_relationships,
+        )
 
-        while retries < max_retries and not valid_response:
-            retries += 1  # increment retries each pass
+        retry_logic = create_retry_logic(max_retries=max_retries)
 
+        print(bold("> Generating Data Model..."))
+        try:
             response: DataModel = self.client.chat.completions.create(
                 model=self.model_name,
                 response_model=DataModel,
@@ -235,55 +232,103 @@ class BaseDataModelingLLM(ABC):
                     {"role": "system", "content": SYSTEM_PROMPTS["data_model"]},
                     {"role": "user", "content": formatted_prompt},
                 ],
+                validation_context=context,
+                max_retries=retry_logic,
                 **self.model_params,
             )
-
-            validation = response.validate_model(
-                valid_columns=valid_columns,
-                data_dictionary=data_dictionary,
-                allow_duplicate_properties=allow_duplicate_properties,
-                enforce_uniqueness=enforce_uniqueness,
+            print(f"\nReceived {green('Valid')} Data Model")
+        except InstructorRetryException as e:
+            print(f"\nReceived {red('Invalid')} Data Model")
+            # return model without validation
+            response: DataModel = DataModel.model_construct(  # type: ignore
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
+                )
             )
-            if not validation["valid"]:
-                print(
-                    "validation failed\nNumber of Errors: ",
-                    len(validation["errors"]),
-                    "\n",
-                )
-                # print(validation["message"])
-                cot = self._get_chain_of_thought_for_error_recommendations_response(
-                    formatted_prompt=validation["message"]
-                )
 
-                formatted_prompt = create_retry_data_model_generation_prompt(
-                    chain_of_thought_response=cot,
-                    errors_to_fix=validation["errors"],
-                    model_to_fix=response,
-                    multifile=len(valid_columns.keys()) > 1,
-                    data_dictionary=data_dictionary,
-                    valid_columns=valid_columns,
-                    use_yaml_data_model=use_yaml_data_model,
+        if hasattr(response, "nodes"):
+            print(
+                pretty_list(
+                    header="Nodes",
+                    content=[cyan(n.__str__()) for n in response.nodes],
+                    cols=2,
+                ),
+                "\n",
+            )
+
+        if hasattr(response, "relationships"):
+            print(
+                pretty_list(
+                    header="Relationships",
+                    content=[cyan(r.__str__()) for r in response.relationships],
                 )
-            elif validation["valid"]:
-                print("recieved a valid response")
-                valid_response = True
+            )
 
         return response
 
-    def _get_chain_of_thought_for_error_recommendations_response(
-        self, formatted_prompt: str
-    ) -> str:
+    def _get_nodes_response(
+        self,
+        formatted_prompt: str,
+        valid_columns: dict[str, list[str]],
+        data_dictionary: Dict[str, Any],
+        max_retries: int = 3,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
+        apply_neo4j_naming_conventions: bool = True,
+    ) -> Nodes:
         """
-        Generate fixes for the previous data model.
+        Get a nodes response from the LLM.
         """
-        print("Analyzing errors...")
-        response: ErrorRecommendations = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
-                {"role": "user", "content": formatted_prompt},
-            ],
-            response_model=ErrorRecommendations,
-            **self.model_params,
+
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+            allow_parallel_relationships=False,
         )
-        return response.recommendations
+
+        retry_logic = create_retry_logic(max_retries=max_retries)
+
+        print(bold("> Generating Nodes..."))
+        try:
+            response: Nodes = self.client.chat.completions.create(
+                model=self.model_name,
+                response_model=Nodes,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPTS["initial_nodes"],
+                    },
+                    {"role": "user", "content": formatted_prompt},
+                ],
+                validation_context=context,
+                max_retries=retry_logic,
+                **self.model_params,
+            )
+
+            print(f"\nReceived {green('Valid')} Nodes")
+        except InstructorRetryException as e:
+            print(f"\nReceived {red('Invalid')} Nodes")
+            # return model without validation
+            response: Nodes = Nodes.model_construct(  # type: ignore
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
+                )
+            )
+
+        print(
+            pretty_list(
+                header="Nodes",
+                content=[cyan(n.__str__()) for n in response.nodes],
+                cols=2,
+            ),
+            "\n",
+        )
+
+        return response

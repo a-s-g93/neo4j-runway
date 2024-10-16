@@ -1,12 +1,15 @@
 from typing import Any, Dict, Optional
 
-from ...llm_response_types.initial_model_pool import DataModelEntityPool
-from .constants import DATA_MODEL_FORMAT, ENTITY_POOL_GENERATION_RULES
+from .constants import (
+    DATA_MODEL_FORMAT,
+    NODE_GENERATION_RULES,
+    NODES_FORMAT,
+)
 from .formatters import get_rules
 from .template import create_data_modeling_prompt
 
 
-def create_initial_data_model_cot_prompt(
+def create_initial_nodes_prompt(
     discovery_text: str,
     multifile: bool,
     use_cases: Optional[str],
@@ -14,15 +17,14 @@ def create_initial_data_model_cot_prompt(
     data_dictionary: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
-    Generate a prompt to find nodes, relationships and properties to include in a data model.
-    This is only for brainstorming, result of prompt should not be a DataModel.
+    Generate a prompt to find nodes and properties to include in a data model.
 
     Returns
     -------
     str
         The prompt.
     """
-    prefix = "Please generate a pool of entities that will be used to construct a graph data model."
+    prefix = "Please generate a list of Nodes that will be used to construct a graph data model. Each node should represent an entity found in the data."
 
     return create_data_modeling_prompt(
         prefix=prefix,
@@ -31,13 +33,14 @@ def create_initial_data_model_cot_prompt(
         use_cases=use_cases,
         valid_columns=valid_columns,
         data_dictionary=data_dictionary,
-        rules=ENTITY_POOL_GENERATION_RULES,
+        rules=NODE_GENERATION_RULES,
+        data_model_format=NODES_FORMAT,
     )
 
 
 def create_initial_data_model_prompt(
     discovery_text: str,
-    data_model_recommendations: DataModelEntityPool,
+    data_model_recommendations: "Nodes",  # type: ignore
     multifile: bool,
     valid_columns: Dict[str, Any],
     data_dictionary: Optional[Dict[str, Any]] = None,
@@ -48,13 +51,13 @@ def create_initial_data_model_prompt(
     Generate the initial data model request prompt.
     """
 
-    prefix = "I would like you to generate a graph data model based on this provided information."
+    prefix = "I would like you to generate a graph data model based on this provided information. Ensure that the recommened nodes are implemented in the final data model."
     rules = get_rules(multifile=multifile, advanced_rules=advanced_rules)
 
     return create_data_modeling_prompt(
         prefix=prefix,
         discovery=discovery_text,
-        entity_pool=data_model_recommendations,
+        nodes=data_model_recommendations,
         valid_columns=valid_columns,
         data_dictionary=data_dictionary,
         use_cases=use_cases,

@@ -269,11 +269,13 @@ class GraphDataModeler:
     def create_initial_model(
         self,
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
         use_advanced_data_model_generation_rules: bool = True,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
-    ) -> Union[DataModel, Dict[str, Any]]:
+        allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
+        **kwargs: Any,
+    ) -> DataModel:
         """
         Generate the initial model.
         You may access this model with the `get_model` method and providing `version=1`.
@@ -282,8 +284,6 @@ class GraphDataModeler:
         ----------
         max_retries : int, optional
             The max number of retries for generating the initial model, by default 3
-        use_yaml_data_model : bool, optional
-            Whether to pass the data model in YAML format while making corrections, by default False
         use_advanced_data_model_generation_rules, optional
             Whether to include advanced data modeling rules, by default True
         allow_duplicate_properties : bool, optional
@@ -291,12 +291,15 @@ class GraphDataModeler:
         enforce_uniqueness : bool, optional
             Whether to error if a node has no unique identifiers (unique or node key).
             Setting this to false may be detrimental during code generation and ingestion. By default True
+        allow_parallel_relationships : bool, optional
+            Whether to allow parallel relationships to exist in the data model, by default False
+        apply_neo4j_naming_conventions : bool, optional
+            Whether to apply Neo4j naming conventions to the generated Data Model, by default True
 
         Returns
         -------
-        Union[DataModel, str]
-            The generated data model if a valid model is generated, or
-            A dictionary containing information about the failed generation attempt.
+        DataModel
+            The generated data model.
         """
 
         response = self.llm._get_initial_data_model_response(
@@ -307,13 +310,11 @@ class GraphDataModeler:
             multifile=self.is_multifile,
             use_advanced_data_model_generation_rules=use_advanced_data_model_generation_rules,
             max_retries=max_retries,
-            use_yaml_data_model=use_yaml_data_model,
             allow_duplicate_properties=allow_duplicate_properties,
             enforce_uniqueness=enforce_uniqueness,
+            allow_parallel_relationships=allow_parallel_relationships,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
         )
-
-        if isinstance(response, dict):
-            return response
 
         self.model_history.append(response)
 
@@ -326,10 +327,12 @@ class GraphDataModeler:
         iterations: int = 1,
         corrections: Optional[str] = None,
         use_advanced_data_model_generation_rules: bool = True,
-        use_yaml_data_model: bool = False,
         max_retries: int = 3,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
+        allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
+        **kwargs: Any,
     ) -> DataModel:
         """
         Iterate on the current model. A data model must exist in the `model_history` property to run.
@@ -344,8 +347,6 @@ class GraphDataModeler:
             What changes the user would like the LLM to address in the next model, by default None
         max_retries : int, optional
             The max number of retries for generating the initial model, by default 3
-        use_yaml_data_model : bool, optional
-            Whether to pass the data model in YAML format while making corrections, by default False
         use_advanced_data_model_generation_rules, optional
             Whether to include advanced data modeling rules, by default True
         allow_duplicate_properties : bool, optional
@@ -353,12 +354,19 @@ class GraphDataModeler:
         enforce_uniqueness : bool, optional
             Whether to error if a node has no unique identifiers (unique or node key).
             Setting this to false may be detrimental during code generation and ingestion. By default True
+        allow_parallel_relationships : bool, optional
+            Whether to allow parallel relationships to exist in the data model, by default False
+        apply_neo4j_naming_conventions : bool, optional
+            Whether to apply Neo4j naming conventions to the generated Data Model, by default True
 
         Returns
         -------
         DataModel
-            The most recent generated data model.
+            The most recently generated data model.
         """
+
+        if "user_corrections" in kwargs:
+            corrections = kwargs["user_corrections"]
 
         assert self._initial_model_created, "No data model present to iterate on."
 
@@ -371,7 +379,6 @@ class GraphDataModeler:
                     corrections=corrections,
                     data_dictionary=self._data_dictionary,
                     use_cases=self.user_input.pretty_use_cases,
-                    use_yaml_data_model=use_yaml_data_model,
                     advanced_rules=use_advanced_data_model_generation_rules,
                     valid_columns=self.allowed_columns,
                 )
@@ -379,10 +386,11 @@ class GraphDataModeler:
                     formatted_prompt=formatted_prompt,
                     max_retries=max_retries,
                     valid_columns=self.allowed_columns,
-                    use_yaml_data_model=use_yaml_data_model,
                     data_dictionary=self._data_dictionary,
                     allow_duplicate_properties=allow_duplicate_properties,
                     enforce_uniqueness=enforce_uniqueness,
+                    allow_parallel_relationships=allow_parallel_relationships,
+                    apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
                 )
 
                 self.model_history.append(response)

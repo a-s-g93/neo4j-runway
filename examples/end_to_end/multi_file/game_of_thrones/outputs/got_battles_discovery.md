@@ -50,24 +50,27 @@ The dataset contains information about 38 battles from the Game of Thrones serie
 6. **summer**: A boolean indicating whether the battle occurred during summer.
 
 #### Key Features and Their Importance
-1. **battle_number**: This feature is crucial as it uniquely identifies each battle, allowing for tracking and referencing specific battles in further analysis.
+1. **battle_number**: This feature is crucial for identifying and referencing specific battles. It can help track changes in alliances and battle occurrences over time.
 
-2. **year**: The year of the battle is significant for analyzing trends over time, such as changes in army sizes and the frequency of battles. The data shows that battles predominantly occurred in the years 298 to 300, indicating a concentrated timeline for the events.
+2. **year**: This feature is essential for analyzing trends over time, such as how army sizes have changed and the frequency of battles. It can also help in understanding the timeline of alliances and conflicts among families.
 
-3. **location**: The location provides context for the battles and can help identify geographical patterns in battles. The most frequent location is Riverrun, which may indicate strategic importance.
+3. **location**: While it provides context for where battles occurred, it may not directly answer the use cases but can be useful for geographical analysis of battles and their outcomes.
 
-4. **region**: This feature categorizes battles into larger areas, which can help analyze regional conflicts and alliances. The Riverlands is the most common region, suggesting a high level of activity in this area.
+4. **region**: Similar to location, this feature helps in understanding the broader context of battles. It can be useful for analyzing which regions are more prone to conflicts and how that relates to family alliances.
 
-5. **name**: The unique names of battles can be used to reference specific events in discussions about alliances and strategies.
+5. **name**: This feature is important for identifying specific battles and can be used in conjunction with other features to analyze family involvement in battles.
 
-6. **summer**: This boolean feature can help analyze the impact of seasonal conditions on battle occurrences and outcomes. The majority of battles occurred in summer, which may correlate with strategic decisions by families.
+6. **summer**: This boolean feature can provide insights into whether battles are more likely to occur in summer, which may correlate with family strategies and alliances.
 
-#### Insights Related to Use Cases
-- **What families have changed alliances?**: While this dataset does not directly provide information about families or alliances, the analysis of battle locations and regions could be correlated with family names from another dataset to infer changes in alliances based on battle participation.
+#### Insights from the Data
+- **Families and Alliances**: To analyze which families have changed alliances, additional data on family affiliations for each battle would be necessary. The current dataset does not include family information, which is critical for this analysis.
+- **Army Sizes Over Time**: The dataset does not provide information on army sizes, which is essential for understanding how they have changed over time. This data would need to be sourced from another dataset.
+- **Frequency of Attacks by Families**: Similar to alliances, the current dataset lacks family affiliation data, making it impossible to determine which families attack most often.
 
-- **How have army sizes changed over time?**: This dataset does not include army sizes, but the year feature can be used to correlate with another dataset that contains army size information to analyze trends over time.
-
-- **Which families attack most often?**: Similar to alliances, this dataset lacks direct family information. However, if combined with another dataset that includes family names associated with each battle, it could reveal which families are most active in battles.
+#### Missing Information
+To fully address the use cases:
+- **Family Affiliation Data**: Information on which families participated in each battle is crucial for analyzing alliances and attack frequency.
+- **Army Size Data**: Data on the size of armies involved in each battle is necessary to analyze changes in army sizes over time.
 
 #### Conclusion
-The most important features for further analysis are **year**, **location**, and **region**, as they provide the necessary context for understanding the dynamics of battles. To fully address the use cases, additional data regarding family names and army sizes would be required.
+The most important features in this dataset are **year**, **battle_number**, and potentially **location** and **region** for contextual analysis. However, to effectively answer the use cases regarding family alliances and army sizes, additional data on family affiliations and army sizes is required.

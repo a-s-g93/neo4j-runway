@@ -109,8 +109,20 @@ def format_entity_pool(
         return f"""Here are recommendations to base your graph data model on. Add necessary entities.
     {entity_pool.model_dump_json()}\n\n"""
     else:
-        return f"""Here are the current entity suggestions:
+        return f"""Here are the current node suggestions:
     {entity_pool.model_dump_json()}\n\n"""
+
+
+def format_nodes(
+    nodes: "Nodes",  # type: ignore
+    retry_prompt: bool = False,
+) -> str:
+    if not retry_prompt:
+        return f"""Here are Nodes to include in the data model. Do NOT change their content. Create Relationships connecting them.
+    {nodes.model_dump_json()}\n\n"""
+    else:
+        return f"""Here are the current node suggestions:
+    {nodes.model_dump_json()}\n\n"""
 
 
 def get_rules(multifile: bool, advanced_rules: bool) -> str:

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 from neo4j import GraphDatabase
 
 from ...exceptions import APOCNotInstalledError
-from ...utils.read_env import read_environment
+from ...utils._utils.read_env import read_environment
 from ..base import BaseGraph
 
 
