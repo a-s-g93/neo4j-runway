@@ -184,7 +184,7 @@ class BaseDataModelingLLM(ABC):
 
             print("Received Valid Initial Nodes.")
         except InstructorRetryException as e:
-            print("Invalid `Nodes` returned.")
+            print("Invalid Nodes returned.")
             # return model without validation
             nodes: Nodes = Nodes.model_construct(  # type: ignore
                 json.loads(
@@ -259,7 +259,7 @@ class BaseDataModelingLLM(ABC):
                 **self.model_params,
             )
         except InstructorRetryException as e:
-            print("Invalid `DataModel` returned.")
+            print("Invalid Data Model returned.")
             # return model without validation
             return DataModel.model_construct(
                 json.loads(
