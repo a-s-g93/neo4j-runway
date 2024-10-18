@@ -34,13 +34,21 @@ class Relationship(BaseModel):
 
     def get_schema(self, verbose: bool = True, neo4j_typing: bool = False) -> str:
         """
-        The Relationship schema.
+        Get the Relationship schema.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to provide more detail, by default True
+        neo4j_typing : bool, optional
+            Whether to use Neo4j types instead of Python types, by default False
 
         Returns
         -------
         str
             The schema
         """
+
         props = ""
         for p in self.properties:
             props += (

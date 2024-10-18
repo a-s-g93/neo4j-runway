@@ -37,9 +37,6 @@ def pretty_list(header: str, content: List[Any], cols: int = 1) -> str:
     for i in range(0, len(content), cols):
         if len(content[i]) > max_len:
             max_len = len(content[i])
-    # for el in content:
-    #     res += f"\n* {el}"
-    # return res
 
     res = header
     for i in range(0, len(content), cols):
