@@ -4,7 +4,7 @@ This file contains the DataModel class which is the standard representation of a
 
 import json
 from ast import literal_eval
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import yaml
 from graphviz import Digraph
@@ -20,6 +20,7 @@ from ...exceptions import (
     InvalidArrowsDataModelError,
     InvalidSolutionsWorkbenchDataModelError,
 )
+from ...utils._utils.print_formatters import add_indent
 from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -29,6 +30,7 @@ from ..solutions_workbench import (
 from .node import Node
 from .property import Property
 from .relationship import Relationship
+from .visualization import create_dot
 
 
 class DataModel(BaseModel):
@@ -48,6 +50,38 @@ class DataModel(BaseModel):
     nodes: List[Node]
     relationships: List[Relationship]
     metadata: Optional[Dict[str, Any]] = None
+
+    def get_schema(
+        self,
+        verbose: bool = True,
+        neo4j_typing: bool = False,
+        print_schema: bool = False,
+    ) -> str:
+        """
+        The data model schema in a string.
+
+        Returns
+        -------
+        str
+            The schema
+        """
+        nodes = ""
+        rels = ""
+
+        for n in self.nodes:
+            nodes += n.get_schema(verbose=verbose, neo4j_typing=neo4j_typing)
+        for r in self.relationships:
+            rels += r.get_schema(verbose=verbose, neo4j_typing=neo4j_typing)
+
+        schema = f"""Nodes
+{nodes}
+Relationships
+{rels}
+"""
+        if print_schema:
+            print(schema)
+
+        return schema
 
     @property
     def node_labels(self) -> List[str]:
@@ -481,71 +515,39 @@ class DataModel(BaseModel):
 
         return self
 
-    def visualize(self) -> Digraph:
+    def visualize(
+        self, detail_level: Literal[1, 2, 3] = 3, neo4j_typing: bool = False
+    ) -> Digraph:
         """
         Visualize the data model using Graphviz. Requires that Graphviz is installed.
+
+        Parameters
+        ----------
+        detail_level : Literal[1, 2, 3]
+            The level of detail to include in the visual\n
+                1: Node labels and Relationship types only\n
+                2: Node labels, Relationship types and basic Property info\n
+                3: Node labels, Relationship types and all Property info
+        neo4j_typing : bool, optional
+            Whether to use Neo4j types instead of Python types, by default False
 
         Returns
         -------
         Digraph
-            A visual representation of the data model.
+            The dot for visualization
         """
 
-        dot = Digraph(comment="Data Model")
-
-        for node in self.nodes:
-            dot.node(name=node.label, label=self._generate_node_text(node=node))
-
-        for rel in self.relationships:
-            dot.edge(
-                tail_name=rel.source,
-                head_name=rel.target,
-                label=self._generate_relationship_text(relationship=rel),
+        try:
+            return create_dot(
+                nodes=self.nodes,
+                relationships=self.relationships,
+                detail_level=detail_level,
+                neo4j_typing=neo4j_typing,
             )
-
-        return dot
-
-    @staticmethod
-    def _generate_node_text(node: Node) -> str:
-        """
-        Generate the label, property and unique constraints displayed on a node.
-        """
-
-        result = node.label
-        if len(node.properties) > 0:
-            result += "\n\nproperties:\n"
-        for prop in node.properties:
-            result = (
-                result
-                + prop.name
-                + f": {prop.column_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
+        except Exception as e:
+            print(
+                f"Unable to visualize data model. Is `Graphviz` installed properly? Error: {e}"
             )
-
-        return result
-
-    @staticmethod
-    def _generate_relationship_text(relationship: Relationship) -> str:
-        """
-        Generate the label, property and unique constraints displayed on a relationship.
-        """
-
-        result = relationship.type
-        if len(relationship.properties) > 0:
-            result += "\n\nproperties:\n"
-        for prop in relationship.properties:
-            result = (
-                result
-                + prop.name
-                + f": {prop.column_mapping}"
-                + (" *unique*" if prop.is_unique else "")
-                + (" *key*" if prop.part_of_key else "")
-                + "\n"
-            )
-
-        return result
 
     def to_json(self, file_path: str = "data-model.json") -> Dict[str, Any]:
         """

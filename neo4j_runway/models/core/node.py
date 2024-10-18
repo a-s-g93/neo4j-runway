@@ -41,6 +41,26 @@ class Node(BaseModel):
     def __str__(self) -> str:
         return f"(:{self.label})"
 
+    def get_schema(self, verbose: bool = True, neo4j_typing: bool = False) -> str:
+        """
+        The Node schema.
+
+        Returns
+        -------
+        str
+            The schema
+        """
+
+        props = ""
+        for p in self.properties:
+            props += (
+                "* " + p.get_schema(verbose=verbose, neo4j_typing=neo4j_typing) + "\n"
+            )
+        schema = f"""(:{self.label})
+{props}"""
+
+        return schema
+
     @property
     def property_names(self) -> List[str]:
         """

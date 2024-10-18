@@ -80,6 +80,30 @@ class Property(BaseModel):
             self.part_of_key = False
         return self
 
+    def get_schema(self, verbose: bool = True, neo4j_typing: bool = False) -> str:
+        """
+        The Property schema
+
+        Returns
+        -------
+        str
+            The schema
+        """
+
+        ending = ""
+        if self.is_unique:
+            ending = " | UNIQUE"
+        elif self.part_of_key:
+            ending = " | KEY"
+
+        if verbose:
+            return (
+                f"{self.name} ({self.column_mapping}): {self.type if not neo4j_typing else self.neo4j_type}"
+                + ending
+            )
+        else:
+            return f"{self.name}: {self.type if not neo4j_typing else self.neo4j_type}"
+
     @property
     def neo4j_type(self) -> str:
         """
