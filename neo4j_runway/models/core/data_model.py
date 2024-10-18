@@ -20,7 +20,6 @@ from ...exceptions import (
     InvalidArrowsDataModelError,
     InvalidSolutionsWorkbenchDataModelError,
 )
-from ...utils._utils.print_formatters import add_indent
 from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -58,13 +57,23 @@ class DataModel(BaseModel):
         print_schema: bool = False,
     ) -> str:
         """
-        The data model schema in a string.
+        Get the data model schema.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Whether to provide more detail, by default True
+        neo4j_typing : bool, optional
+            Whether to use Neo4j types instead of Python types, by default False
+        print_schema : bool, optional
+            Whether to auto print the schema, by default False
 
         Returns
         -------
         str
             The schema
         """
+
         nodes = ""
         rels = ""
 
@@ -182,9 +191,6 @@ Relationships
             * Validate file-spanning rels have source / target with appropriate named aliases.
             """
 
-            # valid_columns: Dict[str, List[str]] = (
-            #     info.context.get("valid_columns") if info.context is not None else dict()
-            # )
             data_dictionary: Optional[Dict[str, Any]] = (
                 info.context.get("data_dictionary")
                 if info.context is not None
@@ -328,12 +334,6 @@ Relationships
                             ):
                                 prop.alias = prop.column_mapping
 
-            # if errors:
-            #     raise ValidationError.from_exception_data(
-            #         title=self.__class__.__name__,
-            #         line_errors=errors,
-            #     )
-
             return errors
 
         def _validate_column_mappings_used_only_once() -> List[InitErrorDetails]:
@@ -461,7 +461,6 @@ Relationships
             )
 
             if not allow_parallel_relationships:
-                # n^2
                 for i in range(0, len(self.relationships)):
                     if i < len(self.relationships) - 1:
                         for j in range(i + 1, len(self.relationships)):
