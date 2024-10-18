@@ -15,12 +15,14 @@
 * Update `Instructor` dependency to v1.5.2
 * Simplify LLM retry logic by better utilizing `Instructor` library
 * Update printed results and progress of `DataModel` generating methods to be prettier
+* Update Graphviz visual from `DataModel.visualize()`
 
 ### Added
 
 * Add `DataModel` validator to check for parallel relationships
 * Add `allow_parallel_relationships` arg to `DataModel` generating methods
 * Add `apply_neo4j_naming_conventions` arg to `DataModel` generating methods
+* Add `get_schema()` to `DataModel`, `Node`, `Relationship` and `Property` to output a text version of schema
 
 ## 0.11.0
 

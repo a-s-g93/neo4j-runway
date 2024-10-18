@@ -51,3 +51,11 @@ def pretty_list(header: str, content: List[Any], cols: int = 1) -> str:
         res += to_add
 
     return res
+
+
+def add_indent(content: str, spaces: int = 4) -> str:
+    """add an indent to the provided string"""
+
+    lines = content.split("\n")
+    lines = [(" " * spaces) + l for l in lines]
+    return "\n".join(lines)
