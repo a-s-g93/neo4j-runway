@@ -18,16 +18,10 @@ toc_icon: "fa-solid fa-plane"
         The name of the model.
     model_params : Optional[dict[str, Any]], optional
         Any parameters to pass to the model.
-    open_ai_key: Union[str, None], optional
-        Your OpenAI API key if it is not declared in an
-        environment variable.
-    enable_async : bool
-        Whether to allow asynchronous LLM calls. This may be
-        utilized in multi-csv input to improve response
-        speed.
-    kwargs : Any
-        Parameters to pass to the model during
-        initialization.
+    is_async : bool
+        Whether the client supports asynchronous API calls.
+    client : Instructor
+            An LLM client patched with Instructor.
 
 
 
@@ -43,7 +37,8 @@ Interface for interacting with OpenAI LLMs for data
     model_name : str
         The name of the model. By default gpt-4o-2024-05-13
     model_params : Optional[dict[str, Any]], optional
-        Any parameters to pass to the model, by default None
+        Any parameters to pass to the model for a request,
+        by default None
     open_ai_key: Union[str, None], optional
         Your OpenAI API key if it is not declared in an
         environment variable. By default None
@@ -51,7 +46,6 @@ Interface for interacting with OpenAI LLMs for data
         Whether to allow asynchronous LLM calls. This may be
         utilized in multi-csv input to improve response
         speed. By default False
-    kwargs : Any
+    llm_init_params : Dict[str, Any], optional
         Parameters to pass to the model during
-        initialization.
-
+        initialization, by default dict()

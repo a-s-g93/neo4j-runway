@@ -8,7 +8,7 @@ toc_icon: "fa-solid fa-plane"
 
     from neo4j_runway import DataModel
 
-This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format. 
+This is the core data model class of Neo4j Runway. All imported data models will be converted to this data model format.
 
 
  The standard Graph Data Model representation in Neo4j
@@ -29,30 +29,27 @@ This is the core data model class of Neo4j Runway. All imported data models will
 ## Class Methods
 
 
-### __init__
-The standard Graph Data Model representation in Neo4j
-        Runway.
+### advanced_validation
+
+
+
+### get_schema
+Get the data model schema.
 
     Parameters
     ----------
-    nodes : List[Node]
-        A list of the nodes in the data model.
-    relationships : List[Relationship]
-        A list of the relationships in the data model.
-    metadata: Optional[Dict[str, Any]]
-        Metadata from an import source such as Solutions
-        Workbench, by default None
-    use_neo4j_naming_conventions : bool, optional
-        Whether to convert labels, relationships and
-        properties to Neo4j naming conventions, by default
-        True
+    verbose : bool, optional
+        Whether to provide more detail, by default True
+    neo4j_typing : bool, optional
+        Whether to use Neo4j types instead of Python types,
+        by default False
+    print_schema : bool, optional
+        Whether to auto print the schema, by default False
 
-
-### apply_neo4j_naming_conventions
-Apply Neo4j naming conventions to all labels,
-        relationships and properties in the data model.
-    This is typically performed within the __init__ method
-        automatically.
+    Returns
+    -------
+    str
+        The schema
 
 
 ### to_arrows
@@ -123,30 +120,72 @@ Output the data model to a yaml file and String.
         A String representation of the yaml file.
 
 
-### validate_model
-Perform additional validation on the data model.
-
-    Parameters
-    ----------
-    csv_columns : List[str]
-        The CSV columns that are allowed in the data model.
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary containing keys 'valid' indicating
-        whether the data model is valid and 'message'
-        containing a list of errors.
-
-
 ### visualize
 Visualize the data model using Graphviz. Requires that
         Graphviz is installed.
 
+    Parameters
+    ----------
+    detail_level : Literal[1, 2, 3]
+        The level of detail to include in the visual
+
+        1: Node labels and Relationship types only
+
+        2: Node labels, Relationship types and basic
+        Property info
+
+        3: Node labels, Relationship types and all Property
+        info
+    neo4j_typing : bool, optional
+        Whether to use Neo4j types instead of Python types,
+        by default False
+
     Returns
     -------
     Digraph
-        A visual representation of the data model.
+        The dot for visualization
+
+
+### from_arrows
+Construct a DataModel from an arrows data model JSON
+        file.
+
+    Parameters
+    ----------
+    file_path : str
+        The location and name of the arrows.app JSON file to
+        import.
+
+    Raises
+    ------
+    InvalidArrowsDataModelError
+        If the json file is unable to be parsed.
+
+    Returns
+    -------
+    DataModel
+        An instance of a DataModel.
+
+
+### from_solutions_workbench
+Construct a DataModel from a Solutions Workbench data
+        model JSON file.
+
+    Parameters
+    ----------
+    file_path : str
+        The location and name of the Solutions Workbench
+        JSON file to import.
+
+    Raises
+    ------
+    InvalidSolutionsWorkbenchDataModelError
+        If the json file is unable to be parsed.
+
+    Returns
+    -------
+    DataModel
+        An instance of a DataModel.
 
 
 
@@ -189,4 +228,3 @@ Returns a list of relationship types.
     -------
     List[str]
         A list of relationship types.
-

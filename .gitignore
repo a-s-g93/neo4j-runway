@@ -18,6 +18,7 @@ notebooks/
 .ruff_cache
 prepare_minor_release.sh
 prepare_patch_release.sh
+_.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

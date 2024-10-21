@@ -2,22 +2,28 @@
 This file contains the base LLM class that all other LLM classes must inherit from.
 """
 
+import json
 from abc import ABC
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from instructor import Instructor
+from instructor.exceptions import InstructorRetryException
 
-from ..inputs import UserInput
 from ..models import DataModel
-from ..resources.llm_response_types import DataModelEntityPool, ErrorRecommendations
+from ..models.core.node import Nodes
+from ..resources.llm_response_types import (
+    DiscoveryResponse,
+)
 from ..resources.prompts import (
     SYSTEM_PROMPTS,
 )
 from ..resources.prompts.data_modeling import (
-    create_initial_data_model_cot_prompt,
     create_initial_data_model_prompt,
-    create_retry_data_model_generation_prompt,
+    create_initial_nodes_prompt,
 )
+from ..utils._utils.print_formatters import bold, cyan, green, pretty_list, red
+from .context import create_context
+from .retry import create_retry_logic
 
 
 class BaseDiscoveryLLM(ABC):
@@ -28,23 +34,23 @@ class BaseDiscoveryLLM(ABC):
     def __init__(
         self,
         model_name: str,
-        client: Any,
+        client: Instructor,
+        is_async: bool = False,
         model_params: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
     ) -> None:
         """
         The base DiscoveryLLM class.
 
-        Attributes
+        Parameters
         ----------
         model_name : str
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : Any
-            An LLM client.
-        kwargs : Any
-            Parameters to pass to the model during initialization.
+        client : Instructor
+            An LLM client patched with Instructor.
+        is_async : bool
+            Whether async calls may be made, by default False
         """
 
         self.model_name = model_name
@@ -52,25 +58,41 @@ class BaseDiscoveryLLM(ABC):
         if "temperature" not in self.model_params.keys():
             self.model_params["temperature"] = 0
         self.client = client
+        self.is_async = is_async
 
     def _get_discovery_response(self, formatted_prompt: str) -> str:
         """
         Get a discovery response from the LLM.
         """
 
-        response: str = (
-            self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            .choices[0]
-            .message.content
+        response: DiscoveryResponse = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+            response_model=DiscoveryResponse,
+            **self.model_params,
         )
 
+        return response.response
+
+    async def _get_async_discovery_response(
+        self, formatted_prompt: str
+    ) -> DiscoveryResponse:
+        """
+        Get an async discovery response from the LLM.
+        """
+
+        response: DiscoveryResponse = await self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS["discovery"]},
+                {"role": "user", "content": formatted_prompt},
+            ],
+            response_model=DiscoveryResponse,
+            **self.model_params,
+        )
         return response
 
 
@@ -84,7 +106,6 @@ class BaseDataModelingLLM(ABC):
         model_name: str,
         client: Instructor,
         model_params: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
     ) -> None:
         """
         The base DataModelingLLM class.
@@ -95,10 +116,8 @@ class BaseDataModelingLLM(ABC):
             The name of the model.
         model_params : Optional[dict[str, Any]], optional
             Any parameters to pass to the model, by default None
-        client : Any
+        client : Instructor
             An LLM client patched with Instructor.
-        kwargs : Any
-             Parameters to pass to the model during initialization.
         """
 
         self.model_name = model_name
@@ -110,14 +129,21 @@ class BaseDataModelingLLM(ABC):
     def _get_initial_data_model_response(
         self,
         discovery_text: str,
-        user_input: UserInput,
+        valid_columns: Dict[str, List[str]],
+        use_cases: str,
+        multifile: bool,
+        use_advanced_data_model_generation_rules: bool,
+        data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
-    ) -> Union[DataModel, Dict[str, Any]]:
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
+        allow_parallel_relationships: bool = False,
+        apply_neo4j_naming_conventions: bool = True,
+    ) -> DataModel:
         """
         Performs at least 2 LLM calls:
-            1. Request the LLM to find nodes, relationships and properties that should be in the data model.
-            2. Construct and return the data model based on previous recommendations.
+            1. Request the LLM to find nodes and properties that should be in the data model.
+            2. Create Relationships and return the data model based on previous recommendations.
 
         Step 2. may be repeated until max retries is reached or a valid data model is returned.
 
@@ -126,68 +152,79 @@ class BaseDataModelingLLM(ABC):
         DataModel
             The final data model.
         """
-        validation = {"valid": False}
-        part_one_retries = 0
-        # part 1
-        while not validation["valid"] and part_one_retries < 2:
-            formatted_prompt = create_initial_data_model_cot_prompt(
-                discovery_text=discovery_text,
-                user_input=user_input,
-                allowed_features=user_input.allowed_columns,
-            )
-            entity_pool: DataModelEntityPool = self.client.chat.completions.create(
-                model=self.model_name,
-                response_model=DataModelEntityPool,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_PROMPTS["initial_data_model"],
-                    },
-                    {"role": "user", "content": formatted_prompt},
-                ],
-                **self.model_params,
-            )
-            validation = entity_pool.validate_pool(
-                allowed_features=user_input.allowed_columns
-            )
-            part_one_retries += 1
 
-        # part 2
-        if validation["valid"]:
-            formatted_prompt = create_initial_data_model_prompt(
-                discovery_text=discovery_text,
-                data_model_recommendations=entity_pool.model_dump(),
-                user_input=user_input,
-            )
+        nodes_prompt = create_initial_nodes_prompt(
+            discovery_text=discovery_text,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            valid_columns=valid_columns,
+        )
 
-            initial_data_model: DataModel = self._get_data_model_response(
-                formatted_prompt=formatted_prompt,
-                csv_columns=user_input.allowed_columns,
-                max_retries=max_retries,
-                use_yaml_data_model=use_yaml_data_model,
-            )
+        nodes = self._get_nodes_response(
+            formatted_prompt=nodes_prompt,
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            max_retries=max_retries,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+        )
 
-            return initial_data_model
+        data_model_prompt = create_initial_data_model_prompt(
+            discovery_text=discovery_text,
+            data_model_recommendations=nodes,
+            multifile=multifile,
+            data_dictionary=data_dictionary,
+            use_cases=use_cases,
+            advanced_rules=use_advanced_data_model_generation_rules,
+            valid_columns=valid_columns,
+        )
 
-        else:
-            return validation
+        initial_data_model: DataModel = self._get_data_model_response(
+            formatted_prompt=data_model_prompt,
+            valid_columns=valid_columns,
+            max_retries=max_retries,
+            data_dictionary=data_dictionary,
+            allow_duplicate_properties=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            allow_parallel_relationships=allow_parallel_relationships,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+        )
+
+        if not hasattr(initial_data_model, "nodes") and hasattr(nodes, "nodes"):
+            initial_data_model.nodes = nodes.nodes
+
+        return initial_data_model
 
     def _get_data_model_response(
         self,
         formatted_prompt: str,
-        csv_columns: List[str],
+        valid_columns: dict[str, list[str]],
+        data_dictionary: Dict[str, Any],
         max_retries: int = 3,
-        use_yaml_data_model: bool = False,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
+        apply_neo4j_naming_conventions: bool = True,
+        allow_parallel_relationships: bool = False,
     ) -> DataModel:
         """
         Get a data model response from the LLM.
         """
 
-        retries = 0
-        valid_response = False
-        while retries < max_retries and not valid_response:
-            retries += 1  # increment retries each pass
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+            allow_parallel_relationships=allow_parallel_relationships,
+        )
 
+        retry_logic = create_retry_logic(max_retries=max_retries)
+
+        print(bold("> Generating Data Model..."))
+        try:
             response: DataModel = self.client.chat.completions.create(
                 model=self.model_name,
                 response_model=DataModel,
@@ -195,45 +232,103 @@ class BaseDataModelingLLM(ABC):
                     {"role": "system", "content": SYSTEM_PROMPTS["data_model"]},
                     {"role": "user", "content": formatted_prompt},
                 ],
+                validation_context=context,
+                max_retries=retry_logic,
                 **self.model_params,
             )
-
-            validation = response.validate_model(csv_columns=csv_columns)
-            if not validation["valid"]:
-                print("validation failed")
-                cot = self._get_chain_of_thought_for_error_recommendations_response(
-                    formatted_prompt=validation["message"]
+            print(f"\nReceived {green('Valid')} Data Model")
+        except InstructorRetryException as e:
+            print(f"\nReceived {red('Invalid')} Data Model")
+            # return model without validation
+            response: DataModel = DataModel.model_construct(  # type: ignore
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
                 )
+            )
 
-                formatted_prompt = create_retry_data_model_generation_prompt(
-                    chain_of_thought_response=cot,
-                    errors_to_fix=validation["errors"],
-                    model_to_fix=(
-                        response.to_yaml(write_file=False)
-                        if use_yaml_data_model
-                        else response
-                    ),
+        if hasattr(response, "nodes"):
+            print(
+                pretty_list(
+                    header="Nodes",
+                    content=[cyan(n.__str__()) for n in response.nodes],
+                    cols=2,
+                ),
+                "\n",
+            )
+
+        if hasattr(response, "relationships"):
+            print(
+                pretty_list(
+                    header="Relationships",
+                    content=[cyan(r.__str__()) for r in response.relationships],
                 )
-            elif validation["valid"]:
-                print("recieved a valid response")
-                valid_response = True
+            )
 
         return response
 
-    def _get_chain_of_thought_for_error_recommendations_response(
-        self, formatted_prompt: str
-    ) -> str:
+    def _get_nodes_response(
+        self,
+        formatted_prompt: str,
+        valid_columns: dict[str, list[str]],
+        data_dictionary: Dict[str, Any],
+        max_retries: int = 3,
+        allow_duplicate_properties: bool = False,
+        enforce_uniqueness: bool = True,
+        apply_neo4j_naming_conventions: bool = True,
+    ) -> Nodes:
         """
-        Generate fixes for the previous data model.
+        Get a nodes response from the LLM.
         """
-        print("performing chain of thought process for error fix recommendations...")
-        response: ErrorRecommendations = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS["retry"]},
-                {"role": "user", "content": formatted_prompt},
-            ],
-            response_model=ErrorRecommendations,
-            **self.model_params,
+
+        context = create_context(
+            data_dictionary=data_dictionary,
+            valid_columns=valid_columns,
+            allow_duplicate_column_mappings=allow_duplicate_properties,
+            enforce_uniqueness=enforce_uniqueness,
+            apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
+            allow_parallel_relationships=False,
         )
-        return response.recommendations
+
+        retry_logic = create_retry_logic(max_retries=max_retries)
+
+        print(bold("> Generating Nodes..."))
+        try:
+            response: Nodes = self.client.chat.completions.create(
+                model=self.model_name,
+                response_model=Nodes,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": SYSTEM_PROMPTS["initial_nodes"],
+                    },
+                    {"role": "user", "content": formatted_prompt},
+                ],
+                validation_context=context,
+                max_retries=retry_logic,
+                **self.model_params,
+            )
+
+            print(f"\nReceived {green('Valid')} Nodes")
+        except InstructorRetryException as e:
+            print(f"\nReceived {red('Invalid')} Nodes")
+            # return model without validation
+            response: Nodes = Nodes.model_construct(  # type: ignore
+                json.loads(
+                    e.last_completion.choices[-1]
+                    .message.tool_calls[-1]
+                    .function.arguments
+                )
+            )
+
+        print(
+            pretty_list(
+                header="Nodes",
+                content=[cyan(n.__str__()) for n in response.nodes],
+                cols=2,
+            ),
+            "\n",
+        )
+
+        return response

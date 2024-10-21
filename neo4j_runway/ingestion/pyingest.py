@@ -37,7 +37,7 @@ class LocalServer(object):
     def close(self) -> None:
         self._driver.close()
 
-    def get_params(self, file: Dict[str, Any]) -> Dict[str, Any]:
+    def get_params(self, file: Dict[str, Any], verbose: bool = False) -> Dict[str, Any]:
         params = dict()
         params["skip_records"] = file.get("skip_records") or 0
         params["compression"] = file.get("compression") or "none"
@@ -46,34 +46,39 @@ class LocalServer(object):
         if self.basepath and file_url.startswith("$BASE"):
             file_url = file_url.replace("$BASE", self.basepath, 1)
         params["url"] = file_url
-        print("File {}", params["url"])
+        if verbose:
+            print("File {}", params["url"])
         params["cql"] = file["cql"]
         params["chunk_size"] = file.get("chunk_size") or 1000
         params["field_sep"] = file.get("field_separator") or ","
         return params
 
-    def load_dataframe(self, file: Dict[str, Any], dataframe: pd.DataFrame) -> None:
+    def load_dataframe(
+        self, file: Dict[str, Any], dataframe: pd.DataFrame, verbose: bool = False
+    ) -> None:
         """
         Load a Pandas DataFrame directly using a PyIngest yaml global_config file.
         """
         with self._driver.session(**self.db_config) as session:
-            params = self.get_params(file)
+            params = self.get_params(file, verbose=verbose)
 
             partition = max(1, int(len(dataframe) / params["chunk_size"]))
 
             for i, rows in enumerate(np.array_split(dataframe, partition)):
-                print("loading...", i, datetime.datetime.now(), flush=True)
+                if verbose:
+                    print("loading...", i, datetime.datetime.now(), flush=True)
                 # Chunk up the rows to enable additional fastness :-)
                 rows_dict = {
                     "rows": pd.DataFrame(rows).fillna(value="").to_dict("records")
                 }
                 session.run(params["cql"], dict=rows_dict).consume()
 
-        print("{} : Completed file", datetime.datetime.now())
+        if verbose:
+            print("{} : Completed file", datetime.datetime.now())
 
-    def load_csv(self, file: Dict[str, Any]) -> None:
+    def load_csv(self, file: Dict[str, Any], verbose: bool = False) -> None:
         with self._driver.session(**self.db_config) as session:
-            params = self.get_params(file)
+            params = self.get_params(file, verbose=verbose)
 
             # check if we load this file...
             skip = params["skip_file"] if "skip_file" in params else False
@@ -101,16 +106,18 @@ class LocalServer(object):
                 )
 
                 for i, rows in enumerate(row_chunks):
-                    print(params["url"], i, datetime.datetime.now(), flush=True)
+                    if verbose:
+                        print(params["url"], i, datetime.datetime.now(), flush=True)
                     # Chunk up the rows to enable additional fastness :-)
                     rows_dict = {
                         "rows": pd.DataFrame(rows).fillna(value="").to_dict("records")
                     }
                     session.run(params["cql"], dict=rows_dict).consume()
 
-        print("{} : Completed file", datetime.datetime.now())
+        if verbose:
+            print("{} : Completed file", datetime.datetime.now())
 
-    def pre_ingest(self) -> None:
+    def pre_ingest(self, verbose: bool = False) -> None:
         if "pre_ingest" in global_config:
             statements = global_config["pre_ingest"]
             if len(statements) > 0:
@@ -118,9 +125,10 @@ class LocalServer(object):
                     for statement in statements:
                         session.run(statement)
             else:
-                print("no pre ingest scripts found.")
+                if verbose:
+                    print("no pre ingest scripts found.")
 
-    def post_ingest(self) -> None:
+    def post_ingest(self, verbose: bool = False) -> None:
         if "post_ingest" in global_config:
             statements = global_config["post_ingest"]
             if len(statements) > 0:
@@ -128,7 +136,8 @@ class LocalServer(object):
                     for statement in statements:
                         session.run(statement)
             else:
-                print("no post ingest scripts found.")
+                if verbose:
+                    print("no post ingest scripts found.")
 
 
 def load_config(configuration: Any) -> None:
@@ -137,7 +146,10 @@ def load_config(configuration: Any) -> None:
 
 
 def PyIngest(
-    config: str, dataframe: Optional[pd.DataFrame] = None, **kwargs: Any
+    config: str,
+    dataframe: Optional[pd.DataFrame] = None,
+    verbose: bool = False,
+    **kwargs: Any,
 ) -> None:
     """
     Function to ingest data according to a configuration YAML.
@@ -151,6 +163,8 @@ def PyIngest(
     dataframe : Optional[pd.DataFrame], optional
         The data to ingest in Pandas DataFrame format.
         If None, then will search for CSVs according to the urls in YAML config, by default None
+    verbose : bool, optional
+        Whether to print progress, by default False
     kwargs : Any
         Additional params
     """
@@ -168,14 +182,14 @@ def PyIngest(
             action="ignore", category=FutureWarning
         )  # pandas throws FutureWarning on `DataFrame.swapaxes in fromnumeric.py`. Is very annoying and not our problem.
         server = LocalServer()
-        server.pre_ingest()
+        server.pre_ingest(verbose=verbose)
         file_list = global_config["files"]
         for file in file_list:
             if dataframe is not None:
-                server.load_dataframe(file, dataframe=dataframe)
+                server.load_dataframe(file, dataframe=dataframe, verbose=verbose)
             else:
-                server.load_csv(file)
-        server.post_ingest()
+                server.load_csv(file, verbose=verbose)
+        server.post_ingest(verbose=verbose)
         server.close()
 
 

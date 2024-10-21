@@ -45,6 +45,12 @@ MATCH (source:Person {name: row.name})
 MATCH (target:Person {name: row.knows_person})
 MERGE (source)-[n:KNOWS]->(target)
 """
+merge_relationship_standard_different_files = """WITH $dict.rows AS rows
+UNWIND rows as row
+MATCH (source:Pet {name: row.name})
+MATCH (target:Person {name: row.person_name})
+MERGE (source)-[n:LOVES]->(target)
+"""
 node_key_constraint_answer = """CREATE CONSTRAINT nodea_nk1_nk2 IF NOT EXISTS FOR (n:NodeA) REQUIRE (n.nk1, n.nk2) IS NODE KEY;\n"""
 
 relationship_key_constraint_answer = """CREATE CONSTRAINT has_relationship_nk1_nk2 IF NOT EXISTS FOR ()-[r:HAS_RELATIONSHIP]-() REQUIRE (r.nk1, r.nk2) IS RELATIONSHIP KEY;\n"""

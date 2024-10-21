@@ -1,0 +1,103 @@
+server_uri: bolt://localhost:7687
+admin_user: neo4j
+admin_pass: password
+database: gameofthrones
+basepath: ./
+
+pre_ingest:
+  - CREATE CONSTRAINT battle_name IF NOT EXISTS FOR (n:Battle) REQUIRE n.name IS UNIQUE;
+  - CREATE CONSTRAINT battle_battlenumber IF NOT EXISTS FOR (n:Battle) REQUIRE n.battleNumber IS UNIQUE;
+  - CREATE CONSTRAINT king_kingname IF NOT EXISTS FOR (n:King) REQUIRE n.kingName IS UNIQUE;
+  - CREATE CONSTRAINT family_familyname IF NOT EXISTS FOR (n:Family) REQUIRE n.familyName IS UNIQUE;
+  - CREATE CONSTRAINT commander_commandername IF NOT EXISTS FOR (n:Commander) REQUIRE n.commanderName IS UNIQUE;
+  - CREATE CONSTRAINT location_locationname IF NOT EXISTS FOR (n:Location) REQUIRE n.locationName IS UNIQUE;
+  - CREATE CONSTRAINT region_regionname IF NOT EXISTS FOR (n:Region) REQUIRE n.regionName IS UNIQUE;
+files:
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    SET n.year = toIntegerOrNull(row.year), n.outcome = row.outcome, n.size = toIntegerOrNull(row.size), n.summer = toBooleanOrNull(row.summer)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:King {kingName: row.king})
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Family {familyName: row.family})
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Commander {commanderName: row.commander})
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Location {locationName: row.location})
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Region {regionName: row.region})
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:King {kingName: row.king})
+    MATCH (target:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MERGE (source)-[n:PARTICIPATED_IN]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Family {familyName: row.family})
+    MATCH (target:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MERGE (source)-[n:INVOLVED_IN]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Commander {commanderName: row.commander})
+    MERGE (source)-[n:LED_BY]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Family {familyName: row.family})
+    MATCH (target:King {kingName: row.king})
+    MERGE (source)-[n:ALLIED_WITH]->(target)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Battle {name: row.name, battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Location {locationName: row.location})
+    MERGE (source)-[n:LOCATED_AT]->(target)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Location {locationName: row.location})
+    MATCH (target:Region {regionName: row.region})
+    MERGE (source)-[n:IN_REGION]->(target)
+  url: $BASE/../../../data/got/game_of_thrones_battles.csv

@@ -23,27 +23,44 @@ class TestDataModel(unittest.TestCase):
             "pet",
             "toy",
             "toy_type",
+            "knows",
         ]
 
         person_name = Property(
-            name="name", type="str", csv_mapping="name", is_unique=True
+            name="name",
+            type="str",
+            column_mapping="name",
+            is_unique=True,
+            alias="knows",
         )
         person_age = Property(
-            name="age", type="int", csv_mapping="age", is_unique=False
+            name="age", type="int", column_mapping="age", is_unique=False
         )
         address_street = Property(
-            name="street", type="str", csv_mapping="street", is_unique=False
+            name="street",
+            type="str",
+            column_mapping="street",
+            is_unique=False,
+            part_of_key=True,
         )
         address_city = Property(
-            name="city", type="str", csv_mapping="city", is_unique=False
+            name="city",
+            type="str",
+            column_mapping="city",
+            is_unique=False,
+            part_of_key=True,
         )
         pet_name = Property(
-            name="name", type="str", csv_mapping="pet_name", is_unique=False
+            name="name", type="str", column_mapping="pet_name", is_unique=True
         )
-        pet_kind = Property(name="kind", type="str", csv_mapping="pet", is_unique=False)
-        toy_name = Property(name="name", type="str", csv_mapping="toy", is_unique=True)
+        pet_kind = Property(
+            name="kind", type="str", column_mapping="pet", is_unique=False
+        )
+        toy_name = Property(
+            name="name", type="str", column_mapping="toy", is_unique=True
+        )
         toy_kind = Property(
-            name="kind", type="str", csv_mapping="toy_type", is_unique=False
+            name="kind", type="str", column_mapping="toy_type", is_unique=False
         )
 
         cls.good_nodes = [
@@ -68,25 +85,21 @@ class TestDataModel(unittest.TestCase):
         cls.good_relationships = [
             Relationship(
                 type="HAS_ADDRESS",
-                properties=[],
                 source="Person",
                 target="Address",
             ),
             Relationship(
                 type="KNOWS",
-                properties=[],
                 source="Person",
                 target="Person",
             ),
             Relationship(
                 type="HAS_PET",
-                properties=[],
                 source="Person",
                 target="Pet",
             ),
             Relationship(
                 type="PLAYS_WITH",
-                properties=[],
                 source="Pet",
                 target="Toy",
             ),

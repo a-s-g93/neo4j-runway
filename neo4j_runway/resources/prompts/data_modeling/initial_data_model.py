@@ -1,78 +1,67 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
-from ....inputs import UserInput
 from .constants import (
     DATA_MODEL_FORMAT,
-    DATA_MODEL_GENERATION_RULES,
-    DATA_MODEL_GENERATION_RULES_ADVANCED,
+    NODE_GENERATION_RULES,
+    NODES_FORMAT,
 )
-from .formatters import (
-    format_column_descriptions,
-    format_discovery_text,
-    format_general_description,
-    format_use_cases,
-)
+from .formatters import get_rules
+from .template import create_data_modeling_prompt
 
 
-def create_initial_data_model_cot_prompt(
-    discovery_text: str, allowed_features: List[str], user_input: UserInput
+def create_initial_nodes_prompt(
+    discovery_text: str,
+    multifile: bool,
+    use_cases: Optional[str],
+    valid_columns: Dict[str, Any],
+    data_dictionary: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
-    Generate a prompt to find nodes, relationships and properties to include in a data model.
-    This is only for brainstorming, result of prompt should not be a DataModel.
+    Generate a prompt to find nodes and properties to include in a data model.
 
     Returns
     -------
     str
         The prompt.
     """
-    discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
+    prefix = "Please generate a list of Nodes that will be used to construct a graph data model. Each node should represent an entity found in the data."
 
-    prompt = f"""{discovery}
-{feature_descriptions}
-{use_cases}
-Based upon the above information and of high-quality graph data models,
-return the following:
-* Nodes and their respective properties
-* Relationships and their respective possible source Nodes and target Nodes
-* Relationships and their respective properties, if any
-* Explanations for each decision and how it will benefit the data model
-* All possible relationships for nodes
-
-Remember
-* All properties must be found in this list: {allowed_features}
-* Do not return an actual data model!
-"""
-
-    return prompt
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        multifile=multifile,
+        use_cases=use_cases,
+        valid_columns=valid_columns,
+        data_dictionary=data_dictionary,
+        rules=NODE_GENERATION_RULES,
+        data_model_format=NODES_FORMAT,
+    )
 
 
 def create_initial_data_model_prompt(
     discovery_text: str,
-    data_model_recommendations: Dict[str, Any],
-    user_input: UserInput,
+    data_model_recommendations: "Nodes",  # type: ignore
+    multifile: bool,
+    valid_columns: Dict[str, Any],
+    data_dictionary: Optional[Dict[str, Any]] = None,
+    use_cases: Optional[str] = None,
+    advanced_rules: bool = True,
 ) -> str:
     """
     Generate the initial data model request prompt.
     """
 
-    discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
-    general_description = format_general_description(user_input=user_input)
+    prefix = "I would like you to generate a graph data model based on this provided information. Ensure that the recommened nodes are implemented in the final data model."
+    rules = get_rules(multifile=multifile, advanced_rules=advanced_rules)
 
-    prompt = f"""{general_description}
-{discovery}
-{feature_descriptions}
-Based upon the above information and of high-quality Neo4j graph data models,
-I would like you to translate the data in my .csv into a Neo4j graph data model.
-
-{use_cases}
-{DATA_MODEL_GENERATION_RULES}
-{DATA_MODEL_GENERATION_RULES_ADVANCED}
-
-{DATA_MODEL_FORMAT}
-"""
-    return prompt
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        nodes=data_model_recommendations,
+        valid_columns=valid_columns,
+        data_dictionary=data_dictionary,
+        use_cases=use_cases,
+        rules=rules,
+        data_model_format=DATA_MODEL_FORMAT,
+        multifile=multifile,
+    )

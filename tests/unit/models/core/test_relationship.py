@@ -8,10 +8,13 @@ class TestRelationship(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.prop1 = Property(
-            name="score", type="float", csv_mapping="similarity_score", is_unique=False
+            name="score",
+            type="float",
+            column_mapping="similarity_score",
+            is_unique=False,
         )
         cls.prop2 = Property(
-            name="current", type="bool", csv_mapping="current", is_unique=True
+            name="current", type="bool", column_mapping="current", is_unique=True
         )
         cls.source = "NodeA"
         cls.target = "NodeB"
@@ -111,26 +114,6 @@ class TestRelationship(unittest.TestCase):
         self.assertFalse(relationship_from_arrows.properties[0].is_unique)
         self.assertEqual(relationship_from_arrows.properties[0].type, "float")
         self.assertEqual(relationship_from_arrows.properties[1].type, "bool")
-
-    def test_validate_relationship_keys(self) -> None:
-        rel = Relationship(
-            type="relA",
-            properties=[
-                Property(
-                    name="rkey",
-                    type="str",
-                    csv_mapping="rkey",
-                    is_unique=False,
-                    part_of_key=True,
-                )
-            ],
-            source="A",
-            target="B",
-        )
-
-        errors = rel.validate_properties(csv_columns=["rkey"])
-        message = "The relationship relA has a relationship key on only one property rkey. Relationship keys must exist on two or more properties."
-        self.assertIn(message, errors)
 
 
 if __name__ == "__main__":

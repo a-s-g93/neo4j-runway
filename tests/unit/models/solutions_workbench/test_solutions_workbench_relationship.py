@@ -70,7 +70,7 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
         city = Property(
             name="city",
             type="str",
-            csv_mapping="city",
+            column_mapping="city",
             is_unique=True,
             part_of_key=True,
         )
@@ -80,7 +80,7 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
             source="N0de2",
             target="Node2",
             properties=[city],
-            csv_name="pets-2.csv",
+            source_name="pets-2.csv",
         )
 
         sw_rel: SolutionsWorkbenchRelationship = core_rel.to_solutions_workbench(
@@ -90,7 +90,7 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
         self.assertEqual("rel0", sw_rel.key)
         self.assertEqual(core_rel.type, sw_rel.type)
         self.assertEqual(core_rel.property_names, list(sw_rel.properties.keys()))
-        self.assertEqual(core_rel.csv_name, sw_rel.description)
+        self.assertEqual(core_rel.source_name, sw_rel.description)
 
     def test_init_to_core_relationship(self) -> None:
         sw_rel = SolutionsWorkbenchRelationship(**self.json_input)
@@ -102,7 +102,7 @@ class TestSolutionsWorkbenchRelationship(unittest.TestCase):
 
         self.assertEqual(core_rel.type, sw_rel.type)
         self.assertEqual(len(core_rel.properties), len(sw_rel.properties.keys()))
-        self.assertEqual(core_rel.csv_name, sw_rel.description)
+        self.assertEqual(core_rel.source_name, sw_rel.description)
         self.assertEqual(
             core_rel.source, node_id_to_label_map[sw_rel.startNodeLabelKey]
         )

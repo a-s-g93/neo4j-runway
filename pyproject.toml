@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neo4j-runway"
-version = "0.9.1"
+version = "0.12.0"
 description = "A Python library that contains tools for data discovery, data model generation and ingestion for the Neo4j graph database."
 authors = ["Alex Gilmore", "Jason Booth", "Dan Bukowski"]
 license = "Apache License, Version 2.0"
@@ -23,9 +23,10 @@ include = "neo4j_runway"
 
 [tool.poetry.dependencies]
 graphviz = "^0.20.1"
-instructor = "1.2.0"
+instructor = "1.5.2"
 ipython = "^8.24.0"
 neo4j = "^5.19.0"
+nest_asyncio = "^1.6.0"
 numpy = "^1.26.3"
 openai = "^1.12.0"
 pandas = "^2.0.3"
@@ -42,6 +43,7 @@ mypy = "^1.10.0"
 nbconvert= "^7.16.4"
 pre-commit = { version = "^3.6.2", python = "^3.10" }
 pytest = "^8.3.2"
+pytest-mock = "^3.12.0"
 python-dotenv = "^1.0.1"
 ruff = "^0.3.0"
 toml = "^0.10.2"
@@ -52,7 +54,7 @@ strict = true
 ignore_missing_imports = true
 allow_subclassing_any = true
 disallow_untyped_calls = false
-exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py"]
+exclude = ["docs", "tests", "scripts", "neo4j_runway/code_generation/generate_ingest.py", "neo4j_runway/llm/base.py"]
 
 [tool.ruff]
 target-version = "py310"

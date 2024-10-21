@@ -33,8 +33,8 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
         core_prop = Property(
             name="kind",
             type="str",
-            csv_mapping="pet",
-            csv_mapping_other=None,
+            column_mapping="pet",
+            alias=None,
             is_unique=True,
             part_of_key=False,
         )
@@ -43,7 +43,7 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
         self.assertEqual(core_prop.name, sw_prop.key)
         self.assertEqual(core_prop.name, sw_prop.name)
         self.assertEqual("String", sw_prop.datatype)
-        self.assertEqual(core_prop.csv_mapping, sw_prop.referenceData)
+        self.assertEqual(core_prop.column_mapping, sw_prop.referenceData)
         self.assertIsNone(sw_prop.description)
         self.assertEqual([], sw_prop.fromDataSources)
         self.assertFalse(sw_prop.isArray)
@@ -56,8 +56,8 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
         core_prop = Property(
             name="kind",
             type="List[str]",
-            csv_mapping="pet",
-            csv_mapping_other=None,
+            column_mapping="pet",
+            alias=None,
             is_unique=True,
             part_of_key=False,
         )
@@ -69,8 +69,8 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
         core_prop = Property(
             name="kind",
             type="str",
-            csv_mapping="pet",
-            csv_mapping_other="pet2",
+            column_mapping="pet",
+            alias="pet2",
             is_unique=True,
             part_of_key=False,
         )
@@ -87,7 +87,7 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
 
         self.assertEqual(core_prop.name, sw_prop.name)
         self.assertEqual("str", core_prop.type)
-        self.assertEqual(core_prop.csv_mapping, sw_prop.referenceData)
+        self.assertEqual(core_prop.column_mapping, sw_prop.referenceData)
         self.assertEqual(core_prop.is_unique, sw_prop.isIndexed)
         self.assertEqual(core_prop.part_of_key, sw_prop.isPartOfKey)
         self.assertEqual(core_prop.is_unique, sw_prop.hasUniqueConstraint)
@@ -99,5 +99,5 @@ class TestSolutionsWorkbenchProperty(unittest.TestCase):
             solutions_workbench_property=sw_prop
         )
 
-        self.assertEqual("pet", core_prop.csv_mapping)
-        self.assertEqual("pet2", core_prop.csv_mapping_other)
+        self.assertEqual("pet", core_prop.column_mapping)
+        self.assertEqual("pet2", core_prop.alias)

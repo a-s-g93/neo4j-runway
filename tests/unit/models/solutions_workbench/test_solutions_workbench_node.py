@@ -90,25 +90,25 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
         name = Property(
             name="name",
             type="str",
-            csv_mapping="pet_name",
+            column_mapping="pet_name",
             is_unique=True,
             part_of_key=False,
         )
         kind = Property(
             name="kind",
             type="str",
-            csv_mapping="pet",
+            column_mapping="pet",
             is_unique=False,
             part_of_key=False,
         )
 
-        core_node = Node(label="Pet", csv_name="pets-2.csv", properties=[name, kind])
+        core_node = Node(label="Pet", source_name="pets-2.csv", properties=[name, kind])
 
         sw_node = core_node.to_solutions_workbench(key="node0", x=50, y=0)
 
         self.assertEqual(core_node.label, sw_node.label)
         self.assertEqual(core_node.property_names, list(sw_node.properties.keys()))
-        self.assertEqual(core_node.csv_name, sw_node.description)
+        self.assertEqual(core_node.source_name, sw_node.description)
         self.assertEqual("node0", sw_node.key)
 
     def test_init_to_core_node(self) -> None:
@@ -118,4 +118,4 @@ class TestSolutionsWorkbenchNode(unittest.TestCase):
 
         self.assertEqual(core_node.label, sw_node.label)
         self.assertEqual(len(core_node.properties), len(sw_node.properties.keys()))
-        self.assertEqual(core_node.csv_name, sw_node.description)
+        self.assertEqual(core_node.source_name, sw_node.description)

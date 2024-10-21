@@ -8,13 +8,69 @@
 
 ### Added
 
+## 0.12.0
+
+### Fixed
+
+* Fix bug where `use_cases` arg in `UserInput` not accounted for.
+
+### Changed
+
+* Change initial `DataModel` generation logic to first generate nodes, then generate relationships
+* Updated examples
+* remove `use_yaml_data_model` arg from `DataModel` generation methods, as it is no longer relevant
+* Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize `Pydantic` library
+* Update `Instructor` dependency to v1.5.2
+* Simplify LLM retry logic by better utilizing `Instructor` library
+* Update printed results and progress of `DataModel` generating methods to be prettier
+* Update Graphviz visual from `DataModel.visualize()`
+
+### Added
+
+* Add `DataModel` validator to check for parallel relationships
+* Add `allow_parallel_relationships` arg to `DataModel` generating methods
+* Add `apply_neo4j_naming_conventions` arg to `DataModel` generating methods
+* Add `get_schema()` to `DataModel`, `Node`, `Relationship` and `Property` to output a text version of schema
+
+## 0.11.0
+
+### Changed
+
+* Removed `kwargs` from LLM classes and replaced with `llm_init_params` to provide parameters that should be passed to the LLM constructor.
+
+### Added
+
+* Azure OpenAI integrations for Discovery and Data Modeling: `AzureOpenAIDiscoveryLLM` and `AzureOpenAIDataModelingLLM`
+* Added example that used Azure OpenAI models
+
+## 0.10.0
+
+### Fixed
+
+* Initial data modeling takes into account entity pool generation step
+* Fixed bug where some filepaths break saving content to file
+
+### Changed
+
+* All data input to Discovery is converted to TableCollection class
+* Discovery generated content is contained in Table on `discovery_content` attribute
+* Discovery file output is handled on Table and TableCollection classes instead of Discovery class
+* Data Modeling prompts have been significantly refactored and organized into a consistent format
+
+### Added
+
+* Add `verbose` arg to `PyIngest` to suppress progress printing
+* Multi file support for Discovery process (EXPERIMENTAL)
+  * parameters in `discovery.run()` and `discovery.run_async()` to control process
+  * async capability to improve response time for multi file
+* Multi file support for Data Modeling process (EXPERIMENTAL)
+* Cypher generation support for relationships spanning across different files
+
 ## 0.9.1
 
 ### Fixed
 
 * Fix bug in LoadCSVCodeGenerator
-
-### Changed
 
 ### Added
 

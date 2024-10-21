@@ -1,0 +1,107 @@
+server_uri: bolt://localhost:7687
+admin_user: neo4j
+admin_pass: password
+database: gameofthronesmulti
+basepath: ./
+
+pre_ingest:
+  - CREATE CONSTRAINT battle_battlenumber IF NOT EXISTS FOR (n:Battle) REQUIRE n.battleNumber IS UNIQUE;
+  - CREATE CONSTRAINT family_family IF NOT EXISTS FOR (n:Family) REQUIRE n.family IS UNIQUE;
+  - CREATE CONSTRAINT commander_commander IF NOT EXISTS FOR (n:Commander) REQUIRE n.commander IS UNIQUE;
+  - CREATE CONSTRAINT year_year IF NOT EXISTS FOR (n:Year) REQUIRE n.year IS UNIQUE;
+  - CREATE CONSTRAINT location_location IF NOT EXISTS FOR (n:Location) REQUIRE n.location IS UNIQUE;
+  - CREATE CONSTRAINT region_region IF NOT EXISTS FOR (n:Region) REQUIRE n.region IS UNIQUE;
+  - CREATE CONSTRAINT king_king IF NOT EXISTS FOR (n:King) REQUIRE n.king IS UNIQUE;
+files:
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    SET n.name = row.name
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Family {family: row.family})
+  url: $BASE/../../../data/got/multi/got_armies.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Commander {commander: row.commander})
+  url: $BASE/../../../data/got/multi/got_armies.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Year {year: toIntegerOrNull(row.year)})
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Location {location: row.location})
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:Region {region: row.region})
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows AS row
+    MERGE (n:King {king: row.king})
+  url: $BASE/../../../data/got/multi/got_armies.csv
+- chunk_size: 100
+  cql: |-
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Family {family: row.family})
+    MATCH (target:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    MERGE (source)-[n:PARTICIPATED_IN]->(target)
+    SET n.attacking = toBooleanOrNull(row.attacking), n.outcome = row.outcome, n.size = toIntegerOrNull(row.size)
+  url: $BASE/../../../data/got/multi/got_armies.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Commander {commander: row.commander})
+    MERGE (source)-[n:LED_BY]->(target)
+  url: $BASE/../../../data/got/multi/got_armies.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Year {year: toIntegerOrNull(row.year)})
+    MERGE (source)-[n:OCCURRED_IN]->(target)
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Battle {battleNumber: toIntegerOrNull(row.battle_number)})
+    MATCH (target:Location {location: row.location})
+    MERGE (source)-[n:LOCATED_AT]->(target)
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Location {location: row.location})
+    MATCH (target:Region {region: row.region})
+    MERGE (source)-[n:REGION_OF]->(target)
+  url: $BASE/../../../data/got/multi/got_battles.csv
+- chunk_size: 100
+  cql: |
+    WITH $dict.rows AS rows
+    UNWIND rows as row
+    MATCH (source:Family {family: row.family})
+    MATCH (target:King {king: row.king})
+    MERGE (source)-[n:RULED_BY]->(target)
+  url: $BASE/../../../data/got/multi/got_armies.csv

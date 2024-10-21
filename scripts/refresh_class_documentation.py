@@ -17,7 +17,13 @@ from neo4j_runway.code_generation import (
     StandardCypherCodeGenerator,
 )
 from neo4j_runway.database import Neo4jGraph
-from neo4j_runway.llm.openai import OpenAIDataModelingLLM, OpenAIDiscoveryLLM
+from neo4j_runway.llm.openai import (
+    AzureOpenAIDataModelingLLM,
+    AzureOpenAIDiscoveryLLM,
+    OpenAIDataModelingLLM,
+    OpenAIDiscoveryLLM,
+)
+from neo4j_runway.utils.data import Table, TableCollection
 
 # ALL DOCUMENTED CLASSES MUST BE LISTED HERE!
 # Map features
@@ -54,6 +60,16 @@ CLASS_DIR = [
         "summary_file_path": "openai_data_modeling_llm.md",
     },
     {
+        "class": AzureOpenAIDiscoveryLLM,
+        "file_path": "api/llm/azure_openai_discovery_llm.md",
+        "summary_file_path": "azure_openai_discovery_llm.md",
+    },
+    {
+        "class": AzureOpenAIDataModelingLLM,
+        "file_path": "api/llm/azure_openai_data_modeling_llm.md",
+        "summary_file_path": "azure_openai_data_modeling_llm.md",
+    },
+    {
         "class": Neo4jGraph,
         "file_path": "api/database/neo4j_graph.md",
         "summary_file_path": "neo4j_graph.md",
@@ -78,6 +94,16 @@ CLASS_DIR = [
         "file_path": "api/code_generator/standard_cypher_code_generator.md",
         "summary_file_path": "standard_cypher_code_generator.md",
     },
+    {
+        "class": Table,
+        "file_path": "api/utils/data/table.md",
+        "summary_file_path": "table.md",
+    },
+    {
+        "class": TableCollection,
+        "file_path": "api/utils/data/table_collection.md",
+        "summary_file_path": "table_collection.md",
+    },
 ]
 
 MAX_TEXT_WIDTH: int = 60
@@ -97,9 +123,12 @@ def format_docstring(docstring: str) -> str:
 
 
 def get_method_docstrings_of_class(class_of_interest) -> List[str]:
+    mems = inspect.getmembers(
+        class_of_interest, predicate=inspect.isfunction
+    ) + inspect.getmembers(class_of_interest, predicate=inspect.ismethod)
     return [
         (m[0], format_docstring(m[1].__doc__))
-        for m in inspect.getmembers(class_of_interest, predicate=inspect.isfunction)
+        for m in mems
         if "BaseModel" not in str(m[1])
         and (not m[0].startswith("_") or m[0] == "__init__")
     ]

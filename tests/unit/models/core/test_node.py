@@ -8,10 +8,10 @@ class TestNode(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.person_name = Property(
-            name="name", type="str", csv_mapping="first_name", is_unique=True
+            name="name", type="str", column_mapping="first_name", is_unique=True
         )
         cls.person_age = Property(
-            name="age", type="str", csv_mapping="age", is_unique=False
+            name="age", type="str", column_mapping="age", is_unique=False
         )
 
     def test_init(self) -> None:
@@ -90,24 +90,6 @@ class TestNode(unittest.TestCase):
         node_from_arrows = Node.from_arrows(arrows_node=arrows_node)
 
         self.assertEqual(len(node_from_arrows.properties), 1)
-
-    def test_validate_node_keys(self) -> None:
-        node = Node(
-            label="nodeA",
-            properties=[
-                Property(
-                    name="nkey",
-                    type="str",
-                    csv_mapping="nkey",
-                    is_unique=False,
-                    part_of_key=True,
-                )
-            ],
-        )
-
-        errors = node.validate_properties(csv_columns=["nkey"])
-        message = "The node nodeA has a node key on only one property nkey. Node keys must exist on two or more properties."
-        self.assertIn(message, errors)
 
 
 if __name__ == "__main__":

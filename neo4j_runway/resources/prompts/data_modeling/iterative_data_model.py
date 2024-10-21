@@ -1,44 +1,40 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
-from ....inputs import UserInput
-from .constants import DATA_MODEL_GENERATION_RULES, DATA_MODEL_GENERATION_RULES_ADVANCED
 from .formatters import (
-    format_column_descriptions,
-    format_discovery_text,
-    format_general_description,
-    format_use_cases,
-    format_user_corrections,
+    get_rules,
 )
+from .template import create_data_modeling_prompt
 
 
 def create_data_model_iteration_prompt(
     discovery_text: str,
-    user_input: UserInput,
+    valid_columns: Dict[str, Any],
     data_model_to_modify: "DataModel",  # type: ignore
-    user_corrections: Optional[str] = None,
+    multifile: bool,
+    corrections: Optional[str] = None,
+    data_dictionary: Optional[Dict[str, Any]] = None,
+    use_cases: Optional[str] = None,
     use_yaml_data_model: bool = False,
+    advanced_rules: bool = True,
 ) -> str:
     """
     Generate the prompt to iterate on the previous data model.
     """
-    discovery = format_discovery_text(discovery_text)
-    feature_descriptions = format_column_descriptions(user_input=user_input)
-    use_cases = format_use_cases(user_input=user_input)
-    user_corrections = format_user_corrections(user_corrections=user_corrections)
-    general_description = format_general_description(user_input=user_input)
 
-    prompt = f"""{general_description}
-{discovery}
-{feature_descriptions}
-Based on your experience building high-quality graph data
-models, please improve this graph data model according to the feedback below.
+    prefix = (
+        "Please make corrections to the graph data model using the context provided."
+    )
+    rules = get_rules(multifile=multifile, advanced_rules=advanced_rules)
 
-{user_corrections}
-{data_model_to_modify.to_yaml(write_file=False) if use_yaml_data_model else data_model_to_modify}
-
-{use_cases}
-{DATA_MODEL_GENERATION_RULES}
-{DATA_MODEL_GENERATION_RULES_ADVANCED}
-"""
-
-    return prompt
+    return create_data_modeling_prompt(
+        prefix=prefix,
+        discovery=discovery_text,
+        data_model=data_model_to_modify,
+        data_model_as_yaml=use_yaml_data_model,
+        corrections=corrections,
+        data_dictionary=data_dictionary,
+        use_cases=use_cases,
+        rules=rules,
+        multifile=multifile,
+        valid_columns=valid_columns,
+    )

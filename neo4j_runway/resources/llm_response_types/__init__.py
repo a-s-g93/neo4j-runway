@@ -1,4 +1,3 @@
-from .error_recommendations import ErrorRecommendations
-from .initial_model_pool import DataModelEntityPool
+from .discovery import DiscoveryResponse
 
-__all__ = ["ErrorRecommendations", "DataModelEntityPool"]
+__all__ = ["DiscoveryResponse"]

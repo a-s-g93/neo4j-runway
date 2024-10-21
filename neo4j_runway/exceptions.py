@@ -9,6 +9,10 @@ class RunwayError(Exception):
     """
 
 
+class RunwayPydanticValidationError(ValueError):
+    """Global error for handling Pydantic errors in Runway"""
+
+
 class Neo4jVersionError(RunwayError):
     """Exception raised when Neo4j version does not meet minimum requirements."""
 
@@ -45,7 +49,31 @@ class InvalidSolutionsWorkbenchDataModelError(RunwayError):
     pass
 
 
+class DataNotSupportedError(RunwayError):
+    """Exception raised when an unsupported data format is given to a DataLoader class."""
+
+    pass
+
+
 class LoadCSVCypherGenerationError(RunwayError):
     """Exception raised when no standard clause can be constructed from provided arguments."""
+
+    pass
+
+
+class PandasDataSummariesNotGeneratedError(RunwayError):
+    """Exception raised when the Discovery class 'run' method is ran and Pandas data summaries are not generated."""
+
+    pass
+
+
+class InvalidSourceNameError(RunwayPydanticValidationError):
+    """Exception raised when an invalid `source_name` is provided."""
+
+    pass
+
+
+class NonuniqueNodeError(RunwayPydanticValidationError):
+    """Exception raised when a node has no unique properties."""
 
     pass

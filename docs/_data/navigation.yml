@@ -27,35 +27,50 @@ docs:
 
       - title: "OpenAIDataModelingLLM"
         url: /api/llm/openai-data-modeling-llm/
-      
+
+      - title: "AzureOpenAIDiscoveryLLM"
+        url: /api/llm/azure-openai-discovery-llm/
+
+      - title: "AzureOpenAIDataModelingLLM"
+        url: /api/llm/azure-openai-data-modeling-llm/
+
       - title: "Neo4jGraph"
         url: /api/database/neo4j-graph/
 
       - title: "Inputs"
         url: /api/inputs/
 
+      - title: "DataLoaders"
+        url: /api/utils/data/data-loaders/
+
+      - title: "Table"
+        url: /api/utils/data/table/
+
+      - title: "TableCollection"
+        url: /api/utils/data/table-collection/
+
       - title: "Utils"
-        url: /api/utils/
-  
+        url: /api/utils/utils/
+
   - title: "Examples"
     children:
       - title: "End-To-End Notebook"
         url: /examples/countries/
       - title: "arrows.app Data Model Import"
         url: "examples/arrows/"
-  
+
   - title: "Modeling Integrations"
     children:
     - title: "arrows.app"
       url: /supported-integrations/arrows-app/
     - title: "Solutions Workbench"
       url: /supported-integrations/solutions-workbench/
-  
+
   - title: "Ingestion Integrations"
     children:
     - title: "LOAD CSV"
       url: /supported-integrations/load-csv/
-    - title: "PyIngest" 
+    - title: "PyIngest"
       url: /supported-integrations/pyingest/
 
   - title: "Contribute"
