@@ -5,13 +5,19 @@ toc: true
 toc_label:
 toc_icon: "fa-solid fa-plane"
 ---
-This notebook will demonstrate how to use the arrows.app web app to design a data model, then use Runway to generate and ingest your data. This notebook uses Runway v0.9.0
+This notebook will demonstrate how to use the arrows.app web app to design a data model, then use Runway to generate and ingest your data. This notebook uses Runway v0.12.0
 
 ## Arrows
 
 First we design a model in arrows. In order to track property types and unique properties we need to format our arrows model a bit differently than normal.
 
-We need to format properties in the following way: `<propertyName>: <csv_mapping> | <Python type> | <unique> or <nodekey> | <ignore>`. If a property is not unique or a node key, then there is no need to provide the third parameter.
+We need to format properties in the following way:
+
+```
+<propertyName>: <csv_mapping> | <Python type> | <unique> or <nodekey> | <ignore>
+```
+
+If a property is not unique or a node key, then there is no need to provide the third parameter.
 
 Identifying a property as unique will create a uniqueness constraint and index.
 
@@ -30,7 +36,7 @@ We can identify the source CSV of a node or relationship by including a property
 
 This will ensure that when we import into Runway, we can maintain all important attributes of our data model.
 
-![Pet Graph](images/runway-pet-data-model-0.2.0.png "Pet Graph")
+![Pet Graph](./images/runway-pet-data-model-0.2.0.png "Pet Graph")
 
 Then we can export it as a JSON file to use with Neo4j Runway.
 
@@ -45,7 +51,7 @@ We can easily ingest the arrows JSON file into a Runway compatible data model.
 
 
 ```python
-model = DataModel.from_arrows(file_path="data/model/pet-model-0.2.0.json")
+model = DataModel.from_arrows(file_path="../../data_models/pet-model-0.2.0.json")
 ```
 
 
@@ -73,7 +79,7 @@ We won't include a csv name here, since we identify the appropriate csv names in
 
 
 ```python
-gen = LoadCSVCodeGenerator(data_model=model, file_directory="./", method="browser")
+gen = LoadCSVCodeGenerator(data_model=model, file_directory="./", file_output_directory="./outputs/", method="browser")
 ```
 
 When generating the LOAD CSV Cypher code, we indicate the method as "browser" since we'll be copy and pasting the code into a Neo4j browser cell. If you plan on using the code with one of the Neo4j drivers or an api, then you can indicate the method as "api" or leave the field blank.
@@ -173,8 +179,13 @@ This method will output a LOAD CSV cypher file.
 
 ```python
 gen.generate_load_csv_cypher_file(file_name="pets_load_csv.cypher")
+gen.generate_cypher_file()
+gen.generate_constraints_file()
 ```
+
+    file dir:  ./outputs/pets_load_csv.cypher
+
 
 After running this code in the Neo4j browser cell, we get this graph.
 
-![Pet Graph](images/runway-pet-graph-browser.png "Pet Graph")
+![Pet Graph](./images/runway-pet-graph-browser.png "Pet Graph")

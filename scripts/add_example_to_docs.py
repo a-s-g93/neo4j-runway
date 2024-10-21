@@ -20,11 +20,11 @@ def import_notebook(file_path: str) -> Any:
     Example notebooks MUST be stored in the repo "https://github.com/a-s-g93/neo4j-runway-examples".
     Outside examples will not be accepted.
     """
-    print("importing file", file_path)
-    url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
-    response = urlopen(url).read().decode()
+    print("importing file: ", file_path)
+    # url = f"https://raw.githubusercontent.com/a-s-g93/neo4j-runway-examples/main/{file_path}"
+    # response = urlopen(url).read().decode()
 
-    return drop_notebook_header(nbformat.reads(response, as_version=4))
+    return drop_notebook_header(nbformat.read(file_path, as_version=4))
 
 
 def write_example_page(
