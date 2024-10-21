@@ -82,9 +82,6 @@ Generate the initial model.
     max_retries : int, optional
         The max number of retries for generating the initial
         model, by default 3
-    use_yaml_data_model : bool, optional
-        Whether to pass the data model in YAML format while
-        making corrections, by default False
     use_advanced_data_model_generation_rules, optional
         Whether to include advanced data modeling rules, by
         default True
@@ -96,14 +93,17 @@ Generate the initial model.
         (unique or node key).
         Setting this to false may be detrimental during code
         generation and ingestion. By default True
+    allow_parallel_relationships : bool, optional
+        Whether to allow parallel relationships to exist in
+        the data model, by default False
+    apply_neo4j_naming_conventions : bool, optional
+        Whether to apply Neo4j naming conventions to the
+        generated Data Model, by default True
 
     Returns
     -------
-    Union[DataModel, str]
-        The generated data model if a valid model is
-        generated, or
-        A dictionary containing information about the failed
-        generation attempt.
+    DataModel
+        The generated data model.
 
 
 ### get_model
@@ -151,9 +151,6 @@ Iterate on the current model. A data model must exist in
     max_retries : int, optional
         The max number of retries for generating the initial
         model, by default 3
-    use_yaml_data_model : bool, optional
-        Whether to pass the data model in YAML format while
-        making corrections, by default False
     use_advanced_data_model_generation_rules, optional
         Whether to include advanced data modeling rules, by
         default True
@@ -165,11 +162,17 @@ Iterate on the current model. A data model must exist in
         (unique or node key).
         Setting this to false may be detrimental during code
         generation and ingestion. By default True
+    allow_parallel_relationships : bool, optional
+        Whether to allow parallel relationships to exist in
+        the data model, by default False
+    apply_neo4j_naming_conventions : bool, optional
+        Whether to apply Neo4j naming conventions to the
+        generated Data Model, by default True
 
     Returns
     -------
     DataModel
-        The most recent generated data model.
+        The most recently generated data model.
 
 
 ### load_model

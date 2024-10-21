@@ -123,9 +123,12 @@ def format_docstring(docstring: str) -> str:
 
 
 def get_method_docstrings_of_class(class_of_interest) -> List[str]:
+    mems = inspect.getmembers(
+        class_of_interest, predicate=inspect.isfunction
+    ) + inspect.getmembers(class_of_interest, predicate=inspect.ismethod)
     return [
         (m[0], format_docstring(m[1].__doc__))
-        for m in inspect.getmembers(class_of_interest, predicate=inspect.isfunction)
+        for m in mems
         if "BaseModel" not in str(m[1])
         and (not m[0].startswith("_") or m[0] == "__init__")
     ]
