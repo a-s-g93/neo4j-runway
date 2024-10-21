@@ -60,7 +60,7 @@ def format_node(
 
     parts = schema.split("\n")
     lbl = parts[0] + "\n"
-    props = "\l".join(parts[1:])
+    props = r"\l".join(parts[1:])
 
     return lbl + props
 
@@ -82,5 +82,5 @@ def format_relationship(
             schema = relationship.get_schema(verbose=True, neo4j_typing=neo4j_typing)
 
     parts = schema.split("\n")
-    props = "\l".join(parts[1:])
+    props = r"\l".join(parts[1:])
     return "  [:" + relationship.type + "]  " + "\n" + props
