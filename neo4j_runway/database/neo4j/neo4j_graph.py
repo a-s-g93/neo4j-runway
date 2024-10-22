@@ -2,6 +2,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Union
 
 from neo4j import GraphDatabase
+from neo4j.exceptions import AuthError
 
 from ...exceptions import APOCNotInstalledError
 from ...utils._utils.read_env import read_environment
@@ -22,7 +23,7 @@ class Neo4jGraph(BaseGraph):
         The edition of the Neo4j instance.
     database_version : str
         The Neo4j version of the Neo4j instance.
-    driver : GraphDatabase.Driver
+    driver : Driver
         The driver used to communicate with Neo4j. Constructed from credentials provided to the constructor.
     schema : Union[Dict[str, Any], None]
         The database schema gathered from APOC.meta.schema
@@ -61,11 +62,14 @@ class Neo4jGraph(BaseGraph):
             **driver_config,
         )
         self.database = database or read_environment("NEO4J_DATABASE") or "neo4j"
+
+        self.driver.verify_connectivity()
+
         self.apoc_version = self._get_apoc_version()
-        version, _ = self._get_database_version()
+        self.database_version, self.database_edition = self._get_database_version()
         self._schema: Optional[Dict[str, Any]] = None
 
-        super().__init__(driver=self.driver, version=version)
+        super().__init__(driver=self.driver, version=self.database_version)
 
     @property
     def schema(self) -> Union[Dict[str, Any], None]:
@@ -106,7 +110,7 @@ class Neo4jGraph(BaseGraph):
                             Connection Error: {e}
                             """,
             }
-        self.driver.close()
+        # self.driver.close()
         return {"valid": True, "message": "Connection and Auth Verified!"}
 
     def _get_database_version(self) -> List[str]:
@@ -125,13 +129,14 @@ class Neo4jGraph(BaseGraph):
     YIELD versions, edition
     RETURN versions[0] as version, edition"""
                 ).single()
+                print("RESPONSE: ", response)
             if response is not None:
-                self.database_version, self.database_edition = response.values()
-
+                version, edition = response.values()
+                return [version, edition]
         except Exception:
-            self.driver.close()
+            print("Unable to retrieve database version and edition.")
 
-        return [self.database_version, self.database_edition]
+        return ["", ""]
 
     def _get_apoc_version(self) -> Union[str, None]:
         """
@@ -170,7 +175,7 @@ class Neo4jGraph(BaseGraph):
             The schema in APOC format, if APOC is present on database
         """
         try:
-            with self.driver.session() as session:
+            with self.driver.session(database=self.database) as session:
                 response: Dict[str, Any] = session.run(
                     """CALL apoc.meta.schema()
 YIELD value
