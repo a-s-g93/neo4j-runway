@@ -1,5 +1,3 @@
-# class to run GraphEDA functions
-
 import logging
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
@@ -11,19 +9,43 @@ from ..utils._utils.read_env import read_environment
 from . import queries
 from .cache import EDACache, create_eda_cache
 
-# from neo4j_runway.database.neo4j.neo4j_graph import Neo4jGraph
-# from neo4j_runway.grapheda.grapheda import GraphEDA
-# from neo4j_runway.utils.read_env import read_environment
-
-
-# from neo4j_runway.utils.test_connection import test_database_connection
-
-# surpress some neo4j logging
+# supress some neo4j logging
 logging.getLogger("neo4j").setLevel(logging.CRITICAL)
 
 
 class GraphEDA:
+    """
+    The GraphEDA module contains queries that return
+    information about the Neo4j database and its contents.
+
+    The purpose of GraphEDA is to understand the characteristics
+    of the data in graph form (nodes, relationships, and properties).
+    This also helps identify errors and outliers in the data.
+
+    The methods in this class primarily use Cypher to query and analyze
+    data in the graph. The queries use Cypher because apoc.meta.schema
+    uses sampling techniques and so the results are not necessarily deterministic.
+
+    WARNING: The functions in this module can be computationally expensive.
+    It is not recommended to use this module on massive Neo4j databases
+    (i.e., nodes and relationships in the hundreds of millions)
+    """
+
     def __init__(self, graph: Optional[Neo4jGraph] = None):
+        """
+        Initialize a GraphEDA class.
+
+        Parameters
+        ----------
+        graph : Optional[Neo4jGraph], optional
+            The `Neo4jGraph` object to be used to run queries.
+            If not provided, will attempt to create via environment variables., by default None
+
+        Raises
+        ------
+        ValueError
+            If unable to construct `Neo4jGraph` object from environment variables.
+        """
         # instantiate Neo4jGraph
         if graph is None:
             try:
@@ -47,22 +69,16 @@ class GraphEDA:
             )
 
         self.cache: EDACache = create_eda_cache()
-        # instantiate GraphEDA class
-        # self.graph_eda = Queries(neo4j_graph=self.neo4j_graph)
 
-    # print database version
-    def print_database_version(self) -> None:
-        """
-        Prints the version of the Neo4j database from the Neo4j graph object.
+    @property
+    def database_version(self) -> str:
+        """The database version"""
+        return self.graph.database_version
 
-        Parameters:
-            None
-
-        Returns:
-            None
-        """
-
-        print("Neo4j Database Version:", self.graph.database_version)
+    @property
+    def database_edition(self) -> str:
+        """The database edition"""
+        return self.graph.database_edition
 
     def delete_cache(self) -> None:
         """

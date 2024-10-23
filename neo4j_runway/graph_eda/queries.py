@@ -26,12 +26,16 @@ def get_database_indexes(
     """
     Method to identify the Neo4j database's indexes.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a list of dictionaries, where each dictionary contains the index
         name as "name" and the list of labels for that index as "labels".
     """
@@ -54,12 +58,16 @@ def get_database_constraints(
     """
     Get the constraints for the graph database.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are list of dictionaries, where each dictionary contains the
         constraint name as "name" and the list of labels for that constraint as "labels".
     """
@@ -80,12 +88,16 @@ def get_node_count(driver: Driver, database: str = "neo4j") -> int:
     """
     Count the total number of nodes in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    int
         This result is the count of nodes in the graph.
     """
 
@@ -109,12 +121,16 @@ def get_node_label_counts(
     Count the number of nodes associated with each
     unique label in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a list of dictionaries, where each dictionary contains
         the unique node label in the database as "label" along with the
         corresponding node count as "count".
@@ -142,12 +158,16 @@ def get_node_multi_label_counts(
     """
     Identify nodes in the graph that have multiple labels.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a list of dictionaries, where each dictionary contains
         the node id as "node_id" and the list of labels for that node as "labels".
     """
@@ -175,12 +195,16 @@ def get_node_properties(
     """
     Get the properties for each unique node label in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a list of dictionaries, where each dictionary contains
         the unique node label in the database as "label" along with the list of
         properties for that label as "properties".
@@ -209,12 +233,16 @@ def get_relationship_count(driver: Driver, database: str = "neo4j") -> int:
     """
     Count the total number of relationships in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query result to the result_cache dictionary.
+    Returns
+    -------
+    int
         This result is an integer representing the number of relationships
         in the graph.
     """
@@ -239,12 +267,16 @@ def get_relationship_type_counts(
     Count the number of relationships in the graph by
     each unique relationship type.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a list of dictionaries, where each dictionary contains
         the unique relationship type in the database as "label" along with the
         corresponding count as "count".
@@ -271,12 +303,16 @@ def get_relationship_properties(
     """
     Get the properties for each unique relationship type in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-        The method adds the query results to the result_cache dictionary.
+    Returns
+    -------
+    List[Dict[str, Any]]
         The results are a of dictionaries, where each dictionary contains
         the unique relationship property name, property data type, and whether
         or not the relationship property is required by the schema.
@@ -306,13 +342,17 @@ def get_unlabeled_node_count(driver: Driver, database: str = "neo4j") -> int:
     """
     Count the number of nodes in the graph that do not have labels.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-
-            The count of unlabeled nodes in the graph
+    Returns
+    -------
+    int
+        The count of unlabeled nodes in the graph
     """
 
     query = """MATCH (n)
@@ -353,17 +393,19 @@ def get_disconnected_node_count(
     """
     Count the number of disconnected nodes in the graph.
 
-    Parameters:
-        None
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
 
-    Returns:
-        None
-
-
-    - the results as a list of dictionaries, where each dictionary
-    includes a node label and the count of disconnected nodes for that label
-    - ex: [{'nodeLabel': 'Customer', 'count': 2}]
-    - also appends the results to the result_cache dictionary
+    Returns
+    -------
+    List[Dict[str, Any]]
+        The results as a list of dictionaries, where each dictionary
+        includes a node label and the count of disconnected nodes for that label
+        ex: [{'nodeLabel': 'Customer', 'count': 2}]
     """
 
     query = """MATCH (n)
@@ -389,10 +431,18 @@ def get_disconnected_node_ids(
 ) -> List[Dict[str, Any]]:
     """
     Identify the node ids of disconnected nodes in the graph.
-    Parameters:
-        None
-    Returns:
-        list: A list of dictionaries, where each dictionary contains the node label as "nodeLabel" and
+
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        A list of dictionaries, where each dictionary contains the node label as "nodeLabel" and
         the node id as "node_id" for each disconnected node in the graph.
         ex: [{'nodeLabel': 'Customer', 'nodeId': 135}, {'nodeLabel': 'Customer', 'nodeId': 170}]
     """
@@ -420,13 +470,22 @@ def get_disconnected_node_ids(
 def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, Any]]:
     """
     Calculate the in-degree and out-degree of each node in the graph.
-    Parameters:
-        None
-    Returns:
-        list: A list of dictionaries, where each dictionary contains the node id as "node_id",
+
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
+
+    Returns
+    -------
+    List[Dict[str, Any]]
+        A list of dictionaries, where each dictionary contains the node id as "node_id",
         label as the node label, the in-degree of the node as "inDegree", and the out-degree of
         the node as "outDegree".
     """
+
     query = """MATCH (n)
                 OPTIONAL MATCH (n)-[r_out]->()
                 WITH n, id(n) AS nodeId, labels(n) AS nodeLabel, count(r_out) AS outDegree
@@ -443,6 +502,7 @@ def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, 
     except Exception:
         driver.close()
         return [{}]
+
     # explicit errors -- something didn't come over correctly
 
     # priority -- things in a graph created from the csv in this session
