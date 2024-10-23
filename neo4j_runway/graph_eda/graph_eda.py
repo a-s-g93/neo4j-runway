@@ -26,7 +26,7 @@ class GraphEDA:
     data in the graph. The queries use Cypher because apoc.meta.schema
     uses sampling techniques and so the results are not necessarily deterministic.
 
-    WARNING: The functions in this module can be computationally expensive.
+    WARNING: The methods in this module can be computationally expensive.
     It is not recommended to use this module on massive Neo4j databases
     (i.e., nodes and relationships in the hundreds of millions)
     """
@@ -83,6 +83,9 @@ class GraphEDA:
     def run(self, refresh: bool = False) -> EDACache:
         """
         Run all analytics on the database. Results will be added to the cache.
+        WARNING: The methods in this module can be computationally expensive.
+        It is not recommended to use this module on massive Neo4j databases
+        (i.e., nodes and relationships in the hundreds of millions)
 
         Parameters
         ----------
