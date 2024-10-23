@@ -80,16 +80,33 @@ class GraphEDA:
         """The database edition"""
         return self.graph.database_edition
 
+    def run(self, refresh: bool = False) -> EDACache:
+        """
+        Run all analytics on the database. Results will be added to the cache.
+
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to refresh all analytics regardless of if they've been previously ran, by default False
+
+        Returns
+        -------
+        EDACache
+            The results cache
+        """
+
+        for k in self.cache.keys():
+            if refresh or self.cache.get(k) is None:
+                method = getattr(self, k)
+                method(refresh=refresh)
+
+        return self.cache
+
     def delete_cache(self) -> None:
         """
         Delete the query result cache.
-
-        Parameters:
-            None
-
-        Returns:
-            None
         """
+
         self.cache = create_eda_cache()
 
     def _process_request(
@@ -130,14 +147,17 @@ class GraphEDA:
         """
         Method to identify the Neo4j database's indexes.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a list of dictionaries, where each dictionary contains the index
-            name as "name" and the list of labels for that index as "labels".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -153,14 +173,17 @@ class GraphEDA:
         """
         Get the constraints for the graph database.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are list of dictionaries, where each dictionary contains the
-            constraint name as "name" and the list of labels for that constraint as "labels".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -175,13 +198,15 @@ class GraphEDA:
         """
         Count the total number of nodes in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            This result is the count of nodes in the graph.
+        Returns
+        -------
+        int
+            The number of nodes
         """
 
         response = self._process_request(
@@ -202,15 +227,17 @@ class GraphEDA:
         Count the number of nodes associated with each
         unique label in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a list of dictionaries, where each dictionary contains
-            the unique node label in the database as "label" along with the
-            corresponding node count as "count".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -226,14 +253,17 @@ class GraphEDA:
         """
         Identify nodes in the graph that have multiple labels.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a list of dictionaries, where each dictionary contains
-            the node id as "node_id" and the list of labels for that node as "labels".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -249,15 +279,17 @@ class GraphEDA:
         """
         Get the properties for each unique node label in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a list of dictionaries, where each dictionary contains
-            the unique node label in the database as "label" along with the list of
-            properties for that label as "properties".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -271,14 +303,15 @@ class GraphEDA:
         """
         Count the total number of relationships in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
 
-        Returns:
-            None
-            The method adds the query result to the cache dictionary.
-            This result is an integer representing the number of relationships
-            in the graph.
+        Returns
+        -------
+        int
+            The number of relationships
         """
 
         response = self._process_request(
@@ -299,15 +332,17 @@ class GraphEDA:
         Count the number of relationships in the graph by
         each unique relationship type.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a list of dictionaries, where each dictionary contains
-            the unique relationship type in the database as "label" along with the
-            corresponding count as "count".
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -323,15 +358,17 @@ class GraphEDA:
         """
         Get the properties for each unique relationship type in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-            The method adds the query results to the cache dictionary.
-            The results are a of dictionaries, where each dictionary contains
-            the unique relationship property name, property data type, and whether
-            or not the relationship property is required by the schema.
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -345,13 +382,15 @@ class GraphEDA:
         """
         Count the number of nodes in the graph that do not have labels.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
 
-        Returns:
-            None
-
-                The count of unlabeled nodes in the graph
+        Returns
+        -------
+        int
+            The number of unlabeled nodes
         """
 
         response = self._process_request(
@@ -377,23 +416,23 @@ class GraphEDA:
         )
 
     # count disconnected nodes
-    def count_disconnected_nodes(
+    def disconnected_node_count(
         self, refresh: bool = False, as_dataframe: bool = True
     ) -> Union[List[Dict[str, Any]], pd.DataFrame]:
         """
         Count the number of disconnected nodes in the graph.
 
-        Parameters:
-            None
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
 
-        Returns:
-            None
-
-
-        - the results as a list of dictionaries, where each dictionary
-        includes a node label and the count of disconnected nodes for that label
-        - ex: [{'nodeLabel': 'Customer', 'count': 2}]
-        - also appends the results to the cache dictionary
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -409,12 +448,18 @@ class GraphEDA:
     ) -> Union[List[Dict[str, Any]], pd.DataFrame]:
         """
         Identify the node ids of disconnected nodes in the graph.
-        Parameters:
-            None
-        Returns:
-            list: A list of dictionaries, where each dictionary contains the node label as "nodeLabel" and
-            the node id as "node_id" for each disconnected node in the graph.
-            ex: [{'nodeLabel': 'Customer', 'nodeId': 135}, {'nodeLabel': 'Customer', 'nodeId': 170}]
+
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
+
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
 
         return self._process_request(
@@ -424,17 +469,23 @@ class GraphEDA:
             as_dataframe=as_dataframe,
         )
 
-    def node_degree(
+    def node_degrees(
         self, refresh: bool = False, as_dataframe: bool = True
     ) -> Union[List[Dict[str, Any]], pd.DataFrame]:
         """
         Calculate the in-degree and out-degree of each node in the graph.
-        Parameters:
-            None
-        Returns:
-            list: A list of dictionaries, where each dictionary contains the node id as "node_id",
-            label as the node label, the in-degree of the node as "inDegree", and the out-degree of
-            the node as "outDegree".
+
+        Parameters
+        ----------
+        refresh : bool, optional
+            Whether to re-query the databae, by default False
+        as_dataframe : bool, optional
+            Whether to return results as a Pandas DataFrame, by default True
+
+        Returns
+        -------
+        Union[List[Dict[str, Any]], pd.DataFrame]
+            The results as either a list of dictionaries or a Pandas DataFrame
         """
         return self._process_request(
             key_name="node_degrees",

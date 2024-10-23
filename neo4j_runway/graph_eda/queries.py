@@ -481,8 +481,8 @@ def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, 
     Returns
     -------
     List[Dict[str, Any]]
-        A list of dictionaries, where each dictionary contains the node id as "node_id",
-        label as the node label, the in-degree of the node as "inDegree", and the out-degree of
+        A list of dictionaries, where each dictionary contains the node id as "nodeId",
+        label as the "nodeLabel", the in-degree of the node as "inDegree", and the out-degree of
         the node as "outDegree".
     """
 
