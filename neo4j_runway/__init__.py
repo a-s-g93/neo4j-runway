@@ -5,3 +5,5 @@ from .modeler import GraphDataModeler
 from .models import DataModel, Node, Property, Relationship
 
 __all__ = ["Discovery", "GraphDataModeler", "PyIngest", "UserInput", "DataModel"]
+
+__version__ = "0.12.0"
