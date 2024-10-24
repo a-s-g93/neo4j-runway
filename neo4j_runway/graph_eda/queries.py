@@ -329,6 +329,7 @@ def get_relationship_properties(
             response_list = [
                 {k: v for k, v in record.items() if k != "relType"}
                 for record in response_list
+                if record["propertyName"] is not None
             ]
 
             return response_list
@@ -387,11 +388,11 @@ def get_unlabeled_node_ids(
         return [{}]
 
 
-def get_disconnected_node_count(
+def get_disconnected_node_count_by_label(
     driver: Driver, database: str = "neo4j"
 ) -> List[Dict[str, Any]]:
     """
-    Count the number of disconnected nodes in the graph.
+    Count the number of disconnected nodes by label in the graph.
 
     Parameters
     ----------
@@ -424,6 +425,37 @@ def get_disconnected_node_count(
     except Exception:
         driver.close()
         return [{}]
+
+
+def get_disconnected_node_count(driver: Driver, database: str = "neo4j") -> int:
+    """
+    Count the number of disconnected nodes in the graph.
+
+    Parameters
+    ----------
+    driver : Driver
+        The Neo4j Driver to handle connections
+    database : str, optional
+        The Neo4j database name to connect to, by default neo4j
+
+    Returns
+    -------
+    int
+        The number of disconnected nodes
+    """
+
+    query = """MATCH (n)
+                WHERE NOT (n)--()
+                return count(n) as numDisconnected"""
+
+    try:
+        with driver.session(database=database) as session:
+            response = session.run(query=query)
+            return int(response.single().data()["numDisconnected"])
+
+    except Exception:
+        driver.close()
+        return -1
 
 
 def get_disconnected_node_ids(

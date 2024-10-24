@@ -29,7 +29,9 @@ class EDACache(TypedDict):
         The number of unlabeled nodes in the database
     unlabeled_node_ids : List[Dict[str, Any]]
         List of maps containing nodeId
-    disconnected_node_count : List[Dict[str, Any]]
+    disconnected_node_count : int
+        The disconnected node count
+    disconnected_node_count_by_label : List[Dict[str, Any]]
         List of maps containing nodeLabel, count
     disconnected_node_ids : List[Dict[str, Any]]
         List of maps containing nodeLabel, nodeId
@@ -48,7 +50,8 @@ class EDACache(TypedDict):
     relationship_properties: Optional[List[Dict[str, Any]]]
     unlabeled_node_count: Optional[int]
     unlabeled_node_ids: Optional[List[Dict[str, Any]]]
-    disconnected_node_count: Optional[List[Dict[str, Any]]]
+    disconnected_node_count: Optional[int]
+    disconnected_node_count_by_label: Optional[List[Dict[str, Any]]]
     disconnected_node_ids: Optional[List[Dict[str, Any]]]
     node_degrees: Optional[List[Dict[str, Any]]]
 
@@ -76,6 +79,7 @@ def create_eda_cache() -> EDACache:
         unlabeled_node_count=None,
         unlabeled_node_ids=None,
         disconnected_node_count=None,
+        disconnected_node_count_by_label=None,
         disconnected_node_ids=None,
         node_degrees=None,
     )

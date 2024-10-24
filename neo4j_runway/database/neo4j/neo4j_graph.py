@@ -25,6 +25,8 @@ class Neo4jGraph(BaseGraph):
         The Neo4j version of the Neo4j instance.
     driver : Driver
         The driver used to communicate with Neo4j. Constructed from credentials provided to the constructor.
+    gds_version : Union[str, None]
+        The GDS version present in the database.
     schema : Union[Dict[str, Any], None]
         The database schema gathered from APOC.meta.schema
     """
@@ -66,6 +68,7 @@ class Neo4jGraph(BaseGraph):
         self.driver.verify_connectivity()
 
         self.apoc_version = self._get_apoc_version()
+        self.gds_version = self._get_gds_version()
         self.database_version, self.database_edition = self._get_database_version()
         self._schema: Optional[Dict[str, Any]] = None
 
@@ -129,7 +132,6 @@ class Neo4jGraph(BaseGraph):
     YIELD versions, edition
     RETURN versions[0] as version, edition"""
                 ).single()
-                print("RESPONSE: ", response)
             if response is not None:
                 version, edition = response.values()
                 return [version, edition]
@@ -155,9 +157,29 @@ class Neo4jGraph(BaseGraph):
                 else:
                     return None
         except Exception:
-            warnings.warn(
-                "APOC is not found in the database. Some features such as schema retrieval depend on APOC."
-            )
+            # warnings.warn(
+            #     "APOC is not found in the database. Some features such as schema retrieval depend on APOC."
+            # )
+            return None
+
+    def _get_gds_version(self) -> Union[str, None]:
+        """
+        Retrieve the GDS version running in the database.
+
+        Returns
+        -------
+        str
+            The GDS version or None if GDS not present on database.
+        """
+        try:
+            with self.driver.session(database=self.database) as session:
+                response = session.run("RETURN gds.version()").single()
+                if response is not None:
+                    return str(response.value())
+                else:
+                    return None
+        except Exception:
+            # warnings.warn("GDS is not found in the database.")
             return None
 
     def refresh_schema(self) -> Dict[str, Any]:
