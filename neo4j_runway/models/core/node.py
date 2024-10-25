@@ -297,12 +297,12 @@ class Node(BaseModel):
     @model_validator(mode="after")
     def validate_property_mappings(self, info: ValidationInfo) -> "Node":
         valid_columns: Dict[str, List[str]] = (
-            info.context.get("valid_columns") if info.context is not None else None
+            info.context.get("valid_columns", {}) if info.context is not None else {}
         )
 
         errors: List[InitErrorDetails] = list()
 
-        if valid_columns is not None:
+        if valid_columns:
             for prop in self.properties:
                 if prop.column_mapping not in valid_columns.get(
                     self.source_name, list()

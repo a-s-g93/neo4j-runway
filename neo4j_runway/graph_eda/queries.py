@@ -451,7 +451,7 @@ def get_disconnected_node_count(driver: Driver, database: str = "neo4j") -> int:
     try:
         with driver.session(database=database) as session:
             response = session.run(query=query)
-            return int(response.single().data()["numDisconnected"])
+            return int([r.data() for r in response][0].get("numDisconnected"))
 
     except Exception:
         driver.close()
