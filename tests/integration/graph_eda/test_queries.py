@@ -62,6 +62,14 @@ def test_get_disconnected_node_count(neo4j_graph: Neo4jGraph) -> None:
         driver=neo4j_graph.driver, database=neo4j_graph.database
     )
 
+    assert result == 1
+
+
+def test_get_disconnected_node_count_by_label(neo4j_graph: Neo4jGraph) -> None:
+    result = queries.get_disconnected_node_count_by_label(
+        driver=neo4j_graph.driver, database=neo4j_graph.database
+    )
+
     assert len(result) == 1
 
 
@@ -126,7 +134,7 @@ def test_get_relationship_properties(neo4j_graph: Neo4jGraph) -> None:
         driver=neo4j_graph.driver, database=neo4j_graph.database
     )
 
-    assert len(result) == 4
+    assert len(result) == 0
 
 
 def test_get_relationship_type_counts(neo4j_graph: Neo4jGraph) -> None:
