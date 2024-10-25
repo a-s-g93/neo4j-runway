@@ -56,8 +56,12 @@ docs:
     children:
       - title: "End-To-End Notebook"
         url: /examples/countries/
+
       - title: "arrows.app Data Model Import"
         url: "examples/arrows/"
+
+      - title: "Exploratory Data Analysis"
+        url: "examples/stackoverflow-graph-eda/"
 
   - title: "Modeling Integrations"
     children:

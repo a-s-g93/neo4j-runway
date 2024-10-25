@@ -115,6 +115,9 @@ def format_node_degrees(
         return ""
 
     if content := cache.get("node_degrees"):
-        return f"## Node Degrees\n{format_node_degrees_table(content, order_node_degrees_by=order_node_degrees_by, top_k_node_degrees=top_k_node_degrees)}"
+        return f"""## Node Degrees
+* Top {top_k_node_degrees} Ordered By {order_node_degrees_by}Degree
+
+{format_node_degrees_table(content, order_node_degrees_by=order_node_degrees_by, top_k_node_degrees=top_k_node_degrees)}"""
     else:
         return f"## Node Degrees\nno node degrees data in cache"

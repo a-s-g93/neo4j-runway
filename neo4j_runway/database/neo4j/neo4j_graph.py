@@ -113,7 +113,6 @@ class Neo4jGraph(BaseGraph):
                             Connection Error: {e}
                             """,
             }
-        # self.driver.close()
         return {"valid": True, "message": "Connection and Auth Verified!"}
 
     def _get_database_version(self) -> List[str]:

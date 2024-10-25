@@ -8,6 +8,10 @@
 
 ### Added
 
+* `GraphEDA` module that gathers analytics and provides a report on the specified database
+* `gds_version` property to `Neo4jGraph`
+* Examples demonstrating how to use the new `GraphEDA` module
+
 ## 0.12.0
 
 ### Fixed
@@ -18,7 +22,7 @@
 
 * Change initial `DataModel` generation logic to first generate nodes, then generate relationships
 * Updated examples
-* remove `use_yaml_data_model` arg from `DataModel` generation methods, as it is no longer relevant
+* Remove `use_yaml_data_model` arg from `DataModel` generation methods, as it is no longer relevant
 * Update `DataModel`, `Node`, `Relationship` and `Property` validation logic to better utilize `Pydantic` library
 * Update `Instructor` dependency to v1.5.2
 * Simplify LLM retry logic by better utilizing `Instructor` library

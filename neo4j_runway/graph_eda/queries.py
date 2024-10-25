@@ -534,15 +534,3 @@ def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, 
     except Exception:
         driver.close()
         return [{}]
-
-    # explicit errors -- something didn't come over correctly
-
-    # priority -- things in a graph created from the csv in this session
-    # which things are wrong versus the designed graph
-    # informative message to the user with pointers to exact issues
-    # optional -- pass the data to an LLM to interpret
-    # future -- have a method that will try to fix the issue
-
-    # future -- things in graph not created with runway
-
-    # other possible issues
