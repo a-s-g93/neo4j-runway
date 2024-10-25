@@ -17,6 +17,7 @@ from neo4j_runway.code_generation import (
     StandardCypherCodeGenerator,
 )
 from neo4j_runway.database import Neo4jGraph
+from neo4j_runway.graph_eda import GraphEDA
 from neo4j_runway.llm.openai import (
     AzureOpenAIDataModelingLLM,
     AzureOpenAIDiscoveryLLM,
@@ -103,6 +104,11 @@ CLASS_DIR = [
         "class": TableCollection,
         "file_path": "api/utils/data/table_collection.md",
         "summary_file_path": "table_collection.md",
+    },
+    {
+        "class": GraphEDA,
+        "file_path": "api/graph_eda/graph_eda.md",
+        "summary_file_path": "graph_eda.md",
     },
 ]
 
