@@ -37,6 +37,9 @@ docs:
       - title: "Neo4jGraph"
         url: /api/database/neo4j-graph/
 
+      - title: "GraphEDA"
+        url: /api/graph-eda/graph-eda/
+
       - title: "Inputs"
         url: /api/inputs/
 
