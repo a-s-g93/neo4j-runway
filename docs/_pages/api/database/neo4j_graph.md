@@ -21,10 +21,12 @@ toc_icon: "fa-solid fa-plane"
         The edition of the Neo4j instance.
     database_version : str
         The Neo4j version of the Neo4j instance.
-    driver : GraphDatabase.Driver
+    driver : Driver
         The driver used to communicate with Neo4j.
         Constructed from credentials provided to the
         constructor.
+    gds_version : Union[str, None]
+        The GDS version present in the database.
     schema : Union[Dict[str, Any], None]
         The database schema gathered from APOC.meta.schema
 
@@ -90,4 +92,3 @@ The database schema provided by apoc.meta.schema
     -------
     Dict[str, Any]
         The schema.
-

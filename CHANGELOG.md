@@ -8,6 +8,14 @@
 
 ### Added
 
+## 0.13.0
+
+### Fixed
+
+### Changed
+
+### Added
+
 * `GraphEDA` module that gathers analytics and provides a report on the specified database
 * `gds_version` property to `Neo4jGraph`
 * Examples demonstrating how to use the new `GraphEDA` module
