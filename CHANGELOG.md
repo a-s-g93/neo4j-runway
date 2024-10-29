@@ -4,15 +4,9 @@
 
 ### Fixed
 
-### Changed
-
-### Added
+* Remove `dotenv` package dependency from `Neo4jGraph` and `GraphEDA`
 
 ## 0.13.0
-
-### Fixed
-
-### Changed
 
 ### Added
 
