@@ -327,7 +327,7 @@ def get_relationship_properties(
 
             # remove the "relationshipType" key from each dictionary
             response_list = [
-                {k: v for k, v in record.items() if k != "relType"}
+                {k: v for k, v in record.items()}
                 for record in response_list
                 if record["propertyName"] is not None
             ]
