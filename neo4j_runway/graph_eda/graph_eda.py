@@ -93,7 +93,19 @@ class GraphEDA:
         """The database edition"""
         return self.graph.database_edition
 
-    def run(self, refresh: bool = False) -> EDACache:
+    @property
+    def available_methods(self) -> List[str]:
+        """The available methods to be run against the database."""
+        return list(self.cache.keys())
+
+    def run(
+        self,
+        refresh: bool = False,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+        return_cache: bool = True,
+        method_params: Dict[str, Dict[str, Any]] = dict(),
+    ) -> Optional[EDACache]:
         """
         Run all analytics on the database. Results will be added to the cache.
         WARNING: The methods in this module can be computationally expensive.
@@ -104,19 +116,42 @@ class GraphEDA:
         ----------
         refresh : bool, optional
             Whether to refresh all analytics regardless of if they've been previously ran, by default False
+        include : List[str], optional
+            The methods to include. Overwrites any content in exclude. If `None`, then this arg is ignored, by default None
+        exclude : List[str], optional
+            The methods to exclude. If `None` or `include` is not `None`, then this arg is ignored, by default None
+        return_cache : bool, optional
+            Whether to directly return the updated cache, by default True
+        method_params : Dict[str, Dict[str, Any]], optional
+            Any parameters to include with method calls. Methods are keys and values are a dictionary of argument keys and values. By default dict()
 
         Returns
         -------
-        EDACache
-            The results cache
+        Optional[EDACache]
+            The results cache if `return_cache` is True
         """
 
-        for k in self.cache.keys():
+        methods = list(self.cache.keys())
+        if include is not None:
+            methods = include
+        elif exclude is not None:
+            for item in exclude:
+                if item in methods:
+                    methods.remove(item)
+                else:
+                    print(f"{item} is not a valid method")
+
+        for k in methods:
             if refresh or self.cache.get(k) is None:
                 method = getattr(self, k)
-                method(refresh=refresh)
+                params = method_params.get(k, dict())
+                params.update({"refresh": refresh})
+                method(**params)
 
-        return self.cache
+        if return_cache:
+            return self.cache
+
+        return None
 
     def create_eda_report(
         self,
@@ -129,7 +164,8 @@ class GraphEDA:
         file_name: str = "eda_report.md",
         view_report: bool = True,
         notebook: bool = True,
-    ) -> str:
+        return_report: bool = True,
+    ) -> Optional[str]:
         """
         Generate a report containing information from the `Neo4jGraph` and internal cache containing eda query results.
         The report may be output in Markdown format.
@@ -154,11 +190,13 @@ class GraphEDA:
             Whether to print the report upon completion, by default True
         notebook : bool, optional
             Whether the report will be displayed in a Python notebook, by default True
+        return_report : bool, optional
+            Whether to directly return the report as a String, by default True
 
         Returns
         -------
-        str
-            The report in string format.
+        Optional[str]
+            The report in string format, if `return_report` is True
         """
 
         report = create_eda_report(
@@ -181,7 +219,10 @@ class GraphEDA:
         if view_report:
             self.view_report(notebook=notebook)
 
-        return self.report
+        if return_report:
+            return self.report
+
+        return None
 
     def save_report(self, file_name: str = "eda_report.md") -> None:
         """
@@ -237,10 +278,11 @@ class GraphEDA:
         query_function: Callable[[Any, Any], Any],
         refresh: bool,
         as_dataframe: bool,
+        query_params: Dict[str, Any] = dict(),
     ) -> Union[List[Dict[str, Any]], pd.DataFrame, int]:
         if refresh or self.cache.get(key_name) is None:
             self.cache[key_name] = query_function(  # type: ignore
-                driver=self.graph.driver, database=self.graph.database
+                driver=self.graph.driver, database=self.graph.database, **query_params
             )
 
         if as_dataframe:
@@ -601,7 +643,11 @@ class GraphEDA:
         )
 
     def node_degrees(
-        self, refresh: bool = False, as_dataframe: bool = True
+        self,
+        refresh: bool = False,
+        as_dataframe: bool = True,
+        top_k: int = 10,
+        order_by: Literal["in", "out"] = "out",
     ) -> Union[List[Dict[str, Any]], pd.DataFrame]:
         """
         Calculate the in-degree and out-degree of each node in the graph.
@@ -612,6 +658,10 @@ class GraphEDA:
             Whether to re-query the databae, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
+        top_k : int, optional
+            The top number of results to return, by default 10
+        order_by : Literal['in', 'out'], optional
+            Whether to order by inDegree or outDegree, by default 'out'
 
         Returns
         -------
@@ -623,4 +673,5 @@ class GraphEDA:
             query_function=queries.get_node_degrees,
             refresh=refresh,
             as_dataframe=as_dataframe,
+            query_params={"top_k": top_k, "order_by": order_by},
         )

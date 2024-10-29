@@ -15,7 +15,7 @@ It is not recommended to use this module on massive Neo4j databases
 (i.e., nodes and relationships in the hundreds of millions)
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 from neo4j import Driver
 
@@ -500,7 +500,12 @@ def get_disconnected_node_ids(
 ############################
 
 
-def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, Any]]:
+def get_node_degrees(
+    driver: Driver,
+    database: str = "neo4j",
+    top_k: int = 10,
+    order_by: Literal["in", "out"] = "out",
+) -> List[Dict[str, Any]]:
     """
     Calculate the in-degree and out-degree of each node in the graph.
 
@@ -519,12 +524,16 @@ def get_node_degrees(driver: Driver, database: str = "neo4j") -> List[Dict[str, 
         the node as "outDegree".
     """
 
-    query = """MATCH (n)
+    assert top_k > 0, "`top_k` must be greater than 0."
+    assert order_by in ["in", "out"], "`order_by` must be either 'in' or 'out'."
+
+    query = f"""MATCH (n)
                 OPTIONAL MATCH (n)-[r_out]->()
                 WITH n, id(n) AS nodeId, labels(n) AS nodeLabel, count(r_out) AS outDegree
                 OPTIONAL MATCH (n)<-[r_in]-()
                 RETURN nodeId, nodeLabel, count(r_in) AS inDegree, outDegree
-                ORDER BY outDegree DESC;
+                ORDER BY {order_by}Degree DESC
+                LIMIT {top_k};
                 """
 
     try:
