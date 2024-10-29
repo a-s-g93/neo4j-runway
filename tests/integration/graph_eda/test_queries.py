@@ -99,7 +99,7 @@ def test_get_node_count(neo4j_graph: Neo4jGraph) -> None:
 
 def test_get_node_degrees(neo4j_graph: Neo4jGraph) -> None:
     result = queries.get_node_degrees(
-        driver=neo4j_graph.driver, database=neo4j_graph.database
+        driver=neo4j_graph.driver, database=neo4j_graph.database, top_k=100
     )
 
     assert len(result) == 20
