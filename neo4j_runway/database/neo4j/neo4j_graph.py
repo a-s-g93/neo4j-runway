@@ -53,8 +53,10 @@ class Neo4jGraph(BaseGraph):
         driver_config : Dict[str, Any], optional
             Any additional configuration to provide the driver, by default dict()
         """
+        if uri is None:
+            uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
         self.driver = GraphDatabase.driver(
-            uri=uri or os.environ.get("NEO4J_URI", "bolt://localhost:7687"),
+            uri=uri,
             auth=(
                 username or os.environ.get("NEO4J_USERNAME", "neo4j"),
                 password or os.environ.get("NEO4J_PASSWORD", "password"),
