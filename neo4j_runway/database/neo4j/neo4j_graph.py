@@ -1,11 +1,9 @@
-import warnings
+import os
 from typing import Any, Dict, List, Optional, Union
 
 from neo4j import GraphDatabase
-from neo4j.exceptions import AuthError
 
 from ...exceptions import APOCNotInstalledError
-from ...utils._utils.read_env import read_environment
 from ..base import BaseGraph
 
 
@@ -56,14 +54,14 @@ class Neo4jGraph(BaseGraph):
             Any additional configuration to provide the driver, by default dict()
         """
         self.driver = GraphDatabase.driver(
-            uri=uri or read_environment("NEO4J_URI"),
+            uri=uri or os.environ.get("NEO4J_URI"),
             auth=(
-                username or read_environment("NEO4J_USERNAME"),
-                password or read_environment("NEO4J_PASSWORD"),
+                username or os.environ.get("NEO4J_USERNAME"),
+                password or os.environ.get("NEO4J_PASSWORD"),
             ),
             **driver_config,
         )
-        self.database = database or read_environment("NEO4J_DATABASE") or "neo4j"
+        self.database = database or os.environ.get("NEO4J_DATABASE") or "neo4j"
 
         self.driver.verify_connectivity()
 

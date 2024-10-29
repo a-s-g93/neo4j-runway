@@ -1,7 +1,7 @@
 import logging
+import os
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
-import dotenv
 import pandas as pd
 from IPython.display import (
     Markdown,
@@ -9,7 +9,6 @@ from IPython.display import (
 )
 
 from ..database.neo4j import Neo4jGraph
-from ..utils._utils.read_env import read_environment
 from . import queries
 from .cache import EDACache, create_eda_cache
 from .report.template import create_eda_report
@@ -64,14 +63,11 @@ class GraphEDA:
         # instantiate Neo4jGraph
         if graph is None:
             try:
-                # import and read from .env file
-                dotenv.load_dotenv()
-
                 self.graph = Neo4jGraph(
-                    username=read_environment("NEO4J_USERNAME"),
-                    password=read_environment("NEO4J_PASSWORD"),
-                    uri=read_environment("NEO4J_URI"),
-                    database=read_environment("NEO4J_DATABASE"),
+                    username=os.environ.get("NEO4J_USERNAME"),
+                    password=os.environ.get("NEO4J_PASSWORD"),
+                    uri=os.environ.get("NEO4J_URI"),
+                    database=os.environ.get("NEO4J_DATABASE"),
                 )
             except Exception as e:
                 raise ValueError(
