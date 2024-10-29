@@ -11,6 +11,9 @@
 ### Added
 
 * Add `relType` to relationship properties section of `GraphEDA` module
+* Add arguments to `GraphEDA.run()` to allow for more flexibility in chosen methods and parameters
+* Add arguments to `GraphEDA.node_degrees` to allow for better result filtering
+* Add arguments to `GraphEDA.run()` and `GraphEDA.create_eda_report()` to control directly returning result
 
 ## 0.13.1
 
