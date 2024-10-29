@@ -6,7 +6,11 @@
 
 ### Changed
 
+* Add comma separator for numbers in `GraphEDA` report
+
 ### Added
+
+* Add `relType` to relationship properties section of `GraphEDA` module
 
 ## 0.13.1
 

@@ -7,9 +7,9 @@
 |  0 | stackoverflow  | 5.15.0            | enterprise        | 5.15.1        | not installed |
 
 ### Counts
-|    |   nodeCount |   unlabeledNodeCount |   disconnectedNodeCount |   relationshipCount |
-|---:|------------:|---------------------:|------------------------:|--------------------:|
-|  0 |        6193 |                    0 |                       0 |               11540 |
+|    | nodeCount   |   unlabeledNodeCount |   disconnectedNodeCount | relationshipCount   |
+|---:|:------------|---------------------:|------------------------:|:--------------------|
+|  0 | 6,193       |                    0 |                       0 | 11,540              |
 
 ### Indexes
 |    |   id | name                | state   |   populationPercent | type   | entityType   | labelsOrTypes   | properties   | indexProvider    | owningConstraint    | lastRead   | readCount   |
@@ -33,13 +33,13 @@
 
 ## Nodes Overview
 ### Label Counts
-|    | label    |   count |
-|---:|:---------|--------:|
-|  0 | Question |    1589 |
-|  1 | Comment  |    1396 |
-|  2 | Answer   |    1367 |
-|  3 | User     |    1365 |
-|  4 | Tag      |     476 |
+|    | label    | count   |
+|---:|:---------|:--------|
+|  0 | Question | 1,589   |
+|  1 | Comment  | 1,396   |
+|  2 | Answer   | 1,367   |
+|  3 | User     | 1,365   |
+|  4 | Tag      | 476     |
 ### Properties
 |    | nodeLabels   | propertyName       | propertyTypes      | mandatory   |
 |---:|:-------------|:-------------------|:-------------------|:------------|
@@ -68,14 +68,14 @@
 
 ## Relationships Overview
 ### Type Counts
-|    | relType      |   count |
-|---:|:-------------|--------:|
-|  0 | TAGGED       |    4425 |
-|  1 | ASKED        |    1589 |
-|  2 | COMMENTED_ON |    1396 |
-|  3 | COMMENTED    |    1396 |
-|  4 | ANSWERED     |    1367 |
-|  5 | PROVIDED     |    1367 |
+|    | relType      | count   |
+|---:|:-------------|:--------|
+|  0 | TAGGED       | 4,425   |
+|  1 | ASKED        | 1,589   |
+|  2 | COMMENTED_ON | 1,396   |
+|  3 | COMMENTED    | 1,396   |
+|  4 | ANSWERED     | 1,367   |
+|  5 | PROVIDED     | 1,367   |
 ### Properties
 no relationship properties
 
@@ -96,6 +96,6 @@ no disconnected nodes data in cache
 |  4 |     2445 | ['User']    |          0 |         138 |
 ---
 
-Runway v0.12.0
+Runway v0.13.0
 
-Report Generated @ 2024-10-25 10:53:46.134954
+Report Generated @ 2024-10-29 13:36:01.059856

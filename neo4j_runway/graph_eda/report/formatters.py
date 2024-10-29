@@ -12,6 +12,27 @@ def get_package_version() -> str:
     return package_version
 
 
+def _format_number(number: Optional[int]) -> str:
+    if number is not None:
+        return f"{number:,}"
+    return ""
+
+
+def _format_numbers_in_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """format numbers to display with commas to separate thousands"""
+    res = list()
+    for d in data:
+        record = dict()
+        for k, v in d.items():
+            if isinstance(v, int) and k != "mandatory":
+                # this makes booleans 1 or 0, skip mandatory key
+                record.update({k: _format_number(v)})
+            else:
+                record.update({k: v})
+        res.append(record)
+    return res
+
+
 def format_main_database_info(graph: Neo4jGraph) -> str:
     data = [
         {
@@ -28,10 +49,12 @@ def format_main_database_info(graph: Neo4jGraph) -> str:
 def format_counts_table(cache: EDACache) -> str:
     data = [
         {
-            "nodeCount": cache.get("node_count"),
-            "unlabeledNodeCount": cache.get("unlabeled_node_count"),
-            "disconnectedNodeCount": cache.get("disconnected_node_count"),
-            "relationshipCount": cache.get("relationship_count"),
+            "nodeCount": _format_number(cache.get("node_count")),
+            "unlabeledNodeCount": _format_number(cache.get("unlabeled_node_count")),
+            "disconnectedNodeCount": _format_number(
+                cache.get("disconnected_node_count")
+            ),
+            "relationshipCount": _format_number(cache.get("relationship_count")),
         }
     ]
 
@@ -40,7 +63,7 @@ def format_counts_table(cache: EDACache) -> str:
 
 def format_table(data: Optional[List[Dict[str, Any]]]) -> str:
     if data is not None:
-        return pd.DataFrame(data).to_markdown()  # type: ignore[no-any-return]
+        return pd.DataFrame(_format_numbers_in_data(data)).to_markdown()  # type: ignore[no-any-return]
     return ""
 
 
