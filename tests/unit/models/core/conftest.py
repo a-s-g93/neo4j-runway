@@ -24,7 +24,7 @@ def node_data() -> Dict[str, Any]:
                 "part_of_key": False,
             }
         ],
-        "source_name": "a.csv",
+        "file_name": "a.csv",
     }
 
 
@@ -49,7 +49,7 @@ def relationship_data() -> Dict[str, Any]:
                 "part_of_key": False,
             }
         ],
-        "source_name": "a.csv",
+        "file_name": "a.csv",
         "source": "nodeA",
         "target": "nodeB",
     }
@@ -70,7 +70,7 @@ def data_model_data() -> Dict[str, Any]:
                 },
                 {"name": "b", "type": "str", "column_mapping": "b"},
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
         {
             "label": "LabelB",
@@ -83,7 +83,7 @@ def data_model_data() -> Dict[str, Any]:
                 },
                 {"name": "c", "type": "str", "column_mapping": "c"},
             ],
-            "source_name": "b.csv",
+            "file_name": "b.csv",
         },
     ]
 
@@ -94,7 +94,7 @@ def data_model_data() -> Dict[str, Any]:
                 "type": "HAS_REL",
                 "source": "LabelA",
                 "target": "LabelB",
-                "source_name": "b.csv",
+                "file_name": "b.csv",
             }
         ],
     }
@@ -115,7 +115,7 @@ def data_model_flipped_data() -> Dict[str, Any]:
                 },
                 {"name": "b", "type": "str", "column_mapping": "b"},
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
         {
             "label": "LabelB",
@@ -128,7 +128,7 @@ def data_model_flipped_data() -> Dict[str, Any]:
                 },
                 {"name": "c", "type": "str", "column_mapping": "c"},
             ],
-            "source_name": "b.csv",
+            "file_name": "b.csv",
         },
     ]
 
@@ -139,7 +139,7 @@ def data_model_flipped_data() -> Dict[str, Any]:
                 "type": "HAS_REL",
                 "source": "LabelB",
                 "target": "LabelA",
-                "source_name": "b.csv",
+                "file_name": "b.csv",
             }
         ],
     }
@@ -177,7 +177,7 @@ def data_model_dupe_prop_data() -> Dict[str, Any]:
                 },
                 {"name": "b", "type": "str", "column_mapping": "b"},
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
         {
             "label": "LabelB",
@@ -189,7 +189,7 @@ def data_model_dupe_prop_data() -> Dict[str, Any]:
                     "is_unique": True,
                 },
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
     ]
 
@@ -200,7 +200,7 @@ def data_model_dupe_prop_data() -> Dict[str, Any]:
                 "type": "HAS_REL",
                 "source": "LabelA",
                 "target": "LabelB",
-                "source_name": "a.csv",
+                "file_name": "a.csv",
             }
         ],
     }
@@ -220,7 +220,7 @@ def data_model_parallel_data() -> Dict[str, Any]:
                     "is_unique": True,
                 },
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
         {
             "label": "LabelB",
@@ -232,7 +232,7 @@ def data_model_parallel_data() -> Dict[str, Any]:
                     "is_unique": True,
                 },
             ],
-            "source_name": "a.csv",
+            "file_name": "a.csv",
         },
     ]
 
@@ -243,13 +243,13 @@ def data_model_parallel_data() -> Dict[str, Any]:
                 "type": "HAS_REL",
                 "source": "LabelA",
                 "target": "LabelB",
-                "source_name": "a.csv",
+                "file_name": "a.csv",
             },
             {
                 "type": "HAS_REL2",
                 "source": "LabelA",
                 "target": "LabelB",
-                "source_name": "a.csv",
+                "file_name": "a.csv",
             },
         ],
     }

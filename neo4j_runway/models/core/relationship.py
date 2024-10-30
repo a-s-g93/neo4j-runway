@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from pydantic import (
     BaseModel,
+    Field,
     ValidationError,
     ValidationInfo,
     field_validator,
@@ -23,11 +24,16 @@ class Relationship(BaseModel):
     Relationship representation.
     """
 
-    type: str
-    properties: List[Property] = list()
-    source: str
-    target: str
-    source_name: str = "file"
+    type: str = Field(description="The relationship type.")
+    properties: List[Property] = Field(
+        description="A list of properties for a relationship.", default=list()
+    )
+    source: str = Field(description="The source node label for the relationship.")
+    target: str = Field(description="The target node label for the relationship.")
+    file_name: str = Field(
+        description="The name of the file containing the node's information.",
+        default="file",
+    )
 
     def __str__(self) -> str:
         return f"(:{self.source})-[:{self.type}]->(:{self.target})"
@@ -201,9 +207,9 @@ class Relationship(BaseModel):
 
         return target
 
-    @field_validator("source_name")
+    @field_validator("file_name")
     @classmethod
-    def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
+    def validate_file_name(cls, file_name: str, info: ValidationInfo) -> str:
         sources: List[str] = (
             list(info.context.get("valid_columns", dict()).keys())
             if info.context is not None
@@ -213,11 +219,11 @@ class Relationship(BaseModel):
         # skip for single file input
         if len(sources) == 1:
             return sources[0]
-        elif source_name in sources or not sources:
-            return source_name
+        elif file_name in sources or not sources:
+            return file_name
         else:
             raise InvalidSourceNameError(
-                f"{source_name} is not in the provided file list: {sources}."
+                f"{file_name} is not in the provided file list: {sources}."
             )
 
     @model_validator(mode="after")
@@ -229,14 +235,12 @@ class Relationship(BaseModel):
 
         if valid_columns:
             for prop in self.properties:
-                if prop.column_mapping not in valid_columns.get(
-                    self.source_name, list()
-                ):
+                if prop.column_mapping not in valid_columns.get(self.file_name, list()):
                     errors.append(
                         InitErrorDetails(
                             type=PydanticCustomError(
                                 "invalid_column_mapping_error",
-                                f"The `Relationship` {self.type} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Relationship` {self.type}.",
+                                f"The `Relationship` {self.type} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.file_name}. Removed {prop.name} from `Relationship` {self.type}.",
                             ),
                             loc=("properties",),
                             input=self.properties,
@@ -293,7 +297,7 @@ class Relationship(BaseModel):
             if k != "csv"
         ]
 
-        source_name = (
+        file_name = (
             arrows_relationship.properties["csv"]
             if "csv" in arrows_relationship.properties.keys()
             else ""
@@ -304,7 +308,7 @@ class Relationship(BaseModel):
             source=node_id_to_label_map[arrows_relationship.fromId],
             target=node_id_to_label_map[arrows_relationship.toId],
             properties=props,
-            source_name=source_name,
+            file_name=file_name,
         )
 
     def to_solutions_workbench(self, key: str) -> "SolutionsWorkbenchRelationship":
@@ -318,7 +322,7 @@ class Relationship(BaseModel):
             key=key,
             type=self.type,
             properties=props,
-            description=self.source_name,
+            description=self.file_name,
             startNodeLabelKey=self.source,
             endNodeLabelKey=self.target,
         )
@@ -345,7 +349,7 @@ class Relationship(BaseModel):
         return cls(
             type=solutions_workbench_relationship.type,
             properties=props,
-            source_name=solutions_workbench_relationship.description,
+            file_name=solutions_workbench_relationship.description,
             source=node_id_to_label_map[
                 solutions_workbench_relationship.startNodeLabelKey
             ],

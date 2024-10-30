@@ -10,6 +10,7 @@ import yaml
 from graphviz import Digraph
 from pydantic import (
     BaseModel,
+    Field,
     ValidationError,
     ValidationInfo,
     model_validator,
@@ -46,9 +47,14 @@ class DataModel(BaseModel):
         Metadata from an import source such as Solutions Workbench.
     """
 
-    nodes: List[Node]
-    relationships: List[Relationship]
-    metadata: Optional[Dict[str, Any]] = None
+    nodes: List[Node] = Field(description="A list of the nodes in the data model.")
+    relationships: List[Relationship] = Field(
+        "A list of the relationships in the model."
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        description="Any metadata for the data model. This should be `None` unless otherwise indicated.",
+        default=None,
+    )
 
     def get_schema(
         self,
@@ -255,31 +261,31 @@ Relationships
 
                     if (
                         source_node is not None
-                        and rel.source_name != source_node.source_name
+                        and rel.file_name != source_node.file_name
                     ):
                         for prop in source_node.unique_properties:
                             if (
                                 prop.alias is None
                                 and prop.column_mapping
-                                not in data_dictionary[rel.source_name]
+                                not in data_dictionary[rel.file_name]
                             ):
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "relationship_source_node_unique_property_missing_alias_error",
-                                            f"The source `Node` {source_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on source `Node` {source_node.label} must have an `alias` attribute found in file {rel.source_name}.",
+                                            f"The source `Node` {source_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on source `Node` {source_node.label} must have an `alias` attribute found in file {rel.file_name}.",
                                         ),
                                         loc=("nodes",),
                                         input=prop,
                                         ctx={},
                                     )
                                 )
-                            elif prop.alias not in data_dictionary[rel.source_name]:
+                            elif prop.alias not in data_dictionary[rel.file_name]:
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "relationship_source_file_missing_source_node_unique_property_alias_error",
-                                            f"`Node` {source_node.label} `Property` {prop.name} is not found in the file {rel.source_name} by the alias {prop.alias}. `Property` `{prop.name}` on source `Node` {source_node.label} must has an `alias` in file {rel.source_name}. Reference the data dictionary for possible alias.",
+                                            f"`Node` {source_node.label} `Property` {prop.name} is not found in the file {rel.file_name} by the alias {prop.alias}. `Property` `{prop.name}` on source `Node` {source_node.label} must has an `alias` in file {rel.file_name}. Reference the data dictionary for possible alias.",
                                         ),
                                         loc=("nodes",),
                                         input=prop,
@@ -290,36 +296,36 @@ Relationships
                             elif (
                                 prop.alias is None
                                 and prop.column_mapping
-                                in data_dictionary[rel.source_name]
+                                in data_dictionary[rel.file_name]
                             ):
                                 prop.alias = prop.column_mapping
 
                     if (
                         target_node is not None
-                        and rel.source_name != target_node.source_name
+                        and rel.file_name != target_node.file_name
                     ):
                         for prop in target_node.unique_properties:
                             if (
                                 prop.alias is None
-                                and prop.alias not in data_dictionary[rel.source_name]
+                                and prop.alias not in data_dictionary[rel.file_name]
                             ):
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "relationship_target_node_unique_property_missing_alias_error",
-                                            f"The target `Node` {target_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on target `Node` {target_node.label} must have an `alias` attribute found in file {rel.source_name}.",
+                                            f"The target `Node` {target_node.label} and `Relationship` {rel.type} are from different files. `Property` {prop.name} on target `Node` {target_node.label} must have an `alias` attribute found in file {rel.file_name}.",
                                         ),
                                         loc=("nodes",),
                                         input=prop,
                                         ctx={},
                                     )
                                 )
-                            elif prop.alias not in data_dictionary[rel.source_name]:
+                            elif prop.alias not in data_dictionary[rel.file_name]:
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "relationship_source_file_missing_target_node_unique_property_alias_error",
-                                            f"`Node` {target_node.label} `Property` {prop.name} is not found in the file {rel.source_name} by the alias {prop.alias}. `Property` `{prop.name}` on target `Node` {target_node.label} must has an `alias` in file {rel.source_name}. Reference the data dictionary for possible alias.",
+                                            f"`Node` {target_node.label} `Property` {prop.name} is not found in the file {rel.file_name} by the alias {prop.alias}. `Property` `{prop.name}` on target `Node` {target_node.label} must has an `alias` in file {rel.file_name}. Reference the data dictionary for possible alias.",
                                         ),
                                         loc=("nodes",),
                                         input=prop,
@@ -330,7 +336,7 @@ Relationships
                             elif (
                                 prop.alias is None
                                 and prop.column_mapping
-                                in data_dictionary[rel.source_name]
+                                in data_dictionary[rel.file_name]
                             ):
                                 prop.alias = prop.column_mapping
 
@@ -365,13 +371,13 @@ Relationships
 
                 for node_idx, node in enumerate(self.nodes):
                     # init the file dictionary
-                    if node.source_name not in used_features.keys():
-                        used_features[node.source_name] = dict()
+                    if node.file_name not in used_features.keys():
+                        used_features[node.file_name] = dict()
                     for prop_idx, prop in enumerate(node.properties):
                         if prop.column_mapping not in list(
-                            used_features[node.source_name].keys()
+                            used_features[node.file_name].keys()
                         ):
-                            used_features[node.source_name][prop.column_mapping] = [
+                            used_features[node.file_name][prop.column_mapping] = [
                                 (
                                     node.label,
                                     "nodes",
@@ -382,7 +388,7 @@ Relationships
                                 )
                             ]
                         else:
-                            used_features[node.source_name][prop.column_mapping].append(
+                            used_features[node.file_name][prop.column_mapping].append(
                                 (
                                     node.label,
                                     "nodes",
@@ -395,13 +401,13 @@ Relationships
 
                 for rel_idx, rel in enumerate(self.relationships):
                     # init the file dictionary
-                    if rel.source_name not in used_features.keys():
-                        used_features[rel.source_name] = dict()
+                    if rel.file_name not in used_features.keys():
+                        used_features[rel.file_name] = dict()
                     for prop_idx, prop in enumerate(rel.properties):
                         if prop.column_mapping not in list(
-                            used_features[rel.source_name].keys()
+                            used_features[rel.file_name].keys()
                         ):
-                            used_features[rel.source_name][prop.column_mapping] = [
+                            used_features[rel.file_name][prop.column_mapping] = [
                                 (
                                     rel.type,
                                     "relationships",
@@ -412,7 +418,7 @@ Relationships
                                 )
                             ]
                         else:
-                            used_features[rel.source_name][prop.column_mapping].append(
+                            used_features[rel.file_name][prop.column_mapping].append(
                                 (
                                     rel.type,
                                     "relationships",
@@ -423,7 +429,7 @@ Relationships
                                 )
                             )
 
-                for source_name, feature_dict in used_features.items():
+                for file_name, feature_dict in used_features.items():
                     for prop_mapping, labels_or_types in feature_dict.items():
                         if len(labels_or_types) > 1:
                             for l_or_t in labels_or_types:
@@ -431,7 +437,7 @@ Relationships
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "duplicate_property_in_data_model_error",
-                                            f"The `Property` `column_mapping` {prop_mapping} from file {source_name} is used for {labels_or_types} in the data model. Each must use a different column as a `Property` attribute `column_mapping` instead. Find alternative `Property` `column_mapping` from the column options in the `source_name` file or remove.",
+                                            f"The `Property` `column_mapping` {prop_mapping} from file {file_name} is used for {labels_or_types} in the data model. Each must use a different column as a `Property` attribute `column_mapping` instead. Find alternative `Property` `column_mapping` from the column options in the `file_name` file or remove.",
                                         ),
                                         loc=_parse_duplicated_property_location(
                                             context=l_or_t

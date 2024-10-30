@@ -29,14 +29,19 @@ class Node(BaseModel):
     label : str
         The node label.
     properties : List[Property]
-        A list of the properties within the node.
-    source_name : str, optional
+        A list of the properties for a node.
+    file_name : str, optional
         The name of the file containing the node's information.
     """
 
-    label: str
-    properties: List[Property]
-    source_name: str = "file"
+    label: str = Field(description="The node label.")
+    properties: List[Property] = Field(
+        description="A list of the properties for a node."
+    )
+    file_name: str = Field(
+        description="The name of the file containing the node's information.",
+        default="file",
+    )
 
     def __str__(self) -> str:
         return f"(:{self.label})"
@@ -255,8 +260,8 @@ class Node(BaseModel):
 
         return label
 
-    @field_validator("source_name")
-    def validate_source_name(cls, source_name: str, info: ValidationInfo) -> str:
+    @field_validator("file_name")
+    def validate_file_name(cls, file_name: str, info: ValidationInfo) -> str:
         sources: List[str] = (
             list(info.context.get("valid_columns", dict()).keys())
             if info.context is not None
@@ -266,11 +271,11 @@ class Node(BaseModel):
         # skip for single file input
         if len(sources) == 1:
             return sources[0]
-        elif source_name in sources or not sources:
-            return source_name
+        elif file_name in sources or not sources:
+            return file_name
         else:
             raise InvalidSourceNameError(
-                f"{source_name} is not in the provided file list: {sources}."
+                f"{file_name} is not in the provided file list: {sources}."
             )
 
     @field_validator("properties")
@@ -304,14 +309,12 @@ class Node(BaseModel):
 
         if valid_columns:
             for prop in self.properties:
-                if prop.column_mapping not in valid_columns.get(
-                    self.source_name, list()
-                ):
+                if prop.column_mapping not in valid_columns.get(self.file_name, list()):
                     errors.append(
                         InitErrorDetails(
                             type=PydanticCustomError(
                                 "invalid_column_mapping_error",
-                                f"The `Node` {self.label} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.source_name}. Removed {prop.name} from `Node` {self.label}.",
+                                f"The `Node` {self.label} has the `Property` {prop.name} mapped to column {prop.column_mapping} which is not allowed for source file {self.file_name}. Removed {prop.name} from `Node` {self.label}.",
                             ),
                             loc=("properties",),
                             input=self.properties,
@@ -343,7 +346,7 @@ class Node(BaseModel):
 
         return ArrowsNode(
             id=self.label,
-            caption=self.source_name,
+            caption=self.file_name,
             position=pos,
             labels=[self.label],
             properties=props,
@@ -361,16 +364,14 @@ class Node(BaseModel):
             if k != "csv" and not v.lower().rstrip().endswith("ignore")
         ]
 
-        source_name = (
+        file_name = (
             arrows_node.properties["csv"]
             if "csv" in arrows_node.properties.keys()
             else arrows_node.caption
         )
 
         # support only single labels for now, take first label
-        return cls(
-            label=arrows_node.labels[0], properties=props, source_name=source_name
-        )
+        return cls(label=arrows_node.labels[0], properties=props, file_name=file_name)
 
     def to_solutions_workbench(
         self, key: str, x: int, y: int
@@ -387,7 +388,7 @@ class Node(BaseModel):
             properties=props,
             x=x,
             y=y,
-            description=self.source_name,
+            description=self.file_name,
         )
 
     @classmethod
@@ -403,13 +404,13 @@ class Node(BaseModel):
             for prop in solutions_workbench_node.properties.values()
         ]
 
-        source_name = solutions_workbench_node.description
+        file_name = solutions_workbench_node.description
 
         # support only single labels for now, take first label
         return cls(
             label=solutions_workbench_node.label,
             properties=props,
-            source_name=source_name,
+            file_name=file_name,
         )
 
 
@@ -464,13 +465,13 @@ class Nodes(BaseModel):
 
                 for node_idx, node in enumerate(self.nodes):
                     # init the file dictionary
-                    if node.source_name not in used_features.keys():
-                        used_features[node.source_name] = dict()
+                    if node.file_name not in used_features.keys():
+                        used_features[node.file_name] = dict()
                     for prop_idx, prop in enumerate(node.properties):
                         if prop.column_mapping not in list(
-                            used_features[node.source_name].keys()
+                            used_features[node.file_name].keys()
                         ):
-                            used_features[node.source_name][prop.column_mapping] = [
+                            used_features[node.file_name][prop.column_mapping] = [
                                 (
                                     node.label,
                                     "nodes",
@@ -481,7 +482,7 @@ class Nodes(BaseModel):
                                 )
                             ]
                         else:
-                            used_features[node.source_name][prop.column_mapping].append(
+                            used_features[node.file_name][prop.column_mapping].append(
                                 (
                                     node.label,
                                     "nodes",
@@ -492,7 +493,7 @@ class Nodes(BaseModel):
                                 )
                             )
 
-                for source_name, feature_dict in used_features.items():
+                for file_name, feature_dict in used_features.items():
                     for prop_mapping, labels_or_types in feature_dict.items():
                         if len(labels_or_types) > 1:
                             for l_or_t in labels_or_types:
@@ -500,7 +501,7 @@ class Nodes(BaseModel):
                                     InitErrorDetails(
                                         type=PydanticCustomError(
                                             "duplicate_property_in_nodes_error",
-                                            f"{source_name} column {prop_mapping} may only be used once as a `Property.column_mapping` value.",
+                                            f"{file_name} column {prop_mapping} may only be used once as a `Property.column_mapping` value.",
                                         ),
                                         loc=_parse_duplicated_property_location(
                                             context=l_or_t

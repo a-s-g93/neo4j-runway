@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 from ...resources.mappings import (
     TYPES_MAP_NEO4J_TO_PYTHON,
@@ -19,25 +19,35 @@ class Property(BaseModel):
     Attributes
     ----------
     name : str
-        The property name in Neo4j.
+        The property name.
     type : str
         The Python type of the property.
     column_mapping : str
-        Which column the property is found under.
+        The column this property maps to in the source file.
     alias : Optional[str]
-        An optional second column that also indicates this property.
+        An optional second column from any files that also maps to this property.
     is_unique : bool
         Whether the property is a unique identifier.
     part_of_key : bool
-        Whether the property is part of a node or relationship key.
+        Whether the property is a part of a uniquely indentifying property combination.
     """
 
-    name: str
-    type: str
-    column_mapping: str
-    alias: Optional[str] = None
-    is_unique: bool = False
-    part_of_key: bool = False
+    name: str = Field(description="The property name.")
+    type: str = Field(description="The Python type of the property.")
+    column_mapping: str = Field(
+        description="The column this property maps to in the source file."
+    )
+    alias: Optional[str] = Field(
+        description="An optional second column from any files that also maps to this property.",
+        default=None,
+    )
+    is_unique: bool = Field(
+        description="Whether the property is a unique identifier.", default=False
+    )
+    part_of_key: bool = Field(
+        description="Whether the property is a part of a uniquely indentifying property combination.",
+        default=False,
+    )
 
     @field_validator("name")
     def validate_name(cls, name: str, info: ValidationInfo) -> str:

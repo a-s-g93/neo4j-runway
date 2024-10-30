@@ -17,7 +17,7 @@ class StandardCypherCodeGenerator(BaseCodeGenerator):
         Where the files are located.
     file_output_directory : str, optional
         The location that generated files should be saved to.
-    source_name : str, optional
+    file_name : str, optional
         The name of the data file. If more than one file is used, this arg should not be provided.
         File names should be included within the data model. By default = ""
     strict_typing : bool, optional

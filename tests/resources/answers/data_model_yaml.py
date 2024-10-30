@@ -65,7 +65,8 @@ data_model_dict = {
 }
 
 data_model_yaml = """nodes:
-- label: NodeA
+- file_name: file
+  label: NodeA
   properties:
   - alias: null
     column_mapping: prop_1
@@ -85,8 +86,8 @@ data_model_yaml = """nodes:
     name: prop3
     part_of_key: false
     type: float
-  source_name: file
-- label: NodeB
+- file_name: file
+  label: NodeB
   properties:
   - alias: null
     column_mapping: prop_4
@@ -106,9 +107,9 @@ data_model_yaml = """nodes:
     name: prop6
     part_of_key: false
     type: float
-  source_name: file
 relationships:
-- properties:
+- file_name: file
+  properties:
   - alias: null
     column_mapping: prop_7
     is_unique: false
@@ -116,7 +117,6 @@ relationships:
     part_of_key: false
     type: float
   source: NodeA
-  source_name: file
   target: NodeB
   type: RELATIONSHIP_AB
 """

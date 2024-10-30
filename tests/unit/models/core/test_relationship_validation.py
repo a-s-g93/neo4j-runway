@@ -9,7 +9,7 @@ from neo4j_runway.models.core.relationship import Relationship
 def test_validate_wrong_source_file_name_multifile(
     relationship_context: Dict[str, Any], relationship_data: Dict[str, Any]
 ) -> None:
-    relationship_data["source_name"] = "wrong.csv"
+    relationship_data["file_name"] = "wrong.csv"
     with pytest.raises(ValueError):
         Relationship.model_validate(relationship_data, context=relationship_context)
 
@@ -17,11 +17,11 @@ def test_validate_wrong_source_file_name_multifile(
 def test_validate_wrong_source_file_name_singlefile(
     relationship_data: Dict[str, Any],
 ) -> None:
-    assert relationship_data.get("source_name") == "a.csv"
+    assert relationship_data.get("file_name") == "a.csv"
     relationship = Relationship.model_validate(
         relationship_data, context={"valid_columns": {"b.csv": ["nkey"]}}
     )
-    assert relationship.source_name == "b.csv"
+    assert relationship.file_name == "b.csv"
 
 
 def test_enforce_uniqueness_pass(

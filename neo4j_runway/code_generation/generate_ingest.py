@@ -44,7 +44,7 @@ class IngestionGenerator:
     def __init__(
         self,
         data_model: DataModel,
-        source_name: str = "",
+        file_name: str = "",
         username: Union[str, None] = None,
         password: Union[str, None] = None,
         uri: Union[str, None] = None,
@@ -59,7 +59,7 @@ class IngestionGenerator:
         ----------
         data_model : DataModel
             The data model to base ingestion code on.
-        source_name : str, optional
+        file_name : str, optional
             The CSV containing the data. If data is contained in multiple CSVs,
             then this should be "" and CSVs noted in the data model, by default ""
         username : Union[str, None], optional
@@ -81,7 +81,7 @@ class IngestionGenerator:
         self.password: Union[str, None] = password
         self.uri: Union[str, None] = uri
         self.database: Union[str, None] = database
-        self.source_name: str = source_name
+        self.file_name: str = file_name
         self.csv_dir: str = csv_dir
         self.file_output_dir: str = file_output_dir
         self._config_files_list: Union[List[Dict[str, Any]], None] = []
@@ -133,17 +133,15 @@ class IngestionGenerator:
                 "cypher_loadcsv": literal_unicode(
                     generate_merge_node_load_csv_clause(
                         node=node,
-                        source_name=(
-                            node.source_name
-                            if self.source_name == ""
-                            else self.source_name
+                        file_name=(
+                            node.file_name if self.file_name == "" else self.file_name
                         ),
                         method=method,
                         batch_size=batch_size,
                         strict_typing=strict_typing,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{node.source_name if self.source_name == '' else self.source_name}",
+                "csv": f"$BASE/{self.csv_dir}{node.file_name if self.file_name == '' else self.file_name}",
             }
 
         ## get relationships
@@ -185,15 +183,15 @@ class IngestionGenerator:
                         relationship=rel,
                         source_node=source,
                         target_node=target,
-                        source_name=rel.source_name
-                        if self.source_name == ""
-                        else self.source_name,
+                        file_name=rel.file_name
+                        if self.file_name == ""
+                        else self.file_name,
                         method=method,
                         batch_size=batch_size,
                         strict_typing=strict_typing,
                     )
                 ),
-                "csv": f"$BASE/{self.csv_dir}{rel.source_name if self.source_name == '' else self.source_name}",
+                "csv": f"$BASE/{self.csv_dir}{rel.file_name if self.file_name == '' else self.file_name}",
             }
 
         self._config_files_list = []

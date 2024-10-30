@@ -59,7 +59,7 @@ def test_allow_duplicate_properties_false(
 def test_node_field_validator_error(
     data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
 ) -> None:
-    data_model_data["nodes"][0]["source_name"] = "wrongfile.csv"
+    data_model_data["nodes"][0]["file_name"] = "wrongfile.csv"
 
     with pytest.raises(ValueError) as e:
         DataModel.model_validate(data_model_data, context=data_model_context)
@@ -90,7 +90,7 @@ def test_node_model_validator_error(
 def test_relationship_field_validator_error(
     data_model_data: Dict[str, Any], data_model_context: Dict[str, Any]
 ) -> None:
-    data_model_data["relationships"][0]["source_name"] = "wrongfile.csv"
+    data_model_data["relationships"][0]["file_name"] = "wrongfile.csv"
 
     with pytest.raises(ValueError) as e:
         DataModel.model_validate(data_model_data, context=data_model_context)

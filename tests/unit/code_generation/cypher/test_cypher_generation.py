@@ -225,7 +225,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
         self.assertEqual(
             generate_merge_node_load_csv_clause(
                 node=self.node_b,
-                source_name="test.csv",
+                file_name="test.csv",
                 method="api",
                 strict_typing=False,
             ),
@@ -257,7 +257,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                 relationship=self.rel_1,
                 source_node=self.node_a,
                 target_node=self.node_b,
-                source_name="test.csv",
+                file_name="test.csv",
                 method="browser",
                 batch_size=50,
                 strict_typing=True,
@@ -321,7 +321,7 @@ class TestIngestCodeGeneration(unittest.TestCase):
                     is_unique=True,
                 )
             ],
-            source_name="owners.csv",
+            file_name="owners.csv",
         )
         node_b = Node(
             label="Pet",
@@ -333,14 +333,14 @@ class TestIngestCodeGeneration(unittest.TestCase):
                     is_unique=True,
                 )
             ],
-            source_name="pets.csv",
+            file_name="pets.csv",
         )
         rel = Relationship(
             type="LOVES",
             source="Pet",
             target="Person",
             properties=[],
-            source_name="pets.csv",
+            file_name="pets.csv",
         )
 
         self.assertEqual(

@@ -126,13 +126,13 @@ def test_to_dict() -> None:
     test_dict = test_model.model_dump()
 
     assert list(test_dict.keys()) == ["nodes", "relationships", "metadata"]
-    assert list(test_dict["nodes"][0].keys()) == ["label", "properties", "source_name"]
+    assert list(test_dict["nodes"][0].keys()) == ["label", "properties", "file_name"]
     assert list(test_dict["relationships"][0].keys()) == [
         "type",
         "properties",
         "source",
         "target",
-        "source_name",
+        "file_name",
     ]
 
 
@@ -295,9 +295,9 @@ def test_data_model_with_multi_csv_from_arrows() -> None:
         "tests/resources/data_models/people-pets-arrows-multi-csv.json"
     )
 
-    assert data_model.relationships[-1].source_name == "shelters.csv"
-    assert data_model.relationships[0].source_name == "pets-arrows.csv"
-    assert data_model.nodes[0].source_name == "pets-arrows.csv"
+    assert data_model.relationships[-1].file_name == "shelters.csv"
+    assert data_model.relationships[0].file_name == "pets-arrows.csv"
+    assert data_model.nodes[0].file_name == "pets-arrows.csv"
 
 
 def test_data_model_with_multi_csv_from_solutions_workbench() -> None:

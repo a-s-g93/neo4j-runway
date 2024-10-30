@@ -10,7 +10,7 @@ nodes = [
         properties=[
             Property(name="alpha", type="str", column_mapping="au", is_unique=True)
         ],
-        source_name="CSV_A.csv",
+        file_name="CSV_A.csv",
     ),
     Node(
         label="NodeC",
@@ -20,7 +20,7 @@ nodes = [
                 name="decorator", type="str", column_mapping="dec", is_unique=False
             ),
         ],
-        source_name="CSV_A.csv",
+        file_name="CSV_A.csv",
     ),
 ]
 rel = Relationship(
@@ -28,7 +28,7 @@ rel = Relationship(
     source="NodeA",
     target="NodeC",
     properties=[],
-    source_name="CSV_A.csv",
+    file_name="CSV_A.csv",
 )
 
 data_model = DataModel(nodes=nodes, relationships=[rel])

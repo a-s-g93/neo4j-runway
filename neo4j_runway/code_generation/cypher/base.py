@@ -106,7 +106,7 @@ MERGE (n:{node.label} {{{generate_set_unique_property(node.node_keys or node.uni
 
 
 def generate_merge_node_load_csv_clause(
-    source_name: str,
+    file_name: str,
     method: str = "api",
     batch_size: int = 10000,
     node: Optional[Node] = None,
@@ -134,7 +134,7 @@ def generate_merge_node_load_csv_clause(
             "Unable to construct MERGE node clause for LOAD CSV from provided arguments."
         )
 
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{source_name}' as row
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{file_name}' as row
 CALL {{
     WITH row
     {standard_clause.strip()}
@@ -153,10 +153,10 @@ def generate_merge_relationship_clause_standard(
     """
 
     use_source_alias: bool = bool(
-        relationship.source_name and relationship.source_name != source_node.source_name
+        relationship.file_name and relationship.file_name != source_node.file_name
     )
     use_target_alias: bool = bool(
-        relationship.source_name and relationship.source_name != target_node.source_name
+        relationship.file_name and relationship.file_name != target_node.file_name
     )
 
     if source_node.label == target_node.label:
@@ -175,7 +175,7 @@ MERGE (source)-[n:{relationship.type}]->(target)
 
 
 def generate_merge_relationship_load_csv_clause(
-    source_name: str,
+    file_name: str,
     method: str = "api",
     batch_size: int = 10000,
     relationship: Optional[Relationship] = None,
@@ -213,7 +213,7 @@ def generate_merge_relationship_load_csv_clause(
         raise LoadCSVCypherGenerationError(
             "Unable to construct MERGE relationship clause for LOAD CSV from provided arguments."
         )
-    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{source_name}' as row
+    return f"""{command}LOAD CSV WITH HEADERS FROM 'file:///{file_name}' as row
 CALL {{
     WITH row
     {standard_clause.strip()}

@@ -9,17 +9,17 @@ from neo4j_runway.models import Node
 def test_validate_wrong_source_file_name_multifile(
     node_context: Dict[str, Any], node_data: Dict[str, Any]
 ) -> None:
-    node_data["source_name"] = "wrong.csv"
+    node_data["file_name"] = "wrong.csv"
     with pytest.raises(ValueError):
         Node.model_validate(node_data, context=node_context)
 
 
 def test_validate_wrong_source_file_name_singlefile(node_data: Dict[str, Any]) -> None:
-    assert node_data.get("source_name") == "a.csv"
+    assert node_data.get("file_name") == "a.csv"
     node = Node.model_validate(
         node_data, context={"valid_columns": {"b.csv": ["nkey"]}}
     )
-    assert node.source_name == "b.csv"
+    assert node.file_name == "b.csv"
 
 
 def test_enforce_uniqueness_pass(
@@ -83,7 +83,7 @@ def test_validate_property_mappings_two_props(
 def test_wrong_source_file_and_wrong_attr_type(
     node_context: Dict[str, Any], node_data: Dict[str, Any]
 ) -> None:
-    node_data["source_name"] = "wrong.csv"
+    node_data["file_name"] = "wrong.csv"
     node_data["properties"] = [
         {
             "name": "nkey",
