@@ -7,6 +7,8 @@
 ### Changed
 
 * Add comma separator for numbers in `GraphEDA` report
+* Changed `source_name` to `file_name` in `Node`, `Relationship` and code generation classes
+* Switch to Pydantic Fields in `DataModel`, `Node`, `Relationship` and `Property` class attributes
 
 ### Added
 
