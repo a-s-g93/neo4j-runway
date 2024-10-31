@@ -11,6 +11,7 @@ Neo4j Runway is a Python library that simplifies the process of migrating your r
 - **Graph Data Modeling**: Utilize OpenAI and the [Instructor](https://github.com/jxnl/instructor) Python library to create valid graph data models
 - **Code Generation**: Generate ingestion code to easily load your data
 - **Data Ingestion**: Load your data using Runway's built in implementation of [PyIngest](https://github.com/neo4j-field/pyingest) - Neo4j's popular ingestion tool
+- **Exploratory Data Analysis**: Run analytics over your graph to discover potential data quality issues
 
 ## Requirements
 Runway uses Graphviz to visualize data models. To enjoy this feature please download [graphviz](https://www.graphviz.org/download/).
@@ -19,7 +20,7 @@ You'll need a Neo4j instance to fully utilize Runway. Start up a free cloud host
 
 ## Get Running in Minutes
 
-Follow the steps below or check out Neo4j Runway [end-to-end examples](https://github.com/a-s-g93/neo4j-runway/tree/main/examples/end_to_end)
+Follow the steps below or check out any of the Neo4j Runway [end-to-end examples](https://github.com/a-s-g93/neo4j-runway/tree/main/examples/end_to_end)
 
 ```
 pip install neo4j-runway
@@ -273,8 +274,17 @@ Here's a snapshot of our new graph!
 
 ![countries-graph.png](./examples/end_to_end/single_file/countries/images/countries-single-0.12.0.png)
 
+
+## Graph Exploratory Data Analysis
+
+Runway offers a module for easily running analyics over an existing graph to gain insights such as finding isolated nodes and ranking top node degrees.
+
+Check [here](./examples/exploratory_data_analysis/stackoverflow/stackoverflow_graph_eda.ipynb) for an example of Runway's `GraphEDA` module.
+
+
 ## Limitations
 Runway is currently in beta and under rapid development. Please raise GitHub issues and provide feedback on any features you'd like. The following are some of the current limitations:
+- More complex data modeling is under development
 - Nodes may only have a single label
 - Only uniqueness and key constraints are supported
 - Only OpenAI models may be used at this time

@@ -9,6 +9,9 @@
 ### Changed
 
 * Add comma separator for numbers in `GraphEDA` report
+* Remove deprecated `IngestionGenerator` class
+* Update README to include `GraphEDA` module
+* Remove images/
 
 ### Added
 
