@@ -192,8 +192,14 @@ class BaseDataModelingLLM(ABC):
             apply_neo4j_naming_conventions=apply_neo4j_naming_conventions,
         )
 
-        if not hasattr(initial_data_model, "nodes") and hasattr(nodes, "nodes"):
-            initial_data_model.nodes = nodes.nodes
+        if (
+            not hasattr(initial_data_model, "nodes") or initial_data_model.nodes is None
+        ) and hasattr(nodes, "nodes"):
+            try:
+                print(initial_data_model)
+                initial_data_model.nodes = nodes.nodes
+            except Exception as e:
+                pass
 
         return initial_data_model
 
