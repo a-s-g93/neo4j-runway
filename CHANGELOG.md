@@ -12,6 +12,7 @@
 * Remove deprecated `IngestionGenerator` class
 * Update README to include `GraphEDA` module
 * Remove images/
+* Mild refactor of `Property.type` validation
 
 ### Added
 
