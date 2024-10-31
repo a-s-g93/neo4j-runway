@@ -195,14 +195,10 @@ def PyIngest(
 
 def get_yaml(data: str) -> str:
     # yaml already in String format
-    if (
-        isinstance(data, str)
-        and ".yml" not in data.lower()
-        and ".yaml" not in data.lower()
-    ):
+    if ".yml" not in data.lower() and ".yaml" not in data.lower():
         return data
     # load the yaml
-    elif isinstance(data, str) and (".yml" in data.lower() or ".yaml" in data.lower()):
+    elif ".yml" in data.lower() or ".yaml" in data.lower():
         with open(data, "r") as f:
             yml_file = f.read()
 

@@ -7,6 +7,7 @@ from ...resources.mappings import (
     TYPES_MAP_PYTHON_TO_NEO4J,
     TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
     TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
+    PythonTypeEnum,
 )
 from ...utils.naming_conventions import fix_property
 from ..solutions_workbench import SolutionsWorkbenchProperty
@@ -52,7 +53,7 @@ class Property(BaseModel):
 
         return name
 
-    @field_validator("type")
+    @field_validator("type", mode="before")
     def validate_type(cls, v: str) -> str:
         if v.lower() == "object" or v.lower() == "string":
             return "str"
@@ -63,16 +64,19 @@ class Property(BaseModel):
         elif "bool" in v.lower():
             return "bool"
 
-        if v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.keys()):
+        valid_python_types = [a.value for a in PythonTypeEnum]
+        if v in valid_python_types:
+            return v
+        elif v.split(".")[-1] in valid_python_types:
+            return v.split(".")[-1]
+        elif v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.keys()):
             return TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON[v]
         elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.keys()):
             return TYPES_MAP_NEO4J_TO_PYTHON[v]
-        elif v in list(TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON.values()):
-            return v
-        elif v in list(TYPES_MAP_NEO4J_TO_PYTHON.values()):
-            return v
         else:
-            raise ValueError(f"Invalid Property type given: {v}")
+            raise ValueError(
+                f"Invalid Property type given: {v}. Must be one of: {valid_python_types}"
+            )
 
     @model_validator(mode="after")
     def validate_is_unique_and_part_of_key(self) -> "Property":

@@ -253,6 +253,7 @@ class BaseDataModelingLLM(ABC):
                     .function.arguments
                 )
             )
+            print(e.messages)
 
         if hasattr(response, "nodes"):
             print(
