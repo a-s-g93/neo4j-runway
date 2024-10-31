@@ -4,6 +4,8 @@
 
 ### Fixed
 
+* Fix bug where patching previous valid nodes into an invalid data model would throw an error
+
 ### Changed
 
 * Add comma separator for numbers in `GraphEDA` report
