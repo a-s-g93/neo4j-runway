@@ -31,9 +31,9 @@ class TestProperty(unittest.TestCase):
         )
         self.assertEqual(p.type, "str")
 
-    def test_float64_type(self) -> None:
+    def test_float_type(self) -> None:
         p = Property(
-            name="street", type="float64", column_mapping="street", is_unique=False
+            name="street", type="float", column_mapping="street", is_unique=False
         )
         self.assertEqual(p.type, "float")
 

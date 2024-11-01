@@ -3,6 +3,7 @@ from .type_mappings import (
     TYPES_MAP_PYTHON_TO_NEO4J,
     TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH,
     TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON,
+    PythonTypeEnum,
 )
 
 __all__ = [
@@ -10,4 +11,5 @@ __all__ = [
     "TYPES_MAP_PYTHON_TO_NEO4J",
     "TYPES_MAP_SOLUTIONS_WORKBENCH_TO_PYTHON",
     "TYPES_MAP_PYTHON_TO_SOLUTIONS_WORKBENCH",
+    "PythonTypeEnum",
 ]

@@ -378,23 +378,19 @@ class TestIngestCodeGeneration(unittest.TestCase):
         self.assertEqual(cast_value(prop_str), "row.p1")
 
     def test_cast_date(self) -> None:
-        prop_date = Property(name="p3", type="neo4j.time.Date", column_mapping="p3")
+        prop_date = Property(name="p3", type="Date", column_mapping="p3")
         self.assertEqual(cast_value(prop_date), "date(row.p3)")
 
     def test_cast_time(self) -> None:
-        prop_time = Property(name="p4", type="neo4j.time.Time", column_mapping="p4")
+        prop_time = Property(name="p4", type="Time", column_mapping="p4")
         self.assertEqual(cast_value(prop_time), "time(row.p4)")
 
     def test_cast_datetime(self) -> None:
-        prop_datetime = Property(
-            name="p5", type="neo4j.time.DateTime", column_mapping="p5"
-        )
+        prop_datetime = Property(name="p5", type="DateTime", column_mapping="p5")
         self.assertEqual(cast_value(prop_datetime), "datetime(row.p5)")
 
     def test_cast_point(self) -> None:
-        prop_point = Property(
-            name="p6", type="neo4j.spatial.CartesianPoint", column_mapping="p6"
-        )
+        prop_point = Property(name="p6", type="CartesianPoint", column_mapping="p6")
         self.assertEqual(cast_value(prop_point), "point(row.p6)")
 
     def test_cast_integer(self) -> None:
