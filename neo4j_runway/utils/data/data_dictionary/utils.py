@@ -47,7 +47,6 @@ def _format_yaml_contents(yaml_contents: Dict[str, Any]) -> Dict[str, Any]:
             res[f["name"]] = sub_data_dict
     else:
         f = yaml_contents["files"][0]
-        # res = {d["name"]: d["desc"] for d in f["columns"]}
         for col in f.get("columns", list()):
             alias = col.get("alias", None)
             ignore = col.get("ignore", False)
