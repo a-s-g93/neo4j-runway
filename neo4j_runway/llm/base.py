@@ -196,7 +196,6 @@ class BaseDataModelingLLM(ABC):
             not hasattr(initial_data_model, "nodes") or initial_data_model.nodes is None
         ) and hasattr(nodes, "nodes"):
             try:
-                print(initial_data_model)
                 initial_data_model.nodes = nodes.nodes
             except Exception as e:
                 pass

@@ -10,6 +10,18 @@ class DataDictionary(BaseModel):
     table_schemas: List[TableSchema]
 
     @property
+    def is_multifile(self) -> bool:
+        """
+        Whether the data dictionary contains more than 1 file.
+
+        Returns
+        -------
+        bool
+        """
+
+        return len(self.table_schemas) > 1
+
+    @property
     def table_column_names_dict(self) -> Dict[str, List[str]]:
         """
         A dictionary with table name keys and column list values.
@@ -39,6 +51,15 @@ class DataDictionary(BaseModel):
     def compact_dict(self) -> Dict[str, Any]:
         """
         Compact representation of the `DataDictionary` information.
+        Format:
+            {
+            file_name:
+                {
+                    column_name: <description> Has aliases <aliases> | <ignore>,
+                    ...
+                },
+            ...
+            }
 
         Returns
         -------

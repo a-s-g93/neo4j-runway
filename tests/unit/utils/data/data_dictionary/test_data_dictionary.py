@@ -32,3 +32,19 @@ def test_compact_dict(validation_info_context: Dict[str, Any]) -> None:
     assert len(dd.compact_dict.keys()) == 2
 
     assert {"table_a", "table_b"} == set(dd.compact_dict.keys())
+
+
+def test_is_multifile_true(validation_info_context: Dict[str, Any]) -> None:
+    dd = DataDictionary.model_validate(
+        {"table_schemas": [table_a, table_b]}, context=validation_info_context
+    )
+
+    assert dd.is_multifile
+
+
+def test_is_multifile_false(validation_info_context: Dict[str, Any]) -> None:
+    dd = DataDictionary.model_validate(
+        {"table_schemas": [table_a]}, context=validation_info_context
+    )
+
+    assert not dd.is_multifile
