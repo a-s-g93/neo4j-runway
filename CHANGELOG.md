@@ -4,6 +4,14 @@
 
 ### Fixed
 
+### Changed
+
+### Added
+
+## 0.14.0
+
+### Fixed
+
 * Fix bug where patching previous valid nodes into an invalid data model would throw an error
 
 ### Changed
