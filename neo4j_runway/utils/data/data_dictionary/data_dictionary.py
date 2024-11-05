@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -69,3 +69,30 @@ class DataDictionary(BaseModel):
         compact_info: Dict[str, str] = dict()
         [compact_info.update(ts.compact_dict) for ts in self.table_schemas]
         return compact_info
+
+    def get_table_schema(self, table_name: str) -> TableSchema:
+        """
+        Retrieve a `TableSchema` object by table name.
+
+        Parameters
+        ----------
+        table_name : str
+            The table name.
+
+        Returns
+        -------
+        TableSchema
+            The `TableSchema` object if it exists, else `None`
+
+        Raises
+        ------
+        KeyError
+            The `table_name` is not found in the data dictionary.
+        """
+
+        if res := {ts.name: ts for ts in self.table_schemas}.get(table_name):
+            return res
+        else:
+            raise KeyError(
+                f"{table_name} is not a valid `TableSchema` name in this data dictionary."
+            )

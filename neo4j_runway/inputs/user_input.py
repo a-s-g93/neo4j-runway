@@ -1,7 +1,12 @@
 import warnings
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
+
+from ..utils.data.data_dictionary.data_dictionary import DataDictionary
+from ..utils.data.data_dictionary.utils import (
+    load_data_dictionary_from_compact_python_dictionary,
+)
 
 
 class UserInput(BaseModel):
@@ -12,7 +17,7 @@ class UserInput(BaseModel):
     ----------
     general_description : str, optional
         A general description of the CSV data.
-    data_dictionary : Dict[str, str], optional
+    data_dictionary :Union[Dict[str, Any], DataDictionary], optional
         A mapping of the desired columns to their descriptions.
         If multi-file, then each file name should contain it's own sub dictionary.
         The keys of this argument will determine which CSV columns are
@@ -22,48 +27,57 @@ class UserInput(BaseModel):
     """
 
     general_description: str = ""
-    data_dictionary: Dict[str, Any] = dict()
+    data_dictionary: Union[Dict[str, Any], DataDictionary]
     use_cases: Optional[List[str]] = None
 
-    def __init__(
-        self,
-        data_dictionary: Dict[str, Any] = dict(),
-        general_description: str = "",
-        use_cases: Optional[List[str]] = None,
-        **kwargs: Any,
-    ) -> None:
-        """
-        A container for user provided information about the data.
+    # def __init__(
+    #     self,
+    #     data_dictionary: Union[Dict[str, Any], DataDictionary] = dict(),
+    #     general_description: str = "",
+    #     use_cases: Optional[List[str]] = None,
+    #     **kwargs: Any,
+    # ) -> None:
+    #     """
+    #     A container for user provided information about the data.
 
-        Parameters
-        ----------
-        general_description : str, optional
-            A general description of the CSV data, by default = ""
-        data_dictionary : Dict[str, str], optional
-            A mapping of the desired columns to their descriptions.
-            If multi-file, then each file name should contain it's own sub dictionary.
-            The leaf values of this argument will determine which columns are
-            evaluated in discovery and used to generate a data model.
-        use_cases : List[str], optional
-            A list of use cases that the final data model should be able to answer.
-        """
+    #     Parameters
+    #     ----------
+    #     general_description : str, optional
+    #         A general description of the CSV data, by default = ""
+    #     data_dictionary : Union[Dict[str, Any], DataDictionary], optional
+    #         A mapping of the desired columns to their descriptions.
+    #         If multi-file, then each file name should contain it's own sub dictionary.
+    #         The leaf values of this argument will determine which columns are
+    #         evaluated in discovery and used to generate a data model.
+    #     use_cases : List[str], optional
+    #         A list of use cases that the final data model should be able to answer.
+    #     """
 
-        # keep support for this arg
-        if "column_descriptions" in kwargs:
-            data_dictionary = kwargs["column_descriptions"]
+    #     # keep support for this arg
+    #     if "column_descriptions" in kwargs:
+    #         data_dictionary = kwargs["column_descriptions"]
 
-        super().__init__(
-            general_description=general_description,
-            data_dictionary=data_dictionary,
-            use_cases=use_cases,
-        )
+    #     super().__init__(
+    #         general_description=general_description,
+    #         data_dictionary=data_dictionary,
+    #         use_cases=use_cases,
+    #     )
 
     @field_validator("data_dictionary")
-    def validate_data_dictionary(cls, v: Dict[str, Any]) -> Dict[str, str]:
-        if any(isinstance(x, int) for x in v.values()):
-            raise ValueError("int values may not be present in data dictionary.")
-        if v == {}:
+    def validate_data_dictionary(
+        cls, v: Union[Dict[str, Any], DataDictionary]
+    ) -> DataDictionary:
+        if not v:
             warnings.warn("Empty data dictionary is not recommended.")
+        if isinstance(v, dict):
+            try:
+                return load_data_dictionary_from_compact_python_dictionary(v)
+            except Exception as e:
+                raise ValueError(
+                    f"Unable to parse provided `data_dictionary` arg into a `DataDictionary` object. Error: {e}"
+                )
+        assert isinstance(v, DataDictionary), "`data_dictionary` arg is not a `DataDictionary` object." 
+
         return v
 
     @property
@@ -76,27 +90,20 @@ class UserInput(BaseModel):
         bool
         """
 
-        possible_cols = list(self.data_dictionary.values())
-        if len(possible_cols) == 0:
-            return False
-        return isinstance(possible_cols[0], dict)
+        return self.data_dictionary.is_multifile
 
     @property
-    def allowed_columns(self) -> Union[List[str], Dict[str, List[str]]]:
+    def allowed_columns(self) -> Dict[str, List[str]]:
         """
         The allowed columns.
 
         Returns
         -------
-        Union[List[str], Dict[str, List[str]]]
-            single file : A list of columns from the DataFrame.
-            Multi file  : a dictionary with keys of file names and A list of columns for each file.
+        Dict[str, List[str]]
+            A dictionary with keys of file names and a list of columns for each file.
         """
 
-        if not self.is_multifile:
-            return list(self.data_dictionary.keys())
-        else:
-            return {k: list(v.keys()) for k, v in self.data_dictionary.items()}
+        return self.data_dictionary.table_column_names_dict
 
     @property
     def pretty_use_cases(self) -> str:

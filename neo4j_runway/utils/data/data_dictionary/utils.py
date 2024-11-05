@@ -2,7 +2,9 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
+from ..._utils.dictionary import get_dictionary_depth
 from .data_dictionary import DataDictionary
+from .table_schema import TableSchema
 
 
 def load_data_dictionary_from_yaml(file_path: str) -> DataDictionary:
@@ -86,3 +88,127 @@ def _get_aliases_from_alias(col_dict: Dict[str, Any]) -> Optional[List[str]]:
             return [str(aliases)]
         return aliases
     return None
+
+
+def load_data_dictionary_from_compact_python_dictionary(
+    python_dictionary: Dict[str, Any], file_name: str = "file"
+) -> DataDictionary:
+    """
+    Load a Python dictionary representation of the data dictionary as a `DataDictionary` object.
+
+    Parameters
+    ----------
+    python_dictionary : Dict[str, Any]
+        The input dictionary. Must adhere to the following structure:
+        multi or single file input
+        {
+        <file name>: {
+            <column name>: <column description>, ...
+            }, ...
+        }
+        OR for single file only
+        {
+        <column name>: <column description>, ...
+        }
+    file_name : str, optional
+        The file name, if providing a single file data dictionary, by default 'file'
+
+    Returns
+    -------
+    DataDictionary
+        The `DataDictionary` object.
+    """
+
+    depth = get_dictionary_depth(python_dictionary)
+
+    if depth == 1:
+        return DataDictionary.model_validate(
+            {
+                "table_schemas": [
+                    {
+                        "name": file_name,
+                        "columns": [
+                            {"name": name, "description": desc}
+                            for name, desc in python_dictionary.items()
+                        ],
+                    }
+                ]
+            }
+        )
+    elif depth == 2:
+        return DataDictionary.model_validate(
+            {
+                "table_schemas": [
+                    {
+                        "name": file_name,
+                        "columns": [
+                            {"name": name, "description": desc}
+                            for name, desc in table_schema.items()
+                        ],
+                    }
+                    for file_name, table_schema in python_dictionary.items()
+                ]
+            }
+        )
+    else:
+        raise ValueError(
+            "Unable to parse the provided `python_dictionary` into a `DataDictionary` object."
+        )
+
+
+def load_table_schema_from_compact_python_dictionary(
+    python_dictionary: Dict[str, Any], file_name: str = "file"
+) -> TableSchema:
+    """
+    Load a Python dictionary representation of the table schema as a `TableSchema` object.
+
+    Parameters
+    ----------
+    python_dictionary : Dict[str, Any]
+        The input dictionary. Must adhere to the following structure:
+        {
+        <file name>: {
+            <column name>: <column description>, ...
+            }
+        }
+        OR
+        {
+        <column name>: <column description>, ...
+        }
+    file_name : str, optional
+        The file name, by default 'file'
+
+    Returns
+    -------
+    TableSchema
+        The `TableSchema` object.
+    """
+
+    depth = get_dictionary_depth(python_dictionary)
+
+    if depth == 1:
+        return TableSchema.model_validate(
+            {
+                "name": file_name,
+                "columns": [
+                    {"name": name, "description": desc}
+                    for name, desc in python_dictionary.items()
+                ],
+            }
+        )
+    elif depth == 2:
+        file_name = list(python_dictionary.keys())[0]
+        col_dict: Dict[str, str] = list(python_dictionary.values())[0]
+        return TableSchema.model_validate(
+            {
+                "name": file_name,
+                "columns": [
+                    {"name": name, "description": desc}
+                    for name, desc in col_dict.items()
+                ],
+            }
+        )
+    else:
+        raise ValueError(
+            "Unable to parse the provided `python_dictionary` into a `TableSchema` object."
+        )

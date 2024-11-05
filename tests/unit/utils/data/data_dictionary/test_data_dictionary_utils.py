@@ -1,4 +1,8 @@
-from neo4j_runway.utils.data import load_data_dictionary_from_yaml
+from neo4j_runway.utils.data import (
+    load_data_dictionary_from_compact_python_dictionary,
+    load_data_dictionary_from_yaml,
+    load_table_schema_from_compact_python_dictionary,
+)
 
 
 def test_multi_file_yaml_compact_dict() -> None:
@@ -42,3 +46,53 @@ def test_single_file_yaml_compact_dict() -> None:
     )
     assert "The column of naming b" in data_dict.values()
     assert "c is for column for which it has been named | ignore" in data_dict.values()
+
+
+def test_single_file_with_file_name_python_dict() -> None:
+    dd = load_data_dictionary_from_compact_python_dictionary(
+        {"a.csv": {"col_a": "desc a", "col_b": "desc b"}}
+    )
+
+    assert not dd.is_multifile
+    assert len(dd.table_column_names_dict.get("a.csv")) == 2
+
+
+def test_single_file_without_file_name_python_dict() -> None:
+    dd = load_data_dictionary_from_compact_python_dictionary(
+        {"col_a": "desc a", "col_b": "desc b"}
+    )
+
+    assert not dd.is_multifile
+    assert len(dd.table_column_names_dict.get("file")) == 2
+
+
+def test_multi_file_python_dict() -> None:
+    dd = load_data_dictionary_from_compact_python_dictionary(
+        {
+            "a.csv": {"col_a": "desc a", "col_b": "desc b"},
+            "b.csv": {"col_c": "desc c", "col_d": "desc d"},
+        }
+    )
+
+    assert dd.is_multifile
+    assert len(dd.table_schemas) == 2
+    assert len(dd.table_column_names_dict.get("a.csv")) == 2
+    assert len(dd.table_column_names_dict.get("b.csv")) == 2
+
+
+def test_table_schema_with_file_name_python_dict() -> None:
+    ts = load_table_schema_from_compact_python_dictionary(
+        {"a.csv": {"col_a": "desc a", "col_b": "desc b"}}
+    )
+
+    assert ts.name == "a.csv"
+    assert len(ts.column_names) == 2
+
+
+def test_table_schema_without_file_name_python_dict() -> None:
+    ts = load_table_schema_from_compact_python_dictionary(
+        {"col_a": "desc a", "col_b": "desc b"}
+    )
+
+    assert ts.name == "file"
+    assert len(ts.column_names) == 2

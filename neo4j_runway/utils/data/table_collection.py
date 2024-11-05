@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict, List, Optional
 
+from .data_dictionary.data_dictionary import DataDictionary
 from .table import Table
 
 
@@ -16,8 +17,8 @@ class TableCollection:
         A list of all Tables to be used in graph data modeling.
     general_description : str
         A general description of the data.
-    data_dictionary : Dict[str, Any], optional
-        A dictionary with file names as keys. Each key contains a dictionary containing a description of each column in the file that is available for data modeling.
+    DataDictionary : DataDictionary
+        Contains a list of `TableSchema` defining the tables in the `TableCollection`.
     use_cases : Optional[List[str]], optional
         Any use cases that the graph data model should address.
     discovery : Optional[DiscoveryContent], optional
@@ -26,8 +27,8 @@ class TableCollection:
 
     data_directory: str
     tables: List[Table]
+    data_dictionary: DataDictionary
     general_description: str = ""
-    data_dictionary: Dict[str, Any] = dict()
     use_cases: Optional[List[str]] = None
     discovery: Optional[str] = None
 
@@ -35,8 +36,8 @@ class TableCollection:
         self,
         data_directory: str,
         tables: List[Table],
+        data_dictionary: DataDictionary,
         general_description: str = "",
-        data_dictionary: Dict[str, Any] = dict(),
         use_cases: Optional[List[str]] = None,
         discovery: Optional[str] = None,
     ) -> None:
@@ -52,8 +53,7 @@ class TableCollection:
         general_description : str
             A general description of the data, by default None
         data_dictionary : Optional[Dict[str, str]], optional
-            A dictionary with file names as keys. Each key contains a dictionary containing a description of each column in the file that is available for data modeling.
-            Only columns identified here will be considered for inclusion in the data model. By default None
+            Contains a list of `TableSchema` defining the tables in the `TableCollection`.
         use_cases : Optional[List[str]], optional
             Any use cases that the graph data model should address, by default None
         discovery : Optional[str], optional

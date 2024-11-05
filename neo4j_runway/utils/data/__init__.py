@@ -1,11 +1,23 @@
-from .data_dictionary.utils import load_data_dictionary_from_yaml
+from .data_dictionary.utils import (
+    load_data_dictionary_from_compact_python_dictionary,
+    load_data_dictionary_from_yaml,
+    load_table_schema_from_compact_python_dictionary,
+)
 from .data_loader import load_local_files
 from .table import Table
 from .table_collection import TableCollection
+from .data_dictionary.data_dictionary import DataDictionary
+from .data_dictionary.table_schema import TableSchema
+from .data_dictionary.column import Column
 
 __all__ = [
     "Table",
     "TableCollection",
     "load_local_files",
     "load_data_dictionary_from_yaml",
+    "load_data_dictionary_from_compact_python_dictionary",
+    "load_table_schema_from_compact_python_dictionary",
+    "Column",
+    "TableSchema",
+    "DataDictionary"
 ]

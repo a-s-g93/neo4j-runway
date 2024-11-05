@@ -22,7 +22,7 @@ from ..resources.prompts.discovery import (
     create_discovery_prompt_single_file,
     create_discovery_summary_prompt,
 )
-from ..utils.data import Table, TableCollection
+from ..utils.data import Table, TableCollection, DataDictionary
 from ..warnings import ExperimentalFeatureWarning
 from .discovery_content import DiscoveryContent
 
@@ -48,6 +48,8 @@ class Discovery:
         data: Union[pd.DataFrame, Table, TableCollection],
         user_input: Union[Dict[str, str], UserInput] = dict(),
         llm: Optional[BaseDiscoveryLLM] = None,
+        data_dictionary: Optional[DataDictionary] = None,
+        use_cases: Optional[List[str]] = None
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
