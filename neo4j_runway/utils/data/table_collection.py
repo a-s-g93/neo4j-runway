@@ -151,6 +151,22 @@ class TableCollection:
 
         return response
 
+    def get_table(self, table_name: str) -> Optional[Table]:
+        """
+        Retrieve a `Table` object by name. If it does not exist, then returns `None`.
+
+        Parameters
+        ----------
+        table_name : str
+            The name
+
+        Returns
+        -------
+        Table | None
+        """
+
+        return self.table_dict.get(table_name)
+
     def to_txt(self, file_dir: str = "./", file_name: str = "discovery.txt") -> None:
         """
         Write the generated discovery to a .txt file.

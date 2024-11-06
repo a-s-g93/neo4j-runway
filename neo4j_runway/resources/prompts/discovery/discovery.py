@@ -3,6 +3,7 @@ from typing import Dict, List
 import pandas as pd
 
 from ....utils.data import Table
+from ....utils.data.data_dictionary.table_schema import TableSchema
 from .constants import DISCOVERY_SUMMARY_GENERATION_RULES
 
 
@@ -11,7 +12,7 @@ def create_discovery_prompt_single_file(
     pandas_general_description: str,
     pandas_numeric_feature_descriptions: pd.DataFrame,
     pandas_categorical_feature_descriptions: pd.DataFrame,
-    data_dictionary: Dict[str, str] = dict(),
+    table_schema: TableSchema,
     use_cases: str = "",
 ) -> str:
     """
@@ -22,10 +23,10 @@ def create_discovery_prompt_single_file(
 
     feature_descriptions: str = ""
     for col in pandas_numeric_feature_descriptions.columns:
-        feature_descriptions += f"""{col}: {data_dictionary.get(col, "")}\nIt has the following distribution: {pandas_numeric_feature_descriptions[col]}\n\n"""
+        feature_descriptions += f"""{col}: {table_schema.get_description(col)}\nIt has the following distribution: {pandas_numeric_feature_descriptions[col]}\n\n"""
 
     for col in pandas_categorical_feature_descriptions.columns:
-        feature_descriptions += f"""{col}: {data_dictionary.get(col, "")}\nIt has the following distribution: {pandas_categorical_feature_descriptions[col]}\n\n"""
+        feature_descriptions += f"""{col}: {table_schema.get_description(col)}\nIt has the following distribution: {pandas_categorical_feature_descriptions[col]}\n\n"""
 
     use_cases_text = (
         "Focus on information that will help answer these use cases: "
@@ -95,10 +96,10 @@ Provide me with your preliminary analysis of this data. What are the most import
         feature_descriptions: str = ""
         if t.discovery_content is not None:
             for col in t.discovery_content.pandas_numerical_description.columns:
-                feature_descriptions += f"""{col}: {t.data_dictionary.get(col, "")}\nIt has the following distribution: {t.discovery_content.pandas_numerical_description[col]}\n\n"""
+                feature_descriptions += f"""{col}: {t.table_schema.get_description(col)}\nIt has the following distribution: {t.discovery_content.pandas_numerical_description[col]}\n\n"""
 
             for col in t.discovery_content.pandas_categorical_description.columns:
-                feature_descriptions += f"""{col}: {t.data_dictionary.get(col, "")}\nIt has the following distribution: {t.discovery_content.pandas_categorical_description[col]}\n\n"""
+                feature_descriptions += f"""{col}: {t.table_schema.get_description(col)}\nIt has the following distribution: {t.discovery_content.pandas_categorical_description[col]}\n\n"""
 
             file_info += f"""### {t.name}
 The following is a summary of the data:

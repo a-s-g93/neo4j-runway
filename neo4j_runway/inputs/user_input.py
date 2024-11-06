@@ -76,7 +76,9 @@ class UserInput(BaseModel):
                 raise ValueError(
                     f"Unable to parse provided `data_dictionary` arg into a `DataDictionary` object. Error: {e}"
                 )
-        assert isinstance(v, DataDictionary), "`data_dictionary` arg is not a `DataDictionary` object." 
+        assert isinstance(
+            v, DataDictionary
+        ), "`data_dictionary` arg is not a `DataDictionary` object."
 
         return v
 

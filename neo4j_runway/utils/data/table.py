@@ -22,7 +22,7 @@ class Table:
         The data in Pandas DataFrame format.
     general_description : str
         A general description of the data.
-    table_schema : Union[TableSchema, Dict[str, str]]
+    table_schema : TableSchema
         A description of each column that is available for data modeling. Only columns identified here will be considered for inclusion in the data model.
     use_cases : Optional[List[str]], optional
         Any use cases that the graph data model should address.
@@ -35,7 +35,7 @@ class Table:
     name: str
     file_path: str
     dataframe: pd.DataFrame
-    table_schema: Union[TableSchema, Dict[str, str]]
+    table_schema: TableSchema
     general_description: str = ""
     use_cases: Optional[List[str]] = None
     discovery_content: Optional[DiscoveryContent] = None
@@ -45,7 +45,7 @@ class Table:
         name: str,
         file_path: str,
         dataframe: pd.DataFrame,
-        table_schema: Union[TableSchema, Dict[str, str]],
+        table_schema: TableSchema,
         general_description: str = "",
         use_cases: Optional[List[str]] = None,
         discovery_content: Optional[DiscoveryContent] = None,
@@ -63,7 +63,7 @@ class Table:
             The data in Pandas DataFrame format.
         general_description : str
             A general description of the data, by default None
-        table_schema : Union[TableSchema, Dict[str, str]]
+        table_schema : TableSchema
             A description of each column that is available for data modeling.
         use_cases : Optional[List[str]], optional
             Any use cases that the graph data model should address, by default None
@@ -74,10 +74,15 @@ class Table:
         if not isinstance(dataframe, pd.DataFrame):
             raise ValueError("table argument 'data' should be a Pandas DataFrame.")
 
-        if not isinstance(table_schema, TableSchema):
-            table_schema = load_table_schema_from_compact_python_dictionary(
-                python_dictionary=table_schema, file_name=name
-            )
+        if isinstance(table_schema, dict):
+            try:
+                table_schema = load_table_schema_from_compact_python_dictionary(
+                    python_dictionary=table_schema, file_name=name
+                )
+            except Exception as e:
+                raise ValueError(
+                    f"Unable to parse dictionary `table_schema` into a `TableSchema` object. Error: {e}"
+                )
 
         self.name = name
         self.file_path = file_path
@@ -108,3 +113,15 @@ class Table:
         assert self.discovery_content is not None
 
         self.discovery_content.discovery = value
+
+    @property
+    def column_names(self) -> List[str]:
+        """
+        The columns in the Pandas DataFrame.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return list(self.dataframe.columns)

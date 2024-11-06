@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 import pandas as pd
 
 from ...exceptions import DataNotSupportedError
+from .data_dictionary.column import Column
 from .data_dictionary.data_dictionary import DataDictionary
 from .data_dictionary.table_schema import TableSchema
 from .data_dictionary.utils import load_data_dictionary_from_compact_python_dictionary
@@ -152,7 +153,10 @@ def load_csv(
         dataframe=data,
         file_path=file_path,
         general_description=general_description,
-        table_schema=table_schema or {name: "" for name in config["usecols"]},
+        table_schema=table_schema
+        or TableSchema(
+            name=name, columns=[Column(name=col_name) for col_name in config["usecols"]]
+        ),
         use_cases=use_cases,
         discovery_content=None,
     )
@@ -190,7 +194,10 @@ def load_json(
         file_path=file_path,
         dataframe=data,
         general_description=general_description,
-        table_schema=table_schema or {name: "" for name in cols},
+        table_schema=table_schema
+        or TableSchema(
+            name=name, columns=[Column(name=col_name) for col_name in config["usecols"]]
+        ),
         use_cases=use_cases,
         discovery_content=None,
     )

@@ -15,14 +15,18 @@ from IPython.display import (
 from numpy import number
 
 from ..exceptions import PandasDataSummariesNotGeneratedError
-from ..inputs import UserInput, user_input_safe_construct
 from ..llm.base import BaseDiscoveryLLM
 from ..resources.prompts.discovery import (
     create_discovery_prompt_multi_file,
     create_discovery_prompt_single_file,
     create_discovery_summary_prompt,
 )
-from ..utils.data import Table, TableCollection, DataDictionary
+from ..utils.data import (
+    DataDictionary,
+    Table,
+    TableCollection,
+    create_data_dictionary_from_pandas_dataframe,
+)
 from ..warnings import ExperimentalFeatureWarning
 from .discovery_content import DiscoveryContent
 
@@ -46,10 +50,11 @@ class Discovery:
     def __init__(
         self,
         data: Union[pd.DataFrame, Table, TableCollection],
-        user_input: Union[Dict[str, str], UserInput] = dict(),
         llm: Optional[BaseDiscoveryLLM] = None,
         data_dictionary: Optional[DataDictionary] = None,
-        use_cases: Optional[List[str]] = None
+        general_description: Optional[str] = None,
+        file_name: Optional[str] = None,
+        use_cases: Optional[List[str]] = None,
     ) -> None:
         """
         The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
@@ -71,30 +76,6 @@ class Discovery:
             This is only necessary if providing a Pandas DataFrame as data input. Otherwise it will be ignored. By default = dict()
         """
 
-        # we convert all user_input to a UserInput object
-        if not isinstance(user_input, UserInput) and isinstance(data, pd.DataFrame):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input, allowed_columns=data.columns
-            )
-        elif not isinstance(user_input, UserInput) and isinstance(data, Table):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input,
-                data_dictionary=data.data_dictionary,
-                use_cases=data.use_cases,
-            )
-        elif not isinstance(user_input, UserInput) and isinstance(
-            data, TableCollection
-        ):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input,
-                data_dictionary=data.data_dictionary,
-                use_cases=data.use_cases,
-            )
-        elif isinstance(user_input, UserInput):
-            self.user_input = user_input
-        else:
-            raise ValueError("Unable to parse `user_input` arg.")
-
         self.llm = llm
 
         # self.data must be a TableCollection
@@ -102,19 +83,31 @@ class Discovery:
         #   1. Table / TableCollection content
         #   2. UserInput content
         if isinstance(data, pd.DataFrame):
+            cols = (
+                data_dictionary.table_schemas[0].column_names
+                if data_dictionary is not None
+                else None
+            )
+            data_dictionary = (
+                create_data_dictionary_from_pandas_dataframe(data)
+                if data_dictionary is None
+                else data_dictionary
+            )
+            file_name = data_dictionary.table_schemas[0].name
+
             t = Table(
-                name="dataframe",
+                name=file_name or "file",
                 file_path="",
-                dataframe=data[self.user_input.allowed_columns],
-                general_description=self.user_input.general_description,
-                data_dictionary=self.user_input.data_dictionary,
-                use_cases=self.user_input.use_cases,
+                dataframe=data[cols] if cols is not None else data,
+                general_description=general_description or "",
+                table_schema=data_dictionary.get_table_schema(file_name or "file"),
+                use_cases=use_cases,
             )
             self.data = TableCollection(
                 data_directory="",
                 tables=[t],
                 general_description=t.general_description,
-                data_dictionary=t.data_dictionary,
+                data_dictionary=data_dictionary,
                 use_cases=t.use_cases,
             )
         elif isinstance(data, Table):
@@ -123,7 +116,7 @@ class Discovery:
                 data_directory=data_dir,
                 tables=[data],
                 general_description=data.general_description,
-                data_dictionary=data.data_dictionary,
+                data_dictionary=DataDictionary(table_schemas=[data.table_schema]),
                 use_cases=data.use_cases,
             )
         elif isinstance(data, TableCollection):
@@ -142,6 +135,17 @@ class Discovery:
             )
 
     @property
+    def data_dictionary(self) -> DataDictionary:
+        """
+        The data dictionary describing the data.
+
+        Returns
+        -------
+        DataDictionary
+        """
+        return self.data.data_dictionary
+
+    @property
     def is_multifile(self) -> bool:
         """
         Whether data is multi-file or not.
@@ -152,12 +156,7 @@ class Discovery:
             True if multi-file detected, else False
         """
 
-        if (
-            len(list(self.data.data_dictionary.keys())) == 1
-        ):  # assumes always more than 1 column for modeling
-            return False
-
-        return self.user_input.is_multifile
+        return self.data_dictionary.is_multifile
 
     @property
     def discovery(self) -> str:
@@ -286,7 +285,7 @@ class Discovery:
                         pandas_numeric_feature_descriptions=self.data.tables[
                             0
                         ].discovery_content.pandas_numerical_description,
-                        data_dictionary=self.data.data_dictionary,
+                        table_schema=self.data.data_dictionary.table_schemas[0],
                         use_cases=self.data.pretty_use_cases,
                     )
                 )

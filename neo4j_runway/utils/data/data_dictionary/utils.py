@@ -1,8 +1,10 @@
 from typing import Any, Dict, List, Optional
 
+import pandas as pd
 import yaml
 
 from ..._utils.dictionary import get_dictionary_depth
+from .column import Column
 from .data_dictionary import DataDictionary
 from .table_schema import TableSchema
 
@@ -212,3 +214,25 @@ def load_table_schema_from_compact_python_dictionary(
         raise ValueError(
             "Unable to parse the provided `python_dictionary` into a `TableSchema` object."
         )
+
+
+def create_data_dictionary_from_pandas_dataframe(
+    dataframe: pd.DataFrame, name: str = "file"
+) -> DataDictionary:
+    """
+    Create a `DataDictionary` from the columns of a provided DataFrame.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        The Pandas DataFrame
+
+    Returns
+    -------
+    DataDictionary
+    """
+
+    table_schema = TableSchema(
+        name=name, columns=[Column(name=c) for c in dataframe.columns.tolist()]
+    )
+    return DataDictionary(table_schemas=[table_schema])

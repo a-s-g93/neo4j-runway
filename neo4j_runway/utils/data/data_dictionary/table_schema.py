@@ -98,3 +98,23 @@ class TableSchema(BaseModel):
         compact_info: Dict[str, str] = dict()
         [compact_info.update(c.compact_dict) for c in self.columns]
         return {self.name: compact_info}
+
+    def get_description(self, column_name: str) -> str:
+        """
+        Retrieve the description for a column. If there is no description, then return an empty string.
+
+        Parameters
+        ----------
+        column_name : str
+            The column name to search for in the table.
+
+        Returns
+        -------
+        str
+            A description of the column, if it exists.
+        """
+
+        col = self.columns_dict.get(column_name)
+        if col is not None:
+            return col.description or ""
+        return ""
