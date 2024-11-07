@@ -6,7 +6,11 @@
 
 ### Changed
 
+* Deprecating `user_input` args and `UserInput` object. The resposibilities of these are handled by `TableCollection` and `DataDictionary`
+
 ### Added
+
+* Data dictionaries are now held in a `DataDictionary` object allowing for advanced validation and better integrations throughout the code base
 
 ## 0.14.0
 
