@@ -33,18 +33,7 @@ from .discovery_content import DiscoveryContent
 
 class Discovery:
     """
-    The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
-
-    Attributes
-    ----------
-    llm : BaseDiscoveryLLM
-        The LLM instance used to generate data discovery.
-    user_input : UserInput
-        User provided descriptions of the data.
-        A class containing user provided information about the data.
-    data : TableCollection
-        The data contained in a TableCollection.
-        All data provided to the Discovery constructor is converted to a Table and placed in a TableCollection class.
+    Handles discovery generation for the provided data via Pandas and LLM analysis.
     """
 
     def __init__(
@@ -57,7 +46,7 @@ class Discovery:
         use_cases: Optional[List[str]] = None,
     ) -> None:
         """
-        The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
+        Handles discovery generation for the provided data via Pandas and LLM analysis.
 
         Parameters
         ----------
@@ -65,15 +54,24 @@ class Discovery:
             The data to run discovery on. Can be either a Pandas DataFrame, Runway Table or Runway TableCollection.
             Multi file inputs should be provided via the TableCollection class.
             Single file inputs may be provided as a DataFrame or Runway Table. They will be placed in a TableCollection class upon initialization of the Discovery class.
-        llm : LLM, optional
+        llm : Optional[BaseDiscoveryLLM], optional
             The LLM instance used to generate data discovery.
             If running discovery for multiple files,
             it is recommended to use an async compatible LLM and use the `run_async` method.
             Not required if only interested in generating Pandas summaries. By default None.
-        user_input : Union[Dict[str, str], UserInput]
-            User provided descriptions of the data.
-            If a dictionary, then should contain the keys "general_description" and all desired columns.
-            This is only necessary if providing a Pandas DataFrame as data input. Otherwise it will be ignored. By default = dict()
+        data_dictionary : Optional[DataDictionary], optional
+            A `DataDictionary` object describing the data, by default None
+        general_description : Optional[str], optional
+            A general description of the data, by default None
+        file_name : Optional[str], optional
+            The file name, if providing only a single file, by default None
+        use_cases : Optional[List[str]], optional
+            A list of use cases that should be addressed by the final graph data model, by default None
+
+        Raises
+        ------
+        ValueError
+            Invalid data is provided.
         """
 
         self.llm = llm
@@ -125,7 +123,7 @@ class Discovery:
             self.data = data
         else:
             raise ValueError(
-                "provided data is not of an accepted type. Must be Pandas DataFrame, Runway Table or Runway TableCollection."
+                "Provided data is not of an accepted type. Must be Pandas DataFrame, Runway Table or Runway TableCollection."
             )
 
         self._discovery_ran = False
