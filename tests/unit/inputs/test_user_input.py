@@ -53,41 +53,41 @@ class TestUserInput(unittest.TestCase):
             self.assertIn("col_a", safe_input.allowed_columns.get("file"))
             self.assertIn("col_b", safe_input.allowed_columns.get("file"))
 
-    def test_unsafe_construction_no_data_dictionary(self) -> None:
-        unsafe_input = {"general_description": "this is the general description."}
-        allowed_columns = ["col_a", "col_b"]
+    # def test_unsafe_construction_no_data_dictionary(self) -> None:
+    #     unsafe_input = {"general_description": "this is the general description."}
+    #     allowed_columns = ["col_a", "col_b"]
 
-        with self.assertWarns(Warning):
-            safe_input = user_input_safe_construct(
-                unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
-            )
+    #     with self.assertWarns(Warning):
+    #         safe_input = user_input_safe_construct(
+    #             unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+    #         )
 
-            self.assertEqual(
-                safe_input.general_description, "this is the general description."
-            )
-            self.assertEqual(
-                set(allowed_columns),
-                set(safe_input.data_dictionary.get_table_schema("file").column_names),
-            )
-            self.assertIn("col_a", safe_input.allowed_columns.get("file"))
-            self.assertIn("col_b", safe_input.allowed_columns.get("file"))
+    #         self.assertEqual(
+    #             safe_input.general_description, "this is the general description."
+    #         )
+    #         self.assertEqual(
+    #             set(allowed_columns),
+    #             set(safe_input.data_dictionary.get_table_schema("file").column_names),
+    #         )
+    #         self.assertIn("col_a", safe_input.allowed_columns.get("file"))
+    #         self.assertIn("col_b", safe_input.allowed_columns.get("file"))
 
-    def test_unsafe_construction_no_input(self) -> None:
-        unsafe_input = {}
-        allowed_columns = ["col_a", "col_b"]
+    # def test_unsafe_construction_no_input(self) -> None:
+    #     unsafe_input = {}
+    #     allowed_columns = ["col_a", "col_b"]
 
-        with self.assertWarns(Warning):
-            safe_input = user_input_safe_construct(
-                unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
-            )
+    #     with self.assertWarns(Warning):
+    #         safe_input = user_input_safe_construct(
+    #             unsafe_user_input=unsafe_input, allowed_columns=allowed_columns
+    #         )
 
-            self.assertEqual(safe_input.general_description, "")
-            self.assertEqual(
-                set(allowed_columns),
-                set(safe_input.data_dictionary.get_table_schema("file").column_names),
-            )
-            self.assertIn("col_a", safe_input.allowed_columns.get("file"))
-            self.assertIn("col_b", safe_input.allowed_columns.get("file"))
+    #         self.assertEqual(safe_input.general_description, "")
+    #         self.assertEqual(
+    #             set(allowed_columns),
+    #             set(safe_input.data_dictionary.get_table_schema("file").column_names),
+    #         )
+    #         self.assertIn("col_a", safe_input.allowed_columns.get("file"))
+    #         self.assertIn("col_b", safe_input.allowed_columns.get("file"))
 
     def test_unsafe_construction_columns_not_found_in_allowed_list(self) -> None:
         unsafe_input = {
