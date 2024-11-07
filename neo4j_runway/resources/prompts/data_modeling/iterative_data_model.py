@@ -1,5 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
+from ....utils.data.data_dictionary.data_dictionary import DataDictionary
 from .formatters import (
     get_rules,
 )
@@ -12,8 +13,8 @@ def create_data_model_iteration_prompt(
     data_model_to_modify: "DataModel",  # type: ignore
     multifile: bool,
     corrections: Optional[str] = None,
-    data_dictionary: Optional[Dict[str, Any]] = None,
-    use_cases: Optional[str] = None,
+    data_dictionary: Optional[DataDictionary] = None,
+    use_cases: Optional[List[str]] = None,
     use_yaml_data_model: bool = False,
     advanced_rules: bool = True,
 ) -> str:

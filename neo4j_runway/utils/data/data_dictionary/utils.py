@@ -233,6 +233,6 @@ def create_data_dictionary_from_pandas_dataframe(
     """
 
     table_schema = TableSchema(
-        name=name, columns=[Column(name=c) for c in dataframe.columns.tolist()]
+        name=name, columns=[Column(name=c) for c in list(dataframe.columns)]
     )
     return DataDictionary(table_schemas=[table_schema])

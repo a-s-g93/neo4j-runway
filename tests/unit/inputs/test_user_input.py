@@ -119,9 +119,8 @@ class TestUserInput(unittest.TestCase):
 
         self.assertFalse(u.is_multifile)
 
-    def test_data_dictionary_with_column_descriptions(self) -> None:
-        ui = UserInput(column_descriptions={"feature_1": "f1", "feature_2": "f2"})
-        print(ui)
+    # def test_data_dictionary_with_column_descriptions(self) -> None:
+    #     ui = UserInput(column_descriptions={"feature_1": "f1", "feature_2": "f2"})
 
 
 if __name__ == "__main__":

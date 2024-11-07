@@ -1,5 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
+from ....utils.data.data_dictionary.data_dictionary import DataDictionary
 from .constants import (
     DATA_MODEL_FORMAT,
     NODE_GENERATION_RULES,
@@ -12,9 +13,9 @@ from .template import create_data_modeling_prompt
 def create_initial_nodes_prompt(
     discovery_text: str,
     multifile: bool,
-    use_cases: Optional[str],
+    use_cases: Optional[List[str]],
     valid_columns: Dict[str, Any],
-    data_dictionary: Optional[Dict[str, Any]] = None,
+    data_dictionary: Optional[DataDictionary] = None,
 ) -> str:
     """
     Generate a prompt to find nodes and properties to include in a data model.
@@ -43,8 +44,8 @@ def create_initial_data_model_prompt(
     data_model_recommendations: "Nodes",  # type: ignore
     multifile: bool,
     valid_columns: Dict[str, Any],
-    data_dictionary: Optional[Dict[str, Any]] = None,
-    use_cases: Optional[str] = None,
+    data_dictionary: Optional[DataDictionary] = None,
+    use_cases: Optional[List[str]] = None,
     advanced_rules: bool = True,
 ) -> str:
     """

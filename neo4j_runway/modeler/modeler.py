@@ -4,11 +4,15 @@ from typing import Any, Dict, List, Optional, Union
 from graphviz import Digraph
 
 from ..discovery import Discovery
-from ..inputs import UserInput, user_input_safe_construct
+from ..inputs import UserInput
 from ..llm.base import BaseDataModelingLLM
 from ..models import DataModel
 from ..resources.prompts.data_modeling import (
     create_data_model_iteration_prompt,
+)
+from ..utils.data.data_dictionary.data_dictionary import DataDictionary
+from ..utils.data.data_dictionary.utils import (
+    load_data_dictionary_from_compact_python_dictionary,
 )
 from ..warnings import ExperimentalFeatureWarning
 
@@ -38,9 +42,10 @@ class GraphDataModeler:
         self,
         llm: BaseDataModelingLLM,
         discovery: Union[str, Discovery] = "",
-        user_input: Union[Dict[str, str], UserInput] = dict(),
-        data_dictionary: Optional[Dict[str, Any]] = None,
-        allowed_columns: List[str] = list(),
+        user_input: Optional[Union[Dict[str, str], UserInput]] = None,
+        data_dictionary: Optional[DataDictionary] = None,
+        use_cases: Optional[List[str]] = None,
+        **kwargs: Any,
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
@@ -65,44 +70,47 @@ class GraphDataModeler:
         """
 
         self.llm = llm
+        self.use_cases = (
+            use_cases  # will be overwritten if a Discovery object is provided
+        )
 
+        # we prefer users to provide the Discovery object
         if isinstance(discovery, Discovery):
-            self.user_input = discovery.user_input
             # data dictionary should have been constructed before / during the discovery phase
-            self._data_dictionary = discovery.data.data_dictionary
+            self.data_dictionary = discovery.data.data_dictionary
             self.discovery = discovery.discovery
-            self.user_input = discovery.user_input
 
-        else:
-            if not allowed_columns and not user_input and not data_dictionary:
-                raise ValueError(
-                    "Not enough information provided. Please provide a Discovery object, user_input, allowed_columns or a data_dictionary respectively to the constructor."
-                )
-            # we convert all user_input to a UserInput object
-            elif not isinstance(user_input, UserInput):
-                self.user_input = user_input_safe_construct(
-                    unsafe_user_input=user_input,
-                    allowed_columns=allowed_columns,
-                    data_dictionary=data_dictionary,
-                )
-            else:
-                self.user_input = user_input
-
+        # if no Discovery object is provided, they should have a proper DataDictionary object
+        elif data_dictionary is not None:
+            self.data_dictionary = data_dictionary
             self.discovery = discovery
 
-        # set the data dictionary
-        # we take the data_dictionary arg first in cases where
-        # a user may want to slightly modify the features available for modeling,
-        # but still use the generated discovery information
-        if data_dictionary is not None:
-            self._data_dictionary = data_dictionary
+        # as a last resort we can parse any `user_input` values they pass. This will be phased out in later versions.
+        elif isinstance(user_input, dict):
+            user_input.pop("general_description", None)
+            self.data_dictionary = load_data_dictionary_from_compact_python_dictionary(
+                user_input
+            )
+            self.discovery = discovery
+        elif isinstance(user_input, UserInput):
+            if isinstance(user_input.data_dictionary, DataDictionary):
+                self.data_dictionary = user_input.data_dictionary
+            else:
+                self.data_dictionary = (
+                    load_data_dictionary_from_compact_python_dictionary(
+                        user_input.data_dictionary
+                    )
+                )
+            self.discovery = discovery
+            self.use_cases = user_input.use_cases or use_cases
 
+        # otherwise crash
         else:
-            # this is a data dictionary derived from the allowed_columns arg
-            # or the original user_input
-            self._data_dictionary = self.user_input.data_dictionary
+            raise ValueError(
+                "Not enough information provided. Please provide a Discovery object or a valid data_dictionary to the constructor."
+            )
 
-        if self.discovery == "":
+        if not self.discovery:
             warnings.warn(
                 "It is highly recommended to provide discovery generated from the Discovery module."
             )
@@ -127,15 +135,8 @@ class GraphDataModeler:
         bool
             True if multi-file detected, else False
         """
-        if isinstance(self.discovery, Discovery):
-            return self.discovery.data.size > 1
 
-        if (
-            len(list(self._data_dictionary.keys())) == 1
-        ):  # assumes always more than 1 column for modeling
-            return False
-
-        return self.user_input.is_multifile
+        return self.data_dictionary.is_multifile
 
     @property
     def allowed_columns(self) -> Dict[str, List[str]]:
@@ -148,30 +149,9 @@ class GraphDataModeler:
         -------
         Dict[str, List[str]]
             The allowd columns for data model generation.
-
-        Raises
-        ------
-        AssertionError
-            When no _data_dictionary attribute is initialized in the GraphDataModeler class.
         """
 
-        assert (
-            self._data_dictionary is not None
-        ), "No data dictionary present in GraphDataModeler class."
-
-        if self.is_multifile:
-            return {
-                k: [col for col, desc in v.items() if not desc.endswith("ignore")]
-                for k, v in self._data_dictionary.items()
-            }
-        else:
-            return {
-                "file": [
-                    col
-                    for col, desc in self._data_dictionary.items()
-                    if not desc.endswith("ignore")
-                ]
-            }
+        return self.data_dictionary.table_column_names_dict
 
     @property
     def current_model(self) -> DataModel:
@@ -305,8 +285,8 @@ class GraphDataModeler:
         response = self.llm._get_initial_data_model_response(
             discovery_text=self.discovery,
             valid_columns=self.allowed_columns,
-            data_dictionary=self._data_dictionary,
-            use_cases=self.user_input.pretty_use_cases,
+            data_dictionary=self.data_dictionary,
+            use_cases=self.use_cases,
             multifile=self.is_multifile,
             use_advanced_data_model_generation_rules=use_advanced_data_model_generation_rules,
             max_retries=max_retries,
@@ -377,8 +357,8 @@ class GraphDataModeler:
                     data_model_to_modify=self.current_model,
                     multifile=self.is_multifile,
                     corrections=corrections,
-                    data_dictionary=self._data_dictionary,
-                    use_cases=self.user_input.pretty_use_cases,
+                    data_dictionary=self.data_dictionary,
+                    use_cases=self.use_cases,
                     advanced_rules=use_advanced_data_model_generation_rules,
                     valid_columns=self.allowed_columns,
                 )
@@ -386,7 +366,7 @@ class GraphDataModeler:
                     formatted_prompt=formatted_prompt,
                     max_retries=max_retries,
                     valid_columns=self.allowed_columns,
-                    data_dictionary=self._data_dictionary,
+                    data_dictionary=self.data_dictionary,
                     allow_duplicate_properties=allow_duplicate_properties,
                     enforce_uniqueness=enforce_uniqueness,
                     allow_parallel_relationships=allow_parallel_relationships,

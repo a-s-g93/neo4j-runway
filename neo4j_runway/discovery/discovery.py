@@ -89,7 +89,9 @@ class Discovery:
                 else None
             )
             data_dictionary = (
-                create_data_dictionary_from_pandas_dataframe(data)
+                create_data_dictionary_from_pandas_dataframe(
+                    dataframe=data, name=file_name or "file"
+                )
                 if data_dictionary is None
                 else data_dictionary
             )
@@ -169,7 +171,7 @@ class Discovery:
             The `discovery` attribute of the `data` attribute.
         """
 
-        assert self.data.discovery is not None
+        assert self.data.discovery is not None, "No generated discovery information."
 
         return self.data.discovery
 

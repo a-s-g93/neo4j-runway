@@ -27,7 +27,7 @@ class UserInput(BaseModel):
     """
 
     general_description: str = ""
-    data_dictionary: Union[Dict[str, Any], DataDictionary]
+    data_dictionary: DataDictionary
     use_cases: Optional[List[str]] = None
 
     # def __init__(
@@ -63,7 +63,7 @@ class UserInput(BaseModel):
     #         use_cases=use_cases,
     #     )
 
-    @field_validator("data_dictionary")
+    @field_validator("data_dictionary", mode="before")
     def validate_data_dictionary(
         cls, v: Union[Dict[str, Any], DataDictionary]
     ) -> DataDictionary:
@@ -130,7 +130,7 @@ class UserInput(BaseModel):
 def user_input_safe_construct(
     unsafe_user_input: Dict[str, Any],
     allowed_columns: List[str] = list(),
-    data_dictionary: Optional[Dict[str, Any]] = None,
+    data_dictionary: Optional[DataDictionary] = None,
     use_cases: Optional[List[str]] = None,
 ) -> UserInput:
     """
@@ -166,7 +166,7 @@ def user_input_safe_construct(
     # check if multifile
     def _is_multifile() -> bool:
         if data_dictionary is not None:
-            possible_cols = list(data_dictionary.values())
+            possible_cols = list(data_dictionary.table_schemas[0].column_names)
             if len(possible_cols) == 0:
                 return False
             return isinstance(possible_cols[0], dict)
@@ -206,7 +206,9 @@ def user_input_safe_construct(
     return UserInput(
         general_description=general_description,
         data_dictionary=data_dictionary
-        or unsafe_user_input
-        or {k: "" for k in allowed_columns},
+        or load_data_dictionary_from_compact_python_dictionary(unsafe_user_input)
+        or load_data_dictionary_from_compact_python_dictionary(
+            {k: "" for k in allowed_columns}
+        ),
         use_cases=use_cases or unsafe_user_input.get("use_cases"),
     )

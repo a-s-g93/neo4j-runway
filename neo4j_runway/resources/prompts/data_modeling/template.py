@@ -27,12 +27,12 @@ def create_data_modeling_prompt(
     multifile: bool,
     data_model_as_yaml: bool = False,
     discovery: Optional[str] = None,
-    data_dictionary: Optional[Dict[str, Any]] = None,
+    data_dictionary: Optional["DataDictionary"] = None,  # type: ignore
     errors: Optional[List[str]] = None,
     corrections: Optional[str] = None,
     data_model: Optional["DataModel"] = None,  # type: ignore
     nodes: Optional["Nodes"] = None,  # type: ignore
-    use_cases: Optional[str] = None,
+    use_cases: Optional[List[str]] = None,
     data_model_format: Optional[str] = None,
     retry_prompt: bool = False,
     suffix: Optional[str] = None,

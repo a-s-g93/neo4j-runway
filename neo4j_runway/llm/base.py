@@ -22,6 +22,7 @@ from ..resources.prompts.data_modeling import (
     create_initial_nodes_prompt,
 )
 from ..utils._utils.print_formatters import bold, cyan, green, pretty_list, red
+from ..utils.data.data_dictionary.data_dictionary import DataDictionary
 from .context import create_context
 from .retry import create_retry_logic
 
@@ -130,10 +131,10 @@ class BaseDataModelingLLM(ABC):
         self,
         discovery_text: str,
         valid_columns: Dict[str, List[str]],
-        use_cases: str,
+        use_cases: Optional[List[str]],
         multifile: bool,
         use_advanced_data_model_generation_rules: bool,
-        data_dictionary: Dict[str, Any],
+        data_dictionary: DataDictionary,
         max_retries: int = 3,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
@@ -206,7 +207,7 @@ class BaseDataModelingLLM(ABC):
         self,
         formatted_prompt: str,
         valid_columns: dict[str, list[str]],
-        data_dictionary: Dict[str, Any],
+        data_dictionary: DataDictionary,
         max_retries: int = 3,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
@@ -278,7 +279,7 @@ class BaseDataModelingLLM(ABC):
         self,
         formatted_prompt: str,
         valid_columns: dict[str, list[str]],
-        data_dictionary: Dict[str, Any],
+        data_dictionary: DataDictionary,
         max_retries: int = 3,
         allow_duplicate_properties: bool = False,
         enforce_uniqueness: bool = True,
