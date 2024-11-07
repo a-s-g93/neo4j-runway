@@ -99,11 +99,15 @@ Generate a report containing information from the
     notebook : bool, optional
         Whether the report will be displayed in a Python
         notebook, by default True
+    return_report : bool, optional
+        Whether to directly return the report as a String,
+        by default True
 
     Returns
     -------
-    str
-        The report in string format.
+    Optional[str]
+        The report in string format, if `return_report` is
+        True
 
 
 ### database_constraints
@@ -223,6 +227,11 @@ Calculate the in-degree and out-degree of each node in
     as_dataframe : bool, optional
         Whether to return results as a Pandas DataFrame, by
         default True
+    top_k : int, optional
+        The top number of results to return, by default 10
+    order_by : Literal['in', 'out'], optional
+        Whether to order by inDegree or outDegree, by
+        default 'out'
 
     Returns
     -------
@@ -354,11 +363,26 @@ Run all analytics on the database. Results will be added
     refresh : bool, optional
         Whether to refresh all analytics regardless of if
         they've been previously ran, by default False
+    include : List[str], optional
+        The methods to include. Overwrites any content in
+        exclude. If `None`, then this arg is ignored, by
+        default None
+    exclude : List[str], optional
+        The methods to exclude. If `None` or `include` is
+        not `None`, then this arg is ignored, by default
+        None
+    return_cache : bool, optional
+        Whether to directly return the updated cache, by
+        default True
+    method_params : Dict[str, Dict[str, Any]], optional
+        Any parameters to include with method calls. Methods
+        are keys and values are a dictionary of argument
+        keys and values. By default dict()
 
     Returns
     -------
-    EDACache
-        The results cache
+    Optional[EDACache]
+        The results cache if `return_cache` is True
 
 
 ### save_report
@@ -400,6 +424,10 @@ View the report.
 
 
 ## Class Properties
+
+
+### available_methods
+The available methods to be run against the database.
 
 
 ### database_edition

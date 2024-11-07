@@ -6,4 +6,4 @@ from .models import DataModel
 
 __all__ = ["Discovery", "GraphDataModeler", "PyIngest", "UserInput", "DataModel"]
 
-__version__ = "0.13.1"
+__version__ = "0.14.0"
