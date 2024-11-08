@@ -15,6 +15,7 @@ from IPython.display import (
 from numpy import number
 
 from ..exceptions import PandasDataSummariesNotGeneratedError
+from ..inputs.user_input import UserInput
 from ..llm.base import BaseDiscoveryLLM
 from ..resources.prompts.discovery import (
     create_discovery_prompt_multi_file,
@@ -26,6 +27,7 @@ from ..utils.data import (
     Table,
     TableCollection,
     create_data_dictionary_from_pandas_dataframe,
+    load_data_dictionary_from_compact_python_dictionary,
 )
 from ..warnings import ExperimentalFeatureWarning
 from .discovery_content import DiscoveryContent
@@ -44,9 +46,11 @@ class Discovery:
         general_description: Optional[str] = None,
         file_name: Optional[str] = None,
         use_cases: Optional[List[str]] = None,
+        user_input: Optional[Union[Dict[str, str], UserInput]] = None,
     ) -> None:
         """
         Handles discovery generation for the provided data via Pandas and LLM analysis.
+        NOTE: It is highly recommended to provide data in the form of a `TableCollection`. This will then also contain the other `__init__` arguments, except for `llm`.
 
         Parameters
         ----------
@@ -67,6 +71,10 @@ class Discovery:
             The file name, if providing only a single file, by default None
         use_cases : Optional[List[str]], optional
             A list of use cases that should be addressed by the final graph data model, by default None
+        user_input : Union[Dict[str, str], UserInput], optional
+            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default None
+            .. deprecated:: 0.15.0
+                `user_input` will be removed as its functions are handled better by `TableCollection` and `DataDictionary`.
 
         Raises
         ------
@@ -75,6 +83,26 @@ class Discovery:
         """
 
         self.llm = llm
+
+        if user_input:
+            if isinstance(user_input, dict):
+                general_description = (
+                    user_input.pop("general_description") or general_description
+                )
+                use_cases_temp = user_input.pop("use_cases") or use_cases
+                if isinstance(use_cases_temp, str):
+                    use_cases = [use_cases_temp]
+                else:
+                    use_cases = use_cases_temp
+                data_dictionary = load_data_dictionary_from_compact_python_dictionary(
+                    user_input, file_name=file_name or "file"
+                )
+            elif isinstance(user_input, UserInput):
+                general_description = (
+                    user_input.general_description or general_description
+                )
+                use_cases = user_input.use_cases or use_cases
+                data_dictionary = user_input.data_dictionary
 
         # self.data must be a TableCollection
         # precedence

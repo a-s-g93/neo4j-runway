@@ -44,7 +44,7 @@ def create_context(
 
     Parameters
     ----------
-    data_dictionary : Dict[str, Any]
+    data_dictionary : DataDictionary
         The data dictionary containing files, columns and descriptions.
     valid_columns : Optional[Dict[str, List[str]]], optional
         The valid columns allowed per file, by default None
@@ -62,6 +62,10 @@ def create_context(
     Context
         The context for validation.
     """
+
+    assert isinstance(
+        data_dictionary, DataDictionary
+    ), "Must provide a `DataDictionary` object."
 
     if valid_columns is None:
         valid_columns = data_dictionary.table_column_names_dict

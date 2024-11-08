@@ -104,13 +104,13 @@ def load_data_dictionary_from_compact_python_dictionary(
         The input dictionary. Must adhere to the following structure:
         multi or single file input
         {
-        <file name>: {
-            <column name>: <column description>, ...
+        file_name: {
+            column_name: column_description, ...
             }, ...
         }
         OR for single file only
         {
-        <column name>: <column description>, ...
+        column_name>: <column description>, ...
         }
     file_name : str, optional
         The file name, if providing a single file data dictionary, by default 'file'

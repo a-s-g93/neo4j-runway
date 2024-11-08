@@ -19,23 +19,9 @@ from ..warnings import ExperimentalFeatureWarning
 
 class GraphDataModeler:
     """
-    This class is responsible for generating a graph data model via communication with an LLM.
+    Handles generating a graph data model via communication with an LLM.
     It handles prompt generation, model generation history as well as access to the generated data models.
 
-     Attributes
-    ----------
-    llm : BaseLLM
-        The LLM used to generate data models.
-    discovery : Union[str, Discovery], optional
-        Either a string containing the LLM generated discovery or a Discovery object that has been run.
-    user_input : Union[Dict[str, str], UserInput], optional
-        Either a dictionary with keys general_description and column names with descriptions or a UserInput object.
-    model_iterations : int
-        The number of times a data model has been returned.
-    model_history : List[DataModel]
-        A list of all valid models generated.
-    current_model : DataModel
-        The most recently generated or loaded data model.
     """
 
     def __init__(
@@ -49,7 +35,7 @@ class GraphDataModeler:
     ) -> None:
         """
         Takes an LLM instance and Discovery information.
-        Either a Discovery object can be provided, or each field can be provided individually.
+        NOTE: It is highly recommended to provide the Discovery object directly to the constructor.
 
         Parameters
         ----------
@@ -59,14 +45,12 @@ class GraphDataModeler:
             Either a string containing the LLM generated discovery or a Discovery object that has been run.
             If a Discovery object is provided then the remaining discovery attributes don't need to be provided, by default ""
         user_input : Union[Dict[str, str], UserInput], optional
-            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default dict()
-        data_dictionary : Dict[str, Any], optional
-            A data dictionary. If single-file input, then the keys will be column names and the values are descriptions.
-            If multi-file input, the keys are file names and each contain a nested dictionary of column name keys and description values.
-            This argument will take precedence over any data dictionary provided via the Discovery object.
-            This argument will take precedence over the allowed_columns argument. By default None
-        allowed_columns : List[str], optional
-            A list of allowed columns for modeling. Can be used only for single-file inputs. By default = list()
+            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default None
+            .. deprecated:: 0.15.0
+                `user_input` will be removed as its functions are handled better by `TableCollection` and `DataDictionary`.
+        data_dictionary : Optional[DataDictionary], optional
+            A `DataDictionary` object describing the data
+            This argument will take precedence over any data dictionary provided via the Discovery object. By default None
         """
 
         self.llm = llm
