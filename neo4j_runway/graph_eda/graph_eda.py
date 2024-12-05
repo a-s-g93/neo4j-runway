@@ -19,7 +19,7 @@ logging.getLogger("neo4j").setLevel(logging.CRITICAL)
 
 class GraphEDA:
     """
-        The GraphEDA module contains queries that return
+    The GraphEDA module contains queries that return
     information about the Neo4j database and its contents.
 
     The purpose of GraphEDA is to understand the characteristics
@@ -299,7 +299,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -325,7 +325,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -350,7 +350,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
 
         Returns
         -------
@@ -379,7 +379,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -405,7 +405,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -431,7 +431,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -455,7 +455,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
 
         Returns
         -------
@@ -484,7 +484,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -510,7 +510,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -534,7 +534,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
 
         Returns
         -------
@@ -573,7 +573,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -597,7 +597,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
 
         Returns
         -------
@@ -625,7 +625,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
 
@@ -655,7 +655,7 @@ class GraphEDA:
         Parameters
         ----------
         refresh : bool, optional
-            Whether to re-query the databae, by default False
+            Whether to re-query the database, by default False
         as_dataframe : bool, optional
             Whether to return results as a Pandas DataFrame, by default True
         top_k : int, optional

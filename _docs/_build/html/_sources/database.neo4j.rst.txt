@@ -1,0 +1,21 @@
+database.neo4j package
+======================
+
+Submodules
+----------
+
+database.neo4j.neo4j\_graph module
+----------------------------------
+
+.. automodule:: database.neo4j.neo4j_graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: database.neo4j
+   :members:
+   :undoc-members:
+   :show-inheritance:

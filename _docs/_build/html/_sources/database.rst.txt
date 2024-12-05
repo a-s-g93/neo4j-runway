@@ -1,0 +1,29 @@
+database package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   database.neo4j
+
+Submodules
+----------
+
+database.base module
+--------------------
+
+.. automodule:: database.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: database
+   :members:
+   :undoc-members:
+   :show-inheritance:

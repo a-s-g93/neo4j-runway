@@ -1,0 +1,32 @@
+site_name: Runway
+site_url: https://a-s-g93.github.io/neo4j-runway/
+theme:
+  name: material
+
+plugins:
+  - mkdocstrings
+
+nav:
+  - Home: index.md
+  - Code Generation:
+    - LoadCSVCodeGenerator: code_generation/load_csv/load_csv_generator.md
+    - PyIngestConfigGenerator: code_generation/pyingest/pyingest_generator.md
+    - StandardCypherCodeGenerator: code_generation/standard/standard_cypher_generator.md
+  - Database:
+    - Neo4jGraph: database/neo4j_graph.md
+  - Discovery:
+    - Discovery: discovery/discovery.md
+    - DiscoveryContent: discovery/discovery_content.md
+  - Graph EDA:
+    - EDACache: graph_eda/cache.md
+    - GraphEDA: graph_eda/graph_eda.md
+  - Ingestion:
+    - PyIngest: ingestion/pyingest.md
+  - Inputs:
+    - UserInput: inputs/user_input.md
+  - LLM:
+    - OpenAI:
+      - AzureOpenAIDataModelingLLM: llm/openai/azure/data_modeling.md
+      - AzureOpenAIDiscoveryLLM: llm/openai/azure/discovery.md
+      - OpenAIDataModelingLLM: llm/openai/data_modeling.md
+      - OpenAIDiscoveryLLM: llm/openai/discovery.md
