@@ -415,7 +415,7 @@ class Node(BaseModel):
 
 class Nodes(BaseModel):
     nodes: List[Node] = Field(
-        description="A list of nodes to be used in a graph data model.", default=list()
+        description="A list of nodes to be used in a graph data model."
     )
 
     @field_validator("nodes")
