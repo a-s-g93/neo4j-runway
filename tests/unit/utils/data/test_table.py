@@ -9,7 +9,7 @@ def test_init() -> None:
         file_path="./test.csv",
         dataframe=pd.DataFrame(),
         general_description="general",
-        data_dictionary={"col_a": "this is a column."},
+        table_schema={"col_a": "this is a column."},
         use_cases=["A use case."],
     )
 
@@ -17,7 +17,7 @@ def test_init() -> None:
     assert t.file_path == "./test.csv"
     assert isinstance(t.dataframe, pd.DataFrame)
     assert t.general_description == "general"
-    assert "col_a" in t.data_dictionary.keys()
+    assert "col_a" in t.table_schema.column_names
     assert "A use case." in t.use_cases
     assert t.discovery_content is None
     assert t.discovery == ""

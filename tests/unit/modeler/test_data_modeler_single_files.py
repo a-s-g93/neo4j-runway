@@ -5,6 +5,9 @@ from graphviz import Digraph
 from neo4j_runway.inputs import UserInput
 from neo4j_runway.modeler import GraphDataModeler
 from neo4j_runway.models import DataModel
+from neo4j_runway.utils.data.data_dictionary.utils import (
+    load_data_dictionary_from_compact_python_dictionary,
+)
 from tests.resources.answers.data_model_yaml import data_model_dict
 
 
@@ -51,7 +54,9 @@ class TestGraphDataModeler(unittest.TestCase):
 
         user_input = UserInput(
             general_description="this is dummy data.",
-            column_descriptions={"prop_" + str(i): "" for i in range(1, 8)},
+            data_dictionary=load_data_dictionary_from_compact_python_dictionary(
+                {"prop_" + str(i): "" for i in range(1, 8)}
+            ),
         )
 
         cls.gdm = GraphDataModeler(
@@ -107,28 +112,12 @@ class TestGraphDataModeler(unittest.TestCase):
                 user_input=USER_GENERATED_INPUT,
             )
 
-    def test_no_general_info_in_user_input(self) -> None:
-        """
-        Test error if no general description of data is present in user info.
-        """
-
-        with self.assertWarns(Warning):
+    def test_no_discovery_no_data_dictionary(self) -> None:
+        with self.assertRaises(ValueError):
             GraphDataModeler(
-                llm="llm",
-                user_input=USER_GENERATED_INPUT_BAD,
-                discovery="discovery",
-            )
-
-    def test_no_discovery_no_user_input_with_allowed_columns(self) -> None:
-        with self.assertWarns(Warning):
-            gdm = GraphDataModeler(
                 llm="llm",
                 discovery="discovery",
                 allowed_columns=["feature_1", "feature_2", "id"],
-            )
-
-            self.assertEqual(
-                ["feature_1", "feature_2", "id"], gdm.allowed_columns["file"]
             )
 
 

@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
+
+from ..utils.data.data_dictionary.data_dictionary import DataDictionary
 
 
 class Context(TypedDict):
@@ -21,7 +23,7 @@ class Context(TypedDict):
         Whether to allow parallel (same direction or reverse) relationships in the data model
     """
 
-    data_dictionary: Dict[str, Any]
+    data_dictionary: DataDictionary
     valid_columns: Dict[str, List[str]]
     enforce_uniqueness: bool
     apply_neo4j_naming_conventions: bool
@@ -30,7 +32,7 @@ class Context(TypedDict):
 
 
 def create_context(
-    data_dictionary: Dict[str, Any],
+    data_dictionary: DataDictionary,
     valid_columns: Optional[Dict[str, List[str]]] = None,
     enforce_uniqueness: bool = True,
     apply_neo4j_naming_conventions: bool = True,
@@ -42,7 +44,7 @@ def create_context(
 
     Parameters
     ----------
-    data_dictionary : Dict[str, Any]
+    data_dictionary : DataDictionary
         The data dictionary containing files, columns and descriptions.
     valid_columns : Optional[Dict[str, List[str]]], optional
         The valid columns allowed per file, by default None
@@ -61,11 +63,12 @@ def create_context(
         The context for validation.
     """
 
+    assert isinstance(
+        data_dictionary, DataDictionary
+    ), "Must provide a `DataDictionary` object."
+
     if valid_columns is None:
-        valid_columns = {
-            f: [col for col in col_desc.keys()]
-            for f, col_desc in data_dictionary.items()
-        }
+        valid_columns = data_dictionary.table_column_names_dict
 
     return Context(
         data_dictionary=data_dictionary,

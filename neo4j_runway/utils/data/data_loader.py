@@ -1,9 +1,13 @@
 import os
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 import pandas as pd
 
 from ...exceptions import DataNotSupportedError
+from .data_dictionary.column import Column
+from .data_dictionary.data_dictionary import DataDictionary
+from .data_dictionary.table_schema import TableSchema
+from .data_dictionary.utils import load_data_dictionary_from_compact_python_dictionary
 from .table import Table
 from .table_collection import TableCollection
 
@@ -11,7 +15,7 @@ from .table_collection import TableCollection
 def load_local_files(
     data_directory: str,
     general_description: str = "",
-    data_dictionary: Dict[str, Any] = dict(),
+    data_dictionary: Union[Dict[str, Any], DataDictionary] = dict(),
     use_cases: Optional[List[str]] = None,
     include_files: List[str] = list(),
     ignored_files: List[str] = list(),
@@ -26,9 +30,12 @@ def load_local_files(
         The directory containing all data.
     general_description : str
         A general description of the data, by default None
-    data_dictionary : Dict[str, Any], optional
-        A dictionary with file names as keys. Each key has a dictionary containing a description of each column in the file that is available for data modeling.
-        Only columns identified here will be considered for inclusion in the data model. By default dict()
+    data_dictionary : Union[Dict[str, Any], DataDictionary], optional
+        Either
+            1. a dictionary with file names as keys. Each key has a dictionary containing a description of each column in the file that is available for data modeling.
+               Only columns identified here will be considered for inclusion in the data model.
+            2. A `DataDictionary` object
+            By default dict()
     use_cases : Optional[List[str]], optional
         Any use cases that the graph data model should address, by default None
     include_files: List[str], optional
@@ -62,23 +69,34 @@ def load_local_files(
 
     _check_files(files=files_to_load)
 
-    for f in files_to_load:
-        allowed_columns = (
-            list(data_dictionary.get(f, dict()))
-            if f in data_dictionary.keys()
-            else None
+    if isinstance(data_dictionary, dict):
+        data_dictionary = load_data_dictionary_from_compact_python_dictionary(
+            python_dictionary=data_dictionary,
+            file_name=list(files_to_load)[0] if len(files_to_load) > 1 else "file",
         )
 
+    assert isinstance(
+        data_dictionary, DataDictionary
+    ), "`data_dictionary` is not a `DataDictionary` object."
+
+    for f in files_to_load:
+        table_schema = data_dictionary.get_table_schema(f)
+        # allowed_columns = (
+        #     list(data_dictionary.get(f, dict()))
+        #     if f in data_dictionary.keys()
+        #     else None
+        # )
+
         conf = config.get(f, dict())
-        file_data_dict: Dict[str, str] = data_dictionary.get(f, data_dictionary)
+        # file_data_dict: Dict[str, str] = data_dictionary.get(f, data_dictionary)
         if f.lower().endswith(".json") or f.lower().endswith(".jsonl"):
             loaded_files.append(
                 load_json(
                     file_path=data_directory + f,
                     general_description=general_description,
-                    data_dictionary=file_data_dict,
+                    table_schema=table_schema,
                     use_cases=use_cases,
-                    allowed_columns=allowed_columns,
+                    allowed_columns=table_schema.column_names,
                     config=conf,
                 )
             )
@@ -87,9 +105,9 @@ def load_local_files(
                 load_csv(
                     file_path=data_directory + f,
                     general_description=general_description,
-                    data_dictionary=file_data_dict,
+                    table_schema=table_schema,
                     use_cases=use_cases,
-                    allowed_columns=allowed_columns,
+                    allowed_columns=table_schema.column_names,
                     config=conf,
                 )
             )
@@ -109,16 +127,14 @@ def load_local_files(
 def load_csv(
     file_path: str,
     general_description: str = "",
-    data_dictionary: Dict[str, str] = dict(),
+    table_schema: Optional[TableSchema] = None,
     use_cases: Optional[List[str]] = None,
     allowed_columns: Optional[List[str]] = None,
     config: Dict[str, Any] = dict(),
 ) -> Table:
     if config.get("usecols") is None:
-        config["usecols"] = (
-            allowed_columns
-            if allowed_columns is not None
-            else (list(data_dictionary.keys()))
+        config["usecols"] = allowed_columns or (
+            table_schema.column_names if table_schema is not None else list()
         )
     try:
         data: pd.DataFrame = pd.read_csv(file_path, **config)
@@ -137,7 +153,10 @@ def load_csv(
         dataframe=data,
         file_path=file_path,
         general_description=general_description,
-        data_dictionary=data_dictionary,
+        table_schema=table_schema
+        or TableSchema(
+            name=name, columns=[Column(name=col_name) for col_name in config["usecols"]]
+        ),
         use_cases=use_cases,
         discovery_content=None,
     )
@@ -146,12 +165,14 @@ def load_csv(
 def load_json(
     file_path: str,
     general_description: str = "",
-    data_dictionary: Dict[str, str] = dict(),
+    table_schema: Optional[TableSchema] = None,
     use_cases: Optional[List[str]] = None,
     allowed_columns: Optional[List[str]] = None,
     config: Dict[str, Any] = dict(),
 ) -> Table:
-    cols = allowed_columns or list(data_dictionary.keys())
+    cols = allowed_columns or (
+        table_schema.column_names if table_schema is not None else list()
+    )
 
     # json lines config
     config["lines"] = True if file_path.lower().endswith("l") else False
@@ -173,7 +194,10 @@ def load_json(
         file_path=file_path,
         dataframe=data,
         general_description=general_description,
-        data_dictionary=data_dictionary,
+        table_schema=table_schema
+        or TableSchema(
+            name=name, columns=[Column(name=col_name) for col_name in config["usecols"]]
+        ),
         use_cases=use_cases,
         discovery_content=None,
     )
