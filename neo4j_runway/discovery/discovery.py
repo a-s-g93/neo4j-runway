@@ -15,42 +15,42 @@ from IPython.display import (
 from numpy import number
 
 from ..exceptions import PandasDataSummariesNotGeneratedError
-from ..inputs import UserInput, user_input_safe_construct
+from ..inputs.user_input import UserInput
 from ..llm.base import BaseDiscoveryLLM
 from ..resources.prompts.discovery import (
     create_discovery_prompt_multi_file,
     create_discovery_prompt_single_file,
     create_discovery_summary_prompt,
 )
-from ..utils.data import Table, TableCollection
+from ..utils.data import (
+    DataDictionary,
+    Table,
+    TableCollection,
+    create_data_dictionary_from_pandas_dataframe,
+    load_data_dictionary_from_compact_python_dictionary,
+)
 from ..warnings import ExperimentalFeatureWarning
 from .discovery_content import DiscoveryContent
 
 
 class Discovery:
     """
-    The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
-
-    Attributes
-    ----------
-    llm : BaseDiscoveryLLM
-        The LLM instance used to generate data discovery.
-    user_input : UserInput
-        User provided descriptions of the data.
-        A class containing user provided information about the data.
-    data : TableCollection
-        The data contained in a TableCollection.
-        All data provided to the Discovery constructor is converted to a Table and placed in a TableCollection class.
+    Handles discovery generation for the provided data via Pandas and LLM analysis.
     """
 
     def __init__(
         self,
         data: Union[pd.DataFrame, Table, TableCollection],
-        user_input: Union[Dict[str, str], UserInput] = dict(),
         llm: Optional[BaseDiscoveryLLM] = None,
+        data_dictionary: Optional[DataDictionary] = None,
+        general_description: Optional[str] = None,
+        file_name: Optional[str] = None,
+        use_cases: Optional[List[str]] = None,
+        user_input: Optional[Union[Dict[str, str], UserInput]] = None,
     ) -> None:
         """
-        The Discovery module that handles summarization and discovery generation via Pandas and an optional LLM.
+        Handles discovery generation for the provided data via Pandas and LLM analysis.
+        NOTE: It is highly recommended to provide data in the form of a `TableCollection`. This will then also contain the other `__init__` arguments, except for `llm`.
 
         Parameters
         ----------
@@ -58,61 +58,84 @@ class Discovery:
             The data to run discovery on. Can be either a Pandas DataFrame, Runway Table or Runway TableCollection.
             Multi file inputs should be provided via the TableCollection class.
             Single file inputs may be provided as a DataFrame or Runway Table. They will be placed in a TableCollection class upon initialization of the Discovery class.
-        llm : LLM, optional
+        llm : Optional[BaseDiscoveryLLM], optional
             The LLM instance used to generate data discovery.
             If running discovery for multiple files,
             it is recommended to use an async compatible LLM and use the `run_async` method.
             Not required if only interested in generating Pandas summaries. By default None.
-        user_input : Union[Dict[str, str], UserInput]
-            User provided descriptions of the data.
-            If a dictionary, then should contain the keys "general_description" and all desired columns.
-            This is only necessary if providing a Pandas DataFrame as data input. Otherwise it will be ignored. By default = dict()
+        data_dictionary : Optional[DataDictionary], optional
+            A `DataDictionary` object describing the data, by default None
+        general_description : Optional[str], optional
+            A general description of the data, by default None
+        file_name : Optional[str], optional
+            The file name, if providing only a single file, by default None
+        use_cases : Optional[List[str]], optional
+            A list of use cases that should be addressed by the final graph data model, by default None
+        user_input : Union[Dict[str, str], UserInput], optional
+            Either a dictionary with keys general_description and column names with descriptions or a UserInput object, by default None
+            .. deprecated:: 0.15.0
+                `user_input` will be removed as its functions are handled better by `TableCollection` and `DataDictionary`.
+
+        Raises
+        ------
+        ValueError
+            Invalid data is provided.
         """
 
-        # we convert all user_input to a UserInput object
-        if not isinstance(user_input, UserInput) and isinstance(data, pd.DataFrame):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input, allowed_columns=data.columns
-            )
-        elif not isinstance(user_input, UserInput) and isinstance(data, Table):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input,
-                data_dictionary=data.data_dictionary,
-                use_cases=data.use_cases,
-            )
-        elif not isinstance(user_input, UserInput) and isinstance(
-            data, TableCollection
-        ):
-            self.user_input = user_input_safe_construct(
-                unsafe_user_input=user_input,
-                data_dictionary=data.data_dictionary,
-                use_cases=data.use_cases,
-            )
-        elif isinstance(user_input, UserInput):
-            self.user_input = user_input
-        else:
-            raise ValueError("Unable to parse `user_input` arg.")
-
         self.llm = llm
+
+        if user_input:
+            if isinstance(user_input, dict):
+                general_description = (
+                    user_input.pop("general_description") or general_description
+                )
+                use_cases_temp = user_input.pop("use_cases") or use_cases
+                if isinstance(use_cases_temp, str):
+                    use_cases = [use_cases_temp]
+                else:
+                    use_cases = use_cases_temp
+                data_dictionary = load_data_dictionary_from_compact_python_dictionary(
+                    user_input, file_name=file_name or "file"
+                )
+            elif isinstance(user_input, UserInput):
+                general_description = (
+                    user_input.general_description or general_description
+                )
+                use_cases = user_input.use_cases or use_cases
+                data_dictionary = user_input.data_dictionary
 
         # self.data must be a TableCollection
         # precedence
         #   1. Table / TableCollection content
         #   2. UserInput content
         if isinstance(data, pd.DataFrame):
+            cols = (
+                data_dictionary.table_schemas[0].column_names
+                if data_dictionary is not None
+                else None
+            )
+            data_dictionary = (
+                create_data_dictionary_from_pandas_dataframe(
+                    dataframe=data, name=file_name or "file"
+                )
+                if data_dictionary is None
+                else data_dictionary
+            )
+            file_name = data_dictionary.table_schemas[0].name
+
             t = Table(
-                name="dataframe",
+                name=file_name or "file",
                 file_path="",
-                dataframe=data[self.user_input.allowed_columns],
-                general_description=self.user_input.general_description,
-                data_dictionary=self.user_input.data_dictionary,
-                use_cases=self.user_input.use_cases,
+                dataframe=data[cols] if cols is not None else data,
+                general_description=general_description or "",
+                table_schema=data_dictionary.get_table_schema(file_name or "file"),
+                use_cases=use_cases,
             )
             self.data = TableCollection(
                 data_directory="",
                 tables=[t],
                 general_description=t.general_description,
-                data_dictionary=t.data_dictionary,
+                data_dictionary=data_dictionary,
                 use_cases=t.use_cases,
             )
         elif isinstance(data, Table):
@@ -121,14 +144,14 @@ class Discovery:
                 data_directory=data_dir,
                 tables=[data],
                 general_description=data.general_description,
-                data_dictionary=data.data_dictionary,
+                data_dictionary=DataDictionary(table_schemas=[data.table_schema]),
                 use_cases=data.use_cases,
             )
         elif isinstance(data, TableCollection):
             self.data = data
         else:
             raise ValueError(
-                "provided data is not of an accepted type. Must be Pandas DataFrame, Runway Table or Runway TableCollection."
+                "Provided data is not of an accepted type. Must be Pandas DataFrame, Runway Table or Runway TableCollection."
             )
 
         self._discovery_ran = False
@@ -138,6 +161,17 @@ class Discovery:
                 message="Multi file Discovery is an experimental feature and may not work as expected. Please use with caution and raise any issues encountered here: https://github.com/a-s-g93/neo4j-runway/issues",
                 category=ExperimentalFeatureWarning,
             )
+
+    @property
+    def data_dictionary(self) -> DataDictionary:
+        """
+        The data dictionary describing the data.
+
+        Returns
+        -------
+        DataDictionary
+        """
+        return self.data.data_dictionary
 
     @property
     def is_multifile(self) -> bool:
@@ -150,12 +184,7 @@ class Discovery:
             True if multi-file detected, else False
         """
 
-        if (
-            len(list(self.data.data_dictionary.keys())) == 1
-        ):  # assumes always more than 1 column for modeling
-            return False
-
-        return self.user_input.is_multifile
+        return self.data_dictionary.is_multifile
 
     @property
     def discovery(self) -> str:
@@ -168,7 +197,7 @@ class Discovery:
             The `discovery` attribute of the `data` attribute.
         """
 
-        assert self.data.discovery is not None
+        assert self.data.discovery is not None, "No generated discovery information."
 
         return self.data.discovery
 
@@ -284,7 +313,7 @@ class Discovery:
                         pandas_numeric_feature_descriptions=self.data.tables[
                             0
                         ].discovery_content.pandas_numerical_description,
-                        data_dictionary=self.data.data_dictionary,
+                        table_schema=self.data.data_dictionary.table_schemas[0],
                         use_cases=self.data.pretty_use_cases,
                     )
                 )

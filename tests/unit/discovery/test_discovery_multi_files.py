@@ -7,32 +7,62 @@ from pytest_mock import MockerFixture
 from neo4j_runway.discovery import Discovery
 from neo4j_runway.discovery.discovery import _create_discovery_prompts_for_multi_file
 from neo4j_runway.utils.data import Table, TableCollection
+from neo4j_runway.utils.data.data_dictionary.data_dictionary import DataDictionary
 from neo4j_runway.warnings import ExperimentalFeatureWarning
 
-data_dict = {
-    "a.csv": {"a": "numbers", "b": "more numbers"},
-    "b.csv": {"c": "many more numbers", "d": "lots of numbers"},
-    "c.csv": {"e": "letters", "f": "chars"},
-}
+# data_dict = {
+#     "a.csv": {"a": "numbers", "b": "more numbers"},
+#     "b.csv": {"c": "many more numbers", "d": "lots of numbers"},
+#     "c.csv": {"e": "letters", "f": "chars"},
+# }
+
+data_dict = DataDictionary(
+    **{
+        "table_schemas": [
+            {
+                "name": "a.csv",
+                "columns": [
+                    {"name": "a", "description": "numbers"},
+                    {"name": "b", "description": "more numbers"},
+                ],
+            },
+            {
+                "name": "b.csv",
+                "columns": [
+                    {"name": "c", "description": "many more numbers"},
+                    {"name": "d", "description": "lots of numbers"},
+                ],
+            },
+            {
+                "name": "c.csv",
+                "columns": [
+                    {"name": "e", "description": "letters"},
+                    {"name": "f", "description": "chars"},
+                ],
+            },
+        ]
+    }
+)
+
 t1 = Table(
     name="a.csv",
     file_path="./a.csv",
     dataframe=pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
-    data_dictionary=data_dict["a.csv"],
+    table_schema=data_dict.get_table_schema("a.csv"),
     use_cases=["test discovery"],
 )
 t2 = Table(
     name="b.csv",
     file_path="./b.csv",
     dataframe=pd.DataFrame({"c": [7, 8, 9], "d": [10, 11, 12]}),
-    data_dictionary=data_dict["b.csv"],
+    table_schema=data_dict.get_table_schema("b.csv"),
     use_cases=["test discovery"],
 )
 t3 = Table(
     name="c.csv",
     file_path="./c.csv",
     dataframe=pd.DataFrame({"e": ["a", "b", "c"], "f": ["d", "e", "f"]}),
-    data_dictionary=data_dict["c.csv"],
+    table_schema=data_dict.get_table_schema("c.csv"),
     use_cases=["test discovery"],
 )
 table_collection = TableCollection(

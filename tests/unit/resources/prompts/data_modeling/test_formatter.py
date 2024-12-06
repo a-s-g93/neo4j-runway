@@ -8,10 +8,30 @@ from neo4j_runway.resources.prompts.data_modeling.formatters import (
     format_use_cases,
     format_valid_columns,
 )
+from neo4j_runway.utils.data.data_dictionary.column import Column
+from neo4j_runway.utils.data.data_dictionary.data_dictionary import DataDictionary
+from neo4j_runway.utils.data.data_dictionary.table_schema import TableSchema
 
 
 def test_data_dictionary_formatter_multifile() -> None:
-    dd = {"a.csv": {"a": "test", "b": "test2"}, "b.csv": {"a": "test", "b": "test2"}}
+    dd = DataDictionary(
+        table_schemas=[
+            TableSchema(
+                name="a.csv",
+                columns=[
+                    Column(name="a", description="test"),
+                    Column(name="b", description="test2"),
+                ],
+            ),
+            TableSchema(
+                name="b.csv",
+                columns=[
+                    Column(name="a", description="test"),
+                    Column(name="b", description="test2"),
+                ],
+            ),
+        ]
+    )
     res = """a.csv
   * a : test
   * b : test2

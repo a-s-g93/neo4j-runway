@@ -20,6 +20,7 @@ from ...exceptions import (
     InvalidArrowsDataModelError,
     InvalidSolutionsWorkbenchDataModelError,
 )
+from ...utils.data.data_dictionary.data_dictionary import DataDictionary
 from ..arrows import ArrowsDataModel, ArrowsNode, ArrowsRelationship
 from ..solutions_workbench import (
     SolutionsWorkbenchDataModel,
@@ -191,7 +192,7 @@ Relationships
             * Validate file-spanning rels have source / target with appropriate named aliases.
             """
 
-            data_dictionary: Optional[Dict[str, Any]] = (
+            data_dictionary: Optional[DataDictionary] = (
                 info.context.get("data_dictionary")
                 if info.context is not None
                 else None
@@ -261,7 +262,9 @@ Relationships
                             if (
                                 prop.alias is None
                                 and prop.column_mapping
-                                not in data_dictionary[rel.source_name]
+                                not in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
                             ):
                                 errors.append(
                                     InitErrorDetails(
@@ -274,7 +277,12 @@ Relationships
                                         ctx={},
                                     )
                                 )
-                            elif prop.alias not in data_dictionary[rel.source_name]:
+                            elif (
+                                prop.alias
+                                not in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
+                            ):
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
@@ -290,7 +298,9 @@ Relationships
                             elif (
                                 prop.alias is None
                                 and prop.column_mapping
-                                in data_dictionary[rel.source_name]
+                                in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
                             ):
                                 prop.alias = prop.column_mapping
 
@@ -301,7 +311,10 @@ Relationships
                         for prop in target_node.unique_properties:
                             if (
                                 prop.alias is None
-                                and prop.alias not in data_dictionary[rel.source_name]
+                                and prop.alias
+                                not in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
                             ):
                                 errors.append(
                                     InitErrorDetails(
@@ -314,7 +327,12 @@ Relationships
                                         ctx={},
                                     )
                                 )
-                            elif prop.alias not in data_dictionary[rel.source_name]:
+                            elif (
+                                prop.alias
+                                not in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
+                            ):
                                 errors.append(
                                     InitErrorDetails(
                                         type=PydanticCustomError(
@@ -330,7 +348,9 @@ Relationships
                             elif (
                                 prop.alias is None
                                 and prop.column_mapping
-                                in data_dictionary[rel.source_name]
+                                in data_dictionary.get_table_schema(
+                                    rel.source_name
+                                ).column_names
                             ):
                                 prop.alias = prop.column_mapping
 

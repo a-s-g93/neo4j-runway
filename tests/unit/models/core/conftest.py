@@ -2,6 +2,10 @@ from typing import Any, Dict
 
 import pytest
 
+from neo4j_runway.utils.data.data_dictionary.column import Column
+from neo4j_runway.utils.data.data_dictionary.data_dictionary import DataDictionary
+from neo4j_runway.utils.data.data_dictionary.table_schema import TableSchema
+
 
 @pytest.fixture(scope="function")
 def node_context() -> Dict[str, Any]:
@@ -147,17 +151,28 @@ def data_model_flipped_data() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def data_model_context() -> Dict[str, Any]:
-    data_dictionary = {
-        "a.csv": {"id": "unique id for a. Has alias a_id", "b": "feature b"},
-        "b.csv": {
-            "id": "unique id for b",
-            "a_id": "unique id for a.",
-            "c": "feature c",
-        },
-    }
+    data_dictionary = DataDictionary(
+        table_schemas=[
+            TableSchema(
+                name="a.csv",
+                columns=[
+                    Column(name="id", description="unique id for a.", aliases=["a_id"]),
+                    Column(name="b", description="feature b"),
+                ],
+            ),
+            TableSchema(
+                name="b.csv",
+                columns=[
+                    Column(name="id", description="unique id for b."),
+                    Column(name="a_id", description="unique id for a."),
+                    Column(name="c", description="feature c"),
+                ],
+            ),
+        ]
+    )
     return {
         "data_dictionary": data_dictionary,
-        "valid_columns": {k: list(v.keys()) for k, v in data_dictionary.items()},
+        "valid_columns": data_dictionary.table_column_names_dict,
         "enforce_uniqueness": True,
         "allow_duplicate_column_mappings": False,
     }
@@ -257,12 +272,49 @@ def data_model_parallel_data() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def data_model_parallel_context() -> Dict[str, Any]:
-    data_dictionary = {
-        "a.csv": {"id": "unique id for a. Has alias a_id", "id2": "unique id 2"},
-    }
+    data_dictionary = DataDictionary(
+        table_schemas=[
+            TableSchema(
+                name="a.csv",
+                columns=[
+                    Column(name="id", description="unique id for a.", aliases=["a_id"]),
+                    Column(name="id2", description="unique id 2"),
+                ],
+            )
+        ]
+    )
     return {
         "data_dictionary": data_dictionary,
-        "valid_columns": {k: list(v.keys()) for k, v in data_dictionary.items()},
+        "valid_columns": data_dictionary.table_column_names_dict,
+        "enforce_uniqueness": True,
+        "allow_duplicate_column_mappings": False,
+        "allow_parallel_relationships": False,
+    }
+
+
+@pytest.fixture(scope="function")
+def data_model_bad_context() -> Dict[str, Any]:
+    data_dictionary = DataDictionary(
+        table_schemas=[
+            TableSchema(
+                name="a.csv",
+                columns=[
+                    Column(name="id", description="unique id for a.", aliases=["a_id"]),
+                    Column(name="b", description="feature b"),
+                ],
+            ),
+            TableSchema(
+                name="b.csv",
+                columns=[
+                    Column(name="id", description="unique id for b."),
+                    Column(name="c", description="feature c"),
+                ],
+            ),
+        ]
+    )
+    return {
+        "data_dictionary": data_dictionary,
+        "valid_columns": data_dictionary.table_column_names_dict,
         "enforce_uniqueness": True,
         "allow_duplicate_column_mappings": False,
         "allow_parallel_relationships": False,

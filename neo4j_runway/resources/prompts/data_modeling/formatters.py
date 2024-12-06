@@ -27,15 +27,16 @@ def format_discovery(text: Optional[str]) -> str:
 
 
 def format_data_dictionary(
-    data_dictionary: Optional[Dict[str, Any]], multifile: bool
+    data_dictionary: Optional["DataDictionary"],  # type: ignore
+    multifile: bool,
 ) -> str:
     assert data_dictionary is not None, "data dictionary must be provided."
 
     def _pretty_print() -> str:
         res = ""
-        for file in data_dictionary.keys():
+        for file in data_dictionary.compact_dict:
             res += f"{file}\n"
-            for col, desc in data_dictionary[file].items():
+            for col, desc in data_dictionary.compact_dict.get(file, dict()).items():
                 res += f"  * {col} : {desc}\n"
         return res
 
@@ -53,14 +54,18 @@ def format_data_dictionary(
         )
 
 
-def format_use_cases(use_cases: Optional[str]) -> str:
-    return (
-        "The final data model should address the following use cases:\n"
-        + f"{use_cases}"
-        + "\n\n"
-        if use_cases is not None
-        else ""
-    )
+def format_use_cases(use_cases: Optional[List[str]]) -> str:
+    if use_cases is not None:
+        res = ""
+        for uc in use_cases:
+            res += "* " + uc + "\n"
+        return (
+            "The final data model should address the following use cases:\n"
+            + f"{res}"
+            + "\n\n"
+        )
+
+    return ""
 
 
 def format_valid_columns(valid_columns: Dict[str, Any]) -> str:

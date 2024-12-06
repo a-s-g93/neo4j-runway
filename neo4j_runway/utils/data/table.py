@@ -1,9 +1,11 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pandas as pd
 
 from ...discovery.discovery_content import DiscoveryContent
+from .data_dictionary.table_schema import TableSchema
+from .data_dictionary.utils import load_table_schema_from_compact_python_dictionary
 
 
 class Table:
@@ -20,7 +22,7 @@ class Table:
         The data in Pandas DataFrame format.
     general_description : str
         A general description of the data.
-    data_dictionary : Dict[str, str], optional
+    table_schema : TableSchema
         A description of each column that is available for data modeling. Only columns identified here will be considered for inclusion in the data model.
     use_cases : Optional[List[str]], optional
         Any use cases that the graph data model should address.
@@ -33,8 +35,8 @@ class Table:
     name: str
     file_path: str
     dataframe: pd.DataFrame
+    table_schema: TableSchema
     general_description: str = ""
-    data_dictionary: Dict[str, str] = dict()
     use_cases: Optional[List[str]] = None
     discovery_content: Optional[DiscoveryContent] = None
 
@@ -43,8 +45,8 @@ class Table:
         name: str,
         file_path: str,
         dataframe: pd.DataFrame,
+        table_schema: TableSchema,
         general_description: str = "",
-        data_dictionary: Dict[str, str] = dict(),
         use_cases: Optional[List[str]] = None,
         discovery_content: Optional[DiscoveryContent] = None,
     ) -> None:
@@ -61,8 +63,8 @@ class Table:
             The data in Pandas DataFrame format.
         general_description : str
             A general description of the data, by default None
-        data_dictionary : Dict[str, str], optional
-            A description of each column that is available for data modeling, by default dict()
+        table_schema : TableSchema
+            A description of each column that is available for data modeling.
         use_cases : Optional[List[str]], optional
             Any use cases that the graph data model should address, by default None
         discovery_content : Optional[DiscoveryContent], optional
@@ -72,11 +74,21 @@ class Table:
         if not isinstance(dataframe, pd.DataFrame):
             raise ValueError("table argument 'data' should be a Pandas DataFrame.")
 
+        if isinstance(table_schema, dict):
+            try:
+                table_schema = load_table_schema_from_compact_python_dictionary(
+                    python_dictionary=table_schema, file_name=name
+                )
+            except Exception as e:
+                raise ValueError(
+                    f"Unable to parse dictionary `table_schema` into a `TableSchema` object. Error: {e}"
+                )
+
         self.name = name
         self.file_path = file_path
         self.dataframe = dataframe
         self.general_description = general_description
-        self.data_dictionary = data_dictionary
+        self.table_schema = table_schema
         self.use_cases = use_cases
         self.discovery_content = discovery_content
 
@@ -101,3 +113,15 @@ class Table:
         assert self.discovery_content is not None
 
         self.discovery_content.discovery = value
+
+    @property
+    def column_names(self) -> List[str]:
+        """
+        The columns in the Pandas DataFrame.
+
+        Returns
+        -------
+        List[str]
+        """
+
+        return list(self.dataframe.columns)
