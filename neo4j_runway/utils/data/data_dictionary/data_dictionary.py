@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
@@ -7,6 +7,15 @@ from .table_schema import TableSchema
 
 
 class DataDictionary(BaseModel):
+    """
+    The data dictionary describing all tables in the data.
+
+    Attributes
+    ----------
+    table_schemas : List[TableSchema]
+        A list of TableSchema objects.
+    """
+
     table_schemas: List[TableSchema]
 
     @property

@@ -60,8 +60,10 @@ class Column(BaseModel, use_enum_values=True):
 
     @model_validator(mode="after")
     def validate_model(self) -> "Column":
-        if self.primary_key or self.foreign_key:
+        if self.primary_key:
             self.nullable = False
+            self.key = True
+        elif self.foreign_key:
             self.key = True
         if self.primary_key and self.foreign_key:
             raise ValueError("`primary_key` and `foreign_key` may not both be True.")

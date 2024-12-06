@@ -33,7 +33,7 @@ def test_init_nullable_and_primary_key() -> None:
 def test_init_nullable_and_foreign_key() -> None:
     c = Column(name="col_a", foreign_key=True, nullable=True)
 
-    assert not c.nullable
+    assert c.nullable
     assert c.foreign_key
 
 

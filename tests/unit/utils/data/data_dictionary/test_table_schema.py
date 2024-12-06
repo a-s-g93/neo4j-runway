@@ -97,3 +97,21 @@ def test_compact_dict() -> None:
     assert len(ts.compact_dict.get(ts.name)) == 2
     assert ts.name in ts.compact_dict.keys()
     assert len(ts.compact_dict.keys()) == 1
+
+
+def test_get_column_exists() -> None:
+    ts = TableSchema(
+        name="table_a",
+        columns=[Column(name="col_a", primary_key=True), Column(name="col_b")],
+    )
+
+    assert ts.get_column("col_a") is not None
+
+
+def test_get_column_not_exists() -> None:
+    ts = TableSchema(
+        name="table_a",
+        columns=[Column(name="col_a", primary_key=True), Column(name="col_b")],
+    )
+
+    assert ts.get_column("error") is None
