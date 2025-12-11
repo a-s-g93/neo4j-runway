@@ -1,3 +1,14 @@
+## Library Archived 
+This library is being archived. It has provided a great learning experience and informed other excellent libraries for incorporating AI into Neo4j developer workflows. 
+
+Please see the Neo4j MCP servers, of which many are the successors to Neo4j Runway. 
+
+[Offical Neo4j MCP Server](https://github.com/neo4j/mcp)
+
+Neo4j Labs MCP Servers
+* [Cypher MCP](https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher)
+* [Data Modeling MCP](https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-data-modeling)
+
 # Neo4j Runway
 Neo4j Runway is a Python library that simplifies the process of migrating your relational data into a graph. It provides tools that abstract communication with OpenAI to run discovery on your data and generate a data model, as well as tools to generate ingestion code and load your data into a Neo4j instance.
 
