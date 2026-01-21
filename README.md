@@ -43,7 +43,11 @@ Here we import the modules we'll be using.
 ```Python
 from neo4j_runway import Discovery, GraphDataModeler, PyIngest, UserInput
 from neo4j_runway.code_generation import PyIngestConfigGenerator
+
+# Choose your LLM provider
 from neo4j_runway.llm.openai import OpenAIDiscoveryLLM, OpenAIDataModelingLLM
+# OR
+from neo4j_runway.llm.gemini import GeminiDiscoveryLLM, GeminiDataModelingLLM
 
 ```
 ### Discovery
@@ -180,8 +184,13 @@ data.tables[0].dataframe.head()
 We may then initialize our discovery and data modeling LLMs. By default we use GPT-4o and define our OpenAI API key in an environment variable.
 
 ```Python
+# Using OpenAI (default)
 llm_disc = OpenAIDiscoveryLLM(model_name='gpt-4o-mini-2024-07-18', model_params={"temperature": 0})
 llm_dm = OpenAIDataModelingLLM(model_name='gpt-4o-2024-05-13', model_params={"temperature": 0.5})
+
+# OR using Google Gemini
+llm_disc = GeminiDiscoveryLLM(model_name='gemini-1.5-pro', model_params={"temperature": 0})
+llm_dm = GeminiDataModelingLLM(model_name='gemini-1.5-pro', model_params={"temperature": 0.5})
 ```
 
 And we run discovery on our data.
@@ -298,5 +307,5 @@ Runway is currently in beta and under rapid development. Please raise GitHub iss
 - More complex data modeling is under development
 - Nodes may only have a single label
 - Only uniqueness and key constraints are supported
-- Only OpenAI models may be used at this time
+- OpenAI and Google Gemini models are currently supported
 - Runway only supports ingesting local files, though it supports code generation for other ingest methods
